@@ -119,7 +119,7 @@ export const EnterpriseInterestModal: React.FC<EnterpriseInterestModalProps> = (
   const mailtoBody = encodeURIComponent(
     `Name: ${formData.name}\nEmail: ${formData.email}\nCompany: ${formData.company}\nRole: ${formData.role}\nTier: ${formData.tier}\nUse Cases: ${formData.use_cases}\nApprox Agents: ${formData.approx_agents}\nDeployment: ${formData.deployment}\nIdP: ${formData.idp}\nWebsite: ${formData.website}\n\nRequirements / Notes:\n${formData.message}`
   );
-  const mailtoUrl = `mailto:sales@joltrin.com?subject=${mailtoSubject}&body=${mailtoBody}`;
+  const mailtoUrl = `mailto:gerardrecinto@gmail.com?subject=${mailtoSubject}&body=${mailtoBody}`;
 
   const copySummaryText = () => {
     const text = `Joltrin ${formData.tier.toUpperCase()} Inquiry\nName: ${formData.name}\nEmail: ${formData.email}\nCompany: ${formData.company}\nRole: ${formData.role}\nUse Cases: ${formData.use_cases}\nAgents: ${formData.approx_agents}\nDeployment: ${formData.deployment}\nRequirements: ${formData.message}`;
@@ -130,7 +130,7 @@ export const EnterpriseInterestModal: React.FC<EnterpriseInterestModalProps> = (
   };
 
   const copySalesEmail = () => {
-    navigator.clipboard.writeText('sales@joltrin.com').then(() => {
+    navigator.clipboard.writeText('gerardrecinto@gmail.com').then(() => {
       setCopiedEmail(true);
       setTimeout(() => setCopiedEmail(false), 2000);
     });
@@ -198,7 +198,7 @@ export const EnterpriseInterestModal: React.FC<EnterpriseInterestModalProps> = (
                 onClick={copySalesEmail}
                 className="px-4 py-2 rounded-xl bg-dark-850 hover:bg-dark-800 border border-dark-700 text-slate-400 hover:text-white font-mono text-xs transition"
               >
-                {copiedEmail ? 'sales@joltrin.com copied' : 'Copy sales@joltrin.com'}
+                {copiedEmail ? 'gerardrecinto@gmail.com copied' : 'Copy gerardrecinto@gmail.com'}
               </button>
             </div>
 
