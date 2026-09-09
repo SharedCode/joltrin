@@ -81,7 +81,7 @@ A fully automated, high-intensity simulation demonstrating resilience:
 ```bash
 # 1. Clone the repository
 git clone https://github.com/sharedcode/joltrin.git
-cd sop/sop-arena
+cd joltrin/sop-arena
 
 # 2. Install dependencies
 npm install

@@ -161,7 +161,7 @@
         This is a static site with no backend, so it cannot run a live MCP or A2A network server, both are real protocols an agent connects to over stdio or HTTP. What you just clicked through is the actual verification logic those servers call before committing a step. Run the real servers yourself:
       </p>
       <pre class="font-mono text-xs bg-dark-950 border border-dark-800 rounded-lg p-4 overflow-x-auto text-slate-300">git clone https://github.com/SharedCode/joltrin.git
-cd sop
+cd joltrin
 go run ./examples/verify_barrier        <span class="text-slate-500"># same scenario, in a terminal</span>
 go run ./cmd/sop-mcp-server              <span class="text-slate-500"># MCP over stdio</span>
 go run ./cmd/sop-a2a-agent &             <span class="text-slate-500"># A2A over HTTP</span>

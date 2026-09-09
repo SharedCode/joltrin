@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/assets/joltrin-logo.svg" alt="Joltrin logo" width="480" />
+  <img src="docs/assets/joltrin-org-logo.jpg" alt="Joltrin logo" width="480" />
 </p>
 
 [![Discussions](https://img.shields.io/github/discussions/SharedCode/joltrin)](https://github.com/SharedCode/joltrin/discussions)
@@ -107,13 +107,7 @@ Every row above is something you can run yourself, not a projection. See [Perfor
 
 ## 🚀 Experience Joltrin
 
-You can test Joltrin directly in your browser without installing anything. Start with the technical demo: it demonstrates the engine's core power directly, safe, ACID-transactional storage running on web storage itself (OPFS), with zero server and zero network calls after the initial page loads the WASM binary. Everything else on this page, including the agent verification barrier below, is built on top of that same engine, a reference implementation showing one concrete use case:
-
-| Experience | Description | Live Interactive Link |
-| :--- | :--- | :--- |
-| 🧠 **Joltrin Technical Demo** | **Client-Side Zero-Server WebAssembly Engine**<br>Execute live ACID transactions, 128-dimensional vector cosine searches, microsecond benchmarks, and durable AI agent memory checkpoints (kill the agent mid-task, watch a successor resume from the B-Tree) running 100% in your browser with **0 runtime HTTP network calls after initial load**. | [**Launch Technical Demo →**](https://sharedcode.github.io/joltrin/) |
-| 🎮 **Joltrin Arena** | **Distributed Systems Survival Simulation**<br>Command a live digital cluster. Scale worker swarms, crash storage nodes, trigger transaction storms, and watch Joltrin automatically redistribute tasks and rebuild parity in real-time. | [**Play Joltrin Arena →**](https://sharedcode.github.io/joltrin/arena/) |
-| 🔌 **Joltrin Agent Verification Barrier** | **The MCP/A2A Safety Check, Clickable**<br>The same `ai/verify` barrier gating `tools/mcpserver` and `tools/a2aagent`, compiled to WASM. Try dropping a database before validating a backup and watch it get blocked, in your browser, with the trace persisted to OPFS. | [**Launch Agent Barrier →**](https://sharedcode.github.io/joltrin/agents/) |
+You can test Joltrin directly in your browser without installing anything via the live interactive experiences above ([Technical Demo](https://sharedcode.github.io/joltrin/), [Joltrin Arena](https://sharedcode.github.io/joltrin/arena/), and [Agent Verification Barrier](https://sharedcode.github.io/joltrin/agents/)). The technical demo demonstrates the engine's core power directly: safe, ACID-transactional storage running on web storage itself (OPFS), with zero server and zero network calls after the initial page loads the WASM binary. Everything else on this page, including the agent verification barrier below, is built on top of that same engine, a reference implementation showing one concrete use case.
 
 The technical demo persists across reloads now, to Origin Private File System, via the browser's async File System Access API. The diagram below is the real tradeoff behind that choice, not a benchmark; no throughput numbers are shown because none have been measured for either path in this repo.
 
@@ -177,7 +171,7 @@ go run ./cmd/sop-a2a-bridge -agent-url http://localhost:8087
     "joltrin": {
       "command": "go",
       "args": ["run", "./cmd/sop-mcp-server"],
-      "cwd": "/absolute/path/to/sop"
+      "cwd": "/absolute/path/to/joltrin"
     }
   }
 }
@@ -189,7 +183,7 @@ Swap `"command"/"args"` for a prebuilt binary once you've run `go build -o sop-m
 {
   "mcpServers": {
     "joltrin": {
-      "command": "/absolute/path/to/sop/sop-mcp-server"
+      "command": "/absolute/path/to/joltrin/sop-mcp-server"
     }
   }
 }
@@ -220,7 +214,7 @@ go run ./cmd/sop-a2a-bridge -agent-url http://localhost:8087
     "joltrin-a2a": {
       "command": "go",
       "args": ["run", "./cmd/sop-a2a-bridge", "-agent-url", "http://localhost:8087"],
-      "cwd": "/absolute/path/to/sop"
+      "cwd": "/absolute/path/to/joltrin"
     }
   }
 }
@@ -407,7 +401,7 @@ These are real, observable industry trends. No specific market-sizing figures ar
 Joltrin overlaps several existing categories rather than creating one from nothing: embedded databases (SQLite, RocksDB), distributed coordination (Zookeeper, etcd, Temporal), vector databases (Pinecone, Weaviate, pgvector), and workflow/task systems (Celery, Ray). Plausible buyers are teams building AI agent infrastructure, edge and IoT platforms, real-time/simulation backends, and fintech ledgers with strict transactional invariants. No independently sourced TAM/SAM/SOM figures are presented here; a rigorous estimate would require external market research (for example, from Gartner or IDC) that this project has not commissioned.
 
 **Business Model Opportunities**
-The project is MIT-licensed with no commercial product today. Plausible paths that open-source infrastructure projects in this category have used, listed here as potential directions rather than current plans, are detailed in [Commercialization Opportunities](#-commercialization-opportunities) below.
+The project is MIT-licensed with no commercial product today. The open-core progression and architectural foundations for commercial governance are detailed in [Monetization & Editions Architecture](#-monetization--editions-architecture) below.
 
 **What Has Been Proven**
 - A working Go engine with ACID transactions (WAL plus two-phase commit), a custom B-Tree, and Reed-Solomon erasure coding, each with passing automated tests (18 packages carry tests in the core Go module; run them with `go test ./...`, while the two WASM-only packages build under `GOOS=js GOARCH=wasm`, see [Performance Benchmarks](#-performance-benchmarks) below for the throughput numbers).
@@ -430,7 +424,7 @@ The project is MIT-licensed with no commercial product today. Plausible paths th
 
 **Potential strategic relevance.** Potential strategic relevance could include: infrastructure vendors looking to add an embedded, agent-friendly storage layer to an existing platform; cloud providers evaluating lightweight alternatives to running separate managed database, cache, and queue services for edge or agent workloads; or AI infrastructure companies needing a durable state layer under an agent runtime. None of this reflects any actual approach, interest, or discussion from any party; it is offered as a way to reason about where the technology could fit strategically.
 
-**Open-source distribution.** The project is distributed under the MIT license with no dual-licensing or commercial tier today. That maximizes adoption friction reduction (any team can use it in production immediately) at the cost of no current monetization mechanism. See [Commercialization Opportunities](#-commercialization-opportunities) for plausible paths from here.
+**Open-source distribution.** The project is distributed under the MIT license with no dual-licensing or commercial tier today. That maximizes adoption friction reduction (any team can use it in production immediately) at the cost of no current monetization mechanism. See [Monetization & Editions Architecture](#-monetization--editions-architecture) for the open-core progression and architectural separation.
 
 **Competitive landscape.** Summarized in the [Joltrin vs. Alternatives](#️-joltrin-vs-alternatives) table further down. No competitor is presented as inferior; each is a mature, widely deployed system that Joltrin would need to displace or complement for any given workload.
 
@@ -462,6 +456,8 @@ Concretely, that means: fewer network hops in your hot path (sub-millisecond, in
 
 Joltrin Engine is a library, not a server: there is no separate database process to provision, patch, or fail over for the embedded case. The optional `tools/httpserver` Data Manager is a standalone service with its own `/metrics` endpoint (tested in `tools/httpserver/metrics_test.go`) if you do want a network-accessible console. Failure recovery is handled by Reed-Solomon erasure coding across storage shards (`fs/erasure`, 12 passing tests at the time of writing) rather than full N-way replication, which trades some recovery latency for lower disk overhead. A prebuilt quickstart container is published to `ghcr.io/sharedcode/joltrin-quickstart`. Multi-node swarm clustering exists and is tested (`examples/swarm_clustered`, `examples/swarm_standalone`), but has not been documented or proven at production scale.
 
+**Supply-Chain Security & Release Provenance:** Release builds are secured by an automated pre-publish quality gate ([`scripts/verify_release.sh`](scripts/verify_release.sh)), cryptographic SHA-256 manifests (`SHA256SUMS`), SPDX Software Bill of Materials (SBOM), and cryptographically signed build provenance attestations via GitHub Actions OIDC (`actions/attest-build-provenance`, SLSA Level 3 compliance). Consumers can independently verify any downloaded artifact using the standalone verification script.
+
 ### 🧪 For Researchers & Distributed Systems Engineers
 
 The interesting parts to read are the B-Tree implementation with copy-on-write page isolation (`btree/`), the WAL plus two-phase commit transaction protocol (`transaction.go`, `common/`), the Reed-Solomon erasure coding layer (`fs/erasure/`), and the swarm coordination model described in [`ai/SWARM_DESIGN.md`](ai/SWARM_DESIGN.md). The [Architecture Whitepaper](docs/SOP_ARCHITECTURE_WHITEPAPER.md) and [Architecture vs. Big Tech](docs/ARCHITECTURE_VS_BIG_TECH.md) go deeper into the design tradeoffs than this README does.
@@ -472,21 +468,27 @@ Reading this codebase is a reasonable way to see real (not textbook-simplified) 
 
 ---
 
-## 📈 Commercialization Opportunities
+## 💎 Monetization & Editions Architecture
 
-Joltrin has no commercial product, pricing, or customers today. It is an MIT-licensed open-source project. The paths below are the plausible business models that open-source infrastructure projects in this category (databases, coordination systems, workflow engines) have historically built, listed here as potential future directions, not current plans or commitments:
+Joltrin follows an **Open-Core and Governance** architecture. The core database, vector similarity search, and agent memory engine are, and will always remain, **100% free and open-source under the permissive MIT License**. 
 
-- **Hosted or managed Joltrin**: a cloud offering that runs and operates Joltrin clusters so teams do not have to manage erasure-coded storage and swarm coordination themselves.
-- **Enterprise support and SLAs**: paid support contracts for teams running Joltrin in production, similar to how Postgres and Kafka have commercial support ecosystems around free cores.
-- **Security, compliance, and governance add-ons**: audit logging, RBAC policy management (there is already an in-repo RBAC prototype, `rbac.go`, `docs/RBAC_ENTITLEMENTS.md`), and compliance tooling for regulated industries.
-- **Observability and operations tooling**: dashboards and alerting built on top of the existing `/metrics` endpoint and event logs.
-- **AI infrastructure products**: a packaged "durable agent memory" service built on the checkpointing primitives described above, sold to teams building agent frameworks who do not want to run Joltrin themselves.
-- **Marketplace listings**: prebuilt container images (a `ghcr.io/sharedcode/joltrin-quickstart` image already exists) distributed through cloud marketplaces.
-- **Professional services**: architecture consulting for teams migrating a fragmented Redis/Kafka/Postgres stack onto Joltrin.
+Commercial tiers are focused entirely on **enterprise governance, compliance, policy enforcement, multi-tenancy, and managed cloud infrastructure**, leaving the open-source core complete, unhindered, and unthrottled.
 
-None of these exist today. They are documented here so a reader evaluating Joltrin as a commercial or investment opportunity can see the plausible paths from open-source project to business, and judge for themselves how credible each one is.
+For deep architectural documentation on package boundaries and code separation, see [Monetization & Governance Architecture](docs/MONETIZATION_AND_TIERS.md).
 
-For a longer, more speculative look at what a local-first, enterprise-defensible version of this could become, including a candid list of what would have to be built first, see [Strategic Architecture & Investor Moat](docs/STRATEGIC_ARCHITECTURE_AND_MOAT.md). It is explicit throughout about the line between what exists in this repo today and what is proposed.
+| Tier / Edition | What It Provides | Distribution & Licensing | Implementation Status |
+| :--- | :--- | :--- | :--- |
+| **Free / Open-Source Core** | • Embedded copy-on-write B-Tree storage engine<br>• WAL + 2PC strict ACID transactions<br>• Reed-Solomon erasure coding and bitrot healing<br>• Durable AI agent memory & checkpointed buffers<br>• In-memory 128-d cosine vector similarity<br>• Embedded MCP server (`cmd/sop-mcp-server`)<br>• Embedded A2A agent runtime (`cmd/sop-a2a-agent`)<br>• Local runbook verification barrier (`ai/verify`)<br>• Developer GitHub OIDC authentication | Embedded Library & CLI<br>**Permissive MIT License** | **Available Today** |
+| **Pro Governance** | • Policy-as-Code declarative runtime compiler<br>• Tamper-evident SHA-256 audit lineage & verification<br>• Signed cryptographic audit export<br>• Team-level workspaces and quota management<br>• Priority MCP gateways and traffic shaping | Team Commercial Add-on | **Foundation Implemented** ([`governance/`](governance/)) |
+| **Enterprise Governance** | • Enterprise SSO: **Okta** & **Microsoft Entra ID**<br>• Multi-tenant RBAC & tenant isolation boundaries<br>• Enterprise audit streaming (real-time SIEM / Kafka)<br>• Fine-grained verification rules & custom safety invariants<br>• Custom invariant enforcement engine<br>• Enterprise compliance guarantees and SLA | Self-Hosted Enterprise Commercial | **Foundation Implemented** ([`governance/`](governance/)) |
+| **Hosted Cloud** | • Managed Joltrin instances (zero-ops)<br>• Cloud-hosted MCP hub & multi-agent routing<br>• Multi-region database replication<br>• Managed agent coordination network<br>• Automated off-site snapshots & backup verification | Managed Cloud SaaS | **Planned** |
+
+### Open-Source Guarantees
+- **No Artificial Paywalls**: The open-source core will never cap database size, transaction limits, memory buffers, or local MCP/A2A concurrency.
+- **Permanent MIT License**: Core storage, vector search, and agent safety verification remain permanently open-source under the MIT license.
+- **Decoupled Architecture**: Commercial and governance modules interact via clean, decoupled Go interfaces ([`governance/`](governance/)) rather than invasive runtime licensing checks.
+
+For a longer strategic view of enterprise defensibility and local-first architecture, see [Strategic Architecture & Investor Moat](docs/STRATEGIC_ARCHITECTURE_AND_MOAT.md).
 
 ---
 
@@ -506,9 +508,7 @@ This list reflects what is actually in the repository at the time of writing. It
 
 CI (`.github/workflows/ci.yml`) builds, vets, and runs the core unit tests (`inmemory`, `btree`, `common`, `cache`, `encoding`, `database`) on `ubuntu-latest`, `macos-latest`, and `windows-latest` on every push and pull request, as three independent, parallel jobs. `macos-latest` runs on Apple Silicon (arm64), so that leg also verifies arm64 for free.
 
-The Redis- and Cassandra-backed integration and stress test suites stay Linux-only: GitHub Actions' `services:` containers require a Linux-hosted runner, so those specific suites are not run on macOS or Windows today. That is a real gap in what is verified there, not a hidden one.
-
-Standing up this matrix also surfaced a genuine, pre-existing Windows-only failure in the `common` package's transaction-timeout tests, unrelated to the matrix itself. That package is currently skipped on the Windows leg rather than papered over; see the comment in `ci.yml` for the exact tests and symptom.
+The Redis- and Cassandra-backed integration and stress test suites stay Linux-only: GitHub Actions' `services:` containers require a Linux-hosted runner, so those specific suites are not run on macOS or Windows today. That is a real gap in what is verified there, not a hidden one. All core unit test packages (`inmemory`, `btree`, `common`, `cache`, `encoding`, `database`) run and pass cleanly across all three operating systems (Linux, macOS, and Windows).
 
 ---
 
@@ -519,7 +519,7 @@ Standing up this matrix also surfaced a genuine, pre-existing Windows-only failu
 ```bash
 # Clone the repository and run the quickstart
 git clone https://github.com/sharedcode/joltrin.git
-cd sop
+cd joltrin
 go run ./examples/quickstart
 ```
 
@@ -652,10 +652,10 @@ For production deployments, pin your dependency to a tagged release. This guaran
 If you are extending storage engine internals (`btree/`, `fs/`), modifying protocol servers (`ai/verify`, `cmd/sop-mcp-server`, `cmd/sop-a2a-agent`), or benchmarking performance enhancements, consuming from source is recommended:
 ```bash
 # Add as a git submodule in your project
-git submodule add https://github.com/sharedcode/joltrin.git vendor/sop
+git submodule add https://github.com/sharedcode/joltrin.git vendor/joltrin
 
 # Or configure a Go workspace (go.work) for local development
-go work use ./vendor/sop
+go work use ./vendor/joltrin
 ```
 
 ## 📚 Technical Reference Guides

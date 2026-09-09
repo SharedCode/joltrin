@@ -90,25 +90,11 @@ jobs:
           fi
           go build $(go list ./... 2>/dev/null | grep -Ev "$exclude")
 
-      # `common` is skipped on Windows only: this matrix caught a pre-existing,
-      # Windows-only failure in its transaction-timeout tests
-      # (Test_ReaderTransaction_Commit_EdgeCases_Table,
-      # Test_Transaction_TimedOut_Table both expect a 2-hour-old start time to
-      # register as timed out and it doesn't there), which looks like a test
-      # isolation issue around the package's injectable `Now()` clock rather
-      # than a platform limitation in the engine itself. Left failing loudly
-      # on ubuntu/macOS rather than hidden with continue-on-error; tracked as
-      # a real gap, not fixed here, since diagnosing it is a separate task
-      # from standing up this matrix.
       - name: Unit tests (no integration/stress tags, no external services)
         shell: bash
         run: |
           set -euo pipefail
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            go test -timeout 20m ./inmemory ./btree ./cache ./encoding ./database
-          else
-            go test -timeout 20m ./inmemory ./btree ./common ./cache ./encoding ./database
-          fi
+          go test -timeout 20m ./inmemory ./btree ./common ./cache ./encoding ./database
 
   # Heavier validation that needs Redis and Cassandra as GitHub Actions
   # `services:` containers. That keyword only runs a Docker daemon on

@@ -56,13 +56,14 @@ def create_base_canvas():
     draw.ellipse([(36, 18), (46, 28)], fill=(234, 179, 8))
     draw.ellipse([(54, 18), (64, 28)], fill=(34, 197, 94))
     
-    # Mini Z brand squircle in top right
+    # Mini J brand squircle in top right
     zx = WIDTH - 52
     zy = 15
     draw.rounded_rectangle([(zx-4, zy-2), (zx+24, zy+20)], radius=4, fill=(11, 15, 25), outline=BRAND_CYAN, width=1)
-    draw.line([(zx, zy+2), (zx+18, zy+2)], fill=BRAND_CYAN, width=2)
-    draw.line([(zx+18, zy+2), (zx+1, zy+16)], fill=BRAND_BLUE, width=2)
-    draw.line([(zx+1, zy+16), (zx+19, zy+16)], fill=BRAND_VIOLET, width=2)
+    draw.line([(zx+12, zy+2), (zx+18, zy+2)], fill=BRAND_CYAN, width=2)
+    draw.line([(zx+18, zy+2), (zx+18, zy+16)], fill=BRAND_BLUE, width=2)
+    draw.line([(zx+18, zy+16), (zx+6, zy+16)], fill=BRAND_VIOLET, width=2)
+    draw.line([(zx+6, zy+16), (zx+6, zy+12)], fill=BRAND_VIOLET, width=2)
     
     # Header tag
     draw.text((80, 16), "SHAREDCODE JOLTRIN // IN-PROCESS STATE ENGINE", fill=TEXT_MUTED, font=font_mono)

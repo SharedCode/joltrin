@@ -62,26 +62,108 @@
     button:hover { filter: brightness(1.05); }
     .muted { color: var(--muted); font-size: 0.95rem; }
     .error { color: var(--danger); min-height: 1.1em; font-size: 0.95rem; }
+    .sso-section { margin-top: 20px; border-top: 1px solid var(--panel-border); padding-top: 16px; }
+    .sso-divider { display: flex; align-items: center; text-align: center; color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+    .sso-divider::before, .sso-divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--panel-border); }
+    .sso-divider:not(:empty)::before { margin-right: .5em; }
+    .sso-divider:not(:empty)::after { margin-left: .5em; }
+    .sso-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s ease-in-out;
+      border: 1px solid var(--panel-border);
+      background: #0d1727;
+      color: var(--text);
+    }
+    .sso-btn:hover { background: #15233a; border-color: var(--accent); }
+    .sso-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .badge-enterprise {
+      font-size: 0.65rem;
+      background: rgba(124, 184, 255, 0.18);
+      color: #7cb8ff;
+      border: 1px solid rgba(124, 184, 255, 0.4);
+      padding: 2px 6px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-left: auto;
+    }
   </style>
 </head>
 <body>
   <main class="card">
-    <h1>SOP Login</h1>
-    <p>Sign in to continue to the SOP workspace.</p>
+    <h1>⚡ Joltrin Login</h1>
+    <p>Sign in to continue to your workspace.</p>
     <form id="login-form" autocomplete="on">
       <label for="username">Username</label>
       <input id="username" name="username" type="text" placeholder="root" required>
       <label for="password">Password</label>
       <input id="password" name="password" type="password" placeholder="Enter your password" required>
-      <button type="submit">Sign in</button>
+      <button type="submit">Sign in with Password</button>
       <div id="login-error" class="error"></div>
     </form>
-    <p class="muted">Tip: use the administrator credentials you configured during setup.</p>
+
+    <div id="sso-section" class="sso-section" style="display:none;">
+      <div class="sso-divider">Or continue with SSO</div>
+      <div id="sso-buttons"></div>
+    </div>
+
+    <p class="muted">Tip: use the administrator credentials or SSO identity configured for this cluster.</p>
   </main>
   <script>
     (function () {
       var form = document.getElementById('login-form');
       var errorBox = document.getElementById('login-error');
+      var ssoSection = document.getElementById('sso-section');
+      var ssoButtons = document.getElementById('sso-buttons');
+
+      // Provider icons
+      var icons = {
+        github: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>',
+        okta: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 18c-3.314 0-6-2.686-6-6s2.686-6 6-6 6 2.686 6 6-2.686 6-6 6z"/></svg>',
+        entraid: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.4 0H0v11.4h11.4V0zM24 0H12.6v11.4H24V0zM11.4 12.6H0V24h11.4V12.6zM24 12.6H12.6V24H24V12.6z"/></svg>'
+      };
+
+      // Load OIDC SSO Providers
+      fetch('/api/auth/providers')
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (!data || !data.providers) return;
+          var externalProviders = data.providers.filter(function (p) { return p.id !== 'local'; });
+          if (externalProviders.length === 0) return;
+
+          ssoSection.style.display = 'block';
+          ssoButtons.innerHTML = '';
+
+          externalProviders.forEach(function (p) {
+            var btn = document.createElement('a');
+            btn.className = 'sso-btn';
+            btn.href = p.authorize_url || ('/api/auth/oidc/authorize?provider=' + p.id);
+            var iconHtml = icons[p.type] || '';
+            var badgeHtml = p.required_tier === 'enterprise' ? '<span class="badge-enterprise">Enterprise</span>' : '';
+            btn.innerHTML = iconHtml + '<span>Sign in with ' + p.display_name + '</span>' + badgeHtml;
+
+            if (!p.is_entitled) {
+              btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                errorBox.textContent = p.display_name + ' SSO requires an upgraded Enterprise license.';
+              });
+            }
+            ssoButtons.appendChild(btn);
+          });
+        })
+        .catch(function () {});
+
       form.addEventListener('submit', function (event) {
         event.preventDefault();
         errorBox.textContent = '';

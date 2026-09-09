@@ -442,6 +442,9 @@ func (nr *nodeRepositoryBackend) areFetchedItemsIntact(ctx context.Context, node
 		return false, err
 	}
 	for i := range handles {
+		if len(handles[i].IDs) != len(vids[i].IDs) {
+			return false, nil
+		}
 		for ii := range handles[i].IDs {
 			// Node with ID had been updated(or deleted) since reading it.
 			if handles[i].IDs[ii].Version != nodes[i].Second[ii].(btree.MetaDataType).GetVersion() {
