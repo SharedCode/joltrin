@@ -218,7 +218,7 @@ func handleSubmitEnterpriseInquiry(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(map[string]any{
 		"status":  "ok",
-		"message": "Thank you. Our enterprise engineering team will contact you within 1 business day.",
+		"message": "Thanks. We read every enterprise inquiry personally and will follow up soon.",
 		"inquiry": saved,
 	})
 }

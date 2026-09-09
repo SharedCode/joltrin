@@ -1,5 +1,11 @@
 # Changelog
 
+## v5.4.0
+
+### Website & Docs
+- **Copy pass on the marketing site** (`demo/index.html`): rewrote the hero, verification barrier intro, business-value section, "why now" section, business model, pricing, enterprise value, and enterprise contact form for a more direct, conversational tone. Removed all em dashes, leftover buzzwords ("paradigm", "mission-critical"), and an unverifiable "1 business day" response-time claim from both the frontend copy and the `/api/billing/enterprise-contact` success message.
+- **README**: shrunk the logo from 480px to 120px so it reads as a mark next to the title instead of a full hero graphic. Added a "Cutting a Release" section documenting the actual `scripts/update_version.sh` / `build_release.sh` / `verify_release.sh` flow, and fixed a stale `go get ...@v0.1.0` example.
+
 ## v5.3.8
 
 ### Highlights
