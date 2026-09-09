@@ -561,4 +561,179 @@
     </div>
 </div>
 
+<!-- Plan, Billing & Commercial Governance Modal -->
+<div id="plan-billing-modal" class="modal">
+    <div class="modal-content" style="width: min(860px, 94vw); max-height: 90vh; display: flex; flex-direction: column;">
+        <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding: 16px 20px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.25rem; font-weight: 700;">⚡ Joltrin Plan & Governance</span>
+                <span id="billing-header-tier-pill" style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: rgba(79, 140, 255, 0.2); color: #7cb8ff; border: 1px solid rgba(79, 140, 255, 0.4);">CORE</span>
+            </div>
+            <span style="cursor: pointer; font-size: 24px; color: var(--text-muted);" onclick="closePlanBillingModal()">&times;</span>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div style="display: flex; gap: 8px; padding: 12px 20px; border-bottom: 1px solid var(--border-color); background: rgba(0,0,0,0.1);">
+            <button id="tab-btn-pricing" onclick="switchBillingTab('pricing')" class="btn-tab active" style="padding: 6px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; background: var(--accent); color: #05101e;">Plans & Upgrade</button>
+            <button id="tab-btn-entitlements" onclick="switchBillingTab('entitlements')" class="btn-tab" style="padding: 6px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; border: 1px solid var(--border-color); background: transparent; color: var(--text-muted);">Capability Matrix</button>
+            <button id="tab-btn-enterprise" onclick="switchBillingTab('enterprise')" class="btn-tab" style="padding: 6px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; border: 1px solid var(--border-color); background: transparent; color: var(--text-muted);">Enterprise Access</button>
+        </div>
+
+        <div class="modal-body" style="padding: 20px; overflow-y: auto; flex: 1;">
+            <!-- Tab 1: Pricing & Plans -->
+            <div id="billing-tab-pricing">
+                <div id="billing-alert-box" style="display: none; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem;"></div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                    <!-- Core Card -->
+                    <div style="background: rgba(16, 28, 44, 0.6); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; display: flex; flex-direction: column;">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+                            <h3 style="margin: 0; font-size: 1.15rem; color: var(--text);">Free / Core</h3>
+                            <span style="font-size: 0.75rem; color: #48bb78; font-weight: 700;">MIT LICENSE</span>
+                        </div>
+                        <div style="font-size: 1.6rem; font-weight: 800; margin-bottom: 4px;">$0 <span style="font-size: 0.85rem; font-weight: 400; color: var(--text-muted);">/ forever</span></div>
+                        <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0; margin-bottom: 16px; min-height: 38px;">100% open-source embedded database and agent memory engine with zero capacity throttling.</p>
+                        
+                        <ul style="font-size: 0.8rem; line-height: 1.6; color: var(--text); padding-left: 18px; margin-top: 0; flex: 1;">
+                            <li>Embedded Copy-on-Write B-Tree</li>
+                            <li>Strict WAL + 2PC ACID engine</li>
+                            <li>Checkpointed AI Agent Memory</li>
+                            <li>128-d Vector Cosine Similarity</li>
+                            <li>Embedded MCP & A2A Server</li>
+                            <li>Local ai/verify Safety Barrier</li>
+                            <li>Developer GitHub OIDC Auth</li>
+                        </ul>
+
+                        <button id="card-btn-core" class="btn-secondary" style="width: 100%; margin-top: 16px; opacity: 0.8;" disabled>Current Active Tier</button>
+                    </div>
+
+                    <!-- Pro Card -->
+                    <div id="card-pro-container" style="background: rgba(16, 28, 44, 0.8); border: 2px solid var(--accent); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; position: relative;">
+                        <div style="position: absolute; top: -11px; right: 16px; background: var(--accent); color: #05101e; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; padding: 2px 8px; border-radius: 10px; letter-spacing: 0.05em;">RECOMMENDED FOR TEAMS</div>
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+                            <h3 style="margin: 0; font-size: 1.15rem; color: var(--text);">Pro Governance</h3>
+                            <span style="font-size: 0.75rem; color: #7cb8ff; font-weight: 700;">COMMERCIAL</span>
+                        </div>
+                        <div style="font-size: 1.6rem; font-weight: 800; margin-bottom: 4px;">$49 <span style="font-size: 0.85rem; font-weight: 400; color: var(--text-muted);">/ team / mo</span></div>
+                        <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0; margin-bottom: 16px; min-height: 38px;">Production-grade policy-as-code, audit lineage, and workspace governance.</p>
+                        
+                        <ul style="font-size: 0.8rem; line-height: 1.6; color: var(--text); padding-left: 18px; margin-top: 0; flex: 1;">
+                            <li><strong>Everything in Core, plus:</strong></li>
+                            <li>Declarative Policy-as-Code Compiler</li>
+                            <li>Tamper-evident SHA-256 Audit Lineage</li>
+                            <li>Signed Cryptographic Audit Export</li>
+                            <li>Team Workspaces & Quota Control</li>
+                            <li>Priority MCP Gateway & Traffic Shaping</li>
+                            <li>Stripe Automated Billing & Invoicing</li>
+                        </ul>
+
+                        <div id="pro-card-actions" style="margin-top: 16px;">
+                            <button id="btn-upgrade-pro" onclick="initiateUpgrade('pro')" class="btn-success" style="width: 100%; font-weight: 700; padding: 10px;">⚡ Upgrade to Pro (Stripe Checkout)</button>
+                            <button id="btn-manage-pro" onclick="openCustomerPortal()" class="btn-secondary" style="width: 100%; display: none; padding: 10px;">Manage Subscription (Stripe Portal)</button>
+                        </div>
+                    </div>
+
+                    <!-- Enterprise Card -->
+                    <div style="background: rgba(16, 28, 44, 0.6); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; display: flex; flex-direction: column;">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+                            <h3 style="margin: 0; font-size: 1.15rem; color: var(--text);">Enterprise</h3>
+                            <span style="font-size: 0.75rem; color: #a78bfa; font-weight: 700;">SELF-HOSTED / SLA</span>
+                        </div>
+                        <div style="font-size: 1.6rem; font-weight: 800; margin-bottom: 4px;">Custom <span style="font-size: 0.85rem; font-weight: 400; color: var(--text-muted);">/ annual</span></div>
+                        <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0; margin-bottom: 16px; min-height: 38px;">Complete enterprise identity, multi-tenancy, compliance streaming, and dedicated support.</p>
+                        
+                        <ul style="font-size: 0.8rem; line-height: 1.6; color: var(--text); padding-left: 18px; margin-top: 0; flex: 1;">
+                            <li><strong>Everything in Pro, plus:</strong></li>
+                            <li>Enterprise SSO: <strong>Okta</strong> & <strong>Microsoft Entra ID</strong></li>
+                            <li>Multi-Tenant RBAC & Tenant Boundaries</li>
+                            <li>SIEM & Kafka Real-Time Audit Streaming</li>
+                            <li>Fine-Grained Barrier Verification Rules</li>
+                            <li>Custom Invariant Enforcement Engine</li>
+                            <li>SOC 2 / HIPAA Compliance Guarantees</li>
+                        </ul>
+
+                        <button onclick="switchBillingTab('enterprise')" class="btn-primary" style="width: 100%; margin-top: 16px; padding: 10px;">Contact Sales / Request Access</button>
+                    </div>
+                </div>
+
+                <!-- Hosted Cloud Teaser -->
+                <div style="background: rgba(255, 255, 255, 0.03); border: 1px dashed var(--border-color); border-radius: 10px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <strong style="font-size: 0.95rem; color: var(--text);">☁️ Joltrin Hosted Cloud</strong>
+                            <span style="font-size: 0.68rem; font-weight: 700; background: rgba(167, 139, 250, 0.2); color: #c4b5fd; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">Planned / Preview</span>
+                        </div>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 4px 0 0;">Zero-ops managed instances, cloud-hosted MCP hubs, automated off-site snapshots, and multi-region replication.</p>
+                    </div>
+                    <button onclick="switchBillingTab('enterprise')" class="btn-secondary" style="font-size: 0.8rem; padding: 6px 12px; white-space: nowrap;">Join Waitlist</button>
+                </div>
+            </div>
+
+            <!-- Tab 2: Entitlements Matrix -->
+            <div id="billing-tab-entitlements" style="display: none;">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0;">Joltrin decouples open-core capabilities from enterprise commercial governance via clean, verified interfaces in <code>governance/</code>.</p>
+                <div style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem;">
+                        <thead>
+                            <tr style="background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border-color); text-align: left;">
+                                <th style="padding: 10px 14px;">Capability Identifier</th>
+                                <th style="padding: 10px 14px;">Required Tier</th>
+                                <th style="padding: 10px 14px; text-align: right;">Status on this Deployment</th>
+                            </tr>
+                        </thead>
+                        <tbody id="billing-entitlements-tbody">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab 3: Enterprise Inquiry Form -->
+            <div id="billing-tab-enterprise" style="display: none;">
+                <h3 style="margin-top: 0; font-size: 1.1rem;">Request Enterprise Access / Contact Sales</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Speak with our engineering leadership to discuss Okta/Entra ID SSO integration, custom invariant barrier policies, high-throughput SIEM streaming, or volume SLAs.</p>
+                
+                <form id="enterprise-inquiry-form" onsubmit="submitEnterpriseInquiry(event)" style="display: grid; gap: 12px; max-width: 560px;">
+                    <div>
+                        <label class="form-label" style="display:block; margin-bottom: 4px; font-size: 0.85rem;">Full Name *</label>
+                        <input type="text" id="ent-name" class="form-input" required style="width: 100%; box-sizing: border-box;" placeholder="Alex Smith">
+                    </div>
+                    <div>
+                        <label class="form-label" style="display:block; margin-bottom: 4px; font-size: 0.85rem;">Work Email *</label>
+                        <input type="email" id="ent-email" class="form-input" required style="width: 100%; box-sizing: border-box;" placeholder="alex@company.com">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div>
+                            <label class="form-label" style="display:block; margin-bottom: 4px; font-size: 0.85rem;">Company Name *</label>
+                            <input type="text" id="ent-company" class="form-input" required style="width: 100%; box-sizing: border-box;" placeholder="Acme Systems">
+                        </div>
+                        <div>
+                            <label class="form-label" style="display:block; margin-bottom: 4px; font-size: 0.85rem;">Engineering Team Size</label>
+                            <select id="ent-team-size" class="form-input" style="width: 100%; box-sizing: border-box;">
+                                <option value="1-10">1 - 10 engineers</option>
+                                <option value="11-50">11 - 50 engineers</option>
+                                <option value="51-250" selected>51 - 250 engineers</option>
+                                <option value="250+">250+ engineers</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label" style="display:block; margin-bottom: 4px; font-size: 0.85rem;">Architecture & Compliance Requirements</label>
+                        <textarea id="ent-usecases" class="form-input" rows="3" style="width: 100%; box-sizing: border-box;" placeholder="e.g. Connecting 50 agent swarms with Okta SSO and Kafka audit log streaming."></textarea>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center; margin-top: 8px;">
+                        <button type="submit" id="ent-submit-btn" class="btn-success" style="padding: 10px 20px; font-weight: 700;">Submit Enterprise Request</button>
+                        <div id="ent-feedback" style="font-size: 0.85rem;"></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="modal-footer" style="border-top: 1px solid var(--border-color); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.78rem; color: var(--text-muted);">Open-core guarantees: Core storage, B-Trees, and AI memory are permanently licensed under MIT.</span>
+            <button onclick="closePlanBillingModal()" class="btn-secondary">Close</button>
+        </div>
+    </div>
+</div>
+
 {{end}}

@@ -73,7 +73,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           </div>
 
           <div className="bg-dark-950/80 px-3 py-2 rounded-lg border border-dark-800 flex items-center space-x-2 text-[11px] font-mono text-slate-300">
-            <span className="text-brand-400 font-bold uppercase">SOP Principle:</span>
+            <span className="text-brand-400 font-bold uppercase">Joltrin Principle:</span>
             <span className="truncate">{activeScenario.sopTakeaway}</span>
           </div>
         </div>

@@ -29,7 +29,7 @@ import (
 // New builds an MCP server with read_sop, validate_step, and execute_step
 // registered against store.
 func New(store *runbookstore.Store) *server.MCPServer {
-	s := server.NewMCPServer("sop-runbook-server", "0.1.0")
+	s := server.NewMCPServer("joltrin-runbook-server", "0.1.0")
 
 	s.AddTool(
 		mcp.NewTool("read_sop",

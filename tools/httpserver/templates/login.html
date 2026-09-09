@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SOP Login</title>
+  <title>Joltrin Login</title>
   <style>
     :root {
       color-scheme: dark;
@@ -156,7 +156,7 @@
             if (!p.is_entitled) {
               btn.addEventListener('click', function (e) {
                 e.preventDefault();
-                errorBox.textContent = p.display_name + ' SSO requires an upgraded Enterprise license.';
+                errorBox.innerHTML = p.display_name + ' SSO requires an Enterprise license. Contact <a href="mailto:sales@joltrin.com" style="color:var(--accent); text-decoration:underline;">sales@joltrin.com</a> or upgrade in workspace settings.';
               });
             }
             ssoButtons.appendChild(btn);

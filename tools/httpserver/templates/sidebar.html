@@ -119,12 +119,23 @@
     </div>
     
     <!-- Sidebar Footer -->
-    <div style="padding-top: 10px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; align-items: center; gap: 10px;">
-        <button onclick="showEnvironmentsManager()" title="Manage Environments" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                 <!-- HDD/Server Icon -->
-                 <path d="M1 4.5A2.5 2.5 0 0 1 3.5 2h9A2.5 2.5 0 0 1 15 4.5v1A2.5 2.5 0 0 1 12.5 8h-9A2.5 2.5 0 0 1 1 5.5v-1zM3.5 3a1.5 1.5 0 0 0-1.5 1.5v1a1.5 1.5 0 0 0 1.5 1.5h9a1.5 1.5 0 0 0 1.5-1.5v-1a1.5 1.5 0 0 0-1.5-1.5h-9zM1 10.5A2.5 2.5 0 0 1 3.5 8h9a2.5 2.5 0 0 1 2.5 2.5v1a2.5 2.5 0 0 1-2.5 2.5h-9a2.5 2.5 0 0 1-2.5-2.5v-1zm1.5 1a1.5 1.5 0 0 0-1.5 1.5v1a1.5 1.5 0 0 0 1.5 1.5h9a1.5 1.5 0 0 0 1.5-1.5v-1a1.5 1.5 0 0 0-1.5-1.5h-9z"/>
-            </svg>
-        </button>
+    <div style="padding-top: 10px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+        <div id="sidebar-tier-badge" onclick="showPlanAndBilling()" title="View Plan & Governance" style="cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 8px; border-radius: 6px; background: rgba(79, 140, 255, 0.15); color: #7cb8ff; border: 1px solid rgba(79, 140, 255, 0.3);">
+            <span>⚡ CORE</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <button onclick="showPlanAndBilling()" title="Plan, Pricing & Commercial Governance" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; display: flex; align-items: center;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v1h14V4a1 1 0 0 0-1-1H2zm13 4H1v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7z"/>
+                    <path d="M2 10a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-1z"/>
+                </svg>
+            </button>
+            <button onclick="showEnvironmentsManager()" title="Manage Environments" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; display: flex; align-items: center;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                     <!-- HDD/Server Icon -->
+                     <path d="M1 4.5A2.5 2.5 0 0 1 3.5 2h9A2.5 2.5 0 0 1 15 4.5v1A2.5 2.5 0 0 1 12.5 8h-9A2.5 2.5 0 0 1 1 5.5v-1zM3.5 3a1.5 1.5 0 0 0-1.5 1.5v1a1.5 1.5 0 0 0 1.5 1.5h9a1.5 1.5 0 0 0 1.5-1.5v-1a1.5 1.5 0 0 0-1.5-1.5h-9zM1 10.5A2.5 2.5 0 0 1 3.5 8h9a2.5 2.5 0 0 1 2.5 2.5v1a2.5 2.5 0 0 1-2.5 2.5h-9a2.5 2.5 0 0 1-2.5-2.5v-1zm1.5 1a1.5 1.5 0 0 0-1.5 1.5v1a1.5 1.5 0 0 0 1.5 1.5h9a1.5 1.5 0 0 0 1.5-1.5v-1a1.5 1.5 0 0 0-1.5-1.5h-9z"/>
+                </svg>
+            </button>
+        </div>
     </div>
 {{end}}

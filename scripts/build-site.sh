@@ -1,11 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$REPO_ROOT"
+
 echo "==> Assembling Joltrin Combined Site for E2E Testing..."
 
 # Ensure Arena is built
 if [ ! -d "sop-arena/dist" ] || [ ! -f "sop-arena/dist/index.html" ]; then
   echo "Building sop-arena..."
+  if [ ! -d "sop-arena/node_modules" ]; then
+    (cd sop-arena && npm ci)
+  fi
   (cd sop-arena && npm run build)
 fi
 
@@ -37,5 +43,12 @@ cp -r demo-agents/. _site/agents/
 echo "Copying Documentation and Assets..."
 cp -r docs/. _site/docs/
 cp -r docs/assets/. _site/assets/
+
+# Preserve custom domain (e.g. joltrin.com) if CNAME exists
+if [ -f "CNAME" ]; then
+  cp CNAME _site/CNAME
+elif [ -f "demo/CNAME" ]; then
+  cp demo/CNAME _site/CNAME
+fi
 
 echo "Site assembled successfully in _site/"
