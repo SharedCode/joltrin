@@ -2488,8 +2488,10 @@
       const mailtoLink = `mailto:gerardrecinto@gmail.com?subject=${mailtoSubject}&body=${mailtoBody}`;
 
       if (statusAlert) {
-        statusAlert.className = 'mb-6 p-5 rounded-xl text-xs bg-brand-500/10 border border-brand-500/30 text-slate-200 block space-y-3';
-        statusAlert.innerHTML = `
+        statusAlert.className = serverSuccess
+          ? 'mb-6 p-5 rounded-xl text-xs bg-brand-500/10 border border-brand-500/30 text-slate-200 block space-y-3'
+          : 'mb-6 p-5 rounded-xl text-xs bg-amber-500/10 border border-amber-500/30 text-slate-200 block space-y-3';
+        statusAlert.innerHTML = serverSuccess ? `
           <div class="flex items-center space-x-2 text-brand-400 font-bold text-sm">
             <i data-lucide="check-circle" class="w-4 h-4"></i>
             <span>Thank you, ${payload.name}! Your inquiry has been received.</span>
@@ -2502,6 +2504,23 @@
             <a href="${mailtoLink}" class="px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-brand-400 font-mono text-[11px] flex items-center space-x-1.5 transition">
               <i data-lucide="mail" class="w-3.5 h-3.5"></i>
               <span>Email Us Directly</span>
+            </a>
+            <button type="button" onclick="navigator.clipboard.writeText('gerardrecinto@gmail.com'); this.innerText='gerardrecinto@gmail.com copied!';" class="px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-slate-400 hover:text-white font-mono text-[11px] transition cursor-pointer">
+              Copy gerardrecinto@gmail.com
+            </button>
+          </div>
+        ` : `
+          <div class="flex items-center space-x-2 text-amber-400 font-bold text-sm">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            <span>${payload.name}, this form can't reach our server right now.</span>
+          </div>
+          <p class="text-slate-300 leading-relaxed">
+            This is the static GitHub Pages demo, so nothing was sent yet. Click below to email it directly instead. Your answers are saved on this device either way.
+          </p>
+          <div class="pt-2 flex flex-wrap items-center gap-3">
+            <a href="${mailtoLink}" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-bold font-mono text-[11px] flex items-center space-x-1.5 transition">
+              <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+              <span>Email This to Us</span>
             </a>
             <button type="button" onclick="navigator.clipboard.writeText('gerardrecinto@gmail.com'); this.innerText='gerardrecinto@gmail.com copied!';" class="px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-slate-400 hover:text-white font-mono text-[11px] transition cursor-pointer">
               Copy gerardrecinto@gmail.com
@@ -2596,41 +2615,46 @@
         return;
       }
 
-      // Simulated / Test Mode Checkout Session Flow
-      const mockSessionId = (sessionData && sessionData.session_id) ? sessionData.session_id : 'cs_test_' + Math.random().toString(36).substring(2, 12);
-      
+      // No billing backend reachable from this static site (e.g. this is the
+      // GitHub Pages deployment, which serves static files only). Be honest
+      // about that instead of faking a checkout session.
       btn.disabled = false;
       btnText.innerText = 'Proceed to Secure Stripe Checkout →';
 
+      const mailtoSubject = encodeURIComponent(`Joltrin Pro signup: ${workspace}`);
+      const mailtoBody = encodeURIComponent(
+        `Workspace: ${workspace}\nEmail: ${email}\nBilling cycle: ${cycle === 'annual' ? 'Annual ($490/year)' : 'Monthly ($49/month)'}`
+      );
+      const mailtoLink = `mailto:gerardrecinto@gmail.com?subject=${mailtoSubject}&body=${mailtoBody}`;
+
       if (statusBox) {
-        statusBox.className = 'p-4 rounded-xl text-xs bg-brand-500/10 border border-brand-500/30 text-slate-200 block space-y-2.5';
+        statusBox.className = 'p-4 rounded-xl text-xs bg-amber-500/10 border border-amber-500/30 text-slate-200 block space-y-2.5';
         statusBox.innerHTML = `
-          <div class="flex items-center space-x-2 text-brand-400 font-bold">
-            <i data-lucide="check-circle" class="w-4 h-4"></i>
-            <span>Test Mode / Simulated Checkout Session Initialized</span>
+          <div class="flex items-center space-x-2 text-amber-400 font-bold">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            <span>Checkout isn't live on this static site yet</span>
           </div>
           <p class="text-slate-300 leading-relaxed">
-            Workspace <strong class="text-white font-mono">${workspace}</strong> queued for provisioning under <span class="font-mono text-brand-400">${email}</span>.
+            This demo is hosted on GitHub Pages, which can't run the billing backend. Email us your workspace name and we'll set up <strong class="text-white font-mono">${workspace}</strong> on the ${cycle === 'annual' ? '$490/year' : '$49/month'} plan directly.
           </p>
-          <div class="font-mono text-[10px] text-slate-400 bg-dark-950 p-2.5 rounded-lg border border-dark-800 break-all leading-relaxed">
-            Session: ${mockSessionId}<br/>
-            Billing: ${cycle === 'annual' ? '$490 / year (Annual - 2 months free)' : '$49 / month (Monthly)'}<br/>
-            Method: Stripe Checkout (Cards, Apple Pay, Google Pay)
-          </div>
-          <div class="pt-2 flex items-center justify-between">
-            <span class="text-[11px] text-slate-400">Confirmation emailed to admin.</span>
-            <button type="button" onclick="closeProCheckoutModal()" class="px-3 py-1.5 rounded-lg bg-brand-500 text-black font-bold text-[11px] cursor-pointer">
-              Complete
+          <div class="pt-1 flex items-center justify-between">
+            <a href="${mailtoLink}" class="px-3 py-1.5 rounded-lg bg-brand-500 text-black font-bold text-[11px] flex items-center space-x-1.5">
+              <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+              <span>Email Us to Start Pro</span>
+            </a>
+            <button type="button" onclick="closeProCheckoutModal()" class="px-3 py-1.5 rounded-lg bg-dark-800 border border-dark-700 text-slate-300 font-semibold text-[11px] cursor-pointer">
+              Close
             </button>
           </div>
         `;
         lucide.createIcons();
       }
 
-      // Save lead locally as offline/fallback protection
+      // Save the attempt locally so it isn't lost if the visitor closes the tab
+      // instead of emailing.
       try {
         const stored = JSON.parse(localStorage.getItem('joltrin_pro_orders') || '[]');
-        stored.push({ workspace, email, cycle, sessionId: mockSessionId, date: new Date().toISOString() });
+        stored.push({ workspace, email, cycle, date: new Date().toISOString(), backendReached: false });
         localStorage.setItem('joltrin_pro_orders', JSON.stringify(stored));
       } catch (_) {}
     }
