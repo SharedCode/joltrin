@@ -161,7 +161,7 @@ export const TopologyGraph: React.FC<TopologyGraphProps> = ({
       {/* Layer Labels */}
       <div className="absolute top-4 left-6 z-10 flex items-center space-x-6 text-[10px] font-mono uppercase tracking-wider text-slate-500 pointer-events-none">
         <span className="flex items-center space-x-1.5"><Activity className="w-3.5 h-3.5 text-blue-400" /><span>1. Ingestion Tier</span></span>
-        <span className="flex items-center space-x-1.5"><Sparkles className="w-3.5 h-3.5 text-brand-400" /><span>2. SOP Unified Engine</span></span>
+        <span className="flex items-center space-x-1.5"><Sparkles className="w-3.5 h-3.5 text-brand-400" /><span>2. Joltrin Unified Engine</span></span>
         <span className="flex items-center space-x-1.5"><Cpu className="w-3.5 h-3.5 text-accent-cyan" /><span>3. Swarm Compute</span></span>
         <span className="flex items-center space-x-1.5"><Database className="w-3.5 h-3.5 text-accent-violet" /><span>4. B-Tree Shards</span></span>
       </div>

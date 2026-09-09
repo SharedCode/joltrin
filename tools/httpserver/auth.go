@@ -416,6 +416,9 @@ func currentTokenFacade() TokenFacade {
 	tokenFacadeOnce.Do(func() {
 		tokenFacade = NewSessionStore(sessionTTL())
 	})
+	if tokenFacade == nil {
+		tokenFacade = NewSessionStore(sessionTTL())
+	}
 	// Allow TTL to be updated if config changes, without resetting the whole store.
 	if s, ok := tokenFacade.(*SessionStore); ok && s.ttl != sessionTTL() {
 		func() {

@@ -10,6 +10,7 @@ import {
   Flame, 
   Briefcase, 
   GitCompare,
+  Building2,
 } from 'lucide-react';
 import { GithubIcon } from './GithubIcon';
 import { sounds } from '../engine/SoundEffects';
@@ -19,6 +20,7 @@ interface HeaderProps {
   onSelectMode: (mode: ViewMode) => void;
   onOpenCopilot: () => void;
   onOpenCompare: () => void;
+  onOpenEnterprise: (tier?: 'pro' | 'enterprise') => void;
   reliabilityScore: number;
 }
 
@@ -27,6 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectMode,
   onOpenCopilot,
   onOpenCompare,
+  onOpenEnterprise,
   reliabilityScore,
 }) => {
   const [isMuted, setIsMuted] = useState(!sounds.isEnabled());
@@ -126,10 +129,28 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <span>🔌 Barrier</span>
           </a>
+
+          <button
+            onClick={() => onOpenEnterprise('enterprise')}
+            className="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 text-brand-400 hover:text-brand-300 transition"
+            title="Commercial Editions & Enterprise Inquiries"
+          >
+            <span>🏢 Enterprise</span>
+          </button>
         </div>
 
         {/* Action Controls & External Links */}
         <div className="flex items-center space-x-2.5">
+          
+          {/* Enterprise Inquiry Trigger */}
+          <button
+            onClick={() => onOpenEnterprise('enterprise')}
+            className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-dark-900 hover:bg-dark-850 text-brand-400 border border-brand-500/30 text-xs font-semibold shadow-sm transition"
+            title="Deploy Joltrin in Production"
+          >
+            <Building2 className="w-3.5 h-3.5" />
+            <span>Enterprise</span>
+          </button>
           
           {/* Reliability Score Live Capsule */}
           <div className="hidden lg:flex items-center space-x-2 bg-dark-900 px-3 py-1.5 rounded-lg border border-dark-800 font-mono text-xs">

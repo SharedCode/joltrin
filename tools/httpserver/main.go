@@ -428,6 +428,14 @@ func main() {
 	http.HandleFunc("/api/auth/oidc/callback", handleOIDCCallback)
 	http.HandleFunc("/api/auth/oidc/token", handleOIDCToken)
 
+	// Billing & Commercial Governance Endpoints
+	http.HandleFunc("/api/billing/plan", withAuth(handleGetPlan))
+	http.HandleFunc("/api/billing/checkout", withAuth(handleCreateCheckoutSession))
+	http.HandleFunc("/api/billing/portal", withAuth(handleCreatePortalSession))
+	http.HandleFunc("/api/billing/checkout/simulate", handleSimulateCheckout)
+	http.HandleFunc("/api/billing/enterprise-contact", handleSubmitEnterpriseInquiry)
+	http.HandleFunc("/api/billing/webhook", handleBillingWebhook)
+
 	// Initialize Agents only if we have configured databases
 	// In Setup Mode (no databases), agents shouldn't initialize as the target environment isn't set yet.
 	if len(config.Databases) > 0 || config.SystemDB != nil {

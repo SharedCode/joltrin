@@ -87,7 +87,7 @@ export const CopilotDrawer: React.FC<CopilotDrawerProps> = ({ isOpen, onClose })
 
         {/* Footer Note */}
         <div className="pt-2 text-center text-[10px] font-mono text-slate-500">
-          Deterministic architectural explainer based on the open-source SOP engine specification.
+          Deterministic architectural explainer based on the open-source Joltrin engine specification.
         </div>
 
       </div>

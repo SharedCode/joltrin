@@ -25,5 +25,8 @@ func withIsolatedSessionStore(t *testing.T) {
 	t.Cleanup(func() {
 		config = oldConfig
 		tokenFacade = oldFacade
+		if oldFacade == nil {
+			tokenFacadeOnce = sync.Once{}
+		}
 	})
 }

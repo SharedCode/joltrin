@@ -1262,5 +1262,245 @@ async function saveNewKB() {
         showAlert("Error creating Space: " + err.message);
     });
 }
+
+// -----------------------------------------------------------------------------
+// Commercial Governance & Billing Controller
+// -----------------------------------------------------------------------------
+
+let currentPlanData = null;
+
+function showPlanAndBilling() {
+    const modal = document.getElementById('plan-billing-modal');
+    if (!modal) return;
+    modal.style.display = 'block';
+    switchBillingTab('pricing');
+    fetchPlanData();
+}
+
+function closePlanBillingModal() {
+    const modal = document.getElementById('plan-billing-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+function switchBillingTab(tabName) {
+    const tabs = ['pricing', 'entitlements', 'enterprise'];
+    tabs.forEach(t => {
+        const el = document.getElementById('billing-tab-' + t);
+        const btn = document.getElementById('tab-btn-' + t);
+        if (el) el.style.display = (t === tabName) ? 'block' : 'none';
+        if (btn) {
+            if (t === tabName) {
+                btn.style.background = 'var(--accent)';
+                btn.style.color = '#05101e';
+                btn.style.borderColor = 'transparent';
+            } else {
+                btn.style.background = 'transparent';
+                btn.style.color = 'var(--text-muted)';
+                btn.style.borderColor = 'var(--border-color)';
+            }
+        }
+    });
+}
+
+async function fetchPlanData() {
+    try {
+        const resp = await apiCall('/api/billing/plan', 'GET');
+        if (!resp) return;
+        currentPlanData = resp;
+        const tier = (resp.current_tier || 'core').toUpperCase();
+        
+        // Update pills
+        const headerPill = document.getElementById('billing-header-tier-pill');
+        if (headerPill) {
+            headerPill.textContent = tier;
+            if (tier === 'PRO') {
+                headerPill.style.background = 'rgba(79, 140, 255, 0.25)';
+                headerPill.style.color = '#7cb8ff';
+                headerPill.style.borderColor = 'rgba(79, 140, 255, 0.5)';
+            } else if (tier === 'ENTERPRISE') {
+                headerPill.style.background = 'rgba(167, 139, 250, 0.25)';
+                headerPill.style.color = '#c4b5fd';
+                headerPill.style.borderColor = 'rgba(167, 139, 250, 0.5)';
+            }
+        }
+
+        const sidebarBadge = document.getElementById('sidebar-tier-badge');
+        if (sidebarBadge) {
+            sidebarBadge.innerHTML = '<span>⚡ ' + tier + '</span>';
+        }
+
+        // Update Pro Card actions based on current tier
+        const btnUpgrade = document.getElementById('btn-upgrade-pro');
+        const btnManage = document.getElementById('btn-manage-pro');
+        const cardCoreBtn = document.getElementById('card-btn-core');
+
+        if (resp.current_tier === 'pro') {
+            if (btnUpgrade) btnUpgrade.style.display = 'none';
+            if (btnManage) btnManage.style.display = 'block';
+            if (cardCoreBtn) cardCoreBtn.textContent = 'Free Core Baseline';
+        } else if (resp.current_tier === 'enterprise') {
+            if (btnUpgrade) btnUpgrade.style.display = 'none';
+            if (btnManage) btnManage.style.display = 'none';
+        } else {
+            if (btnUpgrade) btnUpgrade.style.display = 'block';
+            if (btnManage) btnManage.style.display = 'none';
+        }
+
+        // Render Entitlements
+        renderEntitlementsTable(resp.capabilities || [], resp.current_tier);
+
+    } catch (e) {
+        console.warn("Failed to fetch plan status:", e);
+    }
+}
+
+function renderEntitlementsTable(caps, currentTier) {
+    const tbody = document.getElementById('billing-entitlements-tbody');
+    if (!tbody) return;
+
+    const allCatalog = [
+        { id: 'core:btree', name: 'Embedded Copy-on-Write B-Tree Engine', tier: 'core' },
+        { id: 'core:wal_2pc', name: 'Write-Ahead Log + Two-Phase Commit ACID Engine', tier: 'core' },
+        { id: 'core:agent_memory', name: 'Checkpointed Durable AI Agent Memory', tier: 'core' },
+        { id: 'core:vector_similarity', name: '128-d Cosine Vector Similarity Index', tier: 'core' },
+        { id: 'core:embedded_mcp', name: 'Embedded Model Context Protocol Server', tier: 'core' },
+        { id: 'core:verify_barrier', name: 'Local Invariant Barrier Certificate Engine', tier: 'core' },
+        { id: 'core:developer_oidc', name: 'Developer GitHub OIDC Authentication', tier: 'core' },
+        { id: 'pro:policy_as_code', name: 'Declarative Policy-as-Code Compiler', tier: 'pro' },
+        { id: 'pro:signed_audit_export', name: 'Cryptographically Signed Audit Export', tier: 'pro' },
+        { id: 'pro:tamper_evident_lineage', name: 'SHA-256 Tamper-Evident Audit Lineage', tier: 'pro' },
+        { id: 'pro:team_workspaces', name: 'Team Workspaces & Resource Quota Controls', tier: 'pro' },
+        { id: 'pro:priority_mcp_gateway', name: 'Priority MCP Gateway & Dynamic Rate Limiting', tier: 'pro' },
+        { id: 'enterprise:sso', name: 'Enterprise SSO (Okta & Microsoft Entra ID)', tier: 'enterprise' },
+        { id: 'enterprise:multi_tenant_rbac', name: 'Multi-Tenant RBAC & Logical Tenant Isolation', tier: 'enterprise' },
+        { id: 'enterprise:siem_streaming_audit', name: 'Real-Time SIEM / Kafka Audit Streaming', tier: 'enterprise' },
+        { id: 'enterprise:fine_grained_verification', name: 'Fine-Grained Barrier Invariant Enforcement', tier: 'enterprise' },
+        { id: 'enterprise:custom_invariants', name: 'Custom Invariant Safety Engine', tier: 'enterprise' }
+    ];
+
+    tbody.innerHTML = '';
+    allCatalog.forEach(item => {
+        const isLicensed = caps.includes(item.id);
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid var(--border-color)';
+        
+        let statusBadge = isLicensed
+            ? '<span style="color:#48bb78; font-weight:700; display:inline-flex; align-items:center; gap:4px;">✓ Licensed</span>'
+            : '<span style="color:var(--text-muted); opacity:0.7;">Requires ' + item.tier.toUpperCase() + '</span>';
+
+        tr.innerHTML = `
+            <td style="padding: 10px 14px;"><strong>${item.name}</strong><br><span style="font-family:monospace; font-size:0.75rem; color:var(--text-muted);">${item.id}</span></td>
+            <td style="padding: 10px 14px;"><span style="text-transform:uppercase; font-size:0.75rem; font-weight:700; color:var(--accent);">${item.tier}</span></td>
+            <td style="padding: 10px 14px; text-align: right;">${statusBadge}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+async function initiateUpgrade(targetTier) {
+    const btn = document.getElementById('btn-upgrade-' + targetTier);
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Redirecting to Stripe...';
+    }
+
+    try {
+        const resp = await apiCall('/api/billing/checkout', 'POST', {
+            tier: targetTier,
+            tenant_id: 'default'
+        });
+
+        if (resp && resp.checkout_url) {
+            window.location.assign(resp.checkout_url);
+        } else {
+            showAlert("Unable to initialize Stripe checkout session.");
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '⚡ Upgrade to Pro (Stripe Checkout)';
+            }
+        }
+    } catch (err) {
+        showAlert("Checkout initiation failed: " + (err.message || err));
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = '⚡ Upgrade to Pro (Stripe Checkout)';
+        }
+    }
+}
+
+async function openCustomerPortal() {
+    try {
+        const resp = await apiCall('/api/billing/portal', 'POST', {
+            return_url: window.location.href
+        });
+        if (resp && resp.portal_url) {
+            window.location.assign(resp.portal_url);
+        } else {
+            showAlert("Could not generate Stripe Customer Portal link.");
+        }
+    } catch (e) {
+        showAlert("Portal error: " + (e.message || e));
+    }
+}
+
+async function submitEnterpriseInquiry(e) {
+    e.preventDefault();
+    const btn = document.getElementById('ent-submit-btn');
+    const feedback = document.getElementById('ent-feedback');
+    if (btn) btn.disabled = true;
+    if (feedback) {
+        feedback.textContent = 'Submitting...';
+        feedback.style.color = 'var(--text-muted)';
+    }
+
+    const payload = {
+        name: document.getElementById('ent-name').value.trim(),
+        email: document.getElementById('ent-email').value.trim(),
+        company: document.getElementById('ent-company').value.trim(),
+        team_size: document.getElementById('ent-team-size').value,
+        use_cases: document.getElementById('ent-usecases').value.trim()
+    };
+
+    try {
+        const resp = await apiCall('/api/billing/enterprise-contact', 'POST', payload);
+        if (resp && resp.status === 'ok') {
+            if (feedback) {
+                feedback.textContent = '✓ Request submitted! Our enterprise team will contact you shortly.';
+                feedback.style.color = '#48bb78';
+            }
+            document.getElementById('enterprise-inquiry-form').reset();
+        } else {
+            throw new Error(resp.error || 'Failed to submit request');
+        }
+    } catch (err) {
+        if (feedback) {
+            feedback.textContent = 'Error: ' + err.message;
+            feedback.style.color = 'var(--danger)';
+        }
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
+
+// Check checkout redirect parameters on initial page load
+(function checkCheckoutQueryParam() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') === 'success') {
+        const tier = (params.get('tier') || 'Pro').toUpperCase();
+        setTimeout(() => {
+            showPlanAndBilling();
+            const alertBox = document.getElementById('billing-alert-box');
+            if (alertBox) {
+                alertBox.style.display = 'block';
+                alertBox.style.background = 'rgba(72, 187, 120, 0.2)';
+                alertBox.style.border = '1px solid #48bb78';
+                alertBox.style.color = '#48bb78';
+                alertBox.textContent = `🎉 Congratulations! Your deployment has been upgraded to ${tier} Governance with all commercial capabilities activated.`;
+            }
+        }, 500);
+    }
+    // Update sidebar tier on initial boot
+    setTimeout(fetchPlanData, 200);
+})();
 </script>
 {{end}}

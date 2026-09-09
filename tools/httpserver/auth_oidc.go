@@ -73,6 +73,11 @@ func getOIDCRegistry() (*governance.IdentityProviderRegistry, *governance.Featur
 	return oidcRegistry, serverFeatureGate
 }
 
+func getServerFeatureGate() *governance.FeatureGate {
+	_, gate := getOIDCRegistry()
+	return gate
+}
+
 type ProviderResponse struct {
 	ID           string          `json:"id"`
 	Type         string          `json:"type"`

@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * Staff QA & Automation Engineering - Playwright Configuration
- * Scalable Objects Persistence / Joltrin Web Platform & Docs Suite
+ * Joltrin Web Platform & Docs Suite
  *
  * Configured for multi-engine resilience (Chromium, Firefox, WebKit, Mobile viewports),
  * automatic failure diagnostics capture (traces, videos, screenshots), and CI-tailored timeouts.

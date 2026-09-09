@@ -13,7 +13,8 @@
 </p>
 
 [![Discussions](https://img.shields.io/github/discussions/SharedCode/joltrin)](https://github.com/SharedCode/joltrin/discussions)
-[![CI](https://github.com/SharedCode/joltrin/actions/workflows/go.yml/badge.svg?branch=master)](https://github.com/SharedCode/joltrin/actions/workflows/go.yml)
+[![CI](https://github.com/SharedCode/joltrin/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/SharedCode/joltrin/actions/workflows/ci.yml)
+[![Go Tests](https://github.com/SharedCode/joltrin/actions/workflows/go.yml/badge.svg?event=push&branch=master)](https://github.com/SharedCode/joltrin/actions/workflows/go.yml)
 [![Release](https://img.shields.io/github/v/release/SharedCode/joltrin)](https://github.com/SharedCode/joltrin/releases)
 [![codecov](https://codecov.io/gh/SharedCode/joltrin/branch/master/graph/badge.svg)](https://app.codecov.io/github/SharedCode/joltrin)
 [![Go Reference](https://pkg.go.dev/badge/github.com/sharedcode/joltrin.svg)](https://pkg.go.dev/github.com/sharedcode/joltrin)
@@ -478,9 +479,9 @@ For deep architectural documentation on package boundaries and code separation, 
 
 | Tier / Edition | What It Provides | Distribution & Licensing | Implementation Status |
 | :--- | :--- | :--- | :--- |
-| **Free / Open-Source Core** | • Embedded copy-on-write B-Tree storage engine<br>• WAL + 2PC strict ACID transactions<br>• Reed-Solomon erasure coding and bitrot healing<br>• Durable AI agent memory & checkpointed buffers<br>• In-memory 128-d cosine vector similarity<br>• Embedded MCP server (`cmd/sop-mcp-server`)<br>• Embedded A2A agent runtime (`cmd/sop-a2a-agent`)<br>• Local runbook verification barrier (`ai/verify`)<br>• Developer GitHub OIDC authentication | Embedded Library & CLI<br>**Permissive MIT License** | **Available Today** |
-| **Pro Governance** | • Policy-as-Code declarative runtime compiler<br>• Tamper-evident SHA-256 audit lineage & verification<br>• Signed cryptographic audit export<br>• Team-level workspaces and quota management<br>• Priority MCP gateways and traffic shaping | Team Commercial Add-on | **Foundation Implemented** ([`governance/`](governance/)) |
-| **Enterprise Governance** | • Enterprise SSO: **Okta** & **Microsoft Entra ID**<br>• Multi-tenant RBAC & tenant isolation boundaries<br>• Enterprise audit streaming (real-time SIEM / Kafka)<br>• Fine-grained verification rules & custom safety invariants<br>• Custom invariant enforcement engine<br>• Enterprise compliance guarantees and SLA | Self-Hosted Enterprise Commercial | **Foundation Implemented** ([`governance/`](governance/)) |
+| **Free / Open-Source Core** | • Embedded copy-on-write B-Tree storage engine<br>• WAL + 2PC strict ACID transactions<br>• Reed-Solomon erasure coding and bitrot healing<br>• Durable AI agent memory & checkpointed buffers<br>• In-memory 128-d cosine vector similarity<br>• Embedded MCP server (`cmd/sop-mcp-server`)<br>• Embedded A2A agent runtime (`cmd/sop-a2a-agent`)<br>• Local runbook verification barrier (`ai/verify`)<br>• Developer GitHub OIDC authentication | Embedded Library & CLI<br>**Permissive MIT License** ($0) | **Available Today** |
+| **Pro Governance** | • Policy-as-Code declarative runtime compiler<br>• Tamper-evident SHA-256 audit lineage & verification<br>• Signed cryptographic audit export<br>• Team-level workspaces and quota management<br>• Priority MCP gateways and traffic shaping<br>• Stripe Checkout, Customer Portal & Webhook Engine | Team Commercial Add-on<br>($49/team/mo) | **Available Today** ([`governance/`](governance/)) |
+| **Enterprise Governance** | • Enterprise SSO: **Okta** & **Microsoft Entra ID**<br>• Multi-tenant RBAC & tenant isolation boundaries<br>• Enterprise audit streaming (real-time SIEM / Kafka)<br>• Fine-grained verification rules & custom safety invariants<br>• Custom invariant enforcement engine<br>• Enterprise compliance guarantees and SLA | Self-Hosted Enterprise Commercial<br>(Custom / Annual) | **Foundation Implemented** ([`governance/`](governance/)) |
 | **Hosted Cloud** | • Managed Joltrin instances (zero-ops)<br>• Cloud-hosted MCP hub & multi-agent routing<br>• Multi-region database replication<br>• Managed agent coordination network<br>• Automated off-site snapshots & backup verification | Managed Cloud SaaS | **Planned** |
 
 ### Open-Source Guarantees

@@ -198,6 +198,13 @@ func (fg *FeatureGate) Require(cap Capability) error {
 	return nil
 }
 
+// SetTier dynamically updates the active tier on this gate.
+func (fg *FeatureGate) SetTier(tier Tier) {
+	fg.mu.Lock()
+	defer fg.mu.Unlock()
+	fg.tier = tier
+}
+
 // SetOverride dynamically toggles a capability override.
 func (fg *FeatureGate) SetOverride(cap Capability, enabled bool) {
 	fg.mu.Lock()

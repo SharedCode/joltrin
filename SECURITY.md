@@ -26,4 +26,4 @@ We aim to acknowledge reports within a few business days. Timelines for a fix de
 
 ## Scope
 
-This policy covers the Go core engine, the Python, C#, Java, and Rust bindings, the WebAssembly browser demo, and the standalone `tools/httpserver` Data Manager. It does not cover third-party services you choose to run alongside SOP (Redis, cloud storage, etc.), which have their own security policies.
+This policy covers the Go core engine, the Python, C#, Java, and Rust bindings, the WebAssembly browser demo, and the standalone `tools/httpserver` Data Manager. It does not cover third-party services you choose to run alongside Joltrin (Redis, cloud storage, etc.), which have their own security policies.
