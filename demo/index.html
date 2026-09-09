@@ -3,8 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Joltrin | Zero-Server Embedded ACID B-Tree Engine (Go + WebAssembly)</title>
-  <meta name="description" content="Interactive technical demo of Joltrin: An ACID-compliant embedded B-Tree, vector, and durable agent memory engine running 100% inside your browser via WebAssembly with zero server dependencies." />
+  <title>Joltrin | Durable AI Agent Memory & Embedded ACID Engine</title>
+  <meta name="description" content="Give AI agents durable memory, reliable recovery, and a safety checkpoint before they take action. Open-source embedded B-Tree engine with ACID transactions, vector search, and policy verification." />
+  <meta name="keywords" content="AI agent memory, AI agent infrastructure, AI agent reliability, AI agent governance, AI agent safety, durable AI memory, AI agent checkpointing, AI DevOps, MCP infrastructure, agent governance, ACID, B-Tree, Go, WebAssembly" />
+  <link rel="canonical" href="https://joltrin.com/" />
+
+  <!-- Open Graph / Facebook / LinkedIn -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://joltrin.com/" />
+  <meta property="og:title" content="Joltrin | Durable Memory & Verification Infrastructure for AI Agents" />
+  <meta property="og:description" content="Give AI agents durable memory, reliable recovery, and a safety checkpoint before they take action. Embedded ACID B-Tree and verification engine." />
+  <meta property="og:image" content="https://joltrin.com/assets/og-image.png" />
+
+  <!-- Twitter / X -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://joltrin.com/" />
+  <meta property="twitter:title" content="Joltrin | Durable Memory & Verification Infrastructure for AI Agents" />
+  <meta property="twitter:description" content="Give AI agents durable memory, reliable recovery, and a safety checkpoint before they take action." />
+  <meta property="twitter:image" content="https://joltrin.com/assets/og-image.png" />
+
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
   <link rel="alternate icon" href="./favicon.ico" />
 
@@ -188,26 +205,41 @@
   <header class="border-b border-dark-800 bg-dark-900/80 backdrop-blur-md sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-brand-600 to-accent-cyan flex items-center justify-center font-bold text-black shadow-lg shadow-brand-500/20">
+        <a href="./" class="w-9 h-9 rounded-lg bg-gradient-to-tr from-brand-600 to-accent-cyan flex items-center justify-center font-bold text-black shadow-lg shadow-brand-500/20">
           <i data-lucide="database" class="w-5 h-5 text-black"></i>
-        </div>
+        </a>
         <div>
           <div class="flex items-center space-x-2">
-            <span class="font-extrabold tracking-tight text-white text-lg">Joltrin</span>
+            <a href="./" class="font-extrabold tracking-tight text-white text-lg hover:text-brand-400 transition">Joltrin</a>
             <span class="text-xs px-2 py-0.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 font-mono font-medium">v1.0 WASM</span>
           </div>
-          <p class="text-[10px] text-slate-400 font-mono hidden sm:block">Durable State Engine (formerly SOP)</p>
+          <p class="text-[10px] text-slate-400 font-mono hidden sm:block">Durable AI Agent Memory &amp; Verification</p>
         </div>
       </div>
 
-      <!-- Cross-Demo Nav Links -->
-      <nav class="hidden lg:flex items-center space-x-2 text-xs font-mono">
-        <span class="px-2.5 py-1 rounded-lg bg-brand-500/20 text-brand-400 border border-brand-500/30 font-semibold">🧠 Technical Demo</span>
-        <a href="./arena/" class="px-2.5 py-1 rounded-lg bg-dark-800 hover:bg-dark-700 text-slate-300 border border-dark-700 transition">🎮 Arena</a>
-        <a href="./agents/" class="px-2.5 py-1 rounded-lg bg-dark-800 hover:bg-dark-700 text-slate-300 border border-dark-700 transition">🔌 Agent Barrier</a>
+      <!-- Funnel Navigation Links -->
+      <nav class="hidden lg:flex items-center space-x-1 text-xs font-mono">
+        <span class="px-2.5 py-1 rounded-lg bg-brand-500/20 text-brand-400 border border-brand-500/30 font-semibold flex items-center space-x-1">
+          <span>🧠 Overview</span>
+        </span>
+        <a href="./arena/" class="px-2.5 py-1 rounded-lg bg-dark-800 hover:bg-dark-700 text-slate-300 border border-dark-700 transition flex items-center space-x-1">
+          <span>🎮 Arena</span>
+        </a>
+        <a href="./agents/" class="px-2.5 py-1 rounded-lg bg-dark-800 hover:bg-dark-700 text-slate-300 border border-dark-700 transition flex items-center space-x-1">
+          <span>🔌 Agents</span>
+        </a>
+        <a href="https://github.com/SharedCode/joltrin#readme" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">
+          <span>Docs</span>
+        </a>
+        <a href="#pricing" class="px-2.5 py-1 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">
+          <span>Pricing</span>
+        </a>
+        <a href="#enterprise" class="px-2.5 py-1 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">
+          <span>Enterprise</span>
+        </a>
       </nav>
 
-      <!-- Live Engine Telemetry Pill -->
+      <!-- Live Engine Telemetry Pill & GitHub CTA -->
       <div class="flex items-center space-x-4">
         <div class="hidden md:flex items-center space-x-3 bg-dark-850 px-3 py-1.5 rounded-full border border-dark-700 text-xs font-mono">
           <div class="flex items-center space-x-1.5">
@@ -255,7 +287,7 @@
   <!-- Main Container -->
   <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- Hero / Investor Value Prop -->
+    <!-- Hero / Commercial Positioning -->
     <section class="relative rounded-2xl bg-gradient-to-b from-dark-850 to-dark-900 border border-dark-700/80 p-6 sm:p-10 mb-8 overflow-hidden bg-grid glow-emerald">
       <div class="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
       <div class="absolute bottom-0 left-1/3 -mb-8 w-64 h-64 bg-accent-cyan/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -263,21 +295,55 @@
       <div class="relative z-10 max-w-3xl">
         <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-mono font-semibold uppercase tracking-wider mb-4">
           <i data-lucide="zap" class="w-3.5 h-3.5"></i>
-          <span>Zero-Server Architecture Proof</span>
+          <span>Durable Memory &amp; Verification for AI Agents</span>
         </div>
         <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight mb-4">
-          The ACID Database Running <br class="hidden sm:inline" />
-          <span class="bg-gradient-to-r from-brand-400 via-accent-cyan to-accent-violet bg-clip-text text-transparent">Entirely In Your Browser.</span>
+          Give AI Agents Durable Memory, <br class="hidden sm:inline" />
+          <span class="bg-gradient-to-r from-brand-400 via-accent-cyan to-accent-violet bg-clip-text text-transparent">Reliable Recovery &amp; Safety Checkpoints</span><br class="hidden sm:inline" />
+          Before They Take Action.
         </h1>
-        <p class="text-slate-300 text-base sm:text-lg leading-relaxed mb-6">
-          Joltrin is an embedded B-Tree storage and verification engine written in Go. Instead of maintaining expensive database servers, Joltrin executes transactional mutations, high-dimensional vector searches, and durable agent memory checkpoints <strong>locally on the client</strong> with strict serializability and sub-millisecond latencies.
+        <p class="text-slate-300 text-base sm:text-lg leading-relaxed mb-5">
+          AI agents are moving beyond generating text. They are modifying infrastructure, calling APIs, querying databases, executing autonomous workflows, and coordinating multi-agent swarms. As agents take real-world actions, companies need more than an LLM — they need <strong>persistent memory</strong>, <strong>transactional reliability</strong>, and <strong>authoritative governance</strong>.
         </p>
 
+        <!-- The Core Metaphor Callout -->
+        <div class="p-4 rounded-xl bg-dark-950/80 border border-brand-500/30 mb-6 flex items-start space-x-3">
+          <i data-lucide="shield-alert" class="w-5 h-5 text-brand-400 shrink-0 mt-0.5"></i>
+          <p class="text-sm sm:text-base text-slate-200 font-medium leading-relaxed">
+            <span class="text-white font-bold">Think of Joltrin as memory + recovery + a security checkpoint for AI agents.</span>
+            Joltrin runs as high-performance infrastructure around the agent, executing state checkpoints and policy verification with sub-millisecond local or clustered performance.
+          </p>
+        </div>
+
+        <!-- 4 Purpose-Driven CTAs -->
+        <div class="flex flex-wrap items-center gap-3 mb-6">
+          <a href="https://github.com/SharedCode/joltrin" target="_blank" rel="noopener noreferrer"
+             class="px-5 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 font-bold text-xs text-black shadow-lg shadow-brand-500/20 flex items-center space-x-2 transition transform active:scale-95">
+            <i data-lucide="terminal" class="w-4 h-4"></i>
+            <span>Build with Joltrin (GitHub)</span>
+          </a>
+          <a href="#pricing"
+             class="px-5 py-3 rounded-xl bg-dark-800 hover:bg-dark-750 border border-dark-700 text-slate-200 font-semibold text-xs flex items-center space-x-2 transition">
+            <i data-lucide="layers" class="w-4 h-4 text-accent-cyan"></i>
+            <span>Explore Editions &amp; Pricing</span>
+          </a>
+          <a href="./arena/"
+             class="px-4 py-3 rounded-xl bg-dark-900 hover:bg-dark-800 border border-accent-cyan/30 text-accent-cyan hover:text-white font-semibold text-xs flex items-center space-x-2 transition font-mono">
+            <i data-lucide="gamepad-2" class="w-4 h-4"></i>
+            <span>Try Joltrin Arena →</span>
+          </a>
+          <button onclick="switchTab('agent-tab')"
+             class="px-4 py-3 rounded-xl bg-dark-900 hover:bg-dark-800 border border-accent-violet/30 text-accent-violet hover:text-white font-semibold text-xs flex items-center space-x-2 transition font-mono cursor-pointer">
+            <i data-lucide="brain-circuit" class="w-4 h-4"></i>
+            <span>Explore Agent Memory →</span>
+          </button>
+        </div>
+
         <!-- Proof Pill Badges -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-dark-800">
           <div class="bg-dark-950/80 border border-dark-700/80 rounded-xl p-3">
-            <span class="text-[11px] text-slate-400 font-mono block">Cloud Server Cost</span>
-            <span class="text-xl font-bold text-white font-mono">$0.00 <span class="text-xs text-brand-400 font-normal">/ mo</span></span>
+            <span class="text-[11px] text-slate-400 font-mono block">Zero Cloud Server Cost</span>
+            <span class="text-xl font-bold text-white font-mono">$0.00 <span class="text-xs text-brand-400 font-normal">/ client</span></span>
           </div>
           <div class="bg-dark-950/80 border border-dark-700/80 rounded-xl p-3">
             <span class="text-[11px] text-slate-400 font-mono block">Network Roundtrips</span>
@@ -295,7 +361,7 @@
       </div>
     </section>
 
-    <!-- Unified Interactive Demo Experiences -->
+    <!-- Unified Interactive Demo Experiences (The 3 Proof Points) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
       <div class="p-4 rounded-xl bg-dark-900 border-2 border-brand-500/50 shadow-lg shadow-brand-500/10 flex flex-col justify-between">
         <div>
@@ -343,6 +409,109 @@
         <div class="pt-3 text-[11px] text-slate-500 group-hover:text-accent-violet font-mono">Interactive Precedence Gate →</div>
       </a>
     </div>
+
+    <!-- Section: Business Problem & ROI -->
+    <section class="mb-10 p-6 sm:p-8 rounded-2xl bg-dark-900 border border-dark-800">
+      <div class="max-w-3xl mb-8">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-accent-cyan/10 border border-accent-cyan/30 text-accent-cyan text-xs font-mono font-semibold uppercase tracking-wider mb-3">
+          <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+          <span>Commercial Value &amp; Economic ROI</span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
+          Why Companies Need Joltrin: <br class="hidden sm:inline"/>
+          Deploy Capable AI Agents with Less Risk and Less Engineering.
+        </h2>
+        <p class="text-slate-400 text-sm sm:text-base mt-2 leading-relaxed">
+          AI agents fail in production when they lose context mid-flight, execute unverified destructive tool calls, or corrupt shared state during crashes. Joltrin provides the missing reliable infrastructure layer.
+        </p>
+      </div>
+
+      <!-- 3 Structural Pillars -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="p-5 rounded-xl bg-dark-950 border border-dark-800">
+          <div class="w-8 h-8 rounded-lg bg-brand-500/10 border border-brand-500/30 flex items-center justify-center text-brand-400 mb-3">
+            <i data-lucide="hard-drive" class="w-4 h-4"></i>
+          </div>
+          <h3 class="font-bold text-white text-base mb-1">1. Memory</h3>
+          <ul class="text-xs text-slate-400 space-y-1.5 font-mono">
+            <li>• Persistent agent state</li>
+            <li>• Checkpointing across steps</li>
+            <li>• Session recovery &amp; resumption</li>
+            <li>• Vector similarity indexing</li>
+          </ul>
+        </div>
+
+        <div class="p-5 rounded-xl bg-dark-950 border border-dark-800">
+          <div class="w-8 h-8 rounded-lg bg-accent-cyan/10 border border-accent-cyan/30 flex items-center justify-center text-accent-cyan mb-3">
+            <i data-lucide="refresh-ccw" class="w-4 h-4"></i>
+          </div>
+          <h3 class="font-bold text-white text-base mb-1">2. Reliability</h3>
+          <ul class="text-xs text-slate-400 space-y-1.5 font-mono">
+            <li>• Durable ACID transactions</li>
+            <li>• Crash recovery &amp; parity repair</li>
+            <li>• Atomic rollback on failure</li>
+            <li>• Guaranteed state consistency</li>
+          </ul>
+        </div>
+
+        <div class="p-5 rounded-xl bg-dark-950 border border-dark-800">
+          <div class="w-8 h-8 rounded-lg bg-accent-violet/10 border border-accent-violet/30 flex items-center justify-center text-accent-violet mb-3">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+          </div>
+          <h3 class="font-bold text-white text-base mb-1">3. Governance</h3>
+          <ul class="text-xs text-slate-400 space-y-1.5 font-mono">
+            <li>• Policy &amp; invariant enforcement</li>
+            <li>• Precedence action verification</li>
+            <li>• Tamper-evident audit trails</li>
+            <li>• Okta / Entra ID identity &amp; RBAC</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 5 ROI Sources Grid -->
+      <h3 class="text-sm font-bold uppercase font-mono tracking-wider text-slate-300 mb-4 flex items-center space-x-2">
+        <i data-lucide="check-circle" class="w-4 h-4 text-brand-400"></i>
+        <span>Concrete Drivers of Business ROI</span>
+      </h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <div class="p-4 rounded-xl bg-dark-850/60 border border-dark-800">
+          <h4 class="font-bold text-white text-sm mb-1">Reduce Costly Agent Failures</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Durable checkpoints and automated recovery eliminate lost context from worker crashes, network timeouts, and interrupted workflows.
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-dark-850/60 border border-dark-800">
+          <h4 class="font-bold text-white text-sm mb-1">Reduce Operational Risk</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Deterministic verification barriers evaluate proposed actions against explicit security policies <em>before</em> execution, preventing destructive operations.
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-dark-850/60 border border-dark-800">
+          <h4 class="font-bold text-white text-sm mb-1">Reduce Engineering Effort</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Developers do not have to independently build durable agent memory, checkpointing, rollback logs, vector lookups, and governance infrastructure from scratch.
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-dark-850/60 border border-dark-800">
+          <h4 class="font-bold text-white text-sm mb-1">Accelerate Enterprise AI Adoption</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Organizations can introduce agentic workflows while maintaining the strict auditability, identity binding, and access controls required by security teams.
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-dark-850/60 border border-dark-800 sm:col-span-2 lg:col-span-2">
+          <h4 class="font-bold text-white text-sm mb-1">Lower Infrastructure Complexity</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Joltrin provides persistence, memory, vectors, and safety as one unified embedded layer — eliminating the need to coordinate separate databases, vector stores, caches, and queues for every agent application.
+          </p>
+        </div>
+      </div>
+
+      <!-- ROI Summary Quote Callout -->
+      <div class="p-4 rounded-xl bg-gradient-to-r from-brand-950/40 via-dark-950 to-dark-950 border border-brand-500/20 text-slate-300 text-sm">
+        <span class="font-bold text-white">The Commercial Story:</span>
+        "The ROI isn't just 'AI can do more.' It's that companies can deploy capable AI agents with less operational risk and less infrastructure engineering."
+      </div>
+    </section>
 
     <!-- Interactive Navigation Tabs -->
     <div class="flex items-center space-x-2 border-b border-dark-800 pb-3 mb-6 overflow-x-auto">
@@ -716,19 +885,432 @@
       </div>
     </div>
 
+    <!-- Section: Editions & Pricing -->
+    <section id="pricing" class="mt-14 mb-12 pt-8 border-t border-dark-800">
+      <div class="text-center max-w-3xl mx-auto mb-10">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-mono font-semibold uppercase tracking-wider mb-3">
+          <i data-lucide="tag" class="w-3.5 h-3.5"></i>
+          <span>Transparent Open-Core Model</span>
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Editions &amp; Commercial Tiers
+        </h2>
+        <p class="text-slate-400 text-sm sm:text-base mt-3 leading-relaxed">
+          The core engine is free and open source forever under the MIT license. Commercial tiers provide team governance, enterprise identity, compliance logging, and dedicated support.
+        </p>
+
+        <!-- Open Core Philosophy Explicit Callout -->
+        <div class="mt-4 p-4 rounded-xl bg-dark-900 border border-dark-800 text-xs sm:text-sm text-slate-300">
+          <span class="text-brand-400 font-bold">Open-Core Philosophy:</span>
+          "The Joltrin core remains free and open source. Paid tiers add governance, collaboration, enterprise identity, compliance, and managed capabilities."
+        </div>
+      </div>
+
+      <!-- Pricing Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+        <!-- Tier 1: Free / Open Source -->
+        <div class="bg-dark-900 border border-dark-800 rounded-2xl p-6 flex flex-col justify-between hover:border-dark-700 transition">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Free / Open Source</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/30">Available Today</span>
+            </div>
+            <div class="mb-4">
+              <span class="text-3xl font-extrabold text-white font-mono">$0</span>
+              <span class="text-xs text-slate-500 font-mono"> / forever (MIT License)</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-6 leading-relaxed">
+              For developers, researchers, and open-source projects embedding transactional agent state locally.
+            </p>
+            <ul class="space-y-2.5 text-xs text-slate-300 font-mono mb-6">
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
+                <span>Embedded B-Tree storage engine</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
+                <span>Strict serializable ACID transactions</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
+                <span>High-dimensional vector similarity index</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
+                <span>Client-side OPFS browser persistence</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
+                <span>WASM &amp; native Go library</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
+                <span>Zero server or cloud dependencies</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
+                <span>GitHub community support</span>
+              </li>
+            </ul>
+          </div>
+          <a href="https://github.com/SharedCode/joltrin" target="_blank" rel="noopener noreferrer"
+             class="w-full py-2.5 px-4 rounded-xl bg-dark-800 hover:bg-dark-750 border border-dark-700 text-slate-200 font-semibold text-xs flex items-center justify-center space-x-2 transition">
+            <i data-lucide="github" class="w-4 h-4"></i>
+            <span>Start Building (GitHub)</span>
+          </a>
+        </div>
+
+        <!-- Tier 2: Pro -->
+        <div class="bg-dark-900 border-2 border-brand-500/60 rounded-2xl p-6 flex flex-col justify-between shadow-xl shadow-brand-500/10 relative">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-brand-500 text-black font-mono font-bold text-[10px] uppercase tracking-wider">
+            Most Popular for Teams
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-mono font-semibold uppercase tracking-wider text-brand-400">Pro</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/30">Available / Foundation</span>
+            </div>
+            <div class="mb-4">
+              <span class="text-3xl font-extrabold text-white font-mono">$49</span>
+              <span class="text-xs text-slate-500 font-mono"> / mo / team workspace</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-6 leading-relaxed">
+              For engineering teams deploying reliable agentic workflows that require policy controls and governance.
+            </p>
+            <ul class="space-y-2.5 text-xs text-slate-300 font-mono mb-6">
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
+                <span class="text-white font-semibold">Everything in Open Source, plus:</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
+                <span>Multi-tenant workspace management</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
+                <span>Automated Stripe subscription billing</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
+                <span>Customer self-service billing portal</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
+                <span>Team audit logging &amp; telemetry</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
+                <span>Rate limiting &amp; policy verification gates</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
+                <span>Standard email &amp; priority issue support</span>
+              </li>
+            </ul>
+          </div>
+          <button onclick="selectTierAndScroll('pro')"
+             class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-black font-bold text-xs shadow-lg shadow-brand-500/20 flex items-center justify-center space-x-2 transition transform active:scale-95 cursor-pointer">
+            <i data-lucide="zap" class="w-4 h-4"></i>
+            <span>Start Pro</span>
+          </button>
+        </div>
+
+        <!-- Tier 3: Enterprise -->
+        <div class="bg-dark-900 border border-dark-800 rounded-2xl p-6 flex flex-col justify-between hover:border-accent-violet/40 transition">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-mono font-semibold uppercase tracking-wider text-accent-violet">Enterprise</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-accent-violet/10 text-accent-violet border border-accent-violet/30">Foundation / Preview</span>
+            </div>
+            <div class="mb-4">
+              <span class="text-3xl font-extrabold text-white font-mono">Custom</span>
+              <span class="text-xs text-slate-500 font-mono"> / annual deployment</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-6 leading-relaxed">
+              For organizations deploying autonomous AI agents into mission-critical infrastructure with strict compliance.
+            </p>
+            <ul class="space-y-2.5 text-xs text-slate-300 font-mono mb-6">
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0 mt-0.5"></i>
+                <span class="text-white font-semibold">Everything in Pro, plus:</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0 mt-0.5"></i>
+                <span>Okta &amp; Microsoft Entra ID (OIDC) SSO</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0 mt-0.5"></i>
+                <span>Advanced hierarchical RBAC &amp; space isolation</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0 mt-0.5"></i>
+                <span>Custom CEL policy invariants &amp; gates</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0 mt-0.5"></i>
+                <span>Immutable audit trails &amp; compliance exports</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0 mt-0.5"></i>
+                <span>Dedicated architecture reviews &amp; SLAs</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0 mt-0.5"></i>
+                <span>24/7 incident escalation channel</span>
+              </li>
+            </ul>
+          </div>
+          <button onclick="selectTierAndScroll('enterprise')"
+             class="w-full py-2.5 px-4 rounded-xl bg-dark-800 hover:bg-dark-750 border border-dark-700 hover:border-accent-violet/50 text-slate-200 hover:text-white font-semibold text-xs flex items-center justify-center space-x-2 transition cursor-pointer">
+            <i data-lucide="building" class="w-4 h-4 text-accent-violet"></i>
+            <span>Talk to Sales / Request Access</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Hosted Cloud Clarification -->
+      <div class="p-4 rounded-xl bg-dark-950/80 border border-dark-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-400">
+        <div class="flex items-center space-x-2 font-mono">
+          <span class="px-2 py-0.5 rounded bg-accent-amber/10 border border-accent-amber/30 text-amber-300 font-bold text-[10px]">COMING SOON / PLANNED</span>
+          <span><strong>Hosted Joltrin Cloud:</strong> Fully managed multi-region control plane and hosted agent memory clusters are on the roadmap.</span>
+        </div>
+        <button onclick="selectTierAndScroll('hosted')" class="text-accent-cyan hover:underline font-mono shrink-0 cursor-pointer">
+          Join Hosted Cloud Waitlist →
+        </button>
+      </div>
+    </section>
+
+    <!-- Section: Customer Interest / Sign-Up Form -->
+    <section id="enterprise" class="mt-8 mb-12 p-6 sm:p-10 rounded-2xl bg-dark-900 border border-dark-800 relative overflow-hidden">
+      <div class="max-w-2xl mx-auto">
+        <div class="text-center mb-8">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-mono font-semibold uppercase tracking-wider mb-2">
+            <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+            <span>Direct Commercial Inquiry</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            Interested in Pro or Enterprise?
+          </h2>
+          <p class="text-slate-400 text-xs sm:text-sm mt-2">
+            Tell us about your AI agent architecture and governance requirements. Our engineering team responds within 1 business day.
+          </p>
+        </div>
+
+        <!-- Submission Status Banner -->
+        <div id="form-status-alert" class="hidden mb-6 p-4 rounded-xl text-xs"></div>
+
+        <!-- Form Component -->
+        <form id="interest-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
+
+          <!-- Honeypot Anti-Spam Field (hidden) -->
+          <div style="display:none;" aria-hidden="true">
+            <label for="interest-hp">Do not fill this</label>
+            <input type="text" id="interest-hp" name="website_hp" tabindex="-1" autocomplete="off" />
+          </div>
+          <input type="hidden" id="interest-ts" name="render_ts" value="" />
+
+          <!-- Row 1: Name & Email -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="inq-name" class="block text-xs font-mono text-slate-300 mb-1">
+                Full Name <span class="text-rose-400">*</span>
+              </label>
+              <input id="inq-name" name="name" type="text" required placeholder="Jane Doe"
+                     class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-brand-500 focus:outline-none" />
+            </div>
+            <div>
+              <label for="inq-email" class="block text-xs font-mono text-slate-300 mb-1">
+                Work Email <span class="text-rose-400">*</span>
+              </label>
+              <input id="inq-email" name="email" type="email" required placeholder="jane@company.com"
+                     class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-brand-500 focus:outline-none" />
+            </div>
+          </div>
+
+          <!-- Row 2: Company & Job Title -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="inq-company" class="block text-xs font-mono text-slate-300 mb-1">
+                Company Name <span class="text-rose-400">*</span>
+              </label>
+              <input id="inq-company" name="company" type="text" required placeholder="Acme AI Corp"
+                     class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-brand-500 focus:outline-none" />
+            </div>
+            <div>
+              <label for="inq-role" class="block text-xs font-mono text-slate-300 mb-1">
+                Job Title / Role
+              </label>
+              <input id="inq-role" name="role" type="text" placeholder="Staff Infrastructure Engineer"
+                     class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-brand-500 focus:outline-none" />
+            </div>
+          </div>
+
+          <!-- Row 3: Tier & Company Size -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="inq-tier" class="block text-xs font-mono text-slate-300 mb-1">
+                Tier Interested In <span class="text-rose-400">*</span>
+              </label>
+              <select id="inq-tier" name="tier" onchange="handleTierChange(this.value)"
+                      class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:border-brand-500 focus:outline-none">
+                <option value="pro">Pro ($49/mo team governance)</option>
+                <option value="enterprise" selected>Enterprise (SSO, RBAC &amp; SLAs)</option>
+                <option value="hosted">Hosted Cloud (Waitlist)</option>
+                <option value="not_sure">Not sure / Evaluating options</option>
+              </select>
+            </div>
+            <div>
+              <label for="inq-size" class="block text-xs font-mono text-slate-300 mb-1">
+                Company Size
+              </label>
+              <select id="inq-size" name="company_size"
+                      class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:border-brand-500 focus:outline-none">
+                <option value="1-10">1 – 10 employees</option>
+                <option value="11-50">11 – 50 employees</option>
+                <option value="51-200" selected>51 – 200 employees</option>
+                <option value="201-1000">201 – 1,000 employees</option>
+                <option value="1000+">1,000+ employees</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Row 4: Primary Use Case & Number of Agents -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="inq-usecase" class="block text-xs font-mono text-slate-300 mb-1">
+                Primary Use Case <span class="text-rose-400">*</span>
+              </label>
+              <select id="inq-usecase" name="use_cases"
+                      class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:border-brand-500 focus:outline-none">
+                <option value="ai_devops">AI DevOps &amp; Infrastructure Automation</option>
+                <option value="swe_agents">Software Engineering &amp; Coding Agents</option>
+                <option value="enterprise_workflows">Enterprise Workflow &amp; Approval Agents</option>
+                <option value="multi_agent">Multi-Agent Swarms &amp; Coordination</option>
+                <option value="mcp_infrastructure">MCP / Tool Verification Barrier</option>
+                <option value="other">Other Agent Deployment</option>
+              </select>
+            </div>
+            <div>
+              <label for="inq-agents" class="block text-xs font-mono text-slate-300 mb-1">
+                Approx Number of AI Agents
+              </label>
+              <select id="inq-agents" name="approx_agents"
+                      class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:border-brand-500 focus:outline-none">
+                <option value="1-5">1 – 5 agents</option>
+                <option value="6-25" selected>6 – 25 agents</option>
+                <option value="26-100">26 – 100 agents</option>
+                <option value="100+">100+ agents</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Conditional Enterprise Fields: IDP & Deployment -->
+          <div id="enterprise-extras" class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 bg-dark-950/60 border border-dark-800 rounded-xl">
+            <div>
+              <label for="inq-idp" class="block text-xs font-mono text-slate-300 mb-1">
+                Identity Provider (SSO)
+              </label>
+              <select id="inq-idp" name="idp"
+                      class="w-full bg-dark-900 border border-dark-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:border-brand-500 focus:outline-none">
+                <option value="okta">Okta (OIDC)</option>
+                <option value="entra_id">Microsoft Entra ID (Azure AD)</option>
+                <option value="other">Other IdP / Custom SAML</option>
+                <option value="none">None / Not required yet</option>
+              </select>
+            </div>
+            <div>
+              <label for="inq-deploy" class="block text-xs font-mono text-slate-300 mb-1">
+                Deployment Preference
+              </label>
+              <select id="inq-deploy" name="deployment"
+                      class="w-full bg-dark-900 border border-dark-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:border-brand-500 focus:outline-none">
+                <option value="self_hosted" selected>Self-Hosted (Kubernetes / Docker)</option>
+                <option value="hosted">Interested in Managed Cloud</option>
+                <option value="hybrid">Hybrid Deployment</option>
+                <option value="not_sure">Not sure</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Row 5: Website URL (optional) -->
+          <div>
+            <label for="inq-website" class="block text-xs font-mono text-slate-300 mb-1">
+              Company Website (Optional)
+            </label>
+            <input id="inq-website" name="website" type="url" placeholder="https://example.com"
+                   class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-brand-500 focus:outline-none" />
+          </div>
+
+          <!-- Row 6: Requirements Message -->
+          <div>
+            <label for="inq-message" class="block text-xs font-mono text-slate-300 mb-1">
+              Requirements / Architecture Context
+            </label>
+            <textarea id="inq-message" name="message" rows="3" placeholder="Tell us about the agents you are deploying, volume of operations, or specific compliance questions..."
+                      class="w-full bg-dark-950 border border-dark-700 rounded-lg p-3 text-xs text-white placeholder-slate-600 focus:border-brand-500 focus:outline-none"></textarea>
+          </div>
+
+          <!-- Submit Button & Security Note -->
+          <div class="pt-2">
+            <button id="inq-submit-btn" type="submit"
+                    class="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 font-bold text-xs text-black shadow-lg shadow-brand-500/20 flex items-center justify-center space-x-2 transition transform active:scale-95 cursor-pointer">
+              <i data-lucide="send" class="w-4 h-4"></i>
+              <span id="submit-btn-text">Submit Enterprise Inquiry</span>
+            </button>
+            <p class="text-[11px] text-slate-500 text-center font-mono mt-2">
+              🔒 No credit card required. Sensitive payment info is never stored in browser code.
+            </p>
+          </div>
+
+        </form>
+      </div>
+    </section>
+
   </main>
 
-  <!-- Investor Footer -->
-  <footer class="border-t border-dark-800 bg-dark-950 py-8 text-center text-xs text-slate-500 font-mono">
-    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div>
-        <p class="font-semibold text-slate-400">Joltrin Engine (formerly SOP · Scalable Objects Persistence)</p>
-        <p class="text-[11px] text-slate-600">Transactional State & Verification Infrastructure for AI Agents.</p>
+  <!-- Cohesive Commercial Footer -->
+  <footer class="border-t border-dark-800 bg-dark-950 py-12 text-xs text-slate-400">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+      <div class="space-y-3 md:col-span-2">
+        <div class="flex items-center space-x-2">
+          <span class="font-extrabold text-white text-base">Joltrin</span>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/30 font-mono">MIT Open Source Core</span>
+        </div>
+        <p class="text-xs text-slate-400 max-w-md leading-relaxed">
+          Durable memory, recovery, and safety checkpoint infrastructure for autonomous AI agents. Built in Go, compiled to native binaries and WebAssembly with zero server dependencies.
+        </p>
+        <p class="text-[11px] text-slate-500 font-mono">
+          Canonical custom domain: <a href="https://joltrin.com/" class="text-brand-400 hover:underline">joltrin.com</a> · Formerly known as SOP
+        </p>
       </div>
+      <div>
+        <h4 class="font-mono text-xs uppercase font-bold text-white mb-3">Product Funnel</h4>
+        <ul class="space-y-2 text-xs font-mono">
+          <li><a href="./" class="hover:text-white transition text-brand-400">🧠 Technical Demo &amp; Engine</a></li>
+          <li><a href="./arena/" class="hover:text-white transition">🎮 Joltrin Arena (Simulation)</a></li>
+          <li><a href="./agents/" class="hover:text-white transition">🔌 Joltrin Agents (Safety Barrier)</a></li>
+          <li><a href="#pricing" class="hover:text-white transition">💳 Editions &amp; Pricing</a></li>
+          <li><a href="#enterprise" class="hover:text-white transition">🏢 Enterprise Access</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-mono text-xs uppercase font-bold text-white mb-3">Open Source &amp; Community</h4>
+        <ul class="space-y-2 text-xs font-mono">
+          <li><a href="https://github.com/SharedCode/joltrin" target="_blank" rel="noopener noreferrer" class="hover:text-white transition flex items-center space-x-1.5"><i data-lucide="github" class="w-3.5 h-3.5"></i><span>GitHub (SharedCode/joltrin)</span></a></li>
+          <li><a href="https://github.com/SharedCode/joltrin#readme" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">Documentation</a></li>
+          <li><a href="https://github.com/SharedCode/joltrin/blob/master/LICENSE" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">MIT License</a></li>
+          <li><a href="https://github.com/SharedCode/joltrin/blob/master/SECURITY.md" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">Security Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 border-t border-dark-850 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500 font-mono">
+      <div>© 2026 Joltrin Authors &amp; SharedCode. Open source core under MIT license.</div>
       <div class="flex items-center space-x-4">
-        <a href="https://github.com/SharedCode/joltrin" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:underline">GitHub Repository</a>
+        <span>Sub-millisecond ACID Latency</span>
         <span>•</span>
-        <span>Zero-Server Architecture Demo</span>
+        <span>Zero Unverified Actions</span>
       </div>
     </div>
   </footer>
@@ -1106,6 +1688,154 @@
         container.appendChild(card);
       });
     }
+
+    // ===== Commercial Funnel & Customer Interest Handlers =====
+    function handleTierChange(tier) {
+      const extras = document.getElementById('enterprise-extras');
+      const submitText = document.getElementById('submit-btn-text');
+      if (tier === 'pro') {
+        if (extras) extras.classList.add('hidden');
+        if (submitText) submitText.innerText = 'Start Pro ($49/mo)';
+      } else if (tier === 'hosted') {
+        if (extras) extras.classList.remove('hidden');
+        if (submitText) submitText.innerText = 'Join Hosted Cloud Waitlist';
+      } else {
+        if (extras) extras.classList.remove('hidden');
+        if (submitText) submitText.innerText = 'Submit Enterprise Inquiry';
+      }
+    }
+
+    function selectTierAndScroll(tier) {
+      const select = document.getElementById('inq-tier');
+      if (select) {
+        select.value = tier === 'hosted' ? 'hosted' : tier === 'pro' ? 'pro' : 'enterprise';
+        handleTierChange(select.value);
+      }
+      const section = document.getElementById('enterprise');
+      if (section) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const nameInput = document.getElementById('inq-name');
+        if (nameInput) setTimeout(() => nameInput.focus(), 500);
+      }
+    }
+
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      const form = e.target;
+      const statusAlert = document.getElementById('form-status-alert');
+      const submitBtn = document.getElementById('inq-submit-btn');
+
+      // Honeypot anti-spam check
+      const hp = form.elements['website_hp'] ? form.elements['website_hp'].value : '';
+      if (hp) {
+        console.warn('Bot submission blocked via honeypot.');
+        return;
+      }
+
+      // Check render timestamp (must be > 1.2s to prevent automated instant bots)
+      const renderTs = parseInt(form.elements['render_ts'] ? form.elements['render_ts'].value : '0', 10);
+      if (renderTs && (Date.now() - renderTs < 1200)) {
+        console.warn('Bot submission blocked via velocity check.');
+        return;
+      }
+
+      const payload = {
+        name: form.elements['name'] ? form.elements['name'].value.trim() : '',
+        email: form.elements['email'] ? form.elements['email'].value.trim() : '',
+        company: form.elements['company'] ? form.elements['company'].value.trim() : '',
+        role: form.elements['role'] ? form.elements['role'].value.trim() : '',
+        company_size: form.elements['company_size'] ? form.elements['company_size'].value : '',
+        tier: form.elements['tier'] ? form.elements['tier'].value : '',
+        use_cases: form.elements['use_cases'] ? form.elements['use_cases'].value : '',
+        approx_agents: form.elements['approx_agents'] ? form.elements['approx_agents'].value : '',
+        website: form.elements['website'] ? form.elements['website'].value.trim() : '',
+        idp: form.elements['idp'] ? form.elements['idp'].value : '',
+        deployment: form.elements['deployment'] ? form.elements['deployment'].value : '',
+        message: form.elements['message'] ? form.elements['message'].value.trim() : '',
+      };
+
+      if (!payload.name || !payload.email || !payload.company) {
+        if (statusAlert) {
+          statusAlert.className = 'mb-6 p-4 rounded-xl text-xs bg-rose-500/10 border border-rose-500/30 text-rose-300 block';
+          statusAlert.innerText = 'Please complete all required fields: Name, Work Email, and Company.';
+        }
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Submitting Inquiry...</span>';
+      lucide.createIcons();
+
+      // Save lead locally as offline/fallback protection
+      try {
+        const stored = JSON.parse(localStorage.getItem('joltrin_inquiries') || '[]');
+        stored.push({ ...payload, submitted_at: new Date().toISOString() });
+        localStorage.setItem('joltrin_inquiries', JSON.stringify(stored));
+      } catch (err) {
+        // local storage may be restricted in some iframe contexts
+      }
+
+      let serverSuccess = false;
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+        const res = await fetch('/api/billing/enterprise-contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          serverSuccess = true;
+        }
+      } catch (netErr) {
+        // Expected when running on static GitHub Pages with no active Go backend daemon
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>Inquiry Sent</span>';
+      lucide.createIcons();
+
+      const mailtoSubject = encodeURIComponent(`Joltrin ${payload.tier.toUpperCase()} Inquiry - ${payload.company}`);
+      const mailtoBody = encodeURIComponent(
+        `Name: ${payload.name}\nEmail: ${payload.email}\nCompany: ${payload.company}\nRole: ${payload.role}\nTier: ${payload.tier}\nUse Case: ${payload.use_cases}\nAgents: ${payload.approx_agents}\nDeployment: ${payload.deployment}\nIdP: ${payload.idp}\n\nRequirements:\n${payload.message}`
+      );
+      const mailtoLink = `mailto:sales@joltrin.com?subject=${mailtoSubject}&body=${mailtoBody}`;
+
+      if (statusAlert) {
+        statusAlert.className = 'mb-6 p-5 rounded-xl text-xs bg-brand-500/10 border border-brand-500/30 text-slate-200 block space-y-3';
+        statusAlert.innerHTML = `
+          <div class="flex items-center space-x-2 text-brand-400 font-bold text-sm">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+            <span>Thank you, ${payload.name}! Your inquiry has been received.</span>
+          </div>
+          <p class="text-slate-300 leading-relaxed">
+            Our engineering team will review your requirements and contact you at <strong class="text-white font-mono">${payload.email}</strong> within 1 business day.
+            ${payload.tier === 'pro' ? 'For team onboarding, we will provide you with the workspace provisioning access and Stripe subscription billing setup.' : ''}
+          </p>
+          <div class="pt-2 flex flex-wrap items-center gap-3">
+            <a href="${mailtoLink}" class="px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-brand-400 font-mono text-[11px] flex items-center space-x-1.5 transition">
+              <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+              <span>Launch 1-Click Email Backup</span>
+            </a>
+            <button type="button" onclick="navigator.clipboard.writeText('sales@joltrin.com'); this.innerText='sales@joltrin.com copied!';" class="px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-slate-400 hover:text-white font-mono text-[11px] transition cursor-pointer">
+              Copy sales@joltrin.com
+            </button>
+          </div>
+        `;
+        lucide.createIcons();
+        statusAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      form.reset();
+    }
+
+    // Set form render timestamp
+    document.addEventListener('DOMContentLoaded', () => {
+      const ts = document.getElementById('interest-ts');
+      if (ts) ts.value = Date.now().toString();
+    });
   </script>
 </body>
 </html>

@@ -19,6 +19,7 @@ import { InvestorModeView } from './components/InvestorModeView';
 import { CopilotDrawer } from './components/CopilotDrawer';
 import { MissionSuccessModal } from './components/MissionSuccessModal';
 import { DataInspectorModal } from './components/DataInspectorModal';
+import { EnterpriseInterestModal } from './components/EnterpriseInterestModal';
 import { 
   Database, 
   GitCompare, 
@@ -28,7 +29,14 @@ import {
   Play, 
   Briefcase,
   ShieldCheck,
-  Bot
+  Bot,
+  Building2,
+  Cpu,
+  Zap,
+  Lock,
+  Check,
+  ArrowRight,
+  ExternalLink
 } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -39,6 +47,8 @@ export const App: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('arena');
   const [nodes, setNodes] = useState<TopologyNode[]>([]);
   const [particles, setParticles] = useState<JobParticle[]>([]);
+  const [isEnterpriseOpen, setIsEnterpriseOpen] = useState(false);
+  const [selectedTier, setSelectedTier] = useState<'pro' | 'enterprise' | 'hosted' | 'not_sure'>('enterprise');
   const [metrics, setMetrics] = useState<SystemMetrics>({
     tps: 15000,
     totalTransactions: 150000,
@@ -133,6 +143,10 @@ export const App: React.FC = () => {
         onSelectMode={(mode) => setViewMode(mode)}
         onOpenCopilot={() => setIsCopilotOpen(true)}
         onOpenCompare={() => setIsCompareOpen(true)}
+        onOpenEnterprise={(tier) => {
+          setSelectedTier(tier || 'enterprise');
+          setIsEnterpriseOpen(true);
+        }}
         reliabilityScore={metrics.reliabilityScore}
       />
 
@@ -245,34 +259,233 @@ export const App: React.FC = () => {
               </div>
             </div>
 
+            {/* Post-Demo Section 1: What You're Seeing in Action */}
+            <section className="bg-dark-900 border border-dark-800 rounded-3xl p-6 sm:p-8 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-dark-800">
+                <div>
+                  <div className="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-mono font-semibold uppercase tracking-wider mb-2">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>Technical Architecture Demystified</span>
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+                    What You're Seeing in Action
+                  </h2>
+                  <p className="text-slate-400 text-xs sm:text-sm mt-1">
+                    How Joltrin's distributed Go kernel coordinates transactions and compute under catastrophic failure.
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2 font-mono text-xs text-slate-400">
+                  <span className="w-2 h-2 rounded-full bg-brand-400 animate-pulse"></span>
+                  <span>Zero-Loss Architecture</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-dark-950 p-5 rounded-2xl border border-dark-800 space-y-3">
+                  <div className="w-8 h-8 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-center justify-center text-brand-400">
+                    <Cpu className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-sm font-bold text-white">Autonomous Worker Re-balancing</h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    When you kill a worker node during peak load, Joltrin's distributed lease manager detects heartbeats within milliseconds. In-flight jobs are safely aborted, rolled back, and redistributed across surviving workers without losing transactional state.
+                  </p>
+                </div>
+
+                <div className="bg-dark-950 p-5 rounded-2xl border border-dark-800 space-y-3">
+                  <div className="w-8 h-8 rounded-xl bg-accent-cyan/10 border border-accent-cyan/30 flex items-center justify-center text-accent-cyan">
+                    <Database className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-sm font-bold text-white">Erasure Coding &amp; Storage Resiliency</h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    Storage nodes use Reed-Solomon erasure coding chunks. If a storage node goes offline, missing data fragments are instantly reconstructed in-flight from parity blocks with zero read disruptions or corrupted commits.
+                  </p>
+                </div>
+
+                <div className="bg-dark-950 p-5 rounded-2xl border border-dark-800 space-y-3">
+                  <div className="w-8 h-8 rounded-xl bg-accent-violet/10 border border-accent-violet/30 flex items-center justify-center text-accent-violet">
+                    <Zap className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-sm font-bold text-white">Eliminating the Multi-Tier Tax</h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    Traditional stacks bolt Redis to Kafka, Kafka to Postgres, and Postgres to ZooKeeper. Joltrin combines durable B-Tree indexing, ACID transactions, and compute streaming into one unified engine, cutting 6 failure points.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* Post-Demo Section 2: Take This Into Production */}
+            <section className="bg-gradient-to-br from-dark-900 via-dark-850 to-dark-900 border border-brand-500/30 rounded-3xl p-6 sm:p-10 space-y-8 relative overflow-hidden shadow-2xl">
+              <div className="relative z-10 max-w-3xl space-y-3">
+                <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-mono font-semibold uppercase tracking-wider">
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>Commercial &amp; Enterprise Infrastructure</span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                  Take This Resilience Into Your Production AI Agent Fleets
+                </h2>
+                <p className="text-slate-300 text-sm leading-relaxed">
+                  The same engine running this simulation runs in production as a high-performance Go daemon or embedded WebAssembly library. Give your autonomous agents durable memory, instant crash recovery, and security barriers before they act.
+                </p>
+              </div>
+
+              {/* 3 Commercial Tiers Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
+                {/* Tier 1: Free Open Source */}
+                <div className="bg-dark-950/80 rounded-2xl border border-dark-800 p-6 flex flex-col justify-between space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold font-mono uppercase text-slate-400">Open Core</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-dark-800 text-slate-300 font-mono">MIT License</span>
+                    </div>
+                    <div className="text-2xl font-black text-white">$0</div>
+                    <p className="text-xs text-slate-400">Full embedded engine for local agents and single-node persistence.</p>
+                    <ul className="text-xs space-y-2 text-slate-300 pt-2 border-t border-dark-850 font-mono">
+                      <li className="flex items-start space-x-2"><Check className="w-3.5 h-3.5 text-brand-400 flex-shrink-0 mt-0.5" /><span>Go library &amp; WASM runtime</span></li>
+                      <li className="flex items-start space-x-2"><Check className="w-3.5 h-3.5 text-brand-400 flex-shrink-0 mt-0.5" /><span>Full ACID transaction guarantees</span></li>
+                      <li className="flex items-start space-x-2"><Check className="w-3.5 h-3.5 text-brand-400 flex-shrink-0 mt-0.5" /><span>Vector search &amp; B-Tree indexes</span></li>
+                    </ul>
+                  </div>
+                  <a
+                    href="https://github.com/SharedCode/joltrin"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-2.5 px-4 rounded-xl bg-dark-800 hover:bg-dark-750 text-white font-semibold text-xs text-center border border-dark-700 transition"
+                  >
+                    View on GitHub
+                  </a>
+                </div>
+
+                {/* Tier 2: Pro */}
+                <div className="bg-dark-950/90 rounded-2xl border border-brand-500/40 p-6 flex flex-col justify-between space-y-4 shadow-xl shadow-brand-500/5 relative">
+                  <div className="absolute -top-3 right-4 px-2 py-0.5 bg-brand-500 text-black text-[10px] font-bold font-mono rounded-full uppercase">
+                    Most Popular
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold font-mono uppercase text-brand-400">Pro Edition</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 font-mono">Teams</span>
+                    </div>
+                    <div className="text-2xl font-black text-white">$49 <span className="text-xs font-normal text-slate-400">/ workspace / mo</span></div>
+                    <p className="text-xs text-slate-400">Multi-agent governance, encrypted replication, and team access controls.</p>
+                    <ul className="text-xs space-y-2 text-slate-300 pt-2 border-t border-dark-850 font-mono">
+                      <li className="flex items-start space-x-2"><Check className="w-3.5 h-3.5 text-brand-400 flex-shrink-0 mt-0.5" /><span>Multi-workspace agent policies</span></li>
+                      <li className="flex items-start space-x-2"><Check className="w-3.5 h-3.5 text-brand-400 flex-shrink-0 mt-0.5" /><span>Automated off-site snapshot replication</span></li>
+                      <li className="flex items-start space-x-2"><Check className="w-3.5 h-3.5 text-brand-400 flex-shrink-0 mt-0.5" /><span>Stripe-backed billing &amp; priority SLAs</span></li>
+                    </ul>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSelectedTier('pro');
+                      setIsEnterpriseOpen(true);
+                    }}
+                    className="w-full py-2.5 px-4 rounded-xl bg-brand-500 hover:bg-brand-400 text-black font-bold text-xs transition shadow-md shadow-brand-500/20"
+                  >
+                    Get Started with Pro
+                  </button>
+                </div>
+
+                {/* Tier 3: Enterprise */}
+                <div className="bg-dark-950/80 rounded-2xl border border-accent-cyan/30 p-6 flex flex-col justify-between space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold font-mono uppercase text-accent-cyan">Enterprise</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-accent-cyan/10 text-accent-cyan font-mono">Custom</span>
+                    </div>
+                    <div className="text-2xl font-black text-white">Custom SLA</div>
+                    <p className="text-xs text-slate-400">Strict compliance, Okta / Entra ID SSO, dedicated architecture support.</p>
+                    <ul className="text-xs space-y-2 text-slate-300 pt-2 border-t border-dark-850 font-mono">
+                      <li className="flex items-start space-x-2"><Check className="w-3.5 h-3.5 text-brand-400 flex-shrink-0 mt-0.5" /><span>Okta &amp; Microsoft Entra ID SSO integration</span></li>
+                      <li className="flex items-start space-x-2"><Check className="w-3.5 h-3.5 text-brand-400 flex-shrink-0 mt-0.5" /><span>Tamper-evident audit trails &amp; RBAC</span></li>
+                      <li className="flex items-start space-x-2"><Check className="w-3.5 h-3.5 text-brand-400 flex-shrink-0 mt-0.5" /><span>Custom HA topologies &amp; 99.99% uptime SLA</span></li>
+                    </ul>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSelectedTier('enterprise');
+                      setIsEnterpriseOpen(true);
+                    }}
+                    className="w-full py-2.5 px-4 rounded-xl bg-dark-800 hover:bg-dark-750 text-accent-cyan font-semibold text-xs border border-accent-cyan/40 transition"
+                  >
+                    Contact Enterprise Sales
+                  </button>
+                </div>
+              </div>
+
+              {/* Cloud Waitlist Banner */}
+              <div className="bg-dark-950/60 border border-dark-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-dark-850 border border-dark-700 text-slate-400">
+                    <Lock className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-white">Looking for Hosted Joltrin Cloud?</span>
+                    <span className="text-[10px] ml-2 px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">Planned / Coming Soon</span>
+                    <p className="text-slate-400 text-[11px] mt-0.5">We are onboarding design partners for managed serverless agent clusters.</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setSelectedTier('hosted');
+                    setIsEnterpriseOpen(true);
+                  }}
+                  className="px-4 py-2 rounded-xl bg-dark-850 hover:bg-dark-800 border border-dark-700 text-slate-300 font-mono text-xs whitespace-nowrap transition"
+                >
+                  Join Cloud Waitlist →
+                </button>
+              </div>
+            </section>
+
           </div>
         )}
 
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-dark-800 bg-dark-950 py-6 text-center text-xs text-slate-500 font-mono">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center space-x-2">
-            <span className="font-semibold text-slate-400">Joltrin Arena</span>
-            <span>•</span>
-            <span>Durable Memory and Verification Infrastructure</span>
-            <span>•</span>
-            <span className="text-brand-400 font-semibold">One engine for data and compute</span>
+      {/* Cohesive Commercial Footer */}
+      <footer className="border-t border-dark-800 bg-dark-950 py-10 text-xs text-slate-400">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8 mb-6">
+          <div className="space-y-2 md:col-span-2">
+            <div className="flex items-center space-x-2">
+              <span className="font-extrabold text-white text-base">Joltrin Arena</span>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/30 font-mono">Interactive Simulation</span>
+            </div>
+            <p className="text-xs text-slate-400 max-w-md leading-relaxed">
+              Stress-test distributed transactions, swarm compute, and erasure-coded storage in real time with zero external dependencies.
+            </p>
+            <p className="text-[11px] text-slate-500 font-mono">
+              Canonical custom domain: <a href="https://joltrin.com/arena/" className="text-brand-400 hover:underline">joltrin.com/arena</a> · Open source core under MIT
+            </p>
           </div>
-          <div className="flex items-center space-x-4">
-            <a href="https://github.com/sharedcode/joltrin" target="_blank" rel="noopener noreferrer" className="text-brand-400 hover:underline">
-              GitHub Repository
-            </a>
-            <span>•</span>
-            <a href="https://sharedcode.github.io/joltrin/" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white">
-              Joltrin Technical Demo
-            </a>
+          <div>
+            <h4 className="font-mono text-xs uppercase font-bold text-white mb-2">Product Funnel</h4>
+            <ul className="space-y-1.5 text-xs font-mono">
+              <li><a href="../" className="hover:text-white transition">🧠 Technical Demo &amp; Engine</a></li>
+              <li><a href="./" className="hover:text-white transition text-brand-400">🎮 Joltrin Arena (Simulation)</a></li>
+              <li><a href="../agents/" className="hover:text-white transition">🔌 Joltrin Agents (Safety Barrier)</a></li>
+              <li><button onClick={() => { setSelectedTier('enterprise'); setIsEnterpriseOpen(true); }} className="hover:text-white transition text-left">🏢 Enterprise &amp; Pricing</button></li>
+            </ul>
           </div>
+          <div>
+            <h4 className="font-mono text-xs uppercase font-bold text-white mb-2">Open Source</h4>
+            <ul className="space-y-1.5 text-xs font-mono">
+              <li><a href="https://github.com/SharedCode/joltrin" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">GitHub Repository</a></li>
+              <li><a href="https://github.com/SharedCode/joltrin#readme" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">Documentation</a></li>
+              <li><a href="https://github.com/SharedCode/joltrin/blob/master/LICENSE" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">MIT License</a></li>
+            </ul>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 border-t border-dark-850 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500 font-mono">
+          <div>© 2026 Joltrin Authors &amp; SharedCode. One engine for data and compute.</div>
+          <div>Sub-millisecond ACID Latency • Zero Glue Overhead</div>
         </div>
       </footer>
 
       {/* Modals & Drawers */}
+      <EnterpriseInterestModal
+        isOpen={isEnterpriseOpen}
+        onClose={() => setIsEnterpriseOpen(false)}
+        initialTier={selectedTier}
+      />
+
       <CompareModal
         isOpen={isCompareOpen}
         onClose={() => setIsCompareOpen(false)}

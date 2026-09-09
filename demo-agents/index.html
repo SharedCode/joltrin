@@ -3,8 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Joltrin | Agent Verification Barrier (MCP + A2A)</title>
-  <meta name="description" content="The same ai/verify safety and reachability barrier that gates Joltrin's real MCP and A2A servers, running live in your browser via WebAssembly. Try to drop a database before validating a backup and watch it get blocked." />
+  <title>Joltrin Agents | Durable Memory, State &amp; Verification Barrier for AI</title>
+  <meta name="description" content="AI agents need more than a model. They need memory, state, recovery, and guardrails. Experience Joltrin's deterministic verification barrier live in WebAssembly." />
+  <meta name="keywords" content="AI agent memory, AI agent infrastructure, AI agent reliability, AI agent governance, AI agent safety, durable AI memory, AI agent checkpointing, AI DevOps, MCP infrastructure, agent governance, WebAssembly, Go" />
+  <link rel="canonical" href="https://joltrin.com/agents/" />
+
+  <!-- Open Graph / Social -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://joltrin.com/agents/" />
+  <meta property="og:title" content="Joltrin Agents | Durable Memory, State &amp; Verification Barrier for AI" />
+  <meta property="og:description" content="AI agents need more than a model. They need memory, state, recovery, and guardrails. Live interactive verification barrier in WebAssembly." />
+  <meta property="og:image" content="https://joltrin.com/assets/og-image.png" />
+
+  <!-- Twitter / X -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://joltrin.com/agents/" />
+  <meta property="twitter:title" content="Joltrin Agents | Memory, State &amp; Verification Barrier" />
+  <meta property="twitter:description" content="AI agents need more than a model. They need memory, state, recovery, and guardrails." />
+  <meta property="twitter:image" content="https://joltrin.com/assets/og-image.png" />
+
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
   <link rel="alternate icon" href="./favicon.ico" />
 
@@ -79,26 +96,51 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
-<body class="font-sans">
+<body class="font-sans antialiased selection:bg-brand-500 selection:text-black min-h-screen flex flex-col">
 
-  <header class="border-b border-dark-800 bg-dark-950/80 backdrop-blur sticky top-0 z-40">
+  <!-- Top Navigation Header -->
+  <header class="border-b border-dark-800 bg-dark-900/80 backdrop-blur sticky top-0 z-40">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-400 to-accent-cyan flex items-center justify-center">
+        <a href="../" class="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-400 to-accent-cyan flex items-center justify-center">
           <i data-lucide="shield-check" class="w-5 h-5 text-dark-950"></i>
-        </div>
+        </a>
         <div>
           <div class="flex items-center space-x-2">
-            <span class="font-bold text-white">Joltrin</span>
-            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-dark-800 border border-dark-700 text-brand-400">AGENT BARRIER</span>
+            <a href="../" class="font-bold text-white hover:text-brand-400 transition">Joltrin</a>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-dark-800 border border-dark-700 text-accent-violet">AGENTS</span>
           </div>
-          <p class="text-[10px] text-slate-400 font-mono">ai/verify running live in WASM · Formerly SOP</p>
+          <p class="text-[10px] text-slate-400 font-mono">Durable Memory, State &amp; Verification Barrier</p>
         </div>
       </div>
-      <div class="hidden md:flex items-center space-x-3 bg-dark-850 px-3 py-1.5 rounded-full border border-dark-700 text-xs font-mono">
+
+      <!-- Funnel Navigation Links -->
+      <nav class="hidden md:flex items-center space-x-1 text-xs font-mono">
+        <a href="../" class="px-2.5 py-1.5 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">
+          <span>🧠 Overview</span>
+        </a>
+        <a href="../arena/" class="px-2.5 py-1.5 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">
+          <span>🎮 Arena</span>
+        </a>
+        <span class="px-2.5 py-1.5 rounded-lg bg-accent-violet/20 text-accent-violet border border-accent-violet/30 font-semibold">
+          <span>🔌 Agents</span>
+        </span>
+        <a href="https://github.com/SharedCode/joltrin#readme" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">
+          <span>Docs</span>
+        </a>
+        <a href="../#pricing" class="px-2.5 py-1.5 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">
+          <span>Pricing</span>
+        </a>
+        <a href="#enterprise-form" class="px-2.5 py-1.5 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">
+          <span>Enterprise</span>
+        </a>
+      </nav>
+
+      <!-- WASM Telemetry Pill -->
+      <div class="hidden lg:flex items-center space-x-3 bg-dark-850 px-3 py-1.5 rounded-full border border-dark-700 text-xs font-mono">
         <div class="flex items-center space-x-1.5">
           <span id="wasm-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
-          <span id="wasm-status-text" class="text-amber-300 font-medium">Loading...</span>
+          <span id="wasm-status-text" class="text-amber-300 font-medium">Loading WASM...</span>
         </div>
         <span class="text-dark-600">|</span>
         <button id="opfs-status" onclick="resetTrace()" class="flex items-center space-x-1 text-slate-500 hover:text-slate-300 transition" title="Click to reset the trace">
@@ -106,25 +148,242 @@
           <span id="opfs-status-text" class="font-bold text-slate-500">checking...</span>
         </button>
       </div>
+
       <div class="flex items-center space-x-2">
-        <a href="../" class="text-xs px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-slate-300">← Technical Demo</a>
-        <a href="../arena/" class="text-xs px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-slate-300">🎮 Arena</a>
+        <a href="https://github.com/SharedCode/joltrin" target="_blank" rel="noopener noreferrer"
+           class="text-xs px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-slate-200 flex items-center space-x-1.5 transition">
+          <i data-lucide="github" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">GitHub</span>
+        </a>
       </div>
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto px-4 py-10">
-    <div class="mb-10">
-      <span class="inline-flex items-center space-x-1.5 text-xs font-mono px-3 py-1 rounded-full bg-dark-850 border border-dark-700 text-accent-cyan">
-        <i data-lucide="zap" class="w-3 h-3"></i><span>SAME ENGINE BEHIND THE REAL MCP + A2A SERVERS</span>
-      </span>
-      <h1 class="text-3xl md:text-4xl font-extrabold text-white mt-4 leading-tight">
-        Stop an agent before it drops your database.
+  <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-10">
+
+    <!-- Hero / Commercial Agent Positioning -->
+    <section class="mb-12">
+      <div class="inline-flex items-center space-x-2 text-xs font-mono px-3 py-1 rounded-full bg-accent-violet/10 border border-accent-violet/30 text-accent-violet mb-4">
+        <i data-lucide="bot" class="w-3.5 h-3.5"></i>
+        <span>AI AGENT RUNTIME INFRASTRUCTURE</span>
+      </div>
+      <h1 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight mb-4">
+        AI agents need more than a model.<br class="hidden sm:inline" />
+        <span class="bg-gradient-to-r from-brand-400 via-accent-cyan to-accent-violet bg-clip-text text-transparent">
+          They need memory, state, recovery, and guardrails.
+        </span>
       </h1>
-      <p class="text-slate-400 mt-3 max-w-2xl">
-        This runs <code class="text-brand-400">ai/verify</code>, the safety and reachability barrier compiled to WebAssembly. It is the identical Go package that gates <code class="text-slate-300">tools/mcpserver</code> and <code class="text-slate-300">tools/a2aagent</code>, Joltrin's real MCP and A2A servers, just wired to buttons here instead of protocol calls. Try dropping the database before validating a backup.
+      <p class="text-slate-300 text-base md:text-lg max-w-3xl leading-relaxed mb-6">
+        When autonomous AI agents touch infrastructure, databases, and third-party APIs, raw LLMs fail silently or trigger destructive actions without a safety barrier. Joltrin provides an authoritative verification barrier and durable memory log between the agent and the external world.
       </p>
-    </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <a href="#demo-barrier" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-black font-bold text-xs shadow-lg shadow-brand-500/20 flex items-center space-x-2 transition">
+          <i data-lucide="play" class="w-4 h-4"></i>
+          <span>Try Interactive Barrier Demo ↓</span>
+        </a>
+        <a href="#enterprise-form" class="px-5 py-2.5 rounded-xl bg-dark-800 hover:bg-dark-750 border border-dark-700 text-slate-200 font-semibold text-xs flex items-center space-x-2 transition">
+          <i data-lucide="building" class="w-4 h-4 text-accent-violet"></i>
+          <span>Talk to Enterprise</span>
+        </a>
+        <a href="https://github.com/SharedCode/joltrin" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 rounded-xl bg-dark-900 hover:bg-dark-800 border border-dark-700 text-slate-300 font-mono text-xs flex items-center space-x-1.5 transition">
+          <i data-lucide="terminal" class="w-4 h-4 text-brand-400"></i>
+          <span>go get github.com/sharedcode/joltrin</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- The 4 Core Agent Capabilities -->
+    <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
+      <div class="p-5 rounded-2xl bg-dark-900 border border-dark-800">
+        <div class="w-9 h-9 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-center justify-center text-brand-400 mb-3">
+          <i data-lucide="brain" class="w-4 h-4"></i>
+        </div>
+        <h3 class="font-bold text-white text-sm mb-1.5">Agent Memory</h3>
+        <p class="text-xs text-slate-400 leading-relaxed font-mono">
+          Persistent agent state, step checkpoints, and 128-d vector similarity indexing across sessions without external database latency.
+        </p>
+      </div>
+
+      <div class="p-5 rounded-2xl bg-dark-900 border border-dark-800">
+        <div class="w-9 h-9 rounded-xl bg-accent-cyan/10 border border-accent-cyan/30 flex items-center justify-center text-accent-cyan mb-3">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+        </div>
+        <h3 class="font-bold text-white text-sm mb-1.5">Agent Recovery</h3>
+        <p class="text-xs text-slate-400 leading-relaxed font-mono">
+          Crash resumption, atomic rollback of interrupted reasoning chains, and self-healing task trees when workers fail mid-flight.
+        </p>
+      </div>
+
+      <div class="p-5 rounded-2xl bg-dark-900 border border-dark-800">
+        <div class="w-9 h-9 rounded-xl bg-accent-violet/10 border border-accent-violet/30 flex items-center justify-center text-accent-violet mb-3">
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+        </div>
+        <h3 class="font-bold text-white text-sm mb-1.5">Agent Verification</h3>
+        <p class="text-xs text-slate-400 leading-relaxed font-mono">
+          Deterministic precedence checks gating destructive operations. Evaluates actions against explicit policies before execution.
+        </p>
+      </div>
+
+      <div class="p-5 rounded-2xl bg-dark-900 border border-dark-800">
+        <div class="w-9 h-9 rounded-xl bg-accent-amber/10 border border-accent-amber/30 flex items-center justify-center text-accent-amber mb-3">
+          <i data-lucide="lock" class="w-4 h-4"></i>
+        </div>
+        <h3 class="font-bold text-white text-sm mb-1.5">Agent Governance</h3>
+        <p class="text-xs text-slate-400 leading-relaxed font-mono">
+          Okta &amp; Microsoft Entra ID identity binding, tamper-evident audit trails, hierarchical RBAC, and policy rate limits.
+        </p>
+      </div>
+    </section>
+
+    <!-- Strong AI DevOps Use Case & Flow Comparison -->
+    <section class="mb-12 p-6 sm:p-8 rounded-2xl bg-dark-900 border border-dark-800">
+      <div class="max-w-3xl mb-6">
+        <div class="inline-flex items-center space-x-2 text-xs font-mono px-3 py-1 rounded-full bg-accent-cyan/10 border border-accent-cyan/30 text-accent-cyan mb-2">
+          <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
+          <span>PRODUCTION USE CASE SCENARIO</span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          AI DevOps Agent Preparing a Production Deployment
+        </h2>
+        <p class="text-slate-300 text-sm sm:text-base mt-2 leading-relaxed">
+          Imagine an AI DevOps agent executing a database migration. Joltrin preserves the agent's state, checkpoints each verification step, and evaluates sensitive operations against explicit precedence rules before anything touches production.
+        </p>
+      </div>
+
+      <!-- Comparison Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+
+        <!-- Without Joltrin -->
+        <div class="p-5 rounded-xl bg-dark-950 border border-rose-500/30">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-mono font-bold uppercase text-rose-400">Without Joltrin</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/10 text-rose-300 border border-rose-500/20">High Operational Risk</span>
+          </div>
+          <div class="p-4 rounded-lg bg-dark-900/60 border border-dark-800 font-mono text-xs text-slate-300 space-y-2 mb-3">
+            <div class="flex items-center space-x-2 text-slate-400">
+              <span>Agent</span>
+              <span>──────►</span>
+              <span class="text-amber-400">Tool / API</span>
+              <span>──────►</span>
+              <span class="text-rose-400 font-bold">Irreversible Action</span>
+            </div>
+          </div>
+          <ul class="text-xs text-slate-400 space-y-1.5 font-mono">
+            <li>❌ Hallucinated or out-of-order execution drops database</li>
+            <li>❌ Lost context on container crash or API network failure</li>
+            <li>❌ No atomic rollback for failed intermediate operations</li>
+            <li>❌ Zero auditability or attribution to enterprise identity</li>
+          </ul>
+        </div>
+
+        <!-- With Joltrin -->
+        <div class="p-5 rounded-xl bg-dark-950 border border-brand-500/40 shadow-lg shadow-brand-500/5">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-mono font-bold uppercase text-brand-400">With Joltrin</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-500/10 text-brand-300 border border-brand-500/20">Governed &amp; Resilient</span>
+          </div>
+          <div class="p-4 rounded-lg bg-dark-900/60 border border-dark-800 font-mono text-xs text-slate-300 space-y-2 mb-3">
+            <div class="flex items-center space-x-2 text-slate-400 flex-wrap">
+              <span>Agent</span>
+              <span>──►</span>
+              <span class="text-brand-400 font-semibold">Memory</span>
+              <span>──►</span>
+              <span class="text-accent-cyan font-semibold">Verification</span>
+              <span>──►</span>
+              <span class="text-slate-200">Tool</span>
+              <span>──►</span>
+              <span class="text-brand-400 font-bold">Safe Action</span>
+            </div>
+          </div>
+          <ul class="text-xs text-slate-300 space-y-1.5 font-mono">
+            <li>✓ Precedence barrier blocks drop until backup is validated</li>
+            <li>✓ Durable checkpoints enable instant crash recovery &amp; resume</li>
+            <li>✓ Strict ACID serializability guarantees transaction safety</li>
+            <li>✓ Tamper-evident audit log bound to Okta / Entra ID</li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Realistic Example Use Cases Grid -->
+    <section class="mb-12">
+      <div class="mb-6">
+        <h3 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">Designed For Enterprise Agentic Workflows</h3>
+        <h2 class="text-xl sm:text-2xl font-bold text-white mt-1">Example Production Use Cases</h2>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="p-4 rounded-xl bg-dark-900 border border-dark-800">
+          <h4 class="font-bold text-white text-sm mb-1 flex items-center space-x-1.5">
+            <i data-lucide="server" class="w-4 h-4 text-brand-400"></i>
+            <span>AI DevOps &amp; Cloud Automation</span>
+          </h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Guarding Terraform plans, Kubernetes deployments, and database schema migrations with automated pre-flight checks.
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-dark-900 border border-dark-800">
+          <h4 class="font-bold text-white text-sm mb-1 flex items-center space-x-1.5">
+            <i data-lucide="code" class="w-4 h-4 text-accent-cyan"></i>
+            <span>Software Engineering Agents</span>
+          </h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Persistent workspace checkpoints, reasoning step rollbacks on test failures, and sandboxed tool call verification.
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-dark-900 border border-dark-800">
+          <h4 class="font-bold text-white text-sm mb-1 flex items-center space-x-1.5">
+            <i data-lucide="file-check" class="w-4 h-4 text-accent-violet"></i>
+            <span>Enterprise Workflow Agents</span>
+          </h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Multi-step invoice processing, payroll approvals, and customer data updates with role-based identity validation.
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-dark-900 border border-dark-800">
+          <h4 class="font-bold text-white text-sm mb-1 flex items-center space-x-1.5">
+            <i data-lucide="users" class="w-4 h-4 text-brand-400"></i>
+            <span>Multi-Agent Swarms</span>
+          </h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            A shared, serializable transactional blackboard enabling swarms of agents to coordinate state without race conditions.
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-dark-900 border border-dark-800">
+          <h4 class="font-bold text-white text-sm mb-1 flex items-center space-x-1.5">
+            <i data-lucide="tool" class="w-4 h-4 text-amber-400"></i>
+            <span>Tool-Using AI Agents</span>
+          </h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Preventing unvetted API calls, data exfiltration, and quota exhaustion through rate-limited policy verification.
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-dark-900 border border-dark-800">
+          <h4 class="font-bold text-white text-sm mb-1 flex items-center space-x-1.5">
+            <i data-lucide="box" class="w-4 h-4 text-accent-cyan"></i>
+            <span>MCP-Based Infrastructure</span>
+          </h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Seamless drop-in verification barrier for Model Context Protocol servers (<code class="text-slate-300">tools/mcpserver</code>) and A2A bridges.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Verification Barrier (Tested Section) -->
+    <section id="demo-barrier" class="mb-12">
+      <div class="mb-6">
+        <span class="inline-flex items-center space-x-1.5 text-xs font-mono px-3 py-1 rounded-full bg-dark-850 border border-dark-700 text-accent-cyan mb-2">
+          <i data-lucide="zap" class="w-3 h-3"></i><span>SAME ENGINE BEHIND THE REAL MCP + A2A SERVERS</span>
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
+          Stop an agent before it drops your database.
+        </h2>
+        <p class="text-slate-400 mt-2 max-w-2xl text-xs sm:text-sm">
+          This runs <code class="text-brand-400">ai/verify</code>, the safety and reachability barrier compiled to WebAssembly. It is the identical Go package that gates <code class="text-slate-300">tools/mcpserver</code> and <code class="text-slate-300">tools/a2aagent</code>, Joltrin's real MCP and A2A servers, just wired to buttons here instead of protocol calls. Try dropping the database before validating a backup.
+        </p>
+      </div>
 
     <!-- Runbook pipeline -->
     <div class="bg-dark-850 border border-dark-700 rounded-2xl p-6 mb-6">
@@ -166,15 +425,254 @@ go run ./examples/verify_barrier        <span class="text-slate-500"># same scen
 go run ./cmd/sop-mcp-server              <span class="text-slate-500"># MCP over stdio</span>
 go run ./cmd/sop-a2a-agent &             <span class="text-slate-500"># A2A over HTTP</span>
 curl localhost:8087/.well-known/agent-card.json</pre>
-      <p class="text-xs text-slate-500 mt-3">
-        Full writeup: <a href="https://github.com/SharedCode/joltrin/blob/master/docs/MCP_A2A_AND_VERIFICATION_ENGINE.md" class="text-brand-400 hover:underline">docs/MCP_A2A_AND_VERIFICATION_ENGINE.md</a>
-      </p>
     </div>
+
+    <!-- Section: Ready to put agentic workflows into production? -->
+    <section id="enterprise-form" class="mt-12 p-6 sm:p-10 rounded-2xl bg-dark-900 border border-dark-800 relative overflow-hidden">
+      <div class="max-w-2xl mx-auto">
+        <div class="text-center mb-8">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-accent-violet/10 border border-accent-violet/30 text-accent-violet text-xs font-mono font-semibold uppercase tracking-wider mb-2">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span>Production Deployment</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            Ready to Put Agentic Workflows Into Production?
+          </h2>
+          <p class="text-slate-400 text-xs sm:text-sm mt-2">
+            Explore Joltrin Pro for team governance or contact us about Enterprise deployment with Okta / Entra ID SSO and custom compliance invariants.
+          </p>
+
+          <div class="flex flex-wrap items-center justify-center gap-3 mt-4">
+            <a href="../#pricing" class="px-4 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 font-bold text-xs text-black shadow-lg shadow-brand-500/20 transition">
+              Explore Pro ($49/mo)
+            </a>
+            <button type="button" onclick="document.getElementById('inq-tier-agents').value='enterprise'; document.getElementById('inq-name-agents').focus();"
+                    class="px-4 py-2 rounded-xl bg-dark-800 hover:bg-dark-750 border border-dark-700 text-slate-200 text-xs font-semibold transition cursor-pointer">
+              Enterprise Access
+            </button>
+            <a href="https://github.com/SharedCode/joltrin" target="_blank" rel="noopener noreferrer"
+               class="px-4 py-2 rounded-xl bg-dark-800 hover:bg-dark-750 border border-dark-700 text-slate-300 text-xs font-mono flex items-center space-x-1.5 transition">
+              <i data-lucide="github" class="w-3.5 h-3.5"></i>
+              <span>GitHub</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Submission Status Alert -->
+        <div id="agents-form-status-alert" class="hidden mb-6 p-4 rounded-xl text-xs"></div>
+
+        <!-- Form Component -->
+        <form id="interest-form-agents" onsubmit="handleAgentsFormSubmit(event)" class="space-y-4">
+
+          <!-- Honeypot Anti-Spam Field (hidden) -->
+          <div style="display:none;" aria-hidden="true">
+            <label for="interest-hp-agents">Do not fill this</label>
+            <input type="text" id="interest-hp-agents" name="website_hp" tabindex="-1" autocomplete="off" />
+          </div>
+          <input type="hidden" id="interest-ts-agents" name="render_ts" value="" />
+
+          <!-- Row 1: Name & Email -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="inq-name-agents" class="block text-xs font-mono text-slate-300 mb-1">
+                Full Name <span class="text-rose-400">*</span>
+              </label>
+              <input id="inq-name-agents" name="name" type="text" required placeholder="Jane Doe"
+                     class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-brand-500 focus:outline-none" />
+            </div>
+            <div>
+              <label for="inq-email-agents" class="block text-xs font-mono text-slate-300 mb-1">
+                Work Email <span class="text-rose-400">*</span>
+              </label>
+              <input id="inq-email-agents" name="email" type="email" required placeholder="jane@company.com"
+                     class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-brand-500 focus:outline-none" />
+            </div>
+          </div>
+
+          <!-- Row 2: Company & Role -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="inq-company-agents" class="block text-xs font-mono text-slate-300 mb-1">
+                Company Name <span class="text-rose-400">*</span>
+              </label>
+              <input id="inq-company-agents" name="company" type="text" required placeholder="Acme AI Corp"
+                     class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-brand-500 focus:outline-none" />
+            </div>
+            <div>
+              <label for="inq-role-agents" class="block text-xs font-mono text-slate-300 mb-1">
+                Job Title / Role
+              </label>
+              <input id="inq-role-agents" name="role" type="text" placeholder="DevOps / AI Architect"
+                     class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-brand-500 focus:outline-none" />
+            </div>
+          </div>
+
+          <!-- Row 3: Tier & Company Size -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="inq-tier-agents" class="block text-xs font-mono text-slate-300 mb-1">
+                Tier Interested In <span class="text-rose-400">*</span>
+              </label>
+              <select id="inq-tier-agents" name="tier" onchange="handleAgentsTierChange(this.value)"
+                      class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:border-brand-500 focus:outline-none">
+                <option value="pro">Pro ($49/mo team governance)</option>
+                <option value="enterprise" selected>Enterprise (SSO, RBAC &amp; SLAs)</option>
+                <option value="hosted">Hosted Cloud (Waitlist)</option>
+                <option value="not_sure">Not sure / Evaluating options</option>
+              </select>
+            </div>
+            <div>
+              <label for="inq-size-agents" class="block text-xs font-mono text-slate-300 mb-1">
+                Company Size
+              </label>
+              <select id="inq-size-agents" name="company_size"
+                      class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:border-brand-500 focus:outline-none">
+                <option value="1-10">1 – 10 employees</option>
+                <option value="11-50">11 – 50 employees</option>
+                <option value="51-200" selected>51 – 200 employees</option>
+                <option value="201-1000">201 – 1,000 employees</option>
+                <option value="1000+">1,000+ employees</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Row 4: Primary Use Case & Number of Agents -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="inq-usecase-agents" class="block text-xs font-mono text-slate-300 mb-1">
+                Primary Use Case <span class="text-rose-400">*</span>
+              </label>
+              <select id="inq-usecase-agents" name="use_cases"
+                      class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:border-brand-500 focus:outline-none">
+                <option value="ai_devops" selected>AI DevOps &amp; Infrastructure Automation</option>
+                <option value="swe_agents">Software Engineering &amp; Coding Agents</option>
+                <option value="enterprise_workflows">Enterprise Workflow &amp; Approval Agents</option>
+                <option value="multi_agent">Multi-Agent Swarms &amp; Coordination</option>
+                <option value="mcp_infrastructure">MCP / Tool Verification Barrier</option>
+                <option value="other">Other Agent Deployment</option>
+              </select>
+            </div>
+            <div>
+              <label for="inq-agents-count" class="block text-xs font-mono text-slate-300 mb-1">
+                Approx Number of AI Agents
+              </label>
+              <select id="inq-agents-count" name="approx_agents"
+                      class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:border-brand-500 focus:outline-none">
+                <option value="1-5">1 – 5 agents</option>
+                <option value="6-25" selected>6 – 25 agents</option>
+                <option value="26-100">26 – 100 agents</option>
+                <option value="100+">100+ agents</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Conditional Enterprise Fields: IDP & Deployment -->
+          <div id="enterprise-extras-agents" class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 bg-dark-950/60 border border-dark-800 rounded-xl">
+            <div>
+              <label for="inq-idp-agents" class="block text-xs font-mono text-slate-300 mb-1">
+                Identity Provider (SSO)
+              </label>
+              <select id="inq-idp-agents" name="idp"
+                      class="w-full bg-dark-900 border border-dark-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:border-brand-500 focus:outline-none">
+                <option value="okta">Okta (OIDC)</option>
+                <option value="entra_id">Microsoft Entra ID (Azure AD)</option>
+                <option value="other">Other IdP / Custom SAML</option>
+                <option value="none">None / Not required yet</option>
+              </select>
+            </div>
+            <div>
+              <label for="inq-deploy-agents" class="block text-xs font-mono text-slate-300 mb-1">
+                Deployment Preference
+              </label>
+              <select id="inq-deploy-agents" name="deployment"
+                      class="w-full bg-dark-900 border border-dark-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:border-brand-500 focus:outline-none">
+                <option value="self_hosted" selected>Self-Hosted (Kubernetes / Docker)</option>
+                <option value="hosted">Interested in Managed Cloud</option>
+                <option value="hybrid">Hybrid Deployment</option>
+                <option value="not_sure">Not sure</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Row 5: Website URL (optional) -->
+          <div>
+            <label for="inq-website-agents" class="block text-xs font-mono text-slate-300 mb-1">
+              Company Website (Optional)
+            </label>
+            <input id="inq-website-agents" name="website" type="url" placeholder="https://example.com"
+                   class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-brand-500 focus:outline-none" />
+          </div>
+
+          <!-- Row 6: Requirements Message -->
+          <div>
+            <label for="inq-message-agents" class="block text-xs font-mono text-slate-300 mb-1">
+              Requirements / Architecture Context
+            </label>
+            <textarea id="inq-message-agents" name="message" rows="3" placeholder="Describe the autonomous agents, sensitive APIs, or security policies you want to verify..."
+                      class="w-full bg-dark-950 border border-dark-700 rounded-lg p-3 text-xs text-white placeholder-slate-600 focus:border-brand-500 focus:outline-none"></textarea>
+          </div>
+
+          <!-- Submit Button & Security Note -->
+          <div class="pt-2">
+            <button id="inq-submit-btn-agents" type="submit"
+                    class="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 font-bold text-xs text-black shadow-lg shadow-brand-500/20 flex items-center justify-center space-x-2 transition transform active:scale-95 cursor-pointer">
+              <i data-lucide="send" class="w-4 h-4"></i>
+              <span id="submit-btn-text-agents">Submit Enterprise Inquiry</span>
+            </button>
+            <p class="text-[11px] text-slate-500 text-center font-mono mt-2">
+              🔒 No credit card required. Sensitive payment info is never stored in frontend code.
+            </p>
+          </div>
+
+        </form>
+      </div>
+    </section>
+
   </main>
 
-  <footer class="max-w-6xl mx-auto px-4 py-8 text-center text-xs text-slate-500 font-mono">
-    <p class="font-semibold text-slate-400 mb-1">Joltrin Agent Verification Barrier (formerly SOP)</p>
-    <a href="https://github.com/SharedCode/joltrin" class="hover:text-slate-400">github.com/SharedCode/joltrin</a>
+  <!-- Cohesive Commercial Footer -->
+  <footer class="border-t border-dark-800 bg-dark-950 py-12 text-xs text-slate-400">
+    <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+      <div class="space-y-3 md:col-span-2">
+        <div class="flex items-center space-x-2">
+          <span class="font-extrabold text-white text-base">Joltrin</span>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/30 font-mono">MIT Open Source Core</span>
+        </div>
+        <p class="text-xs text-slate-400 max-w-md leading-relaxed">
+          Durable memory, recovery, and safety checkpoint infrastructure for autonomous AI agents. Built in Go, compiled to native binaries and WebAssembly with zero server dependencies.
+        </p>
+        <p class="text-[11px] text-slate-500 font-mono">
+          Canonical custom domain: <a href="https://joltrin.com/agents/" class="text-brand-400 hover:underline">joltrin.com/agents/</a> · Formerly known as SOP
+        </p>
+      </div>
+      <div>
+        <h4 class="font-mono text-xs uppercase font-bold text-white mb-3">Product Funnel</h4>
+        <ul class="space-y-2 text-xs font-mono">
+          <li><a href="../" class="hover:text-white transition">🧠 Technical Demo &amp; Engine</a></li>
+          <li><a href="../arena/" class="hover:text-white transition">🎮 Joltrin Arena (Simulation)</a></li>
+          <li><a href="./" class="hover:text-white transition text-accent-violet">🔌 Joltrin Agents (Safety Barrier)</a></li>
+          <li><a href="../#pricing" class="hover:text-white transition">💳 Editions &amp; Pricing</a></li>
+          <li><a href="#enterprise-form" class="hover:text-white transition">🏢 Enterprise Access</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-mono text-xs uppercase font-bold text-white mb-3">Open Source &amp; Community</h4>
+        <ul class="space-y-2 text-xs font-mono">
+          <li><a href="https://github.com/SharedCode/joltrin" target="_blank" rel="noopener noreferrer" class="hover:text-white transition flex items-center space-x-1.5"><i data-lucide="github" class="w-3.5 h-3.5"></i><span>GitHub (SharedCode/joltrin)</span></a></li>
+          <li><a href="https://github.com/SharedCode/joltrin#readme" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">Documentation</a></li>
+          <li><a href="https://github.com/SharedCode/joltrin/blob/master/LICENSE" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">MIT License</a></li>
+          <li><a href="https://github.com/SharedCode/joltrin/blob/master/SECURITY.md" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">Security Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="max-w-6xl mx-auto px-4 pt-6 border-t border-dark-850 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500 font-mono">
+      <div>© 2026 Joltrin Authors &amp; SharedCode. Open source core under MIT license.</div>
+      <div class="flex items-center space-x-4">
+        <span>Deterministic Precedence Checks</span>
+        <span>•</span>
+        <span>Zero Unverified Actions</span>
+      </div>
+    </div>
   </footer>
 
   <script>
@@ -277,7 +775,130 @@ curl localhost:8087/.well-known/agent-card.json</pre>
         console.error('Failed to load sop-agents WASM engine:', err);
         document.getElementById('wasm-status-text').innerText = 'LOAD ERROR';
       }
+
+      const ts = document.getElementById('interest-ts-agents');
+      if (ts) ts.value = Date.now().toString();
     });
+
+    // ===== Commercial Funnel & Form Handlers for Agents Page =====
+    function handleAgentsTierChange(tier) {
+      const extras = document.getElementById('enterprise-extras-agents');
+      const submitText = document.getElementById('submit-btn-text-agents');
+      if (tier === 'pro') {
+        if (extras) extras.classList.add('hidden');
+        if (submitText) submitText.innerText = 'Start Pro ($49/mo)';
+      } else if (tier === 'hosted') {
+        if (extras) extras.classList.remove('hidden');
+        if (submitText) submitText.innerText = 'Join Hosted Cloud Waitlist';
+      } else {
+        if (extras) extras.classList.remove('hidden');
+        if (submitText) submitText.innerText = 'Submit Enterprise Inquiry';
+      }
+    }
+
+    async function handleAgentsFormSubmit(e) {
+      e.preventDefault();
+      const form = e.target;
+      const statusAlert = document.getElementById('agents-form-status-alert');
+      const submitBtn = document.getElementById('inq-submit-btn-agents');
+
+      // Honeypot anti-spam check
+      const hp = form.elements['website_hp'] ? form.elements['website_hp'].value : '';
+      if (hp) {
+        console.warn('Bot submission blocked via honeypot.');
+        return;
+      }
+
+      // Velocity check
+      const renderTs = parseInt(form.elements['render_ts'] ? form.elements['render_ts'].value : '0', 10);
+      if (renderTs && (Date.now() - renderTs < 1200)) {
+        console.warn('Bot submission blocked via velocity check.');
+        return;
+      }
+
+      const payload = {
+        name: form.elements['name'] ? form.elements['name'].value.trim() : '',
+        email: form.elements['email'] ? form.elements['email'].value.trim() : '',
+        company: form.elements['company'] ? form.elements['company'].value.trim() : '',
+        role: form.elements['role'] ? form.elements['role'].value.trim() : '',
+        company_size: form.elements['company_size'] ? form.elements['company_size'].value : '',
+        tier: form.elements['tier'] ? form.elements['tier'].value : '',
+        use_cases: form.elements['use_cases'] ? form.elements['use_cases'].value : '',
+        approx_agents: form.elements['approx_agents'] ? form.elements['approx_agents'].value : '',
+        website: form.elements['website'] ? form.elements['website'].value.trim() : '',
+        idp: form.elements['idp'] ? form.elements['idp'].value : '',
+        deployment: form.elements['deployment'] ? form.elements['deployment'].value : '',
+        message: form.elements['message'] ? form.elements['message'].value.trim() : '',
+      };
+
+      if (!payload.name || !payload.email || !payload.company) {
+        if (statusAlert) {
+          statusAlert.className = 'mb-6 p-4 rounded-xl text-xs bg-rose-500/10 border border-rose-500/30 text-rose-300 block';
+          statusAlert.innerText = 'Please complete all required fields: Name, Work Email, and Company.';
+        }
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Submitting...</span>';
+      lucide.createIcons();
+
+      // Save lead locally as offline/fallback protection
+      try {
+        const stored = JSON.parse(localStorage.getItem('joltrin_inquiries') || '[]');
+        stored.push({ ...payload, submitted_at: new Date().toISOString() });
+        localStorage.setItem('joltrin_inquiries', JSON.stringify(stored));
+      } catch (err) {}
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+        await fetch('/api/billing/enterprise-contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+      } catch (netErr) {}
+
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>Inquiry Sent</span>';
+      lucide.createIcons();
+
+      const mailtoSubject = encodeURIComponent(`Joltrin ${payload.tier.toUpperCase()} Agent Inquiry - ${payload.company}`);
+      const mailtoBody = encodeURIComponent(
+        `Name: ${payload.name}\nEmail: ${payload.email}\nCompany: ${payload.company}\nRole: ${payload.role}\nTier: ${payload.tier}\nUse Case: ${payload.use_cases}\nAgents: ${payload.approx_agents}\nDeployment: ${payload.deployment}\nIdP: ${payload.idp}\n\nRequirements:\n${payload.message}`
+      );
+      const mailtoLink = `mailto:sales@joltrin.com?subject=${mailtoSubject}&body=${mailtoBody}`;
+
+      if (statusAlert) {
+        statusAlert.className = 'mb-6 p-5 rounded-xl text-xs bg-brand-500/10 border border-brand-500/30 text-slate-200 block space-y-3';
+        statusAlert.innerHTML = `
+          <div class="flex items-center space-x-2 text-brand-400 font-bold text-sm">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+            <span>Thank you, ${payload.name}! Your inquiry has been received.</span>
+          </div>
+          <p class="text-slate-300 leading-relaxed">
+            Our engineering team will review your AI agent deployment requirements and contact you at <strong class="text-white font-mono">${payload.email}</strong> within 1 business day.
+            ${payload.tier === 'pro' ? 'For team onboarding, we will send you the workspace provisioning access and Stripe subscription billing setup.' : ''}
+          </p>
+          <div class="pt-2 flex flex-wrap items-center gap-3">
+            <a href="${mailtoLink}" class="px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-brand-400 font-mono text-[11px] flex items-center space-x-1.5 transition">
+              <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+              <span>Launch 1-Click Email Backup</span>
+            </a>
+            <button type="button" onclick="navigator.clipboard.writeText('sales@joltrin.com'); this.innerText='sales@joltrin.com copied!';" class="px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-slate-400 hover:text-white font-mono text-[11px] transition cursor-pointer">
+              Copy sales@joltrin.com
+            </button>
+          </div>
+        `;
+        lucide.createIcons();
+        statusAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      form.reset();
+    }
   </script>
 </body>
 </html>

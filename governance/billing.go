@@ -67,14 +67,22 @@ type CheckoutSession struct {
 
 // EnterpriseInquiry captures an enterprise lead / custom deployment request.
 type EnterpriseInquiry struct {
-	ID        string    `json:"id"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	Company   string    `json:"company"`
-	TeamSize  string    `json:"team_size"`
-	UseCases  string    `json:"use_cases"`
-	Status    string    `json:"status"` // "new", "contacted", "qualified"
-	CreatedAt time.Time `json:"created_at"`
+	ID           string    `json:"id"`
+	Name         string    `json:"name"`
+	Email        string    `json:"email"`
+	Company      string    `json:"company"`
+	Role         string    `json:"role,omitempty"`
+	CompanySize  string    `json:"company_size,omitempty"`
+	TeamSize     string    `json:"team_size,omitempty"` // Legacy alias for CompanySize
+	Tier         string    `json:"tier,omitempty"`
+	UseCases     string    `json:"use_cases,omitempty"`
+	ApproxAgents string    `json:"approx_agents,omitempty"`
+	Website      string    `json:"website,omitempty"`
+	IDP          string    `json:"idp,omitempty"`
+	Deployment   string    `json:"deployment,omitempty"`
+	Message      string    `json:"message,omitempty"`
+	Status       string    `json:"status"` // "new", "contacted", "qualified"
+	CreatedAt    time.Time `json:"created_at"`
 }
 
 // StripeConfig defines configuration for Stripe billing and webhooks.
