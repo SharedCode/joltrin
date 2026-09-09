@@ -28,7 +28,7 @@ func TimedOut(ctx context.Context, name string, startTime time.Time, maxTime tim
 		// Wrap context cancellation/deadline so callers can detect both a timeout and the original cause.
 		return ErrTimeout{Name: name, MaxTime: maxTime, Cause: err}
 	}
-	if Now().Sub(startTime) > maxTime {
+	if Now().Sub(startTime) >= maxTime {
 		// Operation-specific timeout (no context cause).
 		return ErrTimeout{Name: name, MaxTime: maxTime}
 	}

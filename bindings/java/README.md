@@ -75,7 +75,7 @@ public class CallScript {
 1.  Clone the repository:
     ```bash
     git clone https://github.com/SharedCode/joltrin.git
-    cd sop/bindings/java
+    cd joltrin/bindings/java
     ```
 
 2.  Build the project:

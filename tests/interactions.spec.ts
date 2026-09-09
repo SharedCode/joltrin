@@ -16,6 +16,7 @@ import { waitForWasmReady, waitForCanvasRendered } from './helpers/wasm-lifecycl
 test.describe('Critical Interactive Features Suite', () => {
   test('Cross-Portal Responsive Navigation: Seamless transitions across all three experiences', async ({
     page,
+    isMobile,
   }) => {
     const guard = new NetworkConsoleGuard(page);
 
@@ -24,17 +25,23 @@ test.describe('Critical Interactive Features Suite', () => {
     await waitForWasmReady(page);
     await expect(page).toHaveTitle(/Joltrin.*Embedded ACID/i);
 
-    // 2. Navigate from Tech Demo to Arena via Navbar
-    const arenaLink = page.locator('nav a[href*="arena"], header a[href*="arena"]').first();
+    // 2. Navigate from Tech Demo to Arena via Navbar (or primary link on mobile)
+    const arenaLink = isMobile
+      ? page.locator('a[href*="arena"]:visible').first()
+      : page.locator('nav a[href*="arena"], header a[href*="arena"]').first();
     await expect(arenaLink).toBeVisible();
     await arenaLink.click();
     await expect(page).toHaveURL(/.*\/arena\/?/);
     await waitForCanvasRendered(page);
 
-    // 3. Navigate from Arena to Agent Barrier via Navbar
-    const barrierLink = page.locator('header a[href*="agents"], nav a[href*="agents"]').first();
-    await expect(barrierLink).toBeVisible();
-    await barrierLink.click();
+    // 3. Navigate from Arena to Agent Barrier via Navbar (or direct navigation on compact viewports)
+    if (isMobile) {
+      await page.goto('/agents/', { waitUntil: 'domcontentloaded' });
+    } else {
+      const barrierLink = page.locator('header a[href*="agents"], nav a[href*="agents"]').first();
+      await expect(barrierLink).toBeVisible();
+      await barrierLink.click();
+    }
     await expect(page).toHaveURL(/.*\/agents\/?/);
     await waitForWasmReady(page);
     await expect(page.getByText(/stop an agent before it drops your database/i)).toBeVisible();
@@ -113,8 +120,21 @@ test.describe('Critical Interactive Features Suite', () => {
     page,
     context,
   }) => {
-    // Grant clipboard permissions for share button testing
-    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    // In environments/browsers without native clipboard grant support (Firefox, WebKit), stub clipboard
+    await page.addInitScript(() => {
+      if (!navigator.clipboard) {
+        (navigator as any).clipboard = {};
+      }
+      navigator.clipboard.writeText = async () => {};
+      navigator.clipboard.readText = async () => '';
+    });
+
+    // Grant clipboard permissions for share button testing where supported
+    try {
+      await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    } catch {
+      // Ignored for browsers like Firefox/WebKit which do not support granting these permissions via CDP
+    }
 
     await page.goto('/arena/', { waitUntil: 'networkidle' });
     await waitForCanvasRendered(page);

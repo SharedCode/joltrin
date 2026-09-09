@@ -10,8 +10,6 @@ import (
 )
 
 func Test_Transaction_MergeNodesKeys_Table(t *testing.T) {
-	t.Parallel()
-
 	// Create mock data.
 	lc := mocks.NewMockClient()
 	existing := lc.CreateLockKeys([]string{sop.NewUUID().String(), sop.NewUUID().String(), sop.NewUUID().String()})
@@ -47,18 +45,16 @@ func Test_Transaction_MergeNodesKeys_Table(t *testing.T) {
 }
 
 func Test_Transaction_UnlockNodesKeys_Table(t *testing.T) {
-	t.Parallel()
 	tr := &Transaction{}
 	ctx := context.Background()
 	_ = tr.unlockNodesKeys(ctx)
 }
 
 func Test_Transaction_TimedOut_Table(t *testing.T) {
-	t.Parallel()
 	tr := &Transaction{}
 	tr.maxTime = time.Duration(2 * time.Hour)
 	ctx := context.Background()
-	now := time.Now()
+	now := sop.Now()
 	cases := []struct {
 		name    string
 		start   time.Time
@@ -78,7 +74,6 @@ func Test_Transaction_TimedOut_Table(t *testing.T) {
 }
 
 func Test_Transaction_TrackedItemsWrappers_Table(t *testing.T) {
-	t.Parallel()
 	tr := &Transaction{}
 	ctx := context.Background()
 	if tr.hasTrackedItems() {

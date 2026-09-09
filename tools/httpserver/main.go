@@ -30,6 +30,7 @@ import (
 	"github.com/sharedcode/joltrin/database"
 	"github.com/sharedcode/joltrin/encoding"
 	"github.com/sharedcode/joltrin/fs"
+	"github.com/sharedcode/joltrin/governance"
 	"github.com/sharedcode/joltrin/jsondb"
 	"github.com/sharedcode/joltrin/tools/confighub"
 )
@@ -66,16 +67,18 @@ type DatabaseConfig struct {
 
 // Config holds the server configuration
 type Config struct {
-	Port                   int              `json:"port"`
-	Databases              []DatabaseConfig `json:"databases"`
-	PageSize               int              `json:"pageSize"`
-	SystemDB               *DatabaseConfig  `json:"system_db,omitempty"`
-	RootPassword           string           `json:"root_password,omitempty"`
-	ProductionMode         bool             `json:"production_mode,omitempty"`
-	SessionTokenTTLMinutes int              `json:"session_token_ttl_minutes,omitempty"`
-	SessionSecret          string           `json:"session_secret,omitempty"`
-	AuthProviderName       string           `json:"auth_provider,omitempty"`
-	Users                  []UserRecord     `json:"users,omitempty"`
+	Port                   int                     `json:"port"`
+	Databases              []DatabaseConfig        `json:"databases"`
+	PageSize               int                     `json:"pageSize"`
+	SystemDB               *DatabaseConfig         `json:"system_db,omitempty"`
+	RootPassword           string                  `json:"root_password,omitempty"`
+	ProductionMode         bool                    `json:"production_mode,omitempty"`
+	SessionTokenTTLMinutes int                     `json:"session_token_ttl_minutes,omitempty"`
+	SessionSecret          string                  `json:"session_secret,omitempty"`
+	AuthProviderName       string                  `json:"auth_provider,omitempty"`
+	Tier                   governance.Tier         `json:"tier,omitempty"`
+	OIDCProviders          []governance.OIDCConfig `json:"oidc_providers,omitempty"`
+	Users                  []UserRecord            `json:"users,omitempty"`
 
 	// ObfuscationMode defines the global obfuscation policy (disabled, per_database, all_databases).
 	// This overrides any setting in the agent's own configuration.
@@ -420,6 +423,10 @@ func main() {
 	http.HandleFunc("/api/config/environments/delete", withAuth(handleDeleteEnvironment))
 	http.HandleFunc("/api/auth/login", handleLogin)
 	http.HandleFunc("/api/auth/refresh", handleRefresh)
+	http.HandleFunc("/api/auth/providers", handleListAuthProviders)
+	http.HandleFunc("/api/auth/oidc/authorize", handleOIDCAuthorize)
+	http.HandleFunc("/api/auth/oidc/callback", handleOIDCCallback)
+	http.HandleFunc("/api/auth/oidc/token", handleOIDCToken)
 
 	// Initialize Agents only if we have configured databases
 	// In Setup Mode (no databases), agents shouldn't initialize as the target environment isn't set yet.

@@ -38,7 +38,6 @@ async function main() {
     path.resolve(__dirname, '../_site/arena/og-image.png'),
     path.resolve(__dirname, '../_site/assets/joltrin-social-preview.png'),
     path.resolve(__dirname, '../_site/assets/og-image.png'),
-    '/Users/gerardlouisrecinto/.gemini/antigravity-cli/brain/d6075c36-d710-4a1d-b0a0-7c17a316e2ca/joltrin-social-preview.png',
   ];
 
   for (const p of [...targetPaths, ...optionalPaths]) {

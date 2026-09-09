@@ -113,6 +113,12 @@ jobs:
           cp -r sop-arena/dist/. _site/arena/
           # Agent verification barrier (ai/verify in WASM) lives at sharedcode.github.io/joltrin/agents/
           cp demo-agents/index.html demo-agents/sop-agents.wasm demo-agents/wasm_exec.js demo-agents/favicon.svg demo-agents/favicon.ico _site/agents/
+          # Preserve custom domain (e.g. joltrin.com) if CNAME exists
+          if [ -f "CNAME" ]; then
+            cp CNAME _site/CNAME
+          elif [ -f "demo/CNAME" ]; then
+            cp demo/CNAME _site/CNAME
+          fi
           ls -lh _site _site/arena _site/agents
 
       - name: Setup GitHub Pages
