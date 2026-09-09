@@ -98,7 +98,7 @@ test.describe('Critical Interactive Features Suite', () => {
     if (await runBenchBtn.count() > 0) {
       await runBenchBtn.click();
       // Wait for benchmark to run (web-first assertion on throughput metric)
-      await expect(page.locator('#bench-ops-sec')).not.toHaveText('—', { timeout: 20_000 });
+      await expect(page.locator('#bench-ops-sec')).not.toHaveText('--', { timeout: 20_000 });
     }
 
     // 4. Switch to B-Tree Internals Tab

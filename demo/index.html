@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Joltrin | Verification Barrier &amp; Durable Memory for AI Agents | Embedded ACID Engine</title>
-  <meta name="description" content="Give AI agents an explicit verification barrier and durable memory before they take consequential actions. Open-source infrastructure with pre-action policy gates, ACID transactions, and enterprise governance." />
+  <meta name="description" content="Open-source infrastructure for AI agents with durable memory, recovery, and a verification barrier before they take action." />
   <meta name="keywords" content="AI agent verification barrier, AI agent safety layer, durable AI agent memory, AI agent governance, autonomous AI safety, AI DevOps, MCP infrastructure, agent policy enforcement, ACID B-Tree, Go, WebAssembly" />
   <link rel="canonical" href="https://joltrin.com/" />
 
@@ -12,14 +12,14 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://joltrin.com/" />
   <meta property="og:title" content="Joltrin | Verification Barrier &amp; Durable Memory for AI Agents" />
-  <meta property="og:description" content="The safety layer for AI agents that take action. Explicit pre-action verification gates, durable memory, and deterministic recovery." />
+  <meta property="og:description" content="Open-source infrastructure for AI agents with durable memory, recovery, and a verification barrier before they take action." />
   <meta property="og:image" content="https://joltrin.com/assets/og-image.png" />
 
   <!-- Twitter / X -->
   <meta property="twitter:card" content="summary_large_image" />
   <meta property="twitter:url" content="https://joltrin.com/" />
   <meta property="twitter:title" content="Joltrin | Verification Barrier &amp; Durable Memory for AI Agents" />
-  <meta property="twitter:description" content="The safety layer for AI agents that take action. Explicit pre-action verification gates and durable memory." />
+  <meta property="twitter:description" content="Open-source infrastructure for AI agents with durable memory, recovery, and a verification barrier before they take action." />
   <meta property="twitter:image" content="https://joltrin.com/assets/og-image.png" />
 
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
@@ -307,15 +307,15 @@
         </h1>
         
         <p class="text-slate-300 text-base sm:text-lg leading-relaxed mb-4">
-          AI agents are moving from generating text to taking real actions: modifying cloud infrastructure, calling external APIs, executing database mutations, deploying containers, and coordinating autonomous swarms.
+          AI agents used to just generate text. Now they call tools, change infrastructure, work with APIs, and carry out multi-step tasks on their own.
         </p>
 
         <!-- The Commercial Hook Question -->
         <div class="p-4 rounded-xl bg-dark-950/90 border border-accent-cyan/30 mb-6">
-          <p class="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">The Critical Shift in AI Safety:</p>
+          <p class="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">The real question:</p>
           <p class="text-sm sm:text-base text-white font-medium leading-relaxed">
-            The question is no longer only: <span class="text-slate-300 italic">"Can AI make the right decision?"</span><br class="hidden sm:inline" />
-            It becomes: <strong class="text-brand-400 font-bold">"How do we know an AI agent is allowed to take this action before it happens?"</strong>
+            It's not just <span class="text-slate-300 italic">"Can the agent make the right decision?"</span> anymore.<br class="hidden sm:inline" />
+            It's <strong class="text-brand-400 font-bold">"How do we know it's allowed to take this action before it happens?"</strong>
           </p>
         </div>
 
@@ -323,8 +323,8 @@
         <div class="p-4 rounded-xl bg-dark-950/80 border border-brand-500/30 mb-6 flex items-start space-x-3">
           <i data-lucide="shield-alert" class="w-5 h-5 text-brand-400 shrink-0 mt-0.5"></i>
           <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
-            <strong class="text-white font-bold block mb-1">Memory + Recovery + Verification for AI Agents.</strong>
-            Joltrin gives autonomous agents an explicit policy checkpoint and transactional rollback layer between deciding what to do and actually doing it.
+            <strong class="text-white font-bold block mb-1">Memory + recovery + verification for AI agents.</strong>
+            Joltrin gives developers a place to keep an agent's state, recover from failures, and check important actions against explicit rules before they happen.
           </p>
         </div>
 
@@ -383,17 +383,17 @@
         </div>
         <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
           The Agent Verification Barrier: <br class="hidden sm:inline"/>
-          An Authoritative Checkpoint Before Action.
+          A Checkpoint Before Action.
         </h2>
         <p class="text-slate-400 text-sm sm:text-base mt-2 leading-relaxed">
-          Autonomous agents cannot be permitted to execute unverified actions against critical systems. Joltrin places an explicit, auditable policy gate between agent reasoning and external execution.
+          An agent that reasons well doesn't automatically deserve unchecked access to your systems. Joltrin sits between what the agent decides to do and the outside world, and checks that the action is actually allowed before it happens.
         </p>
       </div>
 
       <!-- Conceptual Flow Diagram: Agent -> Barrier -> Decision -> Action -->
       <div class="p-6 rounded-2xl bg-dark-950 border border-dark-750 mb-8 font-mono">
         <div class="text-xs text-slate-400 uppercase tracking-wider mb-4 text-center sm:text-left">
-          // How the Joltrin Verification Barrier Intercepts Consequential Operations
+          // How the verification barrier sits between the agent and real systems
         </div>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-center text-center">
           
@@ -519,11 +519,10 @@
           <span>Executive &amp; Operational Value</span>
         </div>
         <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
-          Why Does This Matter? <br class="hidden sm:inline"/>
-          Reducing AI Operational Risk and Engineering Overhead.
+          Why This Matters
         </h2>
         <p class="text-slate-400 text-sm sm:text-base mt-2 leading-relaxed">
-          The economic value of Joltrin is clear: give engineering organizations a deterministic control boundary around tool-using agents without requiring every team to build custom guardrail glue.
+          If an agent can deploy infrastructure, modify data, or call production APIs, a mistake gets expensive fast. Joltrin gives those agents durable state and a policy checkpoint before anything important happens, so your team isn't building that safety net from scratch.
         </p>
       </div>
 
@@ -532,9 +531,9 @@
           <div class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/30 flex items-center justify-center mb-2">
             <i data-lucide="alert-triangle" class="w-4 h-4"></i>
           </div>
-          <h3 class="text-base font-bold text-white">Reduce AI Operational Risk</h3>
+          <h3 class="text-base font-bold text-white">Fewer expensive mistakes</h3>
           <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-            Prevent agents from blindly executing actions that violate security rules, wipe databases, or leak data across tenants. Establish a deterministic boundary before real damage happens.
+            Stop an agent from wiping a database, leaking data across tenants, or breaking a security rule before it happens, not after you notice the damage.
           </p>
         </div>
 
@@ -542,9 +541,9 @@
           <div class="w-8 h-8 rounded-lg bg-brand-500/10 text-brand-400 border border-brand-500/30 flex items-center justify-center mb-2">
             <i data-lucide="shield-check" class="w-4 h-4"></i>
           </div>
-          <h3 class="text-base font-bold text-white">Deploy Agents with Greater Confidence</h3>
+          <h3 class="text-base font-bold text-white">More confidence deploying agents</h3>
           <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-            Give security teams, DevOps, and compliance officers an authoritative policy enforcement layer around autonomous models, accelerating enterprise rollouts from proof-of-concept to production.
+            Give security, DevOps, and compliance a real policy layer around autonomous agents, so going from proof-of-concept to production doesn't require a leap of faith.
           </p>
         </div>
 
@@ -552,9 +551,9 @@
           <div class="w-8 h-8 rounded-lg bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/30 flex items-center justify-center mb-2">
             <i data-lucide="cpu" class="w-4 h-4"></i>
           </div>
-          <h3 class="text-base font-bold text-white">Reduce Engineering Overhead</h3>
+          <h3 class="text-base font-bold text-white">Less infrastructure to build yourself</h3>
           <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-            Avoid requiring every AI product team to hand-roll custom state checkpointing, rollback loops, Redis locks, and verification decorators. Adopt a reusable, battle-tested open-source foundation.
+            Skip hand-rolling checkpointing, rollback logic, and locking for every new agent project. Use one open-source foundation instead.
           </p>
         </div>
 
@@ -562,21 +561,21 @@
           <div class="w-8 h-8 rounded-lg bg-accent-violet/10 text-accent-violet border border-accent-violet/30 flex items-center justify-center mb-2">
             <i data-lucide="lock" class="w-4 h-4"></i>
           </div>
-          <h3 class="text-base font-bold text-white">Make Agent Deployments Governable</h3>
+          <h3 class="text-base font-bold text-white">A clearer path to governance</h3>
           <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-            Connect autonomous agent actions directly to organizational identity (Okta / Entra ID), role-based access controls (RBAC), and immutable audit logs required by enterprise compliance standards.
+            Tie every agent action back to a real identity (Okta or Entra ID), role-based access, and an audit log: the same controls compliance already expects from people.
           </p>
         </div>
       </div>
 
       <!-- Economic Bottom Line -->
       <div class="p-4 rounded-xl bg-dark-950 border border-dark-800 text-slate-300 text-xs sm:text-sm leading-relaxed">
-        <strong class="text-white">The Bottom Line:</strong>
-        "Joltrin is intended to reduce the operational risk and engineering cost of deploying autonomous AI systems."
+        <strong class="text-white">The bottom line:</strong>
+        Joltrin exists to cut the operational risk and engineering cost of running autonomous agents.
       </div>
     </section>
 
-    <!-- SECTION 3: SECOND DIFFERENTIATOR — DURABLE AGENT MEMORY -->
+    <!-- SECTION 3: SECOND DIFFERENTIATOR: DURABLE AGENT MEMORY -->
     <section id="durable-memory" class="mb-12 p-6 sm:p-10 rounded-2xl bg-dark-900 border border-dark-800">
       <div class="max-w-3xl mb-8">
         <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-accent-violet/10 border border-accent-violet/30 text-accent-violet text-xs font-mono font-semibold uppercase tracking-wider mb-3">
@@ -587,7 +586,7 @@
           Agents Need Memory They Can Trust.
         </h2>
         <p class="text-slate-400 text-sm sm:text-base mt-2 leading-relaxed">
-          When an AI agent's process restarts, a network connection drops, or a container is evicted, naive in-memory state is wiped. Joltrin provides durable state, transactional checkpoints, and deterministic recovery.
+          When an agent's process restarts, a network connection drops, or a container gets evicted, whatever it was holding in memory is gone. Joltrin gives it durable state, transactional checkpoints, and a deterministic way to recover.
         </p>
       </div>
 
@@ -639,7 +638,7 @@
       </div>
     </section>
 
-    <!-- SECTION 4: "WHY NOW?" (MARKET SHIFT FOR INVESTORS & STRATEGISTS) -->
+    <!-- SECTION 4: "WHY NOW?" -->
     <section class="mb-12 p-6 sm:p-10 rounded-2xl bg-dark-900 border border-dark-800">
       <div class="max-w-3xl mb-8">
         <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-accent-amber/10 border border-accent-amber/30 text-amber-400 text-xs font-mono font-semibold uppercase tracking-wider mb-3">
@@ -650,17 +649,17 @@
           Why Now? AI is Moving From Answers to Actions.
         </h2>
         <p class="text-slate-400 text-sm sm:text-base mt-2 leading-relaxed">
-          The paradigm of software and artificial intelligence has fundamentally changed.
+          Software used to just answer questions. Now it can act on them.
         </p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        
+
         <div class="p-6 rounded-2xl bg-dark-950 border border-dark-800 space-y-3">
-          <span class="text-xs font-mono text-slate-400 uppercase tracking-wider block">Yesterday's Paradigm</span>
+          <span class="text-xs font-mono text-slate-400 uppercase tracking-wider block">Yesterday</span>
           <h3 class="text-lg font-bold text-slate-300">Traditional AI: Prompt → Response</h3>
           <p class="text-xs text-slate-400 leading-relaxed">
-            The model generates text or code in an ephemeral chat window. If the output contains errors, the human edits it. The operational blast radius is zero.
+            The model generates text or code in a chat window. If the output has errors, a person edits it. Nothing happens on its own.
           </p>
           <div class="p-3 rounded-lg bg-dark-900 border border-dark-800 text-[11px] font-mono text-slate-500">
             [User Prompt] ──▶ [LLM Inference] ──▶ [Markdown Response]
@@ -668,10 +667,10 @@
         </div>
 
         <div class="p-6 rounded-2xl bg-dark-950 border border-brand-500/40 space-y-3 shadow-lg shadow-brand-500/5">
-          <span class="text-xs font-mono text-brand-400 uppercase tracking-wider block">Today's Paradigm</span>
+          <span class="text-xs font-mono text-brand-400 uppercase tracking-wider block">Today</span>
           <h3 class="text-lg font-bold text-white">Agentic AI: Goal → Reason → Tool → Action</h3>
           <p class="text-xs text-slate-300 leading-relaxed">
-            The agent autonomously calls tools, mutates databases, commits code, and provisions infrastructure. The operational blast radius is mission-critical.
+            The agent calls tools on its own, changes data, commits code, and provisions infrastructure. If it gets something wrong, that mistake can hit production.
           </p>
           <div class="p-3 rounded-lg bg-dark-900 border border-brand-500/30 text-[11px] font-mono text-brand-300">
             [Goal] ──▶ [Reason] ──▶ [Tool Call] ──▶ [Action on Prod]
@@ -681,9 +680,9 @@
       </div>
 
       <div class="p-5 rounded-2xl bg-gradient-to-r from-brand-950/40 via-dark-950 to-dark-950 border border-brand-500/30 space-y-2">
-        <h4 class="text-sm font-bold text-white">Joltrin is infrastructure for that transition.</h4>
+        <h4 class="text-sm font-bold text-white">Joltrin is infrastructure for that shift.</h4>
         <p class="text-xs text-slate-300 leading-relaxed">
-          Once software agents take real actions, companies must have durable state, authorization, verification, policy, auditability, and recovery. Joltrin provides that foundation.
+          Once agents take real actions, companies need durable state, authorization, verification, policy, and a way to recover when something goes wrong. Joltrin provides that foundation.
         </p>
       </div>
     </section>
@@ -883,7 +882,7 @@
           Under the Hood: High-Performance Embedded Engine
         </h2>
         <p class="text-slate-400 text-xs sm:text-sm mt-1 leading-relaxed">
-          Why Joltrin is fast, reliable, and durable: Copy-on-Write B-Trees, Write-Ahead Logging (WAL), 2PC strict ACID transactions, Reed-Solomon erasure coding, and Model Context Protocol (MCP) support — compiled directly to native Go and WebAssembly.
+          Joltrin isn't just a thin wrapper around an LLM. Underneath the agent layer is a real storage engine: copy-on-write B-trees, write-ahead logging, strict two-phase-commit ACID transactions, and Reed-Solomon erasure coding, compiled to native Go and to WebAssembly so it can run in the browser too.
         </p>
       </div>
 
@@ -1104,7 +1103,7 @@
           <div class="bg-dark-950 border border-dark-800 rounded-xl p-5">
             <span class="text-xs text-slate-400 font-mono block mb-1">Throughput</span>
             <div class="flex items-baseline space-x-2">
-              <span id="bench-ops-sec" class="text-3xl font-extrabold text-white font-mono">—</span>
+              <span id="bench-ops-sec" class="text-3xl font-extrabold text-white font-mono">--</span>
               <span class="text-xs text-brand-400 font-mono font-semibold">ops/sec</span>
             </div>
             <span class="text-[10px] text-slate-500 mt-2 block font-mono">Pure V8 / WASM Execution</span>
@@ -1112,7 +1111,7 @@
           <div class="bg-dark-950 border border-dark-800 rounded-xl p-5">
             <span class="text-xs text-slate-400 font-mono block mb-1">Average Latency</span>
             <div class="flex items-baseline space-x-2">
-              <span id="bench-avg-lat" class="text-3xl font-extrabold text-accent-cyan font-mono">—</span>
+              <span id="bench-avg-lat" class="text-3xl font-extrabold text-accent-cyan font-mono">--</span>
               <span class="text-xs text-slate-400 font-mono">µs / op</span>
             </div>
             <span class="text-[10px] text-slate-500 mt-2 block font-mono">0ms Network Overhead</span>
@@ -1120,7 +1119,7 @@
           <div class="bg-dark-950 border border-dark-800 rounded-xl p-5">
             <span class="text-xs text-slate-400 font-mono block mb-1">Total Exec Time</span>
             <div class="flex items-baseline space-x-2">
-              <span id="bench-total-time" class="text-3xl font-extrabold text-accent-violet font-mono">—</span>
+              <span id="bench-total-time" class="text-3xl font-extrabold text-accent-violet font-mono">--</span>
             </div>
             <span class="text-[10px] text-slate-500 mt-2 block font-mono">End-to-End in Browser</span>
           </div>
@@ -1211,8 +1210,8 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-3 mb-5 bg-dark-950 p-3 rounded-xl border border-dark-800 text-xs font-mono">
-              <div>Session: <span id="agent-session-id" class="text-white">—</span></div>
-              <div>Active Agent: <span id="agent-current-agent" class="text-white">—</span></div>
+              <div>Session: <span id="agent-session-id" class="text-white">--</span></div>
+              <div>Active Agent: <span id="agent-current-agent" class="text-white">--</span></div>
               <div id="agent-state-badge" class="text-[10px] px-2 py-0.5 rounded-full border bg-dark-800 text-slate-400 border-dark-700">IDLE</div>
               <div id="agent-progress" class="text-slate-400">0 / 0 checkpoints committed</div>
               <div id="agent-generation" class="text-slate-500">Gen 0</div>
@@ -1265,13 +1264,13 @@
       <div class="max-w-4xl mx-auto text-center mb-10">
         <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-accent-cyan/10 border border-accent-cyan/30 text-accent-cyan text-xs font-mono font-semibold uppercase tracking-wider mb-3">
           <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
-          <span>Commercial Strategy &amp; Growth Engine</span>
+          <span>How Joltrin Makes Money</span>
         </div>
         <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
           Open Core. Enterprise Governance. Managed Infrastructure.
         </h2>
         <p class="text-slate-400 text-sm sm:text-base mt-3 leading-relaxed">
-          Joltrin follows the proven open-core infrastructure playbook: bottom-up developer adoption of the embedded engine, monetized through team governance, enterprise compliance, and managed cloud infrastructure.
+          The database and core agent infrastructure stay open and free to use. Teams and enterprises pay for governance, collaboration, and, eventually, managed infrastructure.
         </p>
       </div>
 
@@ -1293,14 +1292,14 @@
             </ul>
           </div>
           <div class="mt-6 pt-3 border-t border-dark-800 text-[11px] font-mono text-brand-400 font-semibold">
-            Free Core · Developer Mindshare
+            Free Core · Open Source
           </div>
         </div>
 
-        <!-- Pillar 2: Team Governance & Self-Service ARR -->
+        <!-- Pillar 2: Team Governance -->
         <div class="p-6 rounded-2xl bg-dark-900 border border-brand-500/30 flex flex-col justify-between hover:border-brand-500/60 transition relative">
           <div class="absolute -top-3 right-4 px-2.5 py-0.5 rounded-full bg-brand-500 text-black font-mono font-bold text-[10px] uppercase tracking-wider">
-            Self-Service ARR
+            Self-Serve
           </div>
           <div>
             <div class="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-center justify-center text-brand-400 mb-4">
@@ -1308,7 +1307,7 @@
             </div>
             <h3 class="text-base font-bold text-white mb-2">2. Team Governance ($49/mo)</h3>
             <p class="text-xs text-slate-400 leading-relaxed mb-4">
-              Multi-tenant workspace controls, team audit logging, rate limiting, and Stripe subscription billing. Frictionless self-service checkout for engineering teams.
+              Multi-tenant workspace controls, audit logging, and rate limiting. Pay with a card through Stripe and you're set up in minutes.
             </p>
             <ul class="space-y-1.5 text-[11px] text-slate-300 font-mono">
               <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-400"></i><span>Automated Stripe billing</span></li>
@@ -1317,14 +1316,14 @@
             </ul>
           </div>
           <div class="mt-6 pt-3 border-t border-dark-800 text-[11px] font-mono text-brand-400 font-semibold">
-            Fast Expansion · Product-Led Growth
+            Self-Serve · Cancel Anytime
           </div>
         </div>
 
-        <!-- Pillar 3: Enterprise Contracts & Hosted Cloud -->
+        <!-- Pillar 3: Enterprise & Hosted Cloud -->
         <div class="p-6 rounded-2xl bg-dark-900 border border-accent-violet/30 flex flex-col justify-between hover:border-accent-violet/60 transition relative">
           <div class="absolute -top-3 right-4 px-2.5 py-0.5 rounded-full bg-accent-violet text-white font-mono font-bold text-[10px] uppercase tracking-wider">
-            Enterprise ACV
+            Enterprise
           </div>
           <div>
             <div class="w-10 h-10 rounded-xl bg-accent-violet/10 border border-accent-violet/30 flex items-center justify-center text-accent-violet mb-4">
@@ -1332,16 +1331,16 @@
             </div>
             <h3 class="text-base font-bold text-white mb-2">3. Enterprise &amp; Cloud (Custom)</h3>
             <p class="text-xs text-slate-400 leading-relaxed mb-4">
-              Okta &amp; Entra ID SSO, immutable compliance exports, custom CEL policy barriers, dedicated SLAs, and hosted multi-region managed clusters.
+              Okta &amp; Entra ID SSO, compliance exports, custom CEL policy rules, and dedicated support.
             </p>
             <ul class="space-y-1.5 text-[11px] text-slate-300 font-mono">
               <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-accent-violet"></i><span>Enterprise SSO (Okta/Entra)</span></li>
               <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-accent-violet"></i><span>SOC 2/HIPAA compliance exports</span></li>
-              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-accent-violet"></i><span>24/7 dedicated support &amp; SLA</span></li>
+              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-accent-violet"></i><span>Direct engineering support</span></li>
             </ul>
           </div>
           <div class="mt-6 pt-3 border-t border-dark-800 text-[11px] font-mono text-accent-violet font-semibold">
-            High ACV · Multi-Year Contracts
+            Custom Pricing · Direct Support
           </div>
         </div>
       </div>
@@ -1355,7 +1354,7 @@
           <span>Transparent Open-Core Model</span>
         </div>
         <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-          Editions &amp; Commercial Tiers
+          Pricing
         </h2>
         <p class="text-slate-400 text-sm sm:text-base mt-3 leading-relaxed">
           The core engine is free and open source forever under the MIT license. Commercial tiers provide team governance, enterprise identity, compliance logging, and dedicated support.
@@ -1501,7 +1500,7 @@
               <span class="text-xs text-slate-500 font-mono"> / annual deployment</span>
             </div>
             <p class="text-xs text-slate-400 mb-6 leading-relaxed">
-              For organizations deploying autonomous AI agents into mission-critical infrastructure with strict compliance.
+              For organizations deploying agents into environments with real compliance requirements: SSO, audit trails, and dedicated support.
             </p>
             <ul class="space-y-2.5 text-xs text-slate-300 font-mono mb-6">
               <li class="flex items-start space-x-2">
@@ -1526,18 +1525,18 @@
               </li>
               <li class="flex items-start space-x-2">
                 <i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0 mt-0.5"></i>
-                <span>Dedicated architecture reviews &amp; SLAs</span>
+                <span>Direct architecture reviews with our team</span>
               </li>
               <li class="flex items-start space-x-2">
                 <i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0 mt-0.5"></i>
-                <span>24/7 incident escalation channel</span>
+                <span>Priority incident support</span>
               </li>
             </ul>
           </div>
           <button onclick="selectTierAndScroll('enterprise')"
              class="w-full py-2.5 px-4 rounded-xl bg-dark-800 hover:bg-dark-750 border border-dark-700 hover:border-accent-violet/50 text-slate-200 hover:text-white font-semibold text-xs flex items-center justify-center space-x-2 transition cursor-pointer">
             <i data-lucide="building" class="w-4 h-4 text-accent-violet"></i>
-            <span>Talk to Sales / Request Access</span>
+            <span>Talk to Enterprise</span>
           </button>
         </div>
 
@@ -1566,7 +1565,7 @@
           Deploy Autonomous AI Agents Without Giving Up Control
         </h2>
         <p class="text-slate-400 text-sm sm:text-base mt-3 leading-relaxed">
-          Six architectural pillars engineered to make agentic workflows safe, compliant, and governable at enterprise scale.
+          Here's what that actually means in practice.
         </p>
       </div>
 
@@ -1645,13 +1644,13 @@
         <div class="text-center mb-8">
           <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-mono font-semibold uppercase tracking-wider mb-2">
             <i data-lucide="building" class="w-3.5 h-3.5"></i>
-            <span>Commercial Deployment &amp; Inquiry</span>
+            <span>Enterprise</span>
           </div>
           <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Bring Joltrin to Your AI Platform
+            Tell Us What You're Building
           </h2>
           <p class="text-slate-400 text-xs sm:text-sm mt-2 leading-relaxed">
-            Tell us about your AI agent architecture, governance requirements, and deployment goals. Our engineering team responds within 1 business day.
+            A few details about your agents and what you need, and we'll follow up personally.
           </p>
         </div>
 
@@ -1803,9 +1802,9 @@
           <!-- Row 6: Requirements Message -->
           <div>
             <label for="inq-message" class="block text-xs font-mono text-slate-300 mb-1">
-              Requirements / Architecture Context
+              What are you hoping to build with Joltrin?
             </label>
-            <textarea id="inq-message" name="message" rows="3" placeholder="Tell us about the agents you are deploying, volume of operations, or specific compliance questions..."
+            <textarea id="inq-message" name="message" rows="3" placeholder="The agents you're deploying, how many, or any compliance questions you have..."
                       class="w-full bg-dark-950 border border-dark-700 rounded-lg p-3 text-xs text-white placeholder-slate-600 focus:border-brand-500 focus:outline-none"></textarea>
           </div>
 
@@ -1814,7 +1813,7 @@
             <button id="inq-submit-btn" type="submit"
                     class="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 font-bold text-xs text-black shadow-lg shadow-brand-500/20 flex items-center justify-center space-x-2 transition transform active:scale-95 cursor-pointer">
               <i data-lucide="send" class="w-4 h-4"></i>
-              <span id="submit-btn-text">Submit Enterprise Inquiry</span>
+              <span id="submit-btn-text">Talk to Us</span>
             </button>
             <p class="text-[11px] text-slate-500 text-center font-mono mt-2">
               🔒 No credit card required. Sensitive payment info is never stored in browser code.
@@ -1837,7 +1836,7 @@
           Ready to Make Your AI Agents Safe, Durable, and Governable?
         </h2>
         <p class="text-slate-300 text-sm sm:text-base leading-relaxed mb-8 max-w-2xl mx-auto">
-          Whether you are embedding an in-memory transactional database in a single agent or governing a fleet of autonomous enterprise workers, Joltrin provides the foundational reliability and verification layer.
+          Whether you're embedding a transactional database in a single agent or governing a whole fleet of them, Joltrin gives you the reliability and verification layer underneath.
         </p>
         <div class="flex flex-wrap items-center justify-center gap-4">
           <button onclick="openProCheckoutModal()"
@@ -1934,7 +1933,7 @@
             <select id="pro-billing-cycle" name="billing_cycle"
                     class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:border-brand-500 focus:outline-none">
               <option value="monthly" selected>Monthly ($49 / month)</option>
-              <option value="annual">Annual ($490 / year — Save 17%, 2 months free)</option>
+              <option value="annual">Annual ($490/year, 2 months free)</option>
             </select>
           </div>
 
@@ -2486,7 +2485,7 @@
       const mailtoBody = encodeURIComponent(
         `Name: ${payload.name}\nEmail: ${payload.email}\nCompany: ${payload.company}\nRole: ${payload.role}\nTier: ${payload.tier}\nUse Case: ${payload.use_cases}\nAgents: ${payload.approx_agents}\nDeployment: ${payload.deployment}\nIdP: ${payload.idp}\n\nRequirements:\n${payload.message}`
       );
-      const mailtoLink = `mailto:sales@joltrin.com?subject=${mailtoSubject}&body=${mailtoBody}`;
+      const mailtoLink = `mailto:gerardrecinto@gmail.com?subject=${mailtoSubject}&body=${mailtoBody}`;
 
       if (statusAlert) {
         statusAlert.className = 'mb-6 p-5 rounded-xl text-xs bg-brand-500/10 border border-brand-500/30 text-slate-200 block space-y-3';
@@ -2496,16 +2495,16 @@
             <span>Thank you, ${payload.name}! Your inquiry has been received.</span>
           </div>
           <p class="text-slate-300 leading-relaxed">
-            Our engineering team will review your requirements and contact you at <strong class="text-white font-mono">${payload.email}</strong> within 1 business day.
-            ${payload.tier === 'pro' ? 'For team onboarding, we will provide you with the workspace provisioning access and Stripe subscription billing setup.' : ''}
+            We read every inquiry personally and will follow up at <strong class="text-white font-mono">${payload.email}</strong> as soon as we can.
+            ${payload.tier === 'pro' ? "If Pro is the right fit, we'll walk you through workspace setup and billing." : ''}
           </p>
           <div class="pt-2 flex flex-wrap items-center gap-3">
             <a href="${mailtoLink}" class="px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-brand-400 font-mono text-[11px] flex items-center space-x-1.5 transition">
               <i data-lucide="mail" class="w-3.5 h-3.5"></i>
-              <span>Launch 1-Click Email Backup</span>
+              <span>Email Us Directly</span>
             </a>
-            <button type="button" onclick="navigator.clipboard.writeText('sales@joltrin.com'); this.innerText='sales@joltrin.com copied!';" class="px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-slate-400 hover:text-white font-mono text-[11px] transition cursor-pointer">
-              Copy sales@joltrin.com
+            <button type="button" onclick="navigator.clipboard.writeText('gerardrecinto@gmail.com'); this.innerText='gerardrecinto@gmail.com copied!';" class="px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-slate-400 hover:text-white font-mono text-[11px] transition cursor-pointer">
+              Copy gerardrecinto@gmail.com
             </button>
           </div>
         `;

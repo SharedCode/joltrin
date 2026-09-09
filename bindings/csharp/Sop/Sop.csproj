@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>Sop4CS</PackageId>
-    <Version>5.3.8</Version>
+    <Version>5.4.0</Version>
     <Authors>Gerardo Recinto</Authors>
     <Description>Joltrin (distributed as Sop4CS) - Durable memory and verification infrastructure for AI agents.</Description>
     <PackageTags>database;btree;vector;storage;transactional;ai-memory</PackageTags>

@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/assets/joltrin-org-logo.jpg" alt="Joltrin logo" width="480" />
+  <img src="docs/assets/joltrin-org-logo.jpg" alt="Joltrin logo" width="120" />
 </p>
 
 [![Discussions](https://img.shields.io/github/discussions/SharedCode/joltrin)](https://github.com/SharedCode/joltrin/discussions)
@@ -645,7 +645,7 @@ When integrating Joltrin into your stack, choose between official versioned rele
 
 #### 1. Official Tagged Releases (Recommended for Production)
 For production deployments, pin your dependency to a tagged release. This guarantees reproducible builds, backward-compatible API guarantees, and security-scanned transitive dependencies:
-- **Go**: `go get github.com/sharedcode/joltrin@v0.1.0`
+- **Go**: `go get github.com/sharedcode/joltrin@v5.4.0` (see [tags](https://github.com/sharedcode/joltrin/tags) for the latest)
 - **Python**: `pip install sop4py==0.1.0`
 - **C# / .NET**: `dotnet add package Sop --version 0.1.0`
 
@@ -658,6 +658,33 @@ git submodule add https://github.com/sharedcode/joltrin.git vendor/joltrin
 # Or configure a Go workspace (go.work) for local development
 go work use ./vendor/joltrin
 ```
+
+### Cutting a Release (Maintainers)
+
+Releases are cut from this repo with the scripts in `scripts/`, then tagged and pushed to GitHub. The full step-by-step for building native bindings and publishing to PyPI/NuGet/Maven is in [`RELEASE_PROCESS.md`](RELEASE_PROCESS.md); the short version:
+
+```bash
+# 1. Bump the version everywhere (VERSION file, go.mod-adjacent metadata, bindings)
+./scripts/update_version.sh 5.4.0
+
+# 2. Review the diff, then commit the bump
+git add -A && git commit -m "chore: bump version to 5.4.0"
+
+# 3. Build release artifacts (native libs for Python/Java/C# bindings)
+./scripts/build_release.sh
+
+# 4. Verify checksums, archive integrity, and SBOM before publishing
+./scripts/verify_release.sh release
+
+# 5. Tag and push. This is what makes `go get github.com/sharedcode/joltrin@v5.4.0` resolve.
+git tag v5.4.0
+git push origin master v5.4.0
+
+# 6. Create the GitHub Release from the tag (attaches release notes + artifacts)
+gh release create v5.4.0 --generate-notes
+```
+
+Go's package proxy needs no separate publish step: once the tag is pushed, `go get ...@v5.4.0` works immediately. Python, C#, and Java bindings still require the explicit `twine upload` / `dotnet nuget push` / `mvn deploy` steps in `RELEASE_PROCESS.md`.
 
 ## 📚 Technical Reference Guides
 

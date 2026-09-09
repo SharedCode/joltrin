@@ -10,7 +10,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>sop-cli</ToolCommandName>
     <PackageId>Sop4CS.CLI</PackageId>
-    <Version>5.3.8</Version>
+    <Version>5.4.0</Version>
     <Authors>Gerardo Recinto</Authors>
     <Description>SOP CLI and Examples</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
