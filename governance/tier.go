@@ -33,15 +33,15 @@ type Capability string
 
 const (
 	// Core capabilities (always available under MIT license)
-	CapEmbeddedBTree       Capability = "core:btree"
-	CapWAL2PC              Capability = "core:wal_2pc"
-	CapErasureCoding       Capability = "core:erasure_coding"
-	CapAgentMemory         Capability = "core:agent_memory"
-	CapVectorSimilarity    Capability = "core:vector_similarity"
-	CapEmbeddedMCP         Capability = "core:embedded_mcp"
-	CapA2ARuntime          Capability = "core:a2a_runtime"
-	CapLocalVerifyBarrier  Capability = "core:verify_barrier"
-	CapDeveloperOIDC       Capability = "core:developer_oidc"
+	CapEmbeddedBTree      Capability = "core:btree"
+	CapWAL2PC             Capability = "core:wal_2pc"
+	CapErasureCoding      Capability = "core:erasure_coding"
+	CapAgentMemory        Capability = "core:agent_memory"
+	CapVectorSimilarity   Capability = "core:vector_similarity"
+	CapEmbeddedMCP        Capability = "core:embedded_mcp"
+	CapA2ARuntime         Capability = "core:a2a_runtime"
+	CapLocalVerifyBarrier Capability = "core:verify_barrier"
+	CapDeveloperOIDC      Capability = "core:developer_oidc"
 
 	// Pro capabilities
 	CapPolicyAsCode         Capability = "pro:policy_as_code"

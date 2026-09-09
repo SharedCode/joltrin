@@ -74,12 +74,12 @@ func getOIDCRegistry() (*governance.IdentityProviderRegistry, *governance.Featur
 }
 
 type ProviderResponse struct {
-	ID           string                          `json:"id"`
-	Type         string                          `json:"type"`
-	DisplayName  string                          `json:"display_name"`
-	RequiredTier governance.Tier                 `json:"required_tier"`
-	IsEntitled   bool                            `json:"is_entitled"`
-	AuthorizeURL string                          `json:"authorize_url,omitempty"`
+	ID           string          `json:"id"`
+	Type         string          `json:"type"`
+	DisplayName  string          `json:"display_name"`
+	RequiredTier governance.Tier `json:"required_tier"`
+	IsEntitled   bool            `json:"is_entitled"`
+	AuthorizeURL string          `json:"authorize_url,omitempty"`
 }
 
 func handleListAuthProviders(w http.ResponseWriter, r *http.Request) {
