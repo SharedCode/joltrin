@@ -13,7 +13,8 @@
 </p>
 
 [![Discussions](https://img.shields.io/github/discussions/SharedCode/joltrin)](https://github.com/SharedCode/joltrin/discussions)
-[![CI](https://github.com/SharedCode/joltrin/actions/workflows/go.yml/badge.svg?branch=master)](https://github.com/SharedCode/joltrin/actions/workflows/go.yml)
+[![CI](https://github.com/SharedCode/joltrin/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/SharedCode/joltrin/actions/workflows/ci.yml)
+[![Go Tests](https://github.com/SharedCode/joltrin/actions/workflows/go.yml/badge.svg?event=push&branch=master)](https://github.com/SharedCode/joltrin/actions/workflows/go.yml)
 [![Release](https://img.shields.io/github/v/release/SharedCode/joltrin)](https://github.com/SharedCode/joltrin/releases)
 [![codecov](https://codecov.io/gh/SharedCode/joltrin/branch/master/graph/badge.svg)](https://app.codecov.io/github/SharedCode/joltrin)
 [![Go Reference](https://pkg.go.dev/badge/github.com/sharedcode/joltrin.svg)](https://pkg.go.dev/github.com/sharedcode/joltrin)
