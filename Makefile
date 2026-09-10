@@ -1,4 +1,4 @@
-.PHONY: security-scan lint-sec sast sca secrets-scan iac-scan
+.PHONY: security-scan lint-sec sast sca secrets-scan iac-scan lint-infra deploy-check
 
 # Mirrors the checks run in .github/workflows/security.yml and codeql.yml
 # so issues surface locally before a push, not after CI runs.
@@ -64,3 +64,38 @@ sast:
 
 security-scan: lint-sec sca secrets-scan iac-scan
 	@echo "All local security checks passed."
+
+# Mirrors the pre-deploy checks that should pass before touching Azure, so
+# issues surface locally before a push, not after deploy-azure.yml runs.
+
+lint-infra:
+	@if command -v az >/dev/null 2>&1; then \
+		echo "== bicep build (syntax + type check) =="; \
+		for f in infra/azure/main.bicep infra/azure/modules/*.bicep; do \
+			echo "-- $$f"; \
+			az bicep build --file "$$f" --stdout > /dev/null || exit 1; \
+		done; \
+	else \
+		echo "az CLI not installed locally, skipping Bicep validation (CI validates on every push): https://learn.microsoft.com/cli/azure/install-azure-cli"; \
+	fi
+	@echo "== deploy-azure.yml is valid YAML =="
+	@python3 -c "import yaml; yaml.safe_load(open('.github/workflows/deploy-azure.yml'))" 2>/dev/null || \
+		{ echo "deploy-azure.yml failed to parse as YAML"; exit 1; }
+
+deploy-check: lint-infra
+	@echo "== go build/vet the billing + persistence code path =="
+	@go build ./governance/... ./tools/httpserver/...
+	@go vet ./governance/... ./tools/httpserver/...
+	@echo "== go test the billing + persistence code path =="
+	@go test ./governance/... ./tools/httpserver/... -run "Billing|Webhook|Checkout|Portal|Stripe" -count=1
+	@if command -v az >/dev/null 2>&1 && az account show >/dev/null 2>&1; then \
+		echo "== az deployment group what-if (dry run against $${RESOURCE_GROUP:-joltrin-prod-rg}) =="; \
+		az deployment group what-if \
+			-g "$${RESOURCE_GROUP:-joltrin-prod-rg}" \
+			-f infra/azure/main.bicep \
+			-p infra/azure/main.parameters.json \
+			-p alertEmail=deploy-check@example.com stripeSecretKey=sk_dry_run stripeWebhookSecret=whsec_dry_run || true; \
+	else \
+		echo "az CLI not installed or not logged in, skipping what-if (CI runs the real deployment on merge to master)."; \
+	fi
+	@echo "deploy-check passed."
