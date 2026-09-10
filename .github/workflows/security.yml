@@ -1,0 +1,188 @@
+name: Security
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  secrets:
+    name: Secret scanning (Gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
+
+  dependency-scan:
+    name: Dependency scan (Trivy fs)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Offline scan: the pom.xml bindings pull in parent POM lookups against
+      # Maven Central for version resolution, which is flaky under CI's
+      # shared egress IPs (rate limiting) and unnecessary - the lockfiles
+      # already pin resolved versions.
+      - name: Trivy filesystem scan (block on critical/high)
+        uses: aquasecurity/trivy-action@0.28.0
+        env:
+          TRIVY_OFFLINE_SCAN: true
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          ignore-unfixed: true
+          format: sarif
+          output: trivy-fs-critical-high.sarif
+
+      - name: Upload SARIF (critical/high)
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-fs-critical-high.sarif
+          category: trivy-fs-critical-high
+
+      - name: Trivy filesystem scan (warn on medium)
+        if: always()
+        uses: aquasecurity/trivy-action@0.28.0
+        env:
+          TRIVY_OFFLINE_SCAN: true
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: MEDIUM
+          exit-code: '0'
+          format: table
+
+  govulncheck:
+    name: Dependency scan (govulncheck)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      # demo and demo-agents are WASM-only (import syscall/js); see the
+      # comment in .github/workflows/go.yml for why they're excluded from
+      # the main scan and checked separately under GOOS=js GOARCH=wasm.
+      - name: govulncheck (native)
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck $(go list ./... 2>/dev/null | grep -Ev '/demo$|/demo-agents$')
+
+      - name: govulncheck (wasm demo)
+        env:
+          GOOS: js
+          GOARCH: wasm
+        run: govulncheck ./demo/...
+
+      - name: govulncheck (wasm agent barrier demo)
+        env:
+          GOOS: js
+          GOARCH: wasm
+        run: govulncheck ./demo-agents/...
+
+  iac-scan:
+    name: IaC / container config scan (Trivy config)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Trivy config scan (block on critical/high)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          format: sarif
+          output: trivy-config-critical-high.sarif
+
+      - name: Upload SARIF (critical/high)
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-config-critical-high.sarif
+          category: trivy-config-critical-high
+
+      - name: Trivy config scan (warn on medium)
+        if: always()
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: MEDIUM
+          exit-code: '0'
+          format: table
+
+  image-scan:
+    name: Container image scan (Trivy image)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build runtime image
+        run: docker build --target runtime -t joltrin:scan .
+
+      - name: Trivy image scan (block on critical/high)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: joltrin:scan
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          ignore-unfixed: true
+          format: sarif
+          output: trivy-image-critical-high.sarif
+
+      - name: Upload SARIF (critical/high)
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-image-critical-high.sarif
+          category: trivy-image-critical-high
+
+      - name: Trivy image scan (warn on medium)
+        if: always()
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: joltrin:scan
+          severity: MEDIUM
+          exit-code: '0'
+          format: table
