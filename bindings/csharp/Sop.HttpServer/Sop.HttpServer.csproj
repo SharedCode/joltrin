@@ -10,7 +10,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>sop-httpserver</ToolCommandName>
     <PackageId>Sop4CS.HttpServer</PackageId>
-    <Version>5.4.0</Version>
+    <Version>5.5.0</Version>
     <Authors>Gerardo Recinto</Authors>
     <Description>SOP HTTP Server and Data Management Console</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
