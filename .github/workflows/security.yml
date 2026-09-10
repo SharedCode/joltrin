@@ -23,11 +23,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Using the CLI directly rather than gitleaks/gitleaks-action@v2: that
+      # action now requires a paid GITLEAKS_LICENSE for organization
+      # repositories (see gitleaks/gitleaks-action#issues, "-announcement").
+      # The gitleaks CLI itself stays free and open source.
+      - name: Install Gitleaks
+        run: |
+          curl -fsSL https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz \
+            | tar -xz -C /usr/local/bin gitleaks
+
       - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_CONFIG: .gitleaks.toml
+        run: gitleaks detect --source . --config .gitleaks.toml --redact
 
   dependency-scan:
     name: Dependency scan (Trivy fs)
@@ -56,6 +62,7 @@ jobs:
           ignore-unfixed: true
           format: sarif
           output: trivy-fs-critical-high.sarif
+          limit-severities-for-sarif: 'true'
 
       - name: Upload SARIF (critical/high)
         if: always()
@@ -129,6 +136,7 @@ jobs:
           exit-code: '1'
           format: sarif
           output: trivy-config-critical-high.sarif
+          limit-severities-for-sarif: 'true'
 
       - name: Upload SARIF (critical/high)
         if: always()
@@ -170,6 +178,7 @@ jobs:
           ignore-unfixed: true
           format: sarif
           output: trivy-image-critical-high.sarif
+          limit-severities-for-sarif: 'true'
 
       - name: Upload SARIF (critical/high)
         if: always()
