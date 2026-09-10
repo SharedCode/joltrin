@@ -11,6 +11,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -200,14 +201,20 @@ type DefaultBillingService struct {
 	cfg             StripeConfig
 	httpClient      *http.Client
 	gate            *FeatureGate
-	subscriptions   map[string]*Subscription      // tenantID -> Subscription
-	customerMap     map[string]string             // customerID -> tenantID
-	processedEvents map[string]time.Time          // eventID -> processedAt (idempotency)
-	inquiries       map[string]*EnterpriseInquiry // inquiryID -> inquiry
+	store           BillingStore                  // durable backing store; nil means in-memory only
+	subscriptions   map[string]*Subscription      // tenantID -> Subscription (read cache)
+	customerMap     map[string]string             // customerID -> tenantID (read cache)
+	processedEvents map[string]time.Time          // eventID -> processedAt (idempotency, read cache)
+	inquiries       map[string]*EnterpriseInquiry // inquiryID -> inquiry (read cache)
 }
 
-// NewDefaultBillingService constructs a new BillingService.
-func NewDefaultBillingService(cfg StripeConfig, gate *FeatureGate) *DefaultBillingService {
+// NewDefaultBillingService constructs a new BillingService. Passing a
+// BillingStore makes subscriptions, webhook idempotency keys, and enterprise
+// inquiries durable across restarts; every write goes through to it, and its
+// contents hydrate the in-memory read cache at construction time. Omitting
+// it (as existing tests and Simulate-only demos do) keeps the previous
+// in-memory-only behavior.
+func NewDefaultBillingService(cfg StripeConfig, gate *FeatureGate, store ...BillingStore) *DefaultBillingService {
 	if cfg.ProPriceID == "" {
 		cfg.ProPriceID = "price_joltrin_pro_monthly"
 	}
@@ -218,7 +225,7 @@ func NewDefaultBillingService(cfg StripeConfig, gate *FeatureGate) *DefaultBilli
 		cfg.Simulate = true
 	}
 
-	return &DefaultBillingService{
+	s := &DefaultBillingService{
 		cfg:             cfg,
 		httpClient:      &http.Client{Timeout: 15 * time.Second},
 		gate:            gate,
@@ -227,12 +234,95 @@ func NewDefaultBillingService(cfg StripeConfig, gate *FeatureGate) *DefaultBilli
 		processedEvents: make(map[string]time.Time),
 		inquiries:       make(map[string]*EnterpriseInquiry),
 	}
+	if len(store) > 0 {
+		s.store = store[0]
+	}
+	if s.store != nil {
+		s.hydrateFromStore(context.Background())
+	}
+	return s
+}
+
+// hydrateFromStore loads durable billing state into the in-memory read cache.
+// Called once at construction; failures are logged to stderr rather than
+// treated as fatal, since a fresh/empty store is a normal first-run state.
+func (s *DefaultBillingService) hydrateFromStore(ctx context.Context) {
+	if subs, err := s.store.ListSubscriptions(ctx); err == nil {
+		for _, sub := range subs {
+			s.subscriptions[sub.TenantID] = sub
+		}
+	} else {
+		fmt.Fprintf(os.Stderr, "governance/billing: hydrate subscriptions: %v\n", err)
+	}
+	if cm, err := s.store.ListCustomerTenants(ctx); err == nil {
+		s.customerMap = cm
+	} else {
+		fmt.Fprintf(os.Stderr, "governance/billing: hydrate customer map: %v\n", err)
+	}
+	if pe, err := s.store.ListProcessedEvents(ctx); err == nil {
+		s.processedEvents = pe
+	} else {
+		fmt.Fprintf(os.Stderr, "governance/billing: hydrate processed events: %v\n", err)
+	}
+	if inqs, err := s.store.ListInquiries(ctx); err == nil {
+		for _, inq := range inqs {
+			s.inquiries[inq.ID] = inq
+		}
+	} else {
+		fmt.Fprintf(os.Stderr, "governance/billing: hydrate inquiries: %v\n", err)
+	}
 }
 
 func (s *DefaultBillingService) Config() StripeConfig {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.cfg
+}
+
+// stripeRequest performs a form-encoded POST against the Stripe API with
+// bounded retry-with-backoff on 429 (rate limited) and 5xx (Stripe outage)
+// responses; 4xx-other-than-429 responses are returned immediately since a
+// retry won't change a malformed or rejected request. This is the graceful
+// degradation layer for a commercial billing surface: a single Stripe blip
+// shouldn't fail a customer's checkout outright.
+func (s *DefaultBillingService) stripeRequest(ctx context.Context, method, url, body string) (*http.Response, []byte, error) {
+	const maxAttempts = 3
+	backoff := 500 * time.Millisecond
+
+	var lastErr error
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		req, err := http.NewRequestWithContext(ctx, method, url, strings.NewReader(body))
+		if err != nil {
+			return nil, nil, fmt.Errorf("governance/billing: failed to create request: %w", err)
+		}
+		req.Header.Set("Authorization", "Bearer "+s.cfg.SecretKey)
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+		resp, err := s.httpClient.Do(req)
+		if err != nil {
+			lastErr = fmt.Errorf("governance/billing: stripe api error: %w", err)
+		} else {
+			bodyBytes, readErr := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			if readErr != nil {
+				return nil, nil, fmt.Errorf("governance/billing: failed reading stripe response: %w", readErr)
+			}
+			if resp.StatusCode != http.StatusTooManyRequests && resp.StatusCode < 500 {
+				return resp, bodyBytes, nil
+			}
+			lastErr = fmt.Errorf("governance/billing: stripe api returned status %d: %s", resp.StatusCode, string(bodyBytes))
+		}
+
+		if attempt < maxAttempts {
+			select {
+			case <-ctx.Done():
+				return nil, nil, ctx.Err()
+			case <-time.After(backoff):
+			}
+			backoff *= 2
+		}
+	}
+	return nil, nil, lastErr
 }
 
 // CreateCheckoutSession generates a Stripe Checkout session or a deterministic simulated session.
@@ -298,22 +388,9 @@ func (s *DefaultBillingService) CreateCheckoutSession(ctx context.Context, tenan
 	data.Set("success_url", successURL)
 	data.Set("cancel_url", cancelURL)
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.stripe.com/v1/checkout/sessions", strings.NewReader(data.Encode()))
+	resp, bodyBytes, err := s.stripeRequest(ctx, http.MethodPost, "https://api.stripe.com/v1/checkout/sessions", data.Encode())
 	if err != nil {
-		return nil, fmt.Errorf("governance/billing: failed to create request: %w", err)
-	}
-	req.Header.Set("Authorization", "Bearer "+s.cfg.SecretKey)
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	resp, err := s.httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("governance/billing: stripe api error: %w", err)
-	}
-	defer resp.Body.Close()
-
-	bodyBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("governance/billing: failed reading stripe response: %w", err)
+		return nil, err
 	}
 
 	if resp.StatusCode >= 400 {
@@ -355,20 +432,10 @@ func (s *DefaultBillingService) CreatePortalSession(ctx context.Context, custome
 		data.Set("return_url", returnURL)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.stripe.com/v1/billing_portal/sessions", strings.NewReader(data.Encode()))
+	resp, body, err := s.stripeRequest(ctx, http.MethodPost, "https://api.stripe.com/v1/billing_portal/sessions", data.Encode())
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("Authorization", "Bearer "+s.cfg.SecretKey)
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	resp, err := s.httpClient.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	body, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode >= 400 {
 		return "", fmt.Errorf("governance/billing: stripe portal error: %s", string(body))
 	}
@@ -404,7 +471,13 @@ func (s *DefaultBillingService) HandleWebhook(ctx context.Context, payload []byt
 	if _, exists := s.processedEvents[ev.ID]; exists {
 		return nil, fmt.Errorf("%w: %s", ErrDuplicateWebhookEvent, ev.ID)
 	}
-	s.processedEvents[ev.ID] = time.Now().UTC()
+	processedAt := time.Now().UTC()
+	s.processedEvents[ev.ID] = processedAt
+	if s.store != nil {
+		if err := s.store.MarkProcessedEvent(ctx, ev.ID, processedAt); err != nil {
+			return nil, fmt.Errorf("governance/billing: persist processed event: %w", err)
+		}
+	}
 
 	// Clean up old events cache (> 24 hours)
 	if len(s.processedEvents) > 5000 {
@@ -423,6 +496,7 @@ func (s *DefaultBillingService) HandleWebhook(ctx context.Context, payload []byt
 	}
 
 	now := time.Now().UTC()
+	var affectedTenant, affectedCustomer string
 
 	switch ev.Type {
 	case "checkout.session.completed":
@@ -464,6 +538,7 @@ func (s *DefaultBillingService) HandleWebhook(ctx context.Context, payload []byt
 		if customerID != "" {
 			s.customerMap[customerID] = tenantID
 		}
+		affectedTenant, affectedCustomer = tenantID, customerID
 
 		// Dynamically upgrade server FeatureGate
 		if s.gate != nil {
@@ -516,6 +591,7 @@ func (s *DefaultBillingService) HandleWebhook(ctx context.Context, payload []byt
 		existing.PlanTier = targetTier
 		existing.Status = status
 		existing.UpdatedAt = now
+		affectedTenant, affectedCustomer = tenantID, customerID
 
 		if s.gate != nil {
 			if status == SubStatusActive || status == SubStatusTrialing {
@@ -535,6 +611,7 @@ func (s *DefaultBillingService) HandleWebhook(ctx context.Context, payload []byt
 		if sub, ok := s.subscriptions[tenantID]; ok {
 			sub.Status = SubStatusCanceled
 			sub.UpdatedAt = now
+			affectedTenant = tenantID
 		}
 
 		// Revert to open-source core tier
@@ -549,6 +626,7 @@ func (s *DefaultBillingService) HandleWebhook(ctx context.Context, payload []byt
 			if sub, ok := s.subscriptions[tenantID]; ok {
 				sub.Status = SubStatusActive
 				sub.UpdatedAt = now
+				affectedTenant = tenantID
 				if s.gate != nil {
 					s.gate.SetTier(sub.PlanTier)
 				}
@@ -562,6 +640,20 @@ func (s *DefaultBillingService) HandleWebhook(ctx context.Context, payload []byt
 			if sub, ok := s.subscriptions[tenantID]; ok {
 				sub.Status = SubStatusPastDue
 				sub.UpdatedAt = now
+				affectedTenant = tenantID
+			}
+		}
+	}
+
+	if s.store != nil && affectedTenant != "" {
+		if sub, ok := s.subscriptions[affectedTenant]; ok {
+			if err := s.store.PutSubscription(ctx, sub); err != nil {
+				return nil, fmt.Errorf("governance/billing: persist subscription: %w", err)
+			}
+		}
+		if affectedCustomer != "" {
+			if err := s.store.PutCustomerTenant(ctx, affectedCustomer, affectedTenant); err != nil {
+				return nil, fmt.Errorf("governance/billing: persist customer mapping: %w", err)
 			}
 		}
 	}
@@ -608,6 +700,16 @@ func (s *DefaultBillingService) SetSubscription(ctx context.Context, sub *Subscr
 	if sub.CustomerID != "" {
 		s.customerMap[sub.CustomerID] = sub.TenantID
 	}
+	if s.store != nil {
+		if err := s.store.PutSubscription(ctx, sub); err != nil {
+			return fmt.Errorf("governance/billing: persist subscription: %w", err)
+		}
+		if sub.CustomerID != "" {
+			if err := s.store.PutCustomerTenant(ctx, sub.CustomerID, sub.TenantID); err != nil {
+				return fmt.Errorf("governance/billing: persist customer mapping: %w", err)
+			}
+		}
+	}
 
 	if s.gate != nil && sub.Status == SubStatusActive {
 		s.gate.SetTier(sub.PlanTier)
@@ -635,6 +737,11 @@ func (s *DefaultBillingService) SubmitEnterpriseInquiry(ctx context.Context, inq
 	inq.CreatedAt = time.Now().UTC()
 
 	s.inquiries[inq.ID] = inq
+	if s.store != nil {
+		if err := s.store.PutInquiry(ctx, inq); err != nil {
+			return nil, fmt.Errorf("governance/billing: persist inquiry: %w", err)
+		}
+	}
 	return inq, nil
 }
 

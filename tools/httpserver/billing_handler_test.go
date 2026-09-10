@@ -5,11 +5,32 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 	"time"
 
 	"github.com/sharedcode/joltrin/governance"
 )
+
+// TestMain isolates config.DatabasePath to a fresh temp directory before any
+// test runs. getBillingService() is a package-level sync.Once singleton
+// that persists billing state under config.DatabasePath; without this,
+// config.DatabasePath is "" during `go test` (main()'s flag.Parse never
+// runs), so the singleton would write real files under a relative
+// "_billing" path in the source tree, and that state would leak across
+// separate `go test` invocations (a duplicate-event false positive once
+// bit TestHandleSimulateCheckout locally).
+func TestMain(m *testing.M) {
+	tmpDir, err := os.MkdirTemp("", "joltrin-httpserver-test-*")
+	if err != nil {
+		panic(err)
+	}
+	config.DatabasePath = tmpDir
+
+	code := m.Run()
+	os.RemoveAll(tmpDir)
+	os.Exit(code)
+}
 
 func TestHandleGetPlan(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/api/billing/plan", nil)

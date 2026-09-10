@@ -1,0 +1,154 @@
+# Deploys tools/httpserver to Azure Container Apps. Runs only after merge to
+# master (never on a PR) - this pipeline provisions and updates real, billed
+# Azure infrastructure, so it stays out of the PR check gate. PR checks are
+# ci.yml / go.yml / security.yml / codeql.yml / e2e.yml, unchanged by this
+# file.
+#
+# One-time prerequisite (done once, outside this repo, in the Azure portal
+# or `az ad app create` / `az ad app federated-credential create`): an Azure
+# AD App Registration with a federated credential trusting GitHub OIDC for
+# this repo + the master branch, granted Contributor on the target
+# subscription/resource group. No client secret is stored anywhere - this is
+# exactly what azure/login's OIDC mode is for. Once created, set these as
+# repository variables (not secrets, they aren't sensitive on their own):
+#   AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID
+# And these as repository secrets:
+#   STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, ALERT_EMAIL
+#
+# Flow: deploy the Bicep stack first (it has a public placeholder default for
+# containerImage, so it stands up the ACR/Key Vault/environment/Container App
+# before a real image exists), then build+scan+push the real image to the
+# now-existing ACR, then point the running Container App at it with
+# `az containerapp update`. This avoids guessing the ACR's Bicep-computed
+# name from bash and creating a second, orphaned registry.
+
+name: Deploy to Azure Container Apps
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'infra/azure/**'
+      - 'tools/httpserver/**'
+      - 'governance/**'
+      - 'Dockerfile'
+      - '.github/workflows/deploy-azure.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RESOURCE_GROUP: joltrin-prod-rg
+  LOCATION: eastus
+  CONTAINER_APP_NAME: joltrin-app
+  ACR_IMAGE_NAME: joltrin
+
+jobs:
+  deploy-infra:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      acr-login-server: ${{ steps.deploy.outputs.acrLoginServer }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login (OIDC, no stored secret)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Ensure resource group exists
+        run: az group create -n "$RESOURCE_GROUP" -l "$LOCATION" -o none
+
+      - name: Deploy Bicep stack (infra only; image stays whatever it already is)
+        id: deploy
+        run: |
+          az deployment group create \
+            -g "$RESOURCE_GROUP" \
+            -f infra/azure/main.bicep \
+            -p infra/azure/main.parameters.json \
+            -p alertEmail="${{ secrets.ALERT_EMAIL }}" \
+            -p stripeSecretKey="${{ secrets.STRIPE_SECRET_KEY }}" \
+            -p stripeWebhookSecret="${{ secrets.STRIPE_WEBHOOK_SECRET }}" \
+            -o json > deploy-output.json
+          acr_login_server=$(jq -r '.properties.outputs.acrLoginServer.value' deploy-output.json)
+          echo "acrLoginServer=${acr_login_server}" >> "$GITHUB_OUTPUT"
+
+  build-scan-push:
+    needs: deploy-infra
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      image-tag: ${{ steps.tag.outputs.image-tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute image tag
+        id: tag
+        run: |
+          version=$(cat VERSION 2>/dev/null || echo "0.0.0")
+          echo "image-tag=${version}-${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+
+      - name: Build runtime image
+        run: docker build --target runtime -t joltrin:scan .
+
+      # Same gate as .github/workflows/security.yml's image-scan job: block
+      # the push on any critical/high CVE in the image about to ship to
+      # production.
+      - name: Trivy image scan (block on critical/high)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: joltrin:scan
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          ignore-unfixed: true
+          format: table
+
+      - name: Azure login (OIDC, no stored secret)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Push image to ACR
+        run: |
+          az acr login --name "$(echo '${{ needs.deploy-infra.outputs.acr-login-server }}' | cut -d. -f1)"
+          docker tag joltrin:scan "${{ needs.deploy-infra.outputs.acr-login-server }}/${ACR_IMAGE_NAME}:${{ steps.tag.outputs.image-tag }}"
+          docker push "${{ needs.deploy-infra.outputs.acr-login-server }}/${ACR_IMAGE_NAME}:${{ steps.tag.outputs.image-tag }}"
+
+  roll-revision:
+    needs: [ deploy-infra, build-scan-push ]
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Azure login (OIDC, no stored secret)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      # Container Apps' default revision mode is a rolling update: the new
+      # revision must pass its startup/readiness probes (see
+      # infra/azure/modules/container-app.bicep) before traffic shifts to
+      # it, and the prior revision stays healthy and serving until it does.
+      # `az containerapp update` blocks until the new revision reaches a
+      # terminal state, so a bad image/probe failure fails this step
+      # instead of silently going live.
+      - name: Point the Container App at the new image
+        run: |
+          az containerapp update \
+            -n "$CONTAINER_APP_NAME" \
+            -g "$RESOURCE_GROUP" \
+            --image "${{ needs.deploy-infra.outputs.acr-login-server }}/${ACR_IMAGE_NAME}:${{ needs.build-scan-push.outputs.image-tag }}"
