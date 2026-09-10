@@ -1,0 +1,67 @@
+name: Claude Remediation (suggest-only)
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: claude-remediation-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  remediate:
+    # Only PR comments (issue_comment fires for both issues and PRs) that
+    # contain the trigger phrase. This workflow never runs on a bare scan
+    # failure - a maintainer has to ask for it explicitly.
+    if: >
+      github.event.issue.pull_request != null &&
+      (contains(github.event.comment.body, '/remediate') ||
+       contains(github.event.comment.body, '/claude fix'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Get PR head ref
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            core.setOutput('sha', pr.head.sha);
+
+      - name: Checkout PR (read-only)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr.outputs.sha }}
+          fetch-depth: 0
+
+      - name: Run Claude Code diagnosis
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          trigger_phrase: "/remediate"
+          # Deliberately no Edit/Write/git-commit tools and no
+          # contents:write permission above: this workflow diagnoses and
+          # proposes a patch, it never writes to the branch. A human
+          # applies the suggested diff themselves.
+          claude_args: |
+            --allowedTools "Read,Grep,Glob,Bash(git diff:*),Bash(git log:*),Bash(gh pr diff:*),Bash(gh run view:*),Bash(gh api:*)"
+          prompt: |
+            A maintainer asked for remediation help on this PR via /remediate
+            or /claude fix. Diagnose the failing security/CI checks (Gitleaks,
+            Trivy, govulncheck, CodeQL, or test failures) using `gh run view`
+            and `gh api` against this PR's head commit.
+
+            Produce the minimal fix as a unified diff and post it in a single
+            PR comment along with a short explanation of the root cause.
+            Do not modify any files and do not commit anything - the
+            maintainer will apply the patch by hand.
