@@ -1,0 +1,61 @@
+# Sidecar ignore file for bindings/Dockerfile.build, which BuildKit picks up
+# instead of the repo-root .dockerignore for this specific -f target. The
+# root .dockerignore excludes bindings/ (correct for the main app image,
+# which has no business bundling foreign-language binding source), but this
+# Dockerfile's whole job is building those bindings, so it needs the
+# opposite: everything the root ignore excludes EXCEPT bindings/ itself.
+
+# Version control and editor
+.git
+.github
+.venv
+.vscode
+.idea
+
+# Build caches and dependencies
+node_modules
+dist
+build
+vendor/
+.cache/
+*.egg-info
+__pycache__
+
+# Web frontend (still irrelevant to the bindings build)
+sop-arena/
+
+# Documentation and assets (preserve embedded prompt templates)
+docs/
+*.md
+!ai/agent/prompts/*.md
+_config.yml
+
+# Test and coverage artifacts
+*.test
+*.out
+*.log
+*.cov
+coverage/
+*.so
+*.dylib
+*.dll
+*.a
+
+# Generated binaries
+/httpserver
+/httpserver_test
+/main
+/server
+/sop_server
+tools/httpserver/httpserver
+tools/httpserver/sop_server
+
+# Data directories and runtime logs
+data/
+translogs/
+storelist.txt
+ai/data/
+ai/nurse_output.txt
+ai/storelist.txt
+tools/httpserver/data_browser
+tools/httpserver/sop-browser
