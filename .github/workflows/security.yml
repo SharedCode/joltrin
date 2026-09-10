@@ -45,7 +45,7 @@ jobs:
       # shared egress IPs (rate limiting) and unnecessary - the lockfiles
       # already pin resolved versions.
       - name: Trivy filesystem scan (block on critical/high)
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # v0.33.1
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         env:
           TRIVY_OFFLINE_SCAN: true
         with:
@@ -66,7 +66,7 @@ jobs:
 
       - name: Trivy filesystem scan (warn on medium)
         if: always()
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # v0.33.1
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         env:
           TRIVY_OFFLINE_SCAN: true
         with:
@@ -121,7 +121,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Trivy config scan (block on critical/high)
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # v0.33.1
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: config
           scan-ref: .
@@ -139,7 +139,7 @@ jobs:
 
       - name: Trivy config scan (warn on medium)
         if: always()
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # v0.33.1
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: config
           scan-ref: .
@@ -162,7 +162,7 @@ jobs:
         run: docker build --target runtime -t joltrin:scan .
 
       - name: Trivy image scan (block on critical/high)
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # v0.33.1
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: joltrin:scan
           severity: CRITICAL,HIGH
@@ -180,7 +180,7 @@ jobs:
 
       - name: Trivy image scan (warn on medium)
         if: always()
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # v0.33.1
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: joltrin:scan
           severity: MEDIUM
