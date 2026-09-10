@@ -53,6 +53,10 @@ jobs:
         shell: bash
         run: go build $(go list ./... 2>/dev/null | grep -Ev '/demo$|/demo-agents$')
 
+      # -o is required here: without it, `go build ./demo/...` under
+      # GOOS=js GOARCH=wasm writes a binary named after the package
+      # directory into the cwd, which collides with the demo/ directory
+      # itself (same reason deploy-demo.yml always passes -o).
       - name: Build Go (wasm demo packages)
         if: matrix.language == 'go'
         shell: bash
@@ -60,8 +64,8 @@ jobs:
           GOOS: js
           GOARCH: wasm
         run: |
-          go build ./demo/...
-          go build ./demo-agents/...
+          go build -o /tmp/demo.wasm ./demo
+          go build -o /tmp/demo-agents.wasm ./demo-agents
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
