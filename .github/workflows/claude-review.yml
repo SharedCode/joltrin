@@ -1,0 +1,62 @@
+name: Claude PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [ "master" ]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: claude-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      # `secrets` isn't a valid context in a job/step `if:`, so this
+      # produces a step output instead. That way the job skips cleanly
+      # (still a passing status) instead of failing every PR until
+      # ANTHROPIC_API_KEY is actually configured.
+      - name: Check for Anthropic API key
+        id: check-key
+        run: echo "present=${{ secrets.ANTHROPIC_API_KEY != '' }}" >> "$GITHUB_OUTPUT"
+
+      - name: Run Claude Code review
+        if: steps.check-key.outputs.present == 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Read-only tool set: this job diagnoses and comments, it never
+          # edits files or pushes commits. Auto-remediation is a separate,
+          # explicitly-triggered workflow (claude-remediation.yml).
+          claude_args: |
+            --allowedTools "Read,Grep,Glob,Bash(git diff:*),Bash(git log:*),Bash(gh pr diff:*)"
+          prompt: |
+            Review this pull request's diff against joltrin's security standards:
+            - No hardcoded secrets, credentials, or tokens.
+            - No new command/SQL/path injection surfaces.
+            - Containers and CI steps keep least-privilege defaults: non-root
+              execution, no unnecessary write scopes, pinned action/image
+              versions.
+            - Go: no unchecked errors on security-relevant paths (auth, crypto,
+              file access), no unsafe use of user input.
+            - Dependency changes: flag anything pulling in an unpinned or
+              unusually broad version range.
+
+            Post findings as a single PR comment: a short summary, then any
+            issues ranked by severity with file:line references. If nothing
+            is found, say so briefly. Do not modify any files.

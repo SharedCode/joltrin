@@ -1,0 +1,73 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  schedule:
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: go
+            build-mode: manual
+          - language: javascript-typescript
+            build-mode: none
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        if: matrix.language == 'go'
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          queries: security-extended
+
+      # demo and demo-agents are WASM-only (import syscall/js) and only
+      # compile under GOOS=js GOARCH=wasm, same exclusion ci.yml applies
+      # to vet/build/test. autobuild would fail on them, so build the
+      # native tree and the wasm packages as two separate passes.
+      - name: Build Go (native)
+        if: matrix.language == 'go'
+        shell: bash
+        run: go build $(go list ./... 2>/dev/null | grep -Ev '/demo$|/demo-agents$')
+
+      # -o is required here: without it, `go build ./demo/...` under
+      # GOOS=js GOARCH=wasm writes a binary named after the package
+      # directory into the cwd, which collides with the demo/ directory
+      # itself (same reason deploy-demo.yml always passes -o).
+      - name: Build Go (wasm demo packages)
+        if: matrix.language == 'go'
+        shell: bash
+        env:
+          GOOS: js
+          GOARCH: wasm
+        run: |
+          go build -o /tmp/demo.wasm ./demo
+          go build -o /tmp/demo-agents.wasm ./demo-agents
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"

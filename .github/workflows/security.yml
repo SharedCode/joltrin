@@ -1,0 +1,197 @@
+name: Security
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  secrets:
+    name: Secret scanning (Gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Using the CLI directly rather than gitleaks/gitleaks-action@v2: that
+      # action now requires a paid GITLEAKS_LICENSE for organization
+      # repositories (see gitleaks/gitleaks-action#issues, "-announcement").
+      # The gitleaks CLI itself stays free and open source.
+      - name: Install Gitleaks
+        run: |
+          curl -fsSL https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz \
+            | tar -xz -C /usr/local/bin gitleaks
+
+      - name: Run Gitleaks
+        run: gitleaks detect --source . --config .gitleaks.toml --redact
+
+  dependency-scan:
+    name: Dependency scan (Trivy fs)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Offline scan: the pom.xml bindings pull in parent POM lookups against
+      # Maven Central for version resolution, which is flaky under CI's
+      # shared egress IPs (rate limiting) and unnecessary - the lockfiles
+      # already pin resolved versions.
+      - name: Trivy filesystem scan (block on critical/high)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_OFFLINE_SCAN: true
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          ignore-unfixed: true
+          format: sarif
+          output: trivy-fs-critical-high.sarif
+          limit-severities-for-sarif: 'true'
+
+      - name: Upload SARIF (critical/high)
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-fs-critical-high.sarif
+          category: trivy-fs-critical-high
+
+      - name: Trivy filesystem scan (warn on medium)
+        if: always()
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_OFFLINE_SCAN: true
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: MEDIUM
+          exit-code: '0'
+          format: table
+
+  govulncheck:
+    name: Dependency scan (govulncheck)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      # demo and demo-agents are WASM-only (import syscall/js); see the
+      # comment in .github/workflows/go.yml for why they're excluded from
+      # the main scan and checked separately under GOOS=js GOARCH=wasm.
+      - name: govulncheck (native)
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck $(go list ./... 2>/dev/null | grep -Ev '/demo$|/demo-agents$')
+
+      - name: govulncheck (wasm demo)
+        env:
+          GOOS: js
+          GOARCH: wasm
+        run: govulncheck ./demo/...
+
+      - name: govulncheck (wasm agent barrier demo)
+        env:
+          GOOS: js
+          GOARCH: wasm
+        run: govulncheck ./demo-agents/...
+
+  iac-scan:
+    name: IaC / container config scan (Trivy config)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Trivy config scan (block on critical/high)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          format: sarif
+          output: trivy-config-critical-high.sarif
+          limit-severities-for-sarif: 'true'
+
+      - name: Upload SARIF (critical/high)
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-config-critical-high.sarif
+          category: trivy-config-critical-high
+
+      - name: Trivy config scan (warn on medium)
+        if: always()
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: MEDIUM
+          exit-code: '0'
+          format: table
+
+  image-scan:
+    name: Container image scan (Trivy image)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build runtime image
+        run: docker build --target runtime -t joltrin:scan .
+
+      - name: Trivy image scan (block on critical/high)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: joltrin:scan
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          ignore-unfixed: true
+          format: sarif
+          output: trivy-image-critical-high.sarif
+          limit-severities-for-sarif: 'true'
+
+      - name: Upload SARIF (critical/high)
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-image-critical-high.sarif
+          category: trivy-image-critical-high
+
+      - name: Trivy image scan (warn on medium)
+        if: always()
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: joltrin:scan
+          severity: MEDIUM
+          exit-code: '0'
+          format: table

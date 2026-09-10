@@ -1,0 +1,33 @@
+title = "joltrin gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Baseline exceptions for known-safe test fixtures and generated artifacts"
+paths = [
+  '''(^|/)_test\.go$''',
+  '''(^|/)node_modules/''',
+  '''(^|/)_site/''',
+  '''(^|/)test-results/''',
+  '''(^|/)playwright-report/''',
+  '''(^|/)go\.sum$''',
+  '''(^|/)go\.work\.sum$''',
+  '''(^|/)package-lock\.json$''',
+  # Generated AI training/demo dataset content that used to be tracked
+  # before it was gitignored (see .gitignore). Its record IDs (disease
+  # names, UUIDs) trip the generic-api-key rule but hold no credentials.
+  '''^ai/data/(doctor_core|doctor|nurse_local)/''',
+  # Deleted legacy ASP.NET scaffold; its Application Insights
+  # instrumentation key is a client-visible telemetry ID, not a secret.
+  '''(^|/)Sop\.AzureWebApp/''',
+]
+
+regexes = [
+  # Placeholder credentials used in test fixtures and README examples,
+  # never real secrets. Kept narrow and literal on purpose.
+  '''legacy-secret''',
+  '''remote-client-test-secret''',
+  '''secret_password''',
+  '''my-secret-token''',
+]
