@@ -33,15 +33,29 @@ FROM golang:1.26.8-alpine AS build-and-test
 # Install Redis server for Alpine
 RUN apk add --no-cache redis
 
-WORKDIR /app
-COPY --from=builder /src /app
+# Unprivileged user to run the test suite as. Go's module cache and build
+# cache need a writable, non-root-owned HOME since this stage does its own
+# `go mod download` at test time (it doesn't inherit the builder stage's
+# cache mount) and redis-server only binds an unprivileged port, so nothing
+# here needs root.
+RUN addgroup -g 10001 -S sop && \
+    adduser -u 10001 -S sop -G sop -h /home/sop && \
+    mkdir -p /home/sop/go /home/sop/.cache /var/lib/sop && \
+    chown -R sop:sop /home/sop /var/lib/sop
 
-# Create the data path folder & the env var.
-RUN mkdir -p /var/lib/sop
+ENV HOME=/home/sop
+ENV GOPATH=/home/sop/go
+ENV GOCACHE=/home/sop/.cache/go-build
+
+WORKDIR /app
+COPY --from=builder --chown=sop:sop /src /app
+
 ENV datapath=/var/lib/sop
 
 # Copy the entrypoint script that runs tests with NO coverage
 COPY docker-entrypoint-nocov.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint-nocov.sh
+
+USER sop:sop
 
 CMD ["docker-entrypoint-nocov.sh"]

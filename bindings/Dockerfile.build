@@ -16,6 +16,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -fsSL https://ziglang.org/download/0.13.0/zig-linux-x86_64-0.13.0.tar.xz | tar -xJ -C /usr/local \
     && ln -s /usr/local/zig-linux-x86_64-0.13.0/zig /usr/local/bin/zig
 
+# Unprivileged user for the actual build (bindings/build_in_docker.sh runs
+# `docker run` with no volume mount and copies artifacts out via `docker cp`
+# afterward, so there's no host-UID bind-mount concern). The --mount=cache
+# module cache above doesn't persist into the image, so build.sh downloads
+# modules again at container-run time and needs a writable GOPATH/GOCACHE.
+RUN groupadd -g 10001 sop && useradd -u 10001 -g sop -m -d /home/sop sop
+
 WORKDIR /app
 
 # Download modules first with layer caching
@@ -33,4 +40,10 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     go mod download
 
 # Copy source code
-COPY . .
+COPY --chown=sop:sop . .
+
+ENV HOME=/home/sop
+ENV GOPATH=/home/sop/go
+ENV GOCACHE=/home/sop/.cache/go-build
+
+USER sop:sop
