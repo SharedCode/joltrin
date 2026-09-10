@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 
@@ -14,7 +16,56 @@ import (
 var (
 	billingService     governance.BillingService
 	billingServiceOnce sync.Once
+
+	billingRateLimiter     *governance.TierRateLimiter
+	billingRateLimiterOnce sync.Once
 )
+
+// getBillingRateLimiter returns the shared tier-aware token-bucket limiter
+// (governance/gateway.go) guarding billing endpoints that either call out to
+// Stripe or aren't behind requireAuth/withAuth, so an automated flood can't
+// run up the Stripe API bill or spam webhook processing.
+func getBillingRateLimiter() *governance.TierRateLimiter {
+	billingRateLimiterOnce.Do(func() {
+		billingRateLimiter = governance.NewTierRateLimiter()
+	})
+	return billingRateLimiter
+}
+
+// clientIPKey extracts a best-effort client identifier for rate limiting.
+// Azure Container Apps' ingress sets X-Forwarded-For; RemoteAddr is the
+// fallback for direct/local connections.
+func clientIPKey(r *http.Request) string {
+	if fwd := r.Header.Get("X-Forwarded-For"); fwd != "" {
+		if idx := strings.Index(fwd, ","); idx != -1 {
+			return strings.TrimSpace(fwd[:idx])
+		}
+		return strings.TrimSpace(fwd)
+	}
+	return r.RemoteAddr
+}
+
+// checkBillingRateLimit applies the tier-aware rate limit to a billing
+// request, keyed by client IP since these endpoints run pre-auth. Returns
+// false and writes a 429 response if the caller should be throttled; the
+// caller must return immediately when this returns false. Fails open on an
+// internal limiter error so a limiter bug cannot take down billing.
+func checkBillingRateLimit(w http.ResponseWriter, r *http.Request) bool {
+	identity := &governance.GatewayIdentity{
+		TenantID: clientIPKey(r),
+		Tier:     getServerFeatureGate().Tier(),
+	}
+	allowed, retryAfter, err := getBillingRateLimiter().Allow(r.Context(), identity)
+	if err != nil {
+		return true
+	}
+	if !allowed {
+		w.Header().Set("Retry-After", fmt.Sprintf("%.0f", retryAfter.Seconds()))
+		writeJSONError(w, http.StatusTooManyRequests, "rate limit exceeded, retry later")
+		return false
+	}
+	return true
+}
 
 func getBillingService() governance.BillingService {
 	billingServiceOnce.Do(func() {
@@ -39,7 +90,19 @@ func getBillingService() governance.BillingService {
 			Simulate:          simulate,
 		}
 
-		billingService = governance.NewDefaultBillingService(cfg, gate)
+		// Subscriptions, webhook idempotency keys, and enterprise inquiries are
+		// persisted under a dedicated subfolder of the server's own data path
+		// (joltrin's own embedded store) so they survive a restart/redeploy
+		// instead of living only in process memory. Falls back to the same
+		// default as the -database flag if unset, rather than silently
+		// collapsing to a relative path in the current working directory.
+		dbPath := config.DatabasePath
+		if dbPath == "" {
+			dbPath = "/tmp/sop_data"
+		}
+		billingDataPath := filepath.Join(dbPath, "_billing")
+		store := governance.NewJoltrinBillingStore(billingDataPath)
+		billingService = governance.NewDefaultBillingService(cfg, gate, store)
 	})
 	return billingService
 }
@@ -77,6 +140,9 @@ func handleGetPlan(w http.ResponseWriter, r *http.Request) {
 func handleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	if !checkBillingRateLimit(w, r) {
 		return
 	}
 
@@ -123,6 +189,9 @@ func handleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 func handleCreatePortalSession(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	if !checkBillingRateLimit(w, r) {
 		return
 	}
 
