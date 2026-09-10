@@ -1,5 +1,29 @@
 # Changelog
 
+## v5.5.0
+
+### DevSecOps Pipeline
+- **CodeQL SAST** for Go and JS/TS, running on push/PR to master plus a weekly schedule.
+- **Secret, dependency, and container config scanning**: Gitleaks (via the free CLI, not the paid GitHub Action), Trivy for filesystem/config/image scans, and govulncheck, all gated to block on critical/high findings and uploaded to GitHub code scanning as SARIF.
+- **Non-root Docker containers**: the nocov and bindings build images now run as non-root.
+- **Claude Code PR review and remediation workflows**, plus local `make security-scan` / `make lint-sec` / `make sca` / `make secrets-scan` / `make iac-scan` targets mirroring what CI checks.
+- Documented the pipeline's security controls in `SECURITY.md`.
+
+### Azure Container Apps Deployment
+- Added a Bicep stack (`infra/azure/`) for `tools/httpserver`: Container Registry (admin disabled, pull via managed identity only), Key Vault holding the Stripe keys, Log Analytics with 30-day retention, a Container Apps environment, and the app itself, pinned to a single replica to keep this least-cost and because the storage engine has no documented multi-process write-safety guarantee.
+- Added a monthly cost budget with 50/75/90/100% alert thresholds and Azure Monitor metric alerts on CPU/memory/restart-loop.
+- Added `.github/workflows/deploy-azure.yml`: OIDC-authenticated (no stored client secret), Trivy-scanned before push, deploys only on merge to master.
+- Added `make deploy-check` / `make lint-infra`.
+
+### Billing
+- **Fixed a real bug**: subscriptions, webhook idempotency keys, the customer-tenant map, and enterprise inquiries lived only in in-process memory, so a server restart or redeploy silently wiped every paying customer's subscription. All four are now persisted through joltrin's own embedded B-Tree engine instead of adding a new external dependency.
+- Wired the previously unused tier-aware rate limiter into the checkout and portal endpoints, and added retry-with-backoff on Stripe 429/5xx responses.
+- The static GitHub Pages demo no longer shows a fake "checkout succeeded" or "inquiry received" screen when the billing backend isn't actually reachable; it says so and points to a real mailto fallback instead.
+
+### Testing
+- Raised coverage on the packages Codecov measures (`btree`, `inmemory`, `fs`, `common`) from 85.3% to 87.7%.
+- Fixed a stale Codecov project slug (`SharedCode/sop`, left over from the joltrin rebrand) that was pointing the badge and coverage uploads at the wrong project.
+
 ## v5.4.0
 
 ### Website & Docs
