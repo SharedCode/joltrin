@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "appName": {
+      "value": "joltrin"
+    },
+    "alertEmail": {
+      "value": "REPLACE_WITH_REAL_ALERT_EMAIL"
+    },
+    "monthlyBudgetUsd": {
+      "value": 25
+    },
+    "stripeSecretKey": {
+      "value": "REPLACE_AT_DEPLOY_TIME"
+    },
+    "stripeWebhookSecret": {
+      "value": "REPLACE_AT_DEPLOY_TIME"
+    },
+    "stripePublishableKey": {
+      "value": ""
+    }
+  }
+}
