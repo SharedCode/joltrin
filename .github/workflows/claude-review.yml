@@ -26,7 +26,16 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
+      # `secrets` isn't a valid context in a job/step `if:`, so this
+      # produces a step output instead. That way the job skips cleanly
+      # (still a passing status) instead of failing every PR until
+      # ANTHROPIC_API_KEY is actually configured.
+      - name: Check for Anthropic API key
+        id: check-key
+        run: echo "present=${{ secrets.ANTHROPIC_API_KEY != '' }}" >> "$GITHUB_OUTPUT"
+
       - name: Run Claude Code review
+        if: steps.check-key.outputs.present == 'true'
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
