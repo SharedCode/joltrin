@@ -30,4 +30,9 @@ regexes = [
   '''remote-client-test-secret''',
   '''secret_password''',
   '''my-secret-token''',
+  # Well-known Azure built-in role definition IDs used in Bicep role
+  # assignments (AcrPull, Key Vault Secrets User). These are public,
+  # Microsoft-documented constants, not credentials.
+  '''7f951dda-4ed3-4680-a7ca-43fe172d538d''',
+  '''4633458b-17de-408a-b874-0445c86b69e6''',
 ]
