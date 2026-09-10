@@ -34,7 +34,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          slug: SharedCode/sop
+          slug: SharedCode/joltrin
 
   perf:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
