@@ -119,10 +119,33 @@ jobs:
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
       - name: Push image to ACR
+        id: push
         run: |
           az acr login --name "$(echo '${{ needs.deploy-infra.outputs.acr-login-server }}' | cut -d. -f1)"
           docker tag joltrin:scan "${{ needs.deploy-infra.outputs.acr-login-server }}/${ACR_IMAGE_NAME}:${{ steps.tag.outputs.image-tag }}"
           docker push "${{ needs.deploy-infra.outputs.acr-login-server }}/${ACR_IMAGE_NAME}:${{ steps.tag.outputs.image-tag }}"
+          digest=$(docker inspect --format='{{index .RepoDigests 0}}' "${{ needs.deploy-infra.outputs.acr-login-server }}/${ACR_IMAGE_NAME}:${{ steps.tag.outputs.image-tag }}" | cut -d@ -f2)
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      # Keyless signing, tied to this workflow's own GitHub Actions OIDC
+      # identity. No signing key to generate, rotate, or leak. Container
+      # Apps has no admission-controller equivalent to Kyverno on plain
+      # Kubernetes, so unlike rollout-sentinel's cluster-side enforcement,
+      # this is the actual enforcement point here: nothing after this step
+      # points the Container App at an image that wasn't just signed by
+      # this exact pipeline.
+      - name: Sign the image we just pushed to ACR
+        run: cosign sign --yes "${{ needs.deploy-infra.outputs.acr-login-server }}/${ACR_IMAGE_NAME}@${{ steps.push.outputs.digest }}"
+
+      - name: Verify the signature before letting the rollout proceed
+        run: |
+          cosign verify \
+            --certificate-identity-regexp "^https://github.com/${{ github.repository }}/.github/workflows/deploy-azure.yml@.*" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            "${{ needs.deploy-infra.outputs.acr-login-server }}/${ACR_IMAGE_NAME}@${{ steps.push.outputs.digest }}"
 
   roll-revision:
     needs: [ deploy-infra, build-scan-push ]
