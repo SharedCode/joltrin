@@ -16,7 +16,10 @@ package a2aagent
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"sort"
+	"strings"
 
 	"github.com/a2aproject/a2a-go/a2a"
 	"github.com/a2aproject/a2a-go/a2asrv"
@@ -89,7 +92,23 @@ func (e *Executor) Execute(ctx context.Context, reqCtx *a2asrv.RequestContext, q
 
 	wf, ok := e.Store.Workflow(req.Workflow)
 	if !ok {
-		return e.fail(ctx, reqCtx, queue, fmt.Sprintf("unknown workflow %q", req.Workflow))
+		// A typo or a guess, not something establishing a missing
+		// precondition could ever fix, so the correction is the server's
+		// actual inventory, not just "no." Mirrors
+		// tools/mcpserver.unknownWorkflowResult's reasoning for the same case.
+		return e.fail(ctx, reqCtx, queue, fmt.Sprintf(
+			"unknown workflow %q (available: %s)", req.Workflow, strings.Join(e.Store.WorkflowNames(), ", "),
+		))
+	}
+	if _, ok := wf.Steps[verify.StepID(req.Step)]; !ok {
+		steps := make([]string, 0, len(wf.Steps))
+		for id := range wf.Steps {
+			steps = append(steps, string(id))
+		}
+		sort.Strings(steps)
+		return e.fail(ctx, reqCtx, queue, fmt.Sprintf(
+			"unknown step %q in workflow %q (available: %s)", req.Step, req.Workflow, strings.Join(steps, ", "),
+		))
 	}
 	trace := e.Store.TraceFor(req.TraceID)
 
@@ -98,20 +117,37 @@ func (e *Executor) Execute(ctx context.Context, reqCtx *a2asrv.RequestContext, q
 	// does both under one trace lock, so a concurrent request on the same
 	// trace_id cannot slip in between the check and the commit.
 	if err := wf.CheckAndCommit(trace, verify.StepID(req.Step)); err != nil {
-		if !verify.IsViolation(err) {
-			// Malformed rather than blocked (an unknown step, say): no
-			// precondition will ever make this succeed.
+		var v *verify.Violation
+		if !errors.As(err, &v) {
+			// The step-existence check above already rules out the only
+			// non-Violation error CheckAndCommit returns (unknown step).
+			// Fail closed rather than treat an unexpected error as a
+			// recoverable block if that invariant ever changes.
 			return e.fail(ctx, reqCtx, queue, err.Error())
 		}
 		// Not a failure: the task is well-formed and could still succeed
 		// once its precondition is met, that's exactly what
 		// TaskStateInputRequired means, "paused, waiting on something
 		// before it can proceed", as opposed to TaskStateFailed's "this
-		// task cannot succeed."
+		// task cannot succeed." The DataPart carries the same fields
+		// tools/mcpserver's execute_step returns in its Blocked result, so
+		// an A2A caller gets the identical structured signal an MCP caller
+		// would, not just a text string to parse.
+		established := wf.StepsThatEstablish(v.MissingState)
+		establishedIDs := make([]string, len(established))
+		for i, id := range established {
+			establishedIDs[i] = string(id)
+		}
 		event := a2a.NewStatusUpdateEvent(reqCtx, a2a.TaskStateInputRequired,
-			a2a.NewMessageForTask(a2a.MessageRoleAgent, reqCtx, a2a.TextPart{
-				Text: fmt.Sprintf("blocked by safety barrier: %s", err.Error()),
-			}))
+			a2a.NewMessageForTask(a2a.MessageRoleAgent, reqCtx,
+				a2a.TextPart{Text: fmt.Sprintf("blocked by safety barrier: %s", err.Error())},
+				a2a.DataPart{Data: map[string]any{
+					"blocked_by":           v.Rule,
+					"missing_state":        string(v.MissingState),
+					"message":              v.Message,
+					"established_by_steps": establishedIDs,
+				}},
+			))
 		event.Final = true
 		if werr := queue.Write(ctx, event); werr != nil {
 			return fmt.Errorf("a2aagent: write input-required: %w", werr)

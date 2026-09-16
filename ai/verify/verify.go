@@ -29,6 +29,7 @@ package verify
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"sync"
 )
 
@@ -129,6 +130,14 @@ func (t *Trace) ExecutedSteps() []StepID {
 type Violation struct {
 	Rule    string
 	Message string
+	// MissingState is the specific State that has not been established yet
+	// in this trace: the step's own precondition for a "precondition"
+	// Violation, or the SafetyRule's Requires state for a rule violation.
+	// Exposed as its own field, not just folded into Message, so a caller
+	// (tools/mcpserver, tools/a2aagent) can look up which steps would
+	// establish it via Workflow.StepsThatEstablish and hand the agent a
+	// concrete next action instead of a string to parse.
+	MissingState State
 }
 
 func (v *Violation) Error() string { return v.Message }
@@ -163,8 +172,9 @@ func (w *Workflow) checkSafetyLocked(trace *Trace, next StepID) error {
 	for _, req := range step.Requires {
 		if !trace.Holds[req] {
 			return &Violation{
-				Rule:    "precondition",
-				Message: fmt.Sprintf("step %q requires state %q, which has not been established in this trace", next, req),
+				Rule:         "precondition",
+				Message:      fmt.Sprintf("step %q requires state %q, which has not been established in this trace", next, req),
+				MissingState: req,
 			}
 		}
 	}
@@ -184,6 +194,7 @@ func (w *Workflow) checkSafetyLocked(trace *Trace, next StepID) error {
 						"step %q would establish forbidden state %q without required state %q first (rule: %s)",
 						next, est, rule.Requires, rule.Name,
 					),
+					MissingState: rule.Requires,
 				}
 			}
 		}
@@ -237,4 +248,25 @@ func (w *Workflow) commitLocked(trace *Trace, next StepID) error {
 		trace.Holds[est] = true
 	}
 	return nil
+}
+
+// StepsThatEstablish returns the IDs of every step in the workflow whose
+// Establishes list includes state, sorted for a deterministic result (map
+// iteration order is not). Intended for a caller that just got a Violation
+// back from CheckSafety: Violation.MissingState names what's missing,
+// StepsThatEstablish(that state) names which step(s) would actually set it,
+// so a blocked response can point at a concrete next action instead of just
+// naming the gap.
+func (w *Workflow) StepsThatEstablish(state State) []StepID {
+	var ids []StepID
+	for id, step := range w.Steps {
+		for _, est := range step.Establishes {
+			if est == state {
+				ids = append(ids, id)
+				break
+			}
+		}
+	}
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	return ids
 }

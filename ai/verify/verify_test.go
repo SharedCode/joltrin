@@ -1,6 +1,7 @@
 package verify
 
 import (
+	"errors"
 	"strings"
 	"testing"
 )
@@ -144,5 +145,63 @@ func Test_NewWorkflow_RejectsDuplicateStepIDs(t *testing.T) {
 	}, nil, nil)
 	if err == nil {
 		t.Fatal("expected an error for duplicate step IDs")
+	}
+}
+
+func Test_Violation_MissingState_SetOnPreconditionBlock(t *testing.T) {
+	wf := dbMaintenanceWorkflow(t)
+	trace := NewTrace()
+
+	err := wf.CheckSafety(trace, "validate_backup")
+	var v *Violation
+	if !errors.As(err, &v) {
+		t.Fatalf("expected a *Violation, got: %v", err)
+	}
+	if v.MissingState != "backup_taken" {
+		t.Fatalf("expected MissingState %q, got %q", "backup_taken", v.MissingState)
+	}
+}
+
+func Test_Violation_MissingState_SetOnSafetyRuleBlock(t *testing.T) {
+	wf := dbMaintenanceWorkflow(t)
+	trace := NewTrace()
+	if err := wf.CheckSafety(trace, "take_backup"); err != nil {
+		t.Fatalf("take_backup unexpectedly blocked: %v", err)
+	}
+	if err := wf.Commit(trace, "take_backup"); err != nil {
+		t.Fatalf("Commit(take_backup): %v", err)
+	}
+
+	err := wf.CheckSafety(trace, "drop_prod_db")
+	var v *Violation
+	if !errors.As(err, &v) {
+		t.Fatalf("expected a *Violation, got: %v", err)
+	}
+	if v.MissingState != "backup_validated" {
+		t.Fatalf("expected MissingState %q, got %q", "backup_validated", v.MissingState)
+	}
+}
+
+func Test_StepsThatEstablish_FindsAllMatchingSteps(t *testing.T) {
+	wf := dbMaintenanceWorkflow(t)
+
+	// Two steps establish rollback_complete: the pre-drop and post-drop
+	// restore paths. Order must be deterministic since map iteration isn't.
+	got := wf.StepsThatEstablish("rollback_complete")
+	want := []StepID{"restore_from_backup", "restore_from_backup_post_drop"}
+	if len(got) != len(want) {
+		t.Fatalf("expected %v, got %v", want, got)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("expected %v, got %v", want, got)
+		}
+	}
+}
+
+func Test_StepsThatEstablish_EmptyForUnestablishedState(t *testing.T) {
+	wf := dbMaintenanceWorkflow(t)
+	if got := wf.StepsThatEstablish("no_such_state"); len(got) != 0 {
+		t.Fatalf("expected no steps, got %v", got)
 	}
 }

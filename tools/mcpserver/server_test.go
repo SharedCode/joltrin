@@ -2,6 +2,7 @@ package mcpserver
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 	"testing"
 
@@ -90,6 +91,27 @@ func resultText(res *mcp.CallToolResult) string {
 	return sb.String()
 }
 
+// structuredAs decodes a real client-received result's structured content
+// into T. The in-process client round-trips through JSON, so
+// res.StructuredContent arrives as a generic map, not the original Go
+// struct, re-marshal/unmarshal is how a real MCP client would decode it too.
+func structuredAs[T any](t *testing.T, res *mcp.CallToolResult) T {
+	t.Helper()
+	raw := res.RawStructuredContent
+	if raw == nil {
+		var err error
+		raw, err = json.Marshal(res.StructuredContent)
+		if err != nil {
+			t.Fatalf("marshal StructuredContent: %v", err)
+		}
+	}
+	var out T
+	if err := json.Unmarshal(raw, &out); err != nil {
+		t.Fatalf("unmarshal structured content into %T: %v (raw: %s)", out, err, raw)
+	}
+	return out
+}
+
 func Test_MCP_ReadSOP_UnknownWorkflow(t *testing.T) {
 	c := newTestClient(t)
 	res := callTool(t, c, "read_sop", map[string]any{"workflow": "does-not-exist"})
@@ -98,6 +120,12 @@ func Test_MCP_ReadSOP_UnknownWorkflow(t *testing.T) {
 	}
 }
 
+// Test_MCP_ExecuteStep_BlockedWithoutValidatedBackup confirms a barrier
+// block is a normal (non-error) structured result with an actionable
+// Blocked reason, not a bare error string: the request was well-formed and
+// could still succeed once its precondition is met, so IsError must stay
+// false, matching the same distinction tools/a2aagent already draws
+// between TaskStateFailed and TaskStateInputRequired.
 func Test_MCP_ExecuteStep_BlockedWithoutValidatedBackup(t *testing.T) {
 	c := newTestClient(t)
 
@@ -106,11 +134,63 @@ func Test_MCP_ExecuteStep_BlockedWithoutValidatedBackup(t *testing.T) {
 		"trace_id": "incident-1",
 		"step":     "drop_prod_db",
 	})
-	if !res.IsError {
-		t.Fatal("expected drop_prod_db to be blocked by the safety barrier over the real MCP tool-call path")
+	if res.IsError {
+		t.Fatalf("blocked-but-recoverable should not be IsError, got: %s", resultText(res))
 	}
-	if !strings.Contains(resultText(res), "blocked by safety barrier") {
-		t.Fatalf("expected a safety-barrier error message, got: %s", resultText(res))
+	got := structuredAs[ExecuteStepResult](t, res)
+	if got.Executed {
+		t.Fatal("expected executed=false")
+	}
+	if got.Blocked == nil {
+		t.Fatal("expected a populated Blocked reason")
+	}
+	if got.Blocked.MissingState != "backup_validated" {
+		t.Fatalf("expected missing_state %q, got %q", "backup_validated", got.Blocked.MissingState)
+	}
+	if len(got.Blocked.EstablishedBy) == 0 {
+		t.Fatal("expected established_by_steps to name at least one step (validate_backup)")
+	}
+}
+
+// Test_MCP_ExecuteStep_UnknownWorkflowIsErrorWithInventory confirms a
+// malformed request (a workflow that was never registered) is reported as
+// an error carrying the server's actual inventory, distinct from a barrier
+// block: no precondition could ever make this one succeed.
+func Test_MCP_ExecuteStep_UnknownWorkflowIsErrorWithInventory(t *testing.T) {
+	c := newTestClient(t)
+
+	res := callTool(t, c, "execute_step", map[string]any{
+		"workflow": "does-not-exist",
+		"trace_id": "incident-1",
+		"step":     "drop_prod_db",
+	})
+	if !res.IsError {
+		t.Fatal("expected an error result for an unknown workflow")
+	}
+	got := structuredAs[UnknownWorkflowResult](t, res)
+	if len(got.Available) != 1 || got.Available[0] != "db-maintenance" {
+		t.Fatalf("expected available_workflows to list db-maintenance, got %v", got.Available)
+	}
+}
+
+// Test_MCP_ExecuteStep_UnknownStepIsErrorWithInventory confirms the same
+// for a step ID that does not exist on an otherwise-known workflow: also
+// malformed, not a barrier block, and reported with the workflow's real
+// step inventory rather than being folded into safe/executed=false.
+func Test_MCP_ExecuteStep_UnknownStepIsErrorWithInventory(t *testing.T) {
+	c := newTestClient(t)
+
+	res := callTool(t, c, "execute_step", map[string]any{
+		"workflow": "db-maintenance",
+		"trace_id": "incident-1",
+		"step":     "nonexistent_step",
+	})
+	if !res.IsError {
+		t.Fatal("expected an error result for an unknown step")
+	}
+	got := structuredAs[UnknownStepResult](t, res)
+	if len(got.Steps) == 0 {
+		t.Fatal("expected available_steps to list this workflow's real steps")
 	}
 }
 
@@ -177,8 +257,12 @@ func Test_MCP_ExecuteStep_TraceIsolation(t *testing.T) {
 		"trace_id": "incident-b",
 		"step":     "drop_prod_db",
 	})
-	if !res.IsError {
-		t.Fatal("expected incident-b to be blocked: it has no validated backup of its own")
+	if res.IsError {
+		t.Fatalf("blocked-but-recoverable should not be IsError, got: %s", resultText(res))
+	}
+	got := structuredAs[ExecuteStepResult](t, res)
+	if got.Executed {
+		t.Fatal("expected incident-b's drop_prod_db to be blocked: it has no validated backup of its own")
 	}
 }
 
