@@ -3,6 +3,7 @@ package a2aagent
 import (
 	"context"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/a2aproject/a2a-go/a2a"
@@ -96,6 +97,38 @@ func Test_A2A_ExecuteStep_BlockedGoesInputRequired(t *testing.T) {
 	}
 }
 
+// Test_A2A_ExecuteStep_BlockedCarriesStructuredData confirms an A2A caller
+// gets the same structured block reason an MCP caller gets from
+// tools/mcpserver's execute_step (blocked_by, missing_state,
+// established_by_steps), as a DataPart alongside the human-readable
+// TextPart, not just text to parse.
+func Test_A2A_ExecuteStep_BlockedCarriesStructuredData(t *testing.T) {
+	srv, _ := newTestServer(t)
+	c := newTestClient(t, srv)
+
+	task := sendStep(t, c, "db-maintenance", "incident-1", "drop_prod_db")
+	if task.Status.Message == nil {
+		t.Fatal("expected a status message on the input-required task")
+	}
+
+	var data map[string]any
+	for _, part := range task.Status.Message.Parts {
+		if dp, ok := part.(a2a.DataPart); ok {
+			data = dp.Data
+		}
+	}
+	if data == nil {
+		t.Fatal("expected a DataPart on the input-required message")
+	}
+	if data["missing_state"] != "backup_validated" {
+		t.Fatalf("expected missing_state %q, got %v", "backup_validated", data["missing_state"])
+	}
+	established, ok := data["established_by_steps"].([]any)
+	if !ok || len(established) == 0 {
+		t.Fatalf("expected established_by_steps to name at least one step, got %v", data["established_by_steps"])
+	}
+}
+
 func Test_A2A_ExecuteStep_UnknownWorkflowFails(t *testing.T) {
 	srv, _ := newTestServer(t)
 	c := newTestClient(t, srv)
@@ -103,6 +136,28 @@ func Test_A2A_ExecuteStep_UnknownWorkflowFails(t *testing.T) {
 	task := sendStep(t, c, "does-not-exist", "incident-1", "drop_prod_db")
 	if task.Status.State != a2a.TaskStateFailed {
 		t.Fatalf("expected TaskStateFailed for an unknown workflow, got %q", task.Status.State)
+	}
+	if task.Status.Message == nil {
+		t.Fatal("expected a status message explaining the failure")
+	}
+	var text string
+	for _, part := range task.Status.Message.Parts {
+		if tp, ok := part.(a2a.TextPart); ok {
+			text += tp.Text
+		}
+	}
+	if !strings.Contains(text, "db-maintenance") {
+		t.Fatalf("expected the failure message to list the registered workflow as a correction, got: %s", text)
+	}
+}
+
+func Test_A2A_ExecuteStep_UnknownStepFails(t *testing.T) {
+	srv, _ := newTestServer(t)
+	c := newTestClient(t, srv)
+
+	task := sendStep(t, c, "db-maintenance", "incident-1", "nonexistent_step")
+	if task.Status.State != a2a.TaskStateFailed {
+		t.Fatalf("expected TaskStateFailed for an unknown step, got %q", task.Status.State)
 	}
 }
 

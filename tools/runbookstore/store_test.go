@@ -8,6 +8,37 @@ import (
 	"github.com/sharedcode/joltrin/ai/verify"
 )
 
+func Test_WorkflowNames_SortedAndEmptyWhenNoneRegistered(t *testing.T) {
+	store := New()
+	if got := store.WorkflowNames(); len(got) != 0 {
+		t.Fatalf("expected no names on an empty store, got %v", got)
+	}
+
+	trivial := func() *verify.Workflow {
+		wf, err := verify.NewWorkflow([]verify.Step{{ID: "noop"}}, nil, nil)
+		if err != nil {
+			t.Fatalf("NewWorkflow: %v", err)
+		}
+		return wf
+	}
+	for _, name := range []string{"zeta", "alpha", "mid"} {
+		if err := store.RegisterWorkflow(name, trivial()); err != nil {
+			t.Fatalf("RegisterWorkflow(%q): %v", name, err)
+		}
+	}
+
+	got := store.WorkflowNames()
+	want := []string{"alpha", "mid", "zeta"}
+	if len(got) != len(want) {
+		t.Fatalf("expected %v, got %v", want, got)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("expected sorted %v, got %v", want, got)
+		}
+	}
+}
+
 // Test_TraceFor_EvictsOldestPastCap is the regression test for the
 // unbounded-memory finding: a trace was allocated per unseen trace_id and
 // never released, so any client reaching a protocol server could grow the

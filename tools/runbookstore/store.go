@@ -8,6 +8,7 @@ package runbookstore
 
 import (
 	"fmt"
+	"sort"
 	"sync"
 
 	"github.com/sharedcode/joltrin/ai/verify"
@@ -77,6 +78,20 @@ func (s *Store) Workflow(name string) (*verify.Workflow, bool) {
 	defer s.mu.RUnlock()
 	wf, ok := s.workflows[name]
 	return wf, ok
+}
+
+// WorkflowNames returns the names of every registered workflow, sorted.
+// Intended for an "unknown workflow" response, so a caller that mistyped or
+// guessed a name gets a correction it can act on rather than a dead end.
+func (s *Store) WorkflowNames() []string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	names := make([]string, 0, len(s.workflows))
+	for name := range s.workflows {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return names
 }
 
 // TraceFor returns the Trace for traceID, creating a fresh one on first
