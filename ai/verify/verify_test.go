@@ -2,6 +2,7 @@ package verify
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -203,5 +204,134 @@ func Test_StepsThatEstablish_EmptyForUnestablishedState(t *testing.T) {
 	wf := dbMaintenanceWorkflow(t)
 	if got := wf.StepsThatEstablish("no_such_state"); len(got) != 0 {
 		t.Fatalf("expected no steps, got %v", got)
+	}
+}
+
+// Test_CheckAndCommitIdempotent_EmptyKeyBehavesLikePlainCommit is the
+// backward-compatibility guarantee: a caller that never passes a key must
+// see the same duplicate-on-retry behavior CheckAndCommit always had, not
+// a silently different default.
+func Test_CheckAndCommitIdempotent_EmptyKeyBehavesLikePlainCommit(t *testing.T) {
+	wf := dbMaintenanceWorkflow(t)
+	trace := NewTrace()
+
+	if replayed, err := wf.CheckAndCommitIdempotent(trace, "take_backup", ""); replayed || err != nil {
+		t.Fatalf("first call: replayed=%v err=%v", replayed, err)
+	}
+	if replayed, err := wf.CheckAndCommitIdempotent(trace, "take_backup", ""); replayed || err != nil {
+		t.Fatalf("second call with empty key: replayed=%v err=%v", replayed, err)
+	}
+
+	if got := trace.ExecutedSteps(); len(got) != 2 {
+		t.Fatalf("expected an empty key to duplicate the entry same as CheckAndCommit, got %v", got)
+	}
+}
+
+// Test_CheckAndCommitIdempotent_SameKeyReplaysSuccessWithoutDuplicating is
+// the fix for the real bug this feature closes: a client retrying
+// execute_step after a timeout, using the same idempotency key, must not
+// double-commit the step to the trace.
+func Test_CheckAndCommitIdempotent_SameKeyReplaysSuccessWithoutDuplicating(t *testing.T) {
+	wf := dbMaintenanceWorkflow(t)
+	trace := NewTrace()
+
+	replayed, err := wf.CheckAndCommitIdempotent(trace, "take_backup", "req-1")
+	if replayed || err != nil {
+		t.Fatalf("first call: replayed=%v err=%v", replayed, err)
+	}
+
+	replayed, err = wf.CheckAndCommitIdempotent(trace, "take_backup", "req-1")
+	if !replayed {
+		t.Fatal("expected the retry with the same key to be reported as replayed")
+	}
+	if err != nil {
+		t.Fatalf("expected the replayed outcome to be the original success, got: %v", err)
+	}
+
+	if got := trace.ExecutedSteps(); len(got) != 1 {
+		t.Fatalf("expected exactly one commit despite two identical calls, got %v", got)
+	}
+}
+
+// Test_CheckAndCommitIdempotent_SameKeyReplaysBlockedOutcome confirms a
+// retried call that was originally blocked replays the same block, not a
+// fresh recomputation, which matters if the trace's state changed between
+// the two calls: the caller asked the same question twice and must get the
+// same answer, not a different one depending on when the retry landed.
+func Test_CheckAndCommitIdempotent_SameKeyReplaysBlockedOutcome(t *testing.T) {
+	wf := dbMaintenanceWorkflow(t)
+	trace := NewTrace()
+
+	_, firstErr := wf.CheckAndCommitIdempotent(trace, "drop_prod_db", "req-1")
+	if firstErr == nil || !IsViolation(firstErr) {
+		t.Fatalf("expected drop_prod_db to be blocked with an empty trace, got: %v", firstErr)
+	}
+
+	// Establish the precondition after the first (blocked) attempt, before
+	// the retry, the exact race a real timeout-then-retry could hit.
+	if err := wf.Commit(trace, "take_backup"); err != nil {
+		t.Fatalf("Commit(take_backup): %v", err)
+	}
+	if err := wf.Commit(trace, "validate_backup"); err != nil {
+		t.Fatalf("Commit(validate_backup): %v", err)
+	}
+
+	replayed, retryErr := wf.CheckAndCommitIdempotent(trace, "drop_prod_db", "req-1")
+	if !replayed {
+		t.Fatal("expected the retry to be reported as replayed")
+	}
+	if retryErr == nil {
+		t.Fatal("expected the replay to return the original blocked outcome, not a fresh success just because the precondition now holds")
+	}
+	if got := trace.ExecutedSteps(); len(got) != 2 {
+		t.Fatalf("drop_prod_db must not have committed via the replay, got %v", got)
+	}
+}
+
+// Test_CheckAndCommitIdempotent_DifferentKeysBothCommit confirms the cache
+// is keyed, not step-based: two distinct legitimate calls for the same
+// step (if a workflow's design allows repeating it) with different keys
+// both take effect, only a matching key replays.
+func Test_CheckAndCommitIdempotent_DifferentKeysBothCommit(t *testing.T) {
+	wf := dbMaintenanceWorkflow(t)
+	trace := NewTrace()
+
+	if _, err := wf.CheckAndCommitIdempotent(trace, "take_backup", "req-1"); err != nil {
+		t.Fatalf("req-1: %v", err)
+	}
+	if _, err := wf.CheckAndCommitIdempotent(trace, "take_backup", "req-2"); err != nil {
+		t.Fatalf("req-2: %v", err)
+	}
+	if got := trace.ExecutedSteps(); len(got) != 2 {
+		t.Fatalf("expected two distinct keys to both commit, got %v", got)
+	}
+}
+
+// Test_CheckAndCommitIdempotent_EvictsOldestKeyPastCap is the regression
+// test for the same unbounded-memory shape runbookstore.DefaultMaxTraces
+// already guards against, applied to the per-trace key cache instead of
+// the store's trace map.
+func Test_CheckAndCommitIdempotent_EvictsOldestKeyPastCap(t *testing.T) {
+	wf := dbMaintenanceWorkflow(t)
+	trace := NewTrace()
+
+	for i := 0; i < maxIdempotencyKeysPerTrace+10; i++ {
+		if _, err := wf.CheckAndCommitIdempotent(trace, "take_backup", fmt.Sprintf("key-%d", i)); err != nil {
+			t.Fatalf("key-%d: %v", i, err)
+		}
+	}
+
+	// The very first key should have been evicted, so replaying it now
+	// re-executes rather than replaying, appending one more entry.
+	before := len(trace.ExecutedSteps())
+	replayed, err := wf.CheckAndCommitIdempotent(trace, "take_backup", "key-0")
+	if replayed {
+		t.Fatal("expected key-0 to have been evicted, not replayed")
+	}
+	if err != nil {
+		t.Fatalf("re-execution after eviction: %v", err)
+	}
+	if got := len(trace.ExecutedSteps()); got != before+1 {
+		t.Fatalf("expected eviction to cause a fresh (duplicate) commit, trace grew from %d to %d", before, got)
 	}
 }

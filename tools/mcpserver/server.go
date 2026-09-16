@@ -54,10 +54,11 @@ func New(store *runbookstore.Store) *server.MCPServer {
 
 	s.AddTool(
 		mcp.NewTool("execute_step",
-			mcp.WithDescription("Execute a step. Blocked server-side if the safety barrier check fails, an agent cannot bypass this by asserting a precondition was met. Never returns a bare error: an unknown workflow or step comes back with the server's actual inventory, and a blocked step comes back with the missing state and which registered steps would establish it."),
+			mcp.WithDescription("Execute a step. Blocked server-side if the safety barrier check fails, an agent cannot bypass this by asserting a precondition was met. Never returns a bare error: an unknown workflow or step comes back with the server's actual inventory, and a blocked step comes back with the missing state and which registered steps would establish it. Safe to retry: pass idempotency_key and a retried call after a dropped or timed-out response returns the original outcome instead of executing (or re-checking) again."),
 			mcp.WithString("workflow", mcp.Required(), mcp.Description("Name of the runbook.")),
 			mcp.WithString("trace_id", mcp.Required(), mcp.Description("Identifies this execution's trace.")),
 			mcp.WithString("step", mcp.Required(), mcp.Description("ID of the step to execute.")),
+			mcp.WithString("idempotency_key", mcp.Description("Optional. A unique ID for this specific call, chosen by the caller. Retrying with the same key after a lost response returns the original result rather than executing the step again. Omit it and every call is treated as new, matching the pre-existing behavior.")),
 			mcp.WithOutputSchema[ExecuteStepResult](),
 		),
 		executeStepHandler(store),
@@ -116,6 +117,7 @@ func executeStepHandler(store *runbookstore.Store) server.ToolHandlerFunc {
 		name := req.GetString("workflow", "")
 		stepID := req.GetString("step", "")
 		traceID := req.GetString("trace_id", "")
+		idempotencyKey := req.GetString("idempotency_key", "")
 
 		wf, ok := store.Workflow(name)
 		if !ok {
@@ -129,15 +131,18 @@ func executeStepHandler(store *runbookstore.Store) server.ToolHandlerFunc {
 		// The barrier certificate: verify before acting, never act then
 		// verify. A failed check here means the step never executes, full
 		// stop, regardless of what the calling agent asserted about its own
-		// prior actions. CheckAndCommit holds the trace lock across both
-		// halves, so a concurrent request on the same trace_id cannot land
-		// between the check and the commit.
-		err := wf.CheckAndCommit(trace, verify.StepID(stepID))
+		// prior actions. CheckAndCommitIdempotent holds the trace lock
+		// across the check and the commit, so a concurrent request on the
+		// same trace_id cannot land between the two, and (when
+		// idempotency_key is set) a retried request gets the original
+		// outcome back instead of being recomputed or double-committed.
+		replayed, err := wf.CheckAndCommitIdempotent(trace, verify.StepID(stepID), idempotencyKey)
 		if err == nil {
 			return mcp.NewToolResultStructuredOnly(ExecuteStepResult{
 				Executed: true,
 				Step:     stepID,
 				Trace:    trace.ExecutedSteps(),
+				Replayed: replayed,
 			}), nil
 		}
 		var v *verify.Violation
@@ -147,6 +152,7 @@ func executeStepHandler(store *runbookstore.Store) server.ToolHandlerFunc {
 		return mcp.NewToolResultStructuredOnly(ExecuteStepResult{
 			Executed: false,
 			Blocked:  blockReason(wf, v),
+			Replayed: replayed,
 		}), nil
 	}
 }

@@ -61,6 +61,11 @@ type stepRequest struct {
 	Workflow string
 	TraceID  string
 	Step     string
+	// IdempotencyKey is optional. Retrying with the same key after a lost
+	// or timed-out response returns the original outcome instead of
+	// executing (or re-checking) the step again; omitted, every call is
+	// treated as new, matching the pre-existing behavior.
+	IdempotencyKey string
 }
 
 // Executor implements a2asrv.AgentExecutor, delegating the actual safety
@@ -113,15 +118,19 @@ func (e *Executor) Execute(ctx context.Context, reqCtx *a2asrv.RequestContext, q
 	trace := e.Store.TraceFor(req.TraceID)
 
 	// The same barrier certificate tools/mcpserver's execute_step tool
-	// gates on: verify before acting, never act then verify. CheckAndCommit
-	// does both under one trace lock, so a concurrent request on the same
-	// trace_id cannot slip in between the check and the commit.
-	if err := wf.CheckAndCommit(trace, verify.StepID(req.Step)); err != nil {
+	// gates on: verify before acting, never act then verify.
+	// CheckAndCommitIdempotent does both under one trace lock, so a
+	// concurrent request on the same trace_id cannot slip in between the
+	// check and the commit, and (when req.IdempotencyKey is set) a retried
+	// request after a dropped or timed-out response gets the original
+	// outcome back instead of being recomputed or double-committed.
+	replayed, err := wf.CheckAndCommitIdempotent(trace, verify.StepID(req.Step), req.IdempotencyKey)
+	if err != nil {
 		var v *verify.Violation
 		if !errors.As(err, &v) {
 			// The step-existence check above already rules out the only
-			// non-Violation error CheckAndCommit returns (unknown step).
-			// Fail closed rather than treat an unexpected error as a
+			// non-Violation error CheckAndCommitIdempotent returns (unknown
+			// step). Fail closed rather than treat an unexpected error as a
 			// recoverable block if that invariant ever changes.
 			return e.fail(ctx, reqCtx, queue, err.Error())
 		}
@@ -146,6 +155,7 @@ func (e *Executor) Execute(ctx context.Context, reqCtx *a2asrv.RequestContext, q
 					"missing_state":        string(v.MissingState),
 					"message":              v.Message,
 					"established_by_steps": establishedIDs,
+					"replayed":             replayed,
 				}},
 			))
 		event.Final = true
@@ -169,6 +179,7 @@ func (e *Executor) Execute(ctx context.Context, reqCtx *a2asrv.RequestContext, q
 		Data: map[string]any{
 			"executed": req.Step,
 			"trace":    executedIDs,
+			"replayed": replayed,
 		},
 	})
 	if err := queue.Write(ctx, artifactEvent); err != nil {
@@ -215,6 +226,9 @@ func parseStepRequest(msg *a2a.Message) (stepRequest, error) {
 		}
 		if v, ok := dp.Data["step"].(string); ok {
 			req.Step = v
+		}
+		if v, ok := dp.Data["idempotency_key"].(string); ok {
+			req.IdempotencyKey = v
 		}
 		if req.Workflow == "" || req.TraceID == "" || req.Step == "" {
 			return stepRequest{}, fmt.Errorf("a2aagent: message data part must include workflow, trace_id, and step")
