@@ -1,0 +1,25 @@
+# helm install joltrin-bindings-runners oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
+#   --namespace arc-runners --create-namespace -f bindings-runner-scaleset-values.yaml
+
+githubConfigUrl: "https://github.com/SharedCode/joltrin"
+githubConfigSecret: joltrin-arc-github-token
+
+minRunners: 0
+maxRunners: 4
+
+containerMode:
+  type: dind
+
+template:
+  spec:
+    containers:
+      - name: runner
+        image: ghcr.io/sharedcode/joltrin-bindings-builder:latest
+        command: ["/home/runner/run.sh"]
+        resources:
+          limits:
+            cpu: "4"
+            memory: 8Gi
+          requests:
+            cpu: "2"
+            memory: 4Gi
