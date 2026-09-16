@@ -152,7 +152,7 @@ sop-httpserver
 *   **High-Performance Search**: Utilizes B-Tree positioning for instant lookups, even in datasets with millions of records. Supports both simple keys and complex composite keys (e.g., searching by `Country` + `City`).
 *   **Efficient Navigation**: Smart pagination and traversal controls (First, Previous, Next, Last) allow you to browse massive datasets without performance penalties.
 *   **Bulk Operations**: Designed for rapid-fire management of records with a clean, non-distracting interface.
-*   **Responsive & Cross-Platform**: Works seamlessly across diverse monitor sizes and devices.
+*   **Responsive & Cross-Platform**: Works across diverse monitor sizes and devices without layout breakage.
 *   **Automatic Setup**: The tool automatically downloads the correct binary for your OS/Architecture upon first run.
 
 **Usage**: By default, it opens on `http://localhost:8080`.
@@ -323,6 +323,15 @@ The `src/main/java/com/sharedcode/sop/examples` directory contains comprehensive
 | `ConcurrentTransactionsDemoClustered` | Multi-threaded ACID transactions (Clustered/Redis). |
 | `CassandraDemo` | Using Cassandra as the storage backend. |
 | `LoggingDemo` | Configuring the SOP logger. |
+
+`examples/spring-boot-checkout-store` is a separate Maven module, a real
+Spring Boot REST service (`CheckoutOrderController` -> `CheckoutOrderStore`
+-> `BTree<String, CheckoutOrder>`) using sop4j as its persistence layer
+instead of JPA. Verified end to end: `mvn compile` against the real
+sop4j jar, then run against the native `libjsondb` library (built via
+`go build -buildmode=c-shared` from `bindings/main`) and exercised with
+curl through create/read/update/list/delete, all real B-Tree operations,
+not stubs. See its own README for the exact commands.
 
 To run an example:
 
