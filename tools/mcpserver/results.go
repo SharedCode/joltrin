@@ -56,6 +56,11 @@ type ExecuteStepResult struct {
 	Step     string          `json:"step,omitempty" jsonschema_description:"The step ID that executed. Empty when executed is false."`
 	Trace    []verify.StepID `json:"trace,omitempty" jsonschema_description:"Every step committed to this trace so far, in order, including this one. Empty when executed is false."`
 	Blocked  *BlockReason    `json:"blocked,omitempty" jsonschema_description:"Present only when executed is false."`
+	// Replayed is true when idempotency_key was supplied and had already
+	// been seen for this trace: the rest of the result is the original
+	// outcome (success or blocked), not a fresh check. Always false when no
+	// idempotency_key was given.
+	Replayed bool `json:"replayed" jsonschema_description:"True if this call was a retry recognized by idempotency_key: the result is the original outcome, replayed, not a fresh check."`
 }
 
 // UnknownWorkflowResult is returned instead of a plain error when a caller

@@ -2,6 +2,7 @@ package a2abridge
 
 import (
 	"context"
+	"encoding/json"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -97,15 +98,24 @@ func newBridgeClient(t *testing.T, agentURL string) *client.Client {
 
 func callExecuteStep(t *testing.T, c *client.Client, traceID, step string) *mcp.CallToolResult {
 	t.Helper()
+	return callExecuteStepWithKey(t, c, traceID, step, "")
+}
+
+// callExecuteStepWithKey is callExecuteStep plus an optional
+// idempotency_key, split out rather than changing callExecuteStep's
+// signature so every existing call site is unaffected.
+func callExecuteStepWithKey(t *testing.T, c *client.Client, traceID, step, idempotencyKey string) *mcp.CallToolResult {
+	t.Helper()
+	args := map[string]any{
+		"workflow": "db-maintenance",
+		"trace_id": traceID,
+		"step":     step,
+	}
+	if idempotencyKey != "" {
+		args["idempotency_key"] = idempotencyKey
+	}
 	res, err := c.CallTool(context.Background(), mcp.CallToolRequest{
-		Params: mcp.CallToolParams{
-			Name: "execute_step",
-			Arguments: map[string]any{
-				"workflow": "db-maintenance",
-				"trace_id": traceID,
-				"step":     step,
-			},
-		},
+		Params: mcp.CallToolParams{Name: "execute_step", Arguments: args},
 	})
 	if err != nil {
 		t.Fatalf("CallTool(execute_step, %s): %v", step, err)
@@ -165,6 +175,66 @@ func Test_Bridge_FullSequence(t *testing.T) {
 	if res.IsError {
 		t.Fatalf("expected drop_prod_db to succeed after backup+validate, got: %s", resultText(res))
 	}
+}
+
+// Test_Bridge_IdempotencyKey_ForwardedToRemoteAgent is the full round trip
+// for the idempotency feature: an MCP client calls execute_step on the
+// bridge twice with the same idempotency_key, the bridge forwards it to
+// the remote A2A agent unchanged, and the retry comes back marked
+// replayed, with the remote trace left at one entry, proving the key
+// actually reached ai/verify.Trace.CheckAndCommitIdempotent through both
+// protocol hops, not just locally on the bridge.
+func Test_Bridge_IdempotencyKey_ForwardedToRemoteAgent(t *testing.T) {
+	agent := newTestAgent(t)
+	defer agent.Close()
+
+	c := newBridgeClient(t, agent.URL)
+	const traceID = "incident-retry"
+
+	first := callExecuteStepWithKey(t, c, traceID, "take_backup", "req-1")
+	if first.IsError {
+		t.Fatalf("first call unexpectedly errored: %s", resultText(first))
+	}
+	if replayed := bridgeArtifactBool(t, first, "replayed"); replayed {
+		t.Fatal("expected the first call to report replayed=false")
+	}
+
+	retry := callExecuteStepWithKey(t, c, traceID, "take_backup", "req-1")
+	if retry.IsError {
+		t.Fatalf("retry unexpectedly errored: %s", resultText(retry))
+	}
+	if replayed := bridgeArtifactBool(t, retry, "replayed"); !replayed {
+		t.Fatal("expected the retry to report replayed=true")
+	}
+}
+
+// bridgeArtifactBool decodes a real client-received execute_step result's
+// structuredContent (which nests the remote agent's artifact data under
+// "artifacts", see artifactData) and returns the named bool field from the
+// first artifact, failing the test if it isn't found.
+func bridgeArtifactBool(t *testing.T, res *mcp.CallToolResult, key string) bool {
+	t.Helper()
+	raw := res.RawStructuredContent
+	if raw == nil {
+		var err error
+		raw, err = json.Marshal(res.StructuredContent)
+		if err != nil {
+			t.Fatalf("marshal StructuredContent: %v", err)
+		}
+	}
+	var decoded struct {
+		Artifacts []map[string]any `json:"artifacts"`
+	}
+	if err := json.Unmarshal(raw, &decoded); err != nil {
+		t.Fatalf("unmarshal structured content: %v (raw: %s)", err, raw)
+	}
+	for _, artifact := range decoded.Artifacts {
+		if v, ok := artifact[key].(bool); ok {
+			return v
+		}
+	}
+	t.Fatalf("expected an artifact with key %q, got: %s", key, raw)
+	return false
 }
 
 // Test_Bridge_UnknownWorkflowGoesToMCPError confirms a remote

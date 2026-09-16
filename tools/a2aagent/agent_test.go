@@ -68,14 +68,24 @@ func newTestClient(t *testing.T, srv *httptest.Server) *a2aclient.Client {
 
 func sendStep(t *testing.T, c *a2aclient.Client, workflow, traceID, step string) *a2a.Task {
 	t.Helper()
+	return sendStepWithKey(t, c, workflow, traceID, step, "")
+}
+
+// sendStepWithKey is sendStep plus an optional idempotency_key, split out
+// rather than changing sendStep's signature so every existing call site
+// (which never needs a key) is unaffected.
+func sendStepWithKey(t *testing.T, c *a2aclient.Client, workflow, traceID, step, idempotencyKey string) *a2a.Task {
+	t.Helper()
+	data := map[string]any{
+		"workflow": workflow,
+		"trace_id": traceID,
+		"step":     step,
+	}
+	if idempotencyKey != "" {
+		data["idempotency_key"] = idempotencyKey
+	}
 	result, err := c.SendMessage(context.Background(), &a2a.MessageSendParams{
-		Message: a2a.NewMessage(a2a.MessageRoleUser, a2a.DataPart{
-			Data: map[string]any{
-				"workflow": workflow,
-				"trace_id": traceID,
-				"step":     step,
-			},
-		}),
+		Message: a2a.NewMessage(a2a.MessageRoleUser, a2a.DataPart{Data: data}),
 	})
 	if err != nil {
 		t.Fatalf("SendMessage(%s): %v", step, err)
@@ -127,6 +137,52 @@ func Test_A2A_ExecuteStep_BlockedCarriesStructuredData(t *testing.T) {
 	if !ok || len(established) == 0 {
 		t.Fatalf("expected established_by_steps to name at least one step, got %v", data["established_by_steps"])
 	}
+}
+
+// Test_A2A_ExecuteStep_IdempotencyKey_RetryDoesNotDuplicate is the A2A
+// counterpart of the MCP proof: a client retrying with the same
+// idempotency_key over the real A2A HTTP+JSON-RPC wire protocol gets back
+// the original outcome, marked replayed, instead of a second commit.
+func Test_A2A_ExecuteStep_IdempotencyKey_RetryDoesNotDuplicate(t *testing.T) {
+	srv, store := newTestServer(t)
+	c := newTestClient(t, srv)
+
+	first := sendStepWithKey(t, c, "db-maintenance", "incident-retry", "take_backup", "req-1")
+	if first.Status.State != a2a.TaskStateCompleted {
+		t.Fatalf("expected the first call to complete, got %q", first.Status.State)
+	}
+	if replayed := artifactBool(t, first, "replayed"); replayed {
+		t.Fatal("expected the first call to report replayed=false")
+	}
+
+	retry := sendStepWithKey(t, c, "db-maintenance", "incident-retry", "take_backup", "req-1")
+	if retry.Status.State != a2a.TaskStateCompleted {
+		t.Fatalf("expected the retry to also complete, got %q", retry.Status.State)
+	}
+	if replayed := artifactBool(t, retry, "replayed"); !replayed {
+		t.Fatal("expected the retry to report replayed=true")
+	}
+
+	if got := store.TraceFor("incident-retry").ExecutedSteps(); len(got) != 1 {
+		t.Fatalf("expected exactly one commit despite the retry, got %v", got)
+	}
+}
+
+// artifactBool extracts a bool field from the first DataPart artifact on
+// task, failing the test if none is found.
+func artifactBool(t *testing.T, task *a2a.Task, key string) bool {
+	t.Helper()
+	for _, artifact := range task.Artifacts {
+		for _, part := range artifact.Parts {
+			if dp, ok := part.(a2a.DataPart); ok {
+				if v, ok := dp.Data[key].(bool); ok {
+					return v
+				}
+			}
+		}
+	}
+	t.Fatalf("expected an artifact DataPart with key %q", key)
+	return false
 }
 
 func Test_A2A_ExecuteStep_UnknownWorkflowFails(t *testing.T) {

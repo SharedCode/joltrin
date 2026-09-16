@@ -87,27 +87,50 @@ func NewWorkflow(steps []Step, safety []SafetyRule, reachability []ReachabilityR
 	return &Workflow{Steps: index, Safety: safety, Reachability: reachability}, nil
 }
 
+// maxIdempotencyKeysPerTrace bounds how many distinct idempotency keys one
+// Trace retains, evicting the oldest first, the same reasoning as
+// runbookstore.DefaultMaxTraces: tools/a2aagent exposes traces over the
+// network, so a per-key cache needs a cap or a client can grow it without
+// limit just by sending fresh keys. A legitimate caller retrying a handful
+// of steps needs nowhere near this many. Eviction here is safe in the same
+// direction runbookstore's trace eviction is: an evicted key just reverts
+// that one retry to pre-idempotency behavior (it re-executes and may
+// duplicate a trace entry), not to something less safe than before this
+// mechanism existed.
+const maxIdempotencyKeysPerTrace = 256
+
 // Trace is the ordered record of steps executed so far in one run of a
 // Workflow, plus the accumulated set of States those steps established.
 //
 // A Trace is shared: tools/runbookstore hands the same *Trace to every
 // request carrying the same trace_id, and those requests can arrive
 // concurrently on different protocols (MCP, A2A) against the same store.
-// The mutex below guards Executed and Holds for that reason; without it,
-// one goroutine committing while another checks is a data race on Holds,
-// which the Go runtime turns into an unrecoverable "concurrent map read and
-// map write" process abort, i.e. a remote kill switch on any server built
-// from this package. Callers must not touch the fields directly; use
-// CheckSafety, Commit, CheckAndCommit, and ExecutedSteps.
+// The mutex below guards Executed, Holds, and commits for that reason;
+// without it, one goroutine committing while another checks is a data race
+// on Holds, which the Go runtime turns into an unrecoverable "concurrent
+// map read and map write" process abort, i.e. a remote kill switch on any
+// server built from this package. Callers must not touch the fields
+// directly; use CheckSafety, Commit, CheckAndCommit,
+// CheckAndCommitIdempotent, and ExecutedSteps.
 type Trace struct {
 	mu       sync.Mutex
 	Executed []StepID
 	Holds    map[State]bool
+	// commits caches the outcome of a CheckAndCommitIdempotent call by its
+	// idempotency key, so a retried call with the same key gets back the
+	// exact original outcome (success or the same Violation) instead of
+	// being recomputed against however the trace has changed since. That is
+	// what actually makes a retry safe: the caller cannot get a different
+	// answer to the same question just by asking twice, and a step never
+	// gets double-committed to Executed because its client timed out and
+	// retried. commitOrder tracks insertion order for the eviction above.
+	commits     map[string]error
+	commitOrder []string
 }
 
 // NewTrace starts an empty execution trace.
 func NewTrace() *Trace {
-	return &Trace{Holds: make(map[State]bool)}
+	return &Trace{Holds: make(map[State]bool), commits: make(map[string]error)}
 }
 
 // ExecutedSteps returns a copy of the steps committed to this trace so far.
@@ -211,10 +234,60 @@ func (w *Workflow) checkSafetyLocked(trace *Trace, next StepID) error {
 //
 // A blocked step returns a *Violation (see IsViolation); a malformed one
 // (unknown step) returns a plain error, and neither mutates the trace.
+//
+// CheckAndCommit does not deduplicate retries: calling it twice for the
+// same step appends twice to Executed. Callers reachable over a protocol a
+// client might retry after a timeout (tools/mcpserver, tools/a2aagent)
+// should use CheckAndCommitIdempotent instead.
 func (w *Workflow) CheckAndCommit(trace *Trace, next StepID) error {
 	trace.mu.Lock()
 	defer trace.mu.Unlock()
+	return w.checkAndCommitLocked(trace, next)
+}
 
+// CheckAndCommitIdempotent is CheckAndCommit, made safe to retry: if
+// idempotencyKey is non-empty and this trace has already processed that
+// exact key, it returns the original outcome (replayed=true) without
+// re-checking safety or re-committing, whether that original outcome was a
+// success or a blocked *Violation. A caller that timed out waiting for a
+// response and is not sure whether the first attempt landed can retry with
+// the same key and get back the true answer to "what actually happened,"
+// not a fresh recomputation that might disagree with it.
+//
+// An empty idempotencyKey disables the cache for that call and behaves
+// exactly like CheckAndCommit (replayed is always false), so this is
+// purely additive: a caller that never passes a key sees no behavior
+// change from adding this method.
+func (w *Workflow) CheckAndCommitIdempotent(trace *Trace, next StepID, idempotencyKey string) (replayed bool, err error) {
+	trace.mu.Lock()
+	defer trace.mu.Unlock()
+
+	if idempotencyKey != "" {
+		if cached, ok := trace.commits[idempotencyKey]; ok {
+			return true, cached
+		}
+	}
+
+	err = w.checkAndCommitLocked(trace, next)
+
+	if idempotencyKey != "" {
+		if _, exists := trace.commits[idempotencyKey]; !exists {
+			for len(trace.commitOrder) >= maxIdempotencyKeysPerTrace {
+				oldest := trace.commitOrder[0]
+				trace.commitOrder = trace.commitOrder[1:]
+				delete(trace.commits, oldest)
+			}
+			trace.commitOrder = append(trace.commitOrder, idempotencyKey)
+		}
+		trace.commits[idempotencyKey] = err
+	}
+	return false, err
+}
+
+// checkAndCommitLocked is CheckAndCommit's body, minus the locking, shared
+// with CheckAndCommitIdempotent so both run the check-then-commit sequence
+// under exactly one lock acquisition.
+func (w *Workflow) checkAndCommitLocked(trace *Trace, next StepID) error {
 	if err := w.checkSafetyLocked(trace, next); err != nil {
 		return err
 	}

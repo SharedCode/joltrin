@@ -71,6 +71,35 @@ func Test_CheckAndCommit_LeavesTraceUntouchedWhenBlocked(t *testing.T) {
 	}
 }
 
+// Test_ConcurrentIdempotentRetries_CommitExactlyOnce is the race-safety
+// proof for CheckAndCommitIdempotent: several goroutines racing to commit
+// the same step with the same idempotency key (simulating a client that
+// fired a retry concurrently with its original request still in flight,
+// not just sequentially after a timeout) must produce exactly one commit.
+// Only the lock held across the cache lookup and the cache write, the same
+// lock CheckAndCommit itself uses, makes that true; checking and writing
+// the cache under separate acquisitions would let two goroutines both see
+// "no key yet" and both commit. Run under -race.
+func Test_ConcurrentIdempotentRetries_CommitExactlyOnce(t *testing.T) {
+	wf := dbMaintenanceWorkflow(t)
+	trace := NewTrace()
+
+	const goroutines = 16
+	var wg sync.WaitGroup
+	for i := 0; i < goroutines; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_, _ = wf.CheckAndCommitIdempotent(trace, "take_backup", "concurrent-retry-1")
+		}()
+	}
+	wg.Wait()
+
+	if got := trace.ExecutedSteps(); len(got) != 1 {
+		t.Fatalf("expected exactly one commit across %d concurrent retries of the same key, got %d: %v", goroutines, len(got), got)
+	}
+}
+
 // Test_IsViolation_DistinguishesMalformedFromBlocked is what lets the A2A
 // executor answer input-required (retryable) versus failed (never
 // succeeds); collapsing the two would make a typo look like a barrier hit.

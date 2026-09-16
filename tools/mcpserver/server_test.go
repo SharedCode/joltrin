@@ -194,6 +194,65 @@ func Test_MCP_ExecuteStep_UnknownStepIsErrorWithInventory(t *testing.T) {
 	}
 }
 
+// Test_MCP_ExecuteStep_IdempotencyKey_RetryDoesNotDuplicate is the real
+// end-to-end proof (over the actual MCP wire protocol, not a direct Go
+// call) that a client retrying execute_step with the same idempotency_key,
+// simulating a lost or timed-out response, gets back the original result
+// and marked replayed, instead of the step executing a second time.
+func Test_MCP_ExecuteStep_IdempotencyKey_RetryDoesNotDuplicate(t *testing.T) {
+	c := newTestClient(t)
+	args := map[string]any{
+		"workflow":        "db-maintenance",
+		"trace_id":        "incident-retry",
+		"step":            "take_backup",
+		"idempotency_key": "req-1",
+	}
+
+	first := callTool(t, c, "execute_step", args)
+	if first.IsError {
+		t.Fatalf("first call unexpectedly errored: %s", resultText(first))
+	}
+	firstResult := structuredAs[ExecuteStepResult](t, first)
+	if !firstResult.Executed || firstResult.Replayed {
+		t.Fatalf("expected a fresh execution, got %+v", firstResult)
+	}
+
+	retry := callTool(t, c, "execute_step", args)
+	if retry.IsError {
+		t.Fatalf("retry unexpectedly errored: %s", resultText(retry))
+	}
+	retryResult := structuredAs[ExecuteStepResult](t, retry)
+	if !retryResult.Executed || !retryResult.Replayed {
+		t.Fatalf("expected the retry to report executed=true replayed=true, got %+v", retryResult)
+	}
+	if len(retryResult.Trace) != 1 {
+		t.Fatalf("expected the retry to leave the trace at one entry, got %v", retryResult.Trace)
+	}
+}
+
+// Test_MCP_ExecuteStep_NoIdempotencyKey_RetryDuplicates is the explicit
+// backward-compatibility check: a caller that omits idempotency_key must
+// see the pre-existing behavior (each call executes independently), not a
+// silently different default once this feature exists.
+func Test_MCP_ExecuteStep_NoIdempotencyKey_RetryDuplicates(t *testing.T) {
+	c := newTestClient(t)
+	args := map[string]any{
+		"workflow": "db-maintenance",
+		"trace_id": "incident-no-key",
+		"step":     "take_backup",
+	}
+
+	callTool(t, c, "execute_step", args)
+	res := callTool(t, c, "execute_step", args)
+	result := structuredAs[ExecuteStepResult](t, res)
+	if result.Replayed {
+		t.Fatal("a call with no idempotency_key must never report replayed=true")
+	}
+	if len(result.Trace) != 2 {
+		t.Fatalf("expected two independent executions without a key, got %v", result.Trace)
+	}
+}
+
 // Test_MCP_ExecuteStep_FullSequence is the real end-to-end path: an MCP
 // client calls validate_step then execute_step for each step in order,
 // exactly how an agent would drive this server, and confirms the barrier

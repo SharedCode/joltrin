@@ -69,6 +69,7 @@ func newServer(card *a2a.AgentCard, c *a2aclient.Client) *server.MCPServer {
 			mcp.WithString("workflow", mcp.Required(), mcp.Description("Name of the runbook registered on the remote agent.")),
 			mcp.WithString("trace_id", mcp.Required(), mcp.Description("Identifies this execution's trace on the remote agent.")),
 			mcp.WithString("step", mcp.Required(), mcp.Description("ID of the step to execute.")),
+			mcp.WithString("idempotency_key", mcp.Description("Optional. Forwarded to the remote agent as-is. Retrying with the same key after a lost or timed-out response returns the original outcome instead of executing the step again on the remote agent.")),
 		),
 		executeStepHandler(c),
 	)
@@ -81,18 +82,21 @@ func executeStepHandler(c *a2aclient.Client) server.ToolHandlerFunc {
 		workflow := req.GetString("workflow", "")
 		traceID := req.GetString("trace_id", "")
 		step := req.GetString("step", "")
+		idempotencyKey := req.GetString("idempotency_key", "")
 		if workflow == "" || traceID == "" || step == "" {
 			return mcp.NewToolResultError("workflow, trace_id, and step are all required"), nil
 		}
 
+		data := map[string]any{
+			"workflow": workflow,
+			"trace_id": traceID,
+			"step":     step,
+		}
+		if idempotencyKey != "" {
+			data["idempotency_key"] = idempotencyKey
+		}
 		result, err := c.SendMessage(ctx, &a2a.MessageSendParams{
-			Message: a2a.NewMessage(a2a.MessageRoleUser, a2a.DataPart{
-				Data: map[string]any{
-					"workflow": workflow,
-					"trace_id": traceID,
-					"step":     step,
-				},
-			}),
+			Message: a2a.NewMessage(a2a.MessageRoleUser, a2a.DataPart{Data: data}),
 		})
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("a2abridge: sending step %q to remote agent: %v", step, err)), nil
