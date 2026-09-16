@@ -3,7 +3,7 @@
 # ==============================================================================
 # Stage 1: Builder
 # ==============================================================================
-FROM golang:1.26.8-alpine AS builder
+FROM golang:1.27.1-alpine AS builder
 
 # Install build dependencies, CA certificates, and tzdata
 RUN apk add --no-cache ca-certificates tzdata
@@ -41,7 +41,7 @@ RUN mkdir -p /out/var/lib/sop && chown -R 65532:65532 /out/var/lib/sop
 # ==============================================================================
 # Stage 2: Integration Test Runner (Optional Target: --target test)
 # ==============================================================================
-FROM golang:1.26.8-alpine AS test
+FROM golang:1.27.1-alpine AS test
 RUN apk add --no-cache redis
 WORKDIR /app
 COPY --from=builder /src /app
