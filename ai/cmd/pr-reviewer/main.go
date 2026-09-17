@@ -1,4 +1,4 @@
-// Command pr_reviewer fetches the diff for the pull request described by
+// Command pr-reviewer fetches the diff for the pull request described by
 // GITHUB_EVENT_PATH, asks Gemini to review it, and posts the result as a PR
 // comment. It's meant to run as a GitHub Actions step; see
 // .github/workflows/gemini-pr-review.yml.
