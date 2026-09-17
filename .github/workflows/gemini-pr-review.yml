@@ -1,0 +1,45 @@
+name: Gemini PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [ "master" ]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: gemini-pr-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ai/go.mod
+
+      # `secrets` isn't a valid context in a job/step `if:`, so this
+      # produces a step output instead. That way the job skips cleanly
+      # (still a passing status) instead of failing every PR until
+      # GEMINI_API_KEY is actually configured.
+      - name: Check for Gemini API key
+        id: check-key
+        run: echo "present=${{ secrets.GEMINI_API_KEY != '' }}" >> "$GITHUB_OUTPUT"
+
+      - name: Run Gemini PR review
+        if: steps.check-key.outputs.present == 'true'
+        working-directory: ai
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: go run ./cmd/pr-reviewer
