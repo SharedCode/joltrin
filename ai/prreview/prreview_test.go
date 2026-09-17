@@ -5,8 +5,21 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync/atomic"
 	"testing"
+	"time"
 )
+
+func withFastGeminiRetry(t *testing.T, maxAttempts int) {
+	t.Helper()
+	originalAttempts, originalDelay := geminiMaxAttempts, geminiRetryBaseDelay
+	geminiMaxAttempts = maxAttempts
+	geminiRetryBaseDelay = time.Millisecond
+	t.Cleanup(func() {
+		geminiMaxAttempts = originalAttempts
+		geminiRetryBaseDelay = originalDelay
+	})
+}
 
 type roundTripFunc func(*http.Request) (*http.Response, error)
 
@@ -167,16 +180,75 @@ func TestReviewDiffParsesResponse(t *testing.T) {
 }
 
 func TestReviewDiffErrorStatus(t *testing.T) {
+	withFastGeminiRetry(t, 3)
+
+	nonRetryable := false
 	withTransport(t, func(req *http.Request) (*http.Response, error) {
+		nonRetryable = true
 		return &http.Response{
-			StatusCode: http.StatusTooManyRequests,
-			Body:       io.NopCloser(strings.NewReader(`{"error":"rate limited"}`)),
+			StatusCode: http.StatusUnauthorized,
+			Body:       io.NopCloser(strings.NewReader(`{"error":"bad api key"}`)),
 			Header:     make(http.Header),
 		}, nil
 	})
 
 	if _, err := ReviewDiff(context.Background(), "test-key", DefaultModel, "prompt"); err == nil {
 		t.Fatal("expected an error when Gemini returns a non-200 status")
+	}
+	if !nonRetryable {
+		t.Fatal("expected the transport to be called")
+	}
+}
+
+func TestReviewDiffRetriesOnTransientStatus(t *testing.T) {
+	withFastGeminiRetry(t, 5)
+
+	var attempts atomic.Int32
+	withTransport(t, func(req *http.Request) (*http.Response, error) {
+		if attempts.Add(1) < 3 {
+			return &http.Response{
+				StatusCode: http.StatusServiceUnavailable,
+				Body:       io.NopCloser(strings.NewReader(`{"error":"high demand"}`)),
+				Header:     make(http.Header),
+			}, nil
+		}
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       io.NopCloser(strings.NewReader(`{"candidates":[{"content":{"parts":[{"text":"no issues found"}]}}]}`)),
+			Header:     make(http.Header),
+		}, nil
+	})
+
+	got, err := ReviewDiff(context.Background(), "test-key", DefaultModel, "prompt")
+	if err != nil {
+		t.Fatalf("ReviewDiff returned an unexpected error: %v", err)
+	}
+	if got != "no issues found" {
+		t.Fatalf("got %q, want %q", got, "no issues found")
+	}
+	if attempts.Load() != 3 {
+		t.Fatalf("got %d attempts, want 3", attempts.Load())
+	}
+}
+
+func TestReviewDiffGivesUpAfterMaxAttempts(t *testing.T) {
+	withFastGeminiRetry(t, 3)
+
+	var attempts atomic.Int32
+	withTransport(t, func(req *http.Request) (*http.Response, error) {
+		attempts.Add(1)
+		return &http.Response{
+			StatusCode: http.StatusServiceUnavailable,
+			Body:       io.NopCloser(strings.NewReader(`{"error":"high demand"}`)),
+			Header:     make(http.Header),
+		}, nil
+	})
+
+	if _, err := ReviewDiff(context.Background(), "test-key", DefaultModel, "prompt"); err == nil {
+		t.Fatal("expected an error after exhausting retries")
+	}
+	if attempts.Load() != 3 {
+		t.Fatalf("got %d attempts, want 3 (geminiMaxAttempts)", attempts.Load())
 	}
 }
 

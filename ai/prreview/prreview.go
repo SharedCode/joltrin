@@ -8,9 +8,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 )
 
 // DefaultModel is used when no model override is provided.
@@ -306,8 +308,30 @@ type geminiGenerateResponse struct {
 	Candidates []geminiCandidate `json:"candidates"`
 }
 
+// geminiMaxAttempts and geminiRetryBaseDelay are vars, not consts, so tests
+// can shrink them and keep retry tests fast.
+var (
+	geminiMaxAttempts    = 5
+	geminiRetryBaseDelay = 2 * time.Second
+)
+
+const geminiRequestTimeout = 30 * time.Second
+
+// isRetryableGeminiStatus reports whether a Gemini HTTP status code is worth
+// retrying: rate limiting and the transient 5xx statuses Gemini returns when
+// a model is overloaded (e.g. "503 UNAVAILABLE ... high demand").
+func isRetryableGeminiStatus(status int) bool {
+	switch status {
+	case http.StatusTooManyRequests, http.StatusInternalServerError, http.StatusBadGateway, http.StatusServiceUnavailable, http.StatusGatewayTimeout:
+		return true
+	default:
+		return false
+	}
+}
+
 // ReviewDiff sends prompt to the Gemini generateContent API and returns the
-// model's response text.
+// model's response text. Transient errors (429, 500, 502, 503, 504) are
+// retried with exponential backoff and jitter before giving up.
 func ReviewDiff(ctx context.Context, apiKey, model, prompt string) (string, error) {
 	if apiKey == "" {
 		return "", fmt.Errorf("gemini api key is missing")
@@ -326,27 +350,65 @@ func ReviewDiff(ctx context.Context, apiKey, model, prompt string) (string, erro
 		return "", fmt.Errorf("failed to marshal gemini request: %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(jsonBody))
+	var lastErr error
+	for attempt := 0; attempt < geminiMaxAttempts; attempt++ {
+		status, body, err := doGeminiRequest(ctx, url, jsonBody)
+		if err != nil {
+			return "", err
+		}
+
+		if status == http.StatusOK {
+			return parseGeminiResponse(body)
+		}
+
+		lastErr = fmt.Errorf("gemini api error (status %d): %s", status, string(body))
+		if !isRetryableGeminiStatus(status) || attempt == geminiMaxAttempts-1 {
+			return "", lastErr
+		}
+
+		delay := geminiRetryBaseDelay << attempt
+		jitter := time.Duration(rand.Int63n(int64(delay/2) + 1))
+		timer := time.NewTimer(delay + jitter)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return "", ctx.Err()
+		case <-timer.C:
+		}
+	}
+
+	return "", lastErr
+}
+
+// doGeminiRequest performs a single Gemini generateContent call, bounded by
+// geminiRequestTimeout, and returns its status code and raw response body.
+func doGeminiRequest(ctx context.Context, url string, jsonBody []byte) (int, []byte, error) {
+	reqCtx, cancel := context.WithTimeout(ctx, geminiRequestTimeout)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(reqCtx, http.MethodPost, url, bytes.NewReader(jsonBody))
 	if err != nil {
-		return "", fmt.Errorf("failed to create gemini request: %w", err)
+		return 0, nil, fmt.Errorf("failed to create gemini request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("gemini api request failed: %w", err)
+		return 0, nil, fmt.Errorf("gemini api request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf("failed to read gemini response: %w", err)
+		return 0, nil, fmt.Errorf("failed to read gemini response: %w", err)
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("gemini api error (status %d): %s", resp.StatusCode, string(body))
-	}
+	return resp.StatusCode, body, nil
+}
 
+// parseGeminiResponse extracts the model's response text from a successful
+// Gemini generateContent response body.
+func parseGeminiResponse(body []byte) (string, error) {
 	var genResp geminiGenerateResponse
 	if err := json.Unmarshal(body, &genResp); err != nil {
 		return "", fmt.Errorf("failed to decode gemini response: %w", err)

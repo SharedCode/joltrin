@@ -60,5 +60,5 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GEMINI_MODEL: ${{ github.event.inputs.model }}
+          GEMINI_MODEL: ${{ github.event.inputs.model || 'gemini-2.5-flash' }}
         run: go run ./cmd/pr-reviewer
