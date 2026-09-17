@@ -4,6 +4,17 @@ on:
   pull_request:
     types: [opened, synchronize]
     branches: [ "master" ]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Pull request number to review"
+        required: true
+      model:
+        description: "Gemini model to use"
+        required: false
+        default: "gemini-2.5-flash"
 
 permissions:
   contents: read
@@ -11,14 +22,21 @@ permissions:
   issues: write
 
 concurrency:
-  group: gemini-pr-review-${{ github.event.pull_request.number }}
+  group: gemini-pr-review-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
   cancel-in-progress: true
 
 jobs:
   review:
-    if: github.event.pull_request.draft == false
+    # pull_request: skip drafts. issue_comment: only PR comments (issue_comment
+    # fires for both issues and PRs) containing the trigger phrase.
+    # workflow_dispatch: always allowed, it's an explicit manual request.
+    if: >
+      (github.event_name == 'pull_request' && github.event.pull_request.draft == false) ||
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request != null &&
+       (contains(github.event.comment.body, '/gemini review') || contains(github.event.comment.body, '@gemini review'))) ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -39,7 +57,10 @@ jobs:
       - name: Run Gemini PR review
         if: steps.check-key.outputs.present == 'true'
         working-directory: ai
+        timeout-minutes: 12
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_MODEL: ${{ github.event.inputs.model || 'gemini-2.5-flash' }}
+          GEMINI_TIMEOUT: 90s
         run: go run ./cmd/pr-reviewer
