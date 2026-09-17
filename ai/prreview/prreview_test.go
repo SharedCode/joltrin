@@ -44,6 +44,62 @@ func TestParseEventMissingNumber(t *testing.T) {
 	}
 }
 
+func TestParseEventIssueCommentOnPullRequest(t *testing.T) {
+	payload := `{
+		"action": "created",
+		"comment": {"body": "/gemini review"},
+		"issue": {"number": 42, "pull_request": {"url": "https://api.github.com/..."}},
+		"repository": {"name": "joltrin", "owner": {"login": "sharedcode"}}
+	}`
+
+	owner, repo, number, err := ParseEvent(strings.NewReader(payload))
+	if err != nil {
+		t.Fatalf("ParseEvent returned an unexpected error: %v", err)
+	}
+	if owner != "sharedcode" || repo != "joltrin" || number != 42 {
+		t.Fatalf("got owner=%q repo=%q number=%d, want owner=sharedcode repo=joltrin number=42", owner, repo, number)
+	}
+}
+
+func TestParseEventIssueCommentOnPlainIssue(t *testing.T) {
+	payload := `{
+		"action": "created",
+		"comment": {"body": "/gemini review"},
+		"issue": {"number": 42},
+		"repository": {"name": "joltrin", "owner": {"login": "sharedcode"}}
+	}`
+
+	if _, _, _, err := ParseEvent(strings.NewReader(payload)); err == nil {
+		t.Fatal("expected an error when the comment is on a plain issue, not a pull request")
+	}
+}
+
+func TestParseEventWorkflowDispatch(t *testing.T) {
+	payload := `{
+		"inputs": {"pr_number": "42", "model": "gemini-2.5-pro"},
+		"repository": {"name": "joltrin", "owner": {"login": "sharedcode"}}
+	}`
+
+	owner, repo, number, err := ParseEvent(strings.NewReader(payload))
+	if err != nil {
+		t.Fatalf("ParseEvent returned an unexpected error: %v", err)
+	}
+	if owner != "sharedcode" || repo != "joltrin" || number != 42 {
+		t.Fatalf("got owner=%q repo=%q number=%d, want owner=sharedcode repo=joltrin number=42", owner, repo, number)
+	}
+}
+
+func TestParseEventWorkflowDispatchInvalidPRNumber(t *testing.T) {
+	payload := `{
+		"inputs": {"pr_number": "not-a-number"},
+		"repository": {"name": "joltrin", "owner": {"login": "sharedcode"}}
+	}`
+
+	if _, _, _, err := ParseEvent(strings.NewReader(payload)); err == nil {
+		t.Fatal("expected an error when the pr_number input isn't a number")
+	}
+}
+
 func TestTruncateDiffUnderLimit(t *testing.T) {
 	diff := "short diff"
 	got, truncated := TruncateDiff(diff, 100)
@@ -148,6 +204,70 @@ func TestFetchDiffSendsAuthAndDiffHeaders(t *testing.T) {
 	}
 	if seenAccept != "application/vnd.github.v3.diff" {
 		t.Fatalf("got Accept header %q, want application/vnd.github.v3.diff", seenAccept)
+	}
+}
+
+func TestFetchHeadSHA(t *testing.T) {
+	withTransport(t, func(req *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       io.NopCloser(strings.NewReader(`{"head":{"sha":"abc123"}}`)),
+			Header:     make(http.Header),
+		}, nil
+	})
+
+	sha, err := FetchHeadSHA(context.Background(), "test-token", "sharedcode", "joltrin", 42)
+	if err != nil {
+		t.Fatalf("FetchHeadSHA returned an unexpected error: %v", err)
+	}
+	if sha != "abc123" {
+		t.Fatalf("got sha %q, want abc123", sha)
+	}
+}
+
+func TestFetchFailingChecksFiltersPassingRuns(t *testing.T) {
+	withTransport(t, func(req *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Body: io.NopCloser(strings.NewReader(`{"check_runs":[
+				{"name":"lint","conclusion":"success","output":{"summary":"ok"}},
+				{"name":"gitleaks","conclusion":"failure","output":{"summary":"secret found"}},
+				{"name":"tests","conclusion":"neutral","output":{"summary":"skipped"}}
+			]}`)),
+			Header: make(http.Header),
+		}, nil
+	})
+
+	failing, err := FetchFailingChecks(context.Background(), "test-token", "sharedcode", "joltrin", "abc123")
+	if err != nil {
+		t.Fatalf("FetchFailingChecks returned an unexpected error: %v", err)
+	}
+	if len(failing) != 1 || failing[0].Name != "gitleaks" || failing[0].Summary != "secret found" {
+		t.Fatalf("got %+v, want a single gitleaks failure", failing)
+	}
+}
+
+func TestBuildRemediationPromptIncludesFailingChecks(t *testing.T) {
+	prompt := BuildRemediationPrompt("diff --git a/x b/x", []FailingCheck{{Name: "gitleaks", Summary: "secret found"}})
+	if !strings.Contains(prompt, "gitleaks: secret found") {
+		t.Fatalf("expected prompt to include failing check details, got %q", prompt)
+	}
+}
+
+func TestBuildRemediationPromptNoFailingChecks(t *testing.T) {
+	prompt := BuildRemediationPrompt("diff --git a/x b/x", nil)
+	if !strings.Contains(prompt, "none reported") {
+		t.Fatalf("expected prompt to note no reported failing checks, got %q", prompt)
+	}
+}
+
+func TestFormatRemediationCommentMarksSuggestOnly(t *testing.T) {
+	comment := FormatRemediationComment("```diff\n+fix\n```", false)
+	if !strings.Contains(comment, remediationCommentMarker) {
+		t.Fatalf("expected remediation comment marker, got %q", comment)
+	}
+	if !strings.Contains(comment, "not applied automatically") {
+		t.Fatalf("expected suggest-only notice, got %q", comment)
 	}
 }
 

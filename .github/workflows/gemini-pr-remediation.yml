@@ -1,0 +1,52 @@
+name: Gemini PR Remediation (suggest-only)
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: gemini-pr-remediation-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  remediate:
+    # Only PR comments (issue_comment fires for both issues and PRs) that
+    # contain the trigger phrase. This workflow never runs on a bare scan
+    # failure - a maintainer has to ask for it explicitly.
+    if: >
+      github.event.issue.pull_request != null &&
+      contains(github.event.comment.body, '/gemini fix')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ai/go.mod
+
+      # `secrets` isn't a valid context in a job/step `if:`, so this
+      # produces a step output instead. That way the job skips cleanly
+      # (still a passing status) instead of failing every /gemini fix
+      # request until GEMINI_API_KEY is actually configured.
+      - name: Check for Gemini API key
+        id: check-key
+        run: echo "present=${{ secrets.GEMINI_API_KEY != '' }}" >> "$GITHUB_OUTPUT"
+
+      - name: Run Gemini PR remediation
+        if: steps.check-key.outputs.present == 'true'
+        working-directory: ai
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Deliberately contents: read only above and no git-commit step here:
+        # this workflow diagnoses and proposes a patch as a PR comment, it
+        # never writes to the branch. A maintainer applies the diff by hand.
+        run: go run ./cmd/pr-remediator
