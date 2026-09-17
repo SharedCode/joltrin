@@ -315,7 +315,11 @@ var (
 	geminiRetryBaseDelay = 2 * time.Second
 )
 
-const geminiRequestTimeout = 30 * time.Second
+// GeminiRequestTimeout bounds a single Gemini request attempt. It's a var,
+// not a const, so main can raise it from the GEMINI_TIMEOUT env var without
+// a recompile - generateContent can genuinely take a couple of minutes on a
+// large diff.
+var GeminiRequestTimeout = 2 * time.Minute
 
 // isRetryableGeminiStatus reports whether a Gemini HTTP status code is worth
 // retrying: rate limiting and the transient 5xx statuses Gemini returns when
@@ -330,8 +334,10 @@ func isRetryableGeminiStatus(status int) bool {
 }
 
 // ReviewDiff sends prompt to the Gemini generateContent API and returns the
-// model's response text. Transient errors (429, 500, 502, 503, 504) are
-// retried with exponential backoff and jitter before giving up.
+// model's response text. Both transient HTTP statuses (429, 500, 502, 503,
+// 504) and transport-level errors (including a single attempt timing out)
+// are retried with exponential backoff and jitter before giving up; a
+// non-retryable status (e.g. a bad API key) fails immediately.
 func ReviewDiff(ctx context.Context, apiKey, model, prompt string) (string, error) {
 	if apiKey == "" {
 		return "", fmt.Errorf("gemini api key is missing")
@@ -354,15 +360,23 @@ func ReviewDiff(ctx context.Context, apiKey, model, prompt string) (string, erro
 	for attempt := 0; attempt < geminiMaxAttempts; attempt++ {
 		status, body, err := doGeminiRequest(ctx, url, jsonBody)
 		if err != nil {
-			return "", err
-		}
-
-		if status == http.StatusOK {
+			// A canceled/expired parent context means the caller gave up;
+			// don't keep retrying into that. Anything else - including this
+			// attempt's own per-request timeout - is worth another try.
+			if ctx.Err() != nil {
+				return "", err
+			}
+			lastErr = err
+		} else if status == http.StatusOK {
 			return parseGeminiResponse(body)
+		} else {
+			lastErr = fmt.Errorf("gemini api error (status %d): %s", status, string(body))
+			if !isRetryableGeminiStatus(status) {
+				return "", lastErr
+			}
 		}
 
-		lastErr = fmt.Errorf("gemini api error (status %d): %s", status, string(body))
-		if !isRetryableGeminiStatus(status) || attempt == geminiMaxAttempts-1 {
+		if attempt == geminiMaxAttempts-1 {
 			return "", lastErr
 		}
 
@@ -381,9 +395,9 @@ func ReviewDiff(ctx context.Context, apiKey, model, prompt string) (string, erro
 }
 
 // doGeminiRequest performs a single Gemini generateContent call, bounded by
-// geminiRequestTimeout, and returns its status code and raw response body.
+// GeminiRequestTimeout, and returns its status code and raw response body.
 func doGeminiRequest(ctx context.Context, url string, jsonBody []byte) (int, []byte, error) {
-	reqCtx, cancel := context.WithTimeout(ctx, geminiRequestTimeout)
+	reqCtx, cancel := context.WithTimeout(ctx, GeminiRequestTimeout)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(reqCtx, http.MethodPost, url, bytes.NewReader(jsonBody))

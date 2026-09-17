@@ -22,7 +22,7 @@ jobs:
       github.event.issue.pull_request != null &&
       contains(github.event.comment.body, '/gemini fix')
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -43,9 +43,11 @@ jobs:
       - name: Run Gemini PR remediation
         if: steps.check-key.outputs.present == 'true'
         working-directory: ai
+        timeout-minutes: 12
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_TIMEOUT: 90s
         # Deliberately contents: read only above and no git-commit step here:
         # this workflow diagnoses and proposes a patch as a PR comment, it
         # never writes to the branch. A maintainer applies the diff by hand.

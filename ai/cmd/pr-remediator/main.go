@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/sharedcode/joltrin/ai/prreview"
 )
@@ -53,6 +54,12 @@ func run() error {
 	model := os.Getenv("GEMINI_MODEL")
 	if model == "" {
 		model = prreview.DefaultModel
+	}
+
+	if raw := os.Getenv("GEMINI_TIMEOUT"); raw != "" {
+		if parsed, err := time.ParseDuration(raw); err == nil && parsed > 0 {
+			prreview.GeminiRequestTimeout = parsed
+		}
 	}
 
 	maxDiffBytes := prreview.DefaultMaxDiffBytes

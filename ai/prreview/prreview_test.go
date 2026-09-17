@@ -2,6 +2,7 @@ package prreview
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -249,6 +250,52 @@ func TestReviewDiffGivesUpAfterMaxAttempts(t *testing.T) {
 	}
 	if attempts.Load() != 3 {
 		t.Fatalf("got %d attempts, want 3 (geminiMaxAttempts)", attempts.Load())
+	}
+}
+
+func TestReviewDiffRetriesOnTransportError(t *testing.T) {
+	withFastGeminiRetry(t, 5)
+
+	var attempts atomic.Int32
+	withTransport(t, func(req *http.Request) (*http.Response, error) {
+		if attempts.Add(1) < 3 {
+			return nil, fmt.Errorf("Post %q: context deadline exceeded", req.URL.String())
+		}
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       io.NopCloser(strings.NewReader(`{"candidates":[{"content":{"parts":[{"text":"no issues found"}]}}]}`)),
+			Header:     make(http.Header),
+		}, nil
+	})
+
+	got, err := ReviewDiff(context.Background(), "test-key", DefaultModel, "prompt")
+	if err != nil {
+		t.Fatalf("ReviewDiff returned an unexpected error: %v", err)
+	}
+	if got != "no issues found" {
+		t.Fatalf("got %q, want %q", got, "no issues found")
+	}
+	if attempts.Load() != 3 {
+		t.Fatalf("got %d attempts, want 3", attempts.Load())
+	}
+}
+
+func TestReviewDiffStopsRetryingWhenContextCanceled(t *testing.T) {
+	withFastGeminiRetry(t, 5)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	var attempts atomic.Int32
+	withTransport(t, func(req *http.Request) (*http.Response, error) {
+		attempts.Add(1)
+		cancel()
+		return nil, ctx.Err()
+	})
+
+	if _, err := ReviewDiff(ctx, "test-key", DefaultModel, "prompt"); err == nil {
+		t.Fatal("expected an error when the context is canceled")
+	}
+	if attempts.Load() != 1 {
+		t.Fatalf("got %d attempts, want 1 (should stop retrying once ctx is done)", attempts.Load())
 	}
 }
 

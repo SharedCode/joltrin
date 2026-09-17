@@ -36,7 +36,7 @@ jobs:
        (contains(github.event.comment.body, '/gemini review') || contains(github.event.comment.body, '@gemini review'))) ||
       github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -57,8 +57,10 @@ jobs:
       - name: Run Gemini PR review
         if: steps.check-key.outputs.present == 'true'
         working-directory: ai
+        timeout-minutes: 12
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_MODEL: ${{ github.event.inputs.model || 'gemini-2.5-flash' }}
+          GEMINI_TIMEOUT: 90s
         run: go run ./cmd/pr-reviewer
