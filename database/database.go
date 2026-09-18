@@ -19,6 +19,7 @@ import (
 	"github.com/sharedcode/joltrin/incfs"
 	"github.com/sharedcode/joltrin/infs"
 	"github.com/sharedcode/joltrin/internal/logsafe"
+	"github.com/sharedcode/joltrin/internal/pathsafety"
 )
 
 // DatabaseOptions holds the configuration for the database.
@@ -413,7 +414,7 @@ func Remove(ctx context.Context, dbPath string) error {
 
 			log.Warn("Skipping os.RemoveAll because it is the current working directory. Removed SOP metadata only.", "path", logsafe.V(folder))
 		} else {
-			if err := os.RemoveAll(folder); err != nil {
+			if err := pathsafety.RemoveAll(folder); err != nil {
 				return err
 			}
 		}

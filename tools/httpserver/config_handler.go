@@ -725,7 +725,7 @@ func handleUninstallSystem(w http.ResponseWriter, r *http.Request) {
 	if shouldDeleteSystem || shouldDeleteUsers {
 		// System DB
 		if shouldDeleteSystem && config.SystemDB != nil && config.SystemDB.Path != "" {
-			if err := os.RemoveAll(config.SystemDB.Path); err != nil {
+			if err := safeRemoveAll(config.SystemDB.Path); err != nil {
 				log.Error(logsafe.V(fmt.Sprintf("Failed to remove system db path %s: %v", config.SystemDB.Path, err)))
 				// Continue anyway to try cleaning up others
 			}
@@ -734,7 +734,7 @@ func handleUninstallSystem(w http.ResponseWriter, r *http.Request) {
 		if shouldDeleteUsers {
 			for _, db := range config.Databases {
 				if db.Path != "" {
-					if err := os.RemoveAll(db.Path); err != nil {
+					if err := safeRemoveAll(db.Path); err != nil {
 						log.Error(logsafe.V(fmt.Sprintf("Failed to remove db path %s: %v", db.Path, err)))
 					}
 				}
