@@ -500,7 +500,7 @@ func (s *Service) identifyTopic(ctx context.Context, query string) (*TopicAssess
 Existing Topics (Most Recent First):
 %s
 
-User Query: "%s"
+User Query: %q
 
 Instructions:
 1. If the query strictly refers to the context of a previous topic (e.g. "change it to blue", "what about the other one?"), select that Topic ID.
@@ -1027,9 +1027,9 @@ func (s *Service) handlePendingUserConfirmation(ctx context.Context, query strin
 	}()
 
 	if dbName != "" {
-		return true, fmt.Sprintf("Delete Space '%s' from database '%s'? Reply 'yes' to confirm or 'no' to cancel.", spaceName, dbName), nil
+		return true, fmt.Sprintf("Delete Space %q from database %q? Reply 'yes' to confirm or 'no' to cancel.", spaceName, dbName), nil
 	}
-	return true, fmt.Sprintf("Delete Space '%s'? Reply 'yes' to confirm or 'no' to cancel.", spaceName), nil
+	return true, fmt.Sprintf("Delete Space %q? Reply 'yes' to confirm or 'no' to cancel.", spaceName), nil
 }
 
 func (s *Service) executeDeleteSpaceDirect(ctx context.Context, spaceName string, databaseName string) (string, error) {
@@ -1136,7 +1136,7 @@ func (s *Service) RecordStep(ctx context.Context, step ai.ScriptStep) {
 			for k := range step.Args {
 				keys = append(keys, k)
 			}
-			log.Debug(fmt.Sprintf("Service.RecordStep: Drafting command '%s' without script. Args keys: %v", step.Command, keys))
+			log.Debug(fmt.Sprintf("Service.RecordStep: Drafting command %q without script. Args keys: %v", step.Command, keys))
 		}
 	}
 

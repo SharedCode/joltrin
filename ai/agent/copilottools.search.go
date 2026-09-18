@@ -347,7 +347,7 @@ func (a *CopilotAgent) getSubcategories(ctx context.Context, db *database.Databa
 			return "", fmt.Errorf("failed to find category by path: %w", err)
 		}
 		if !found {
-			return fmt.Sprintf("Category path '%s' not found.", categoryPath), nil
+			return fmt.Sprintf("Category path %q not found.", categoryPath), nil
 		}
 
 		catID, err := catsByPath.GetCurrentValue(ctx)
@@ -357,7 +357,7 @@ func (a *CopilotAgent) getSubcategories(ctx context.Context, db *database.Databa
 
 		ok, err := categoriesTree.Find(ctx, catID, false)
 		if err != nil || !ok {
-			return fmt.Sprintf("Category path '%s' not found.", categoryPath), nil
+			return fmt.Sprintf("Category path %q not found.", categoryPath), nil
 		}
 
 		parentCat, err := categoriesTree.GetCurrentValue(ctx)
@@ -385,7 +385,7 @@ func (a *CopilotAgent) getSubcategories(ctx context.Context, db *database.Databa
 		if categoryPath == "" {
 			return "No root categories found in this knowledge base.", nil
 		}
-		return fmt.Sprintf("No subcategories found under '%s'.", categoryPath), nil
+		return fmt.Sprintf("No subcategories found under %q.", categoryPath), nil
 	}
 
 	// Apply pagination
@@ -411,7 +411,7 @@ func (a *CopilotAgent) getSubcategories(ctx context.Context, db *database.Databa
 	var results []string
 	header := "Available Categories:"
 	if categoryPath != "" {
-		header = fmt.Sprintf("Subcategories under '%s':", categoryPath)
+		header = fmt.Sprintf("Subcategories under %q:", categoryPath)
 	}
 
 	// Add page info if multiple pages exist

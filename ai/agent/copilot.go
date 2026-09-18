@@ -650,7 +650,7 @@ func (a *CopilotAgent) Open(ctx context.Context) error {
 	if p != nil && p.CurrentDB != "" {
 		dbName := p.CurrentDB
 
-		log.Debug(fmt.Sprintf("CopilotAgent.Open: Checking DB '%s', SystemDB available: %v", dbName, a.systemDB != nil))
+		log.Debug(fmt.Sprintf("CopilotAgent.Open: Checking DB %q, SystemDB available: %v", dbName, a.systemDB != nil))
 
 		// Check for system DB
 		if dbName == SystemDBName && a.systemDB != nil {
@@ -1198,9 +1198,9 @@ func (a *CopilotAgent) handlePendingUserConfirmation(ctx context.Context, query 
 	}()
 
 	if dbName != "" {
-		return true, fmt.Sprintf("Delete Space '%s' from database '%s'? Reply 'yes' to confirm or 'no' to cancel.", spaceName, dbName), nil
+		return true, fmt.Sprintf("Delete Space %q from database %q? Reply 'yes' to confirm or 'no' to cancel.", spaceName, dbName), nil
 	}
-	return true, fmt.Sprintf("Delete Space '%s'? Reply 'yes' to confirm or 'no' to cancel.", spaceName), nil
+	return true, fmt.Sprintf("Delete Space %q? Reply 'yes' to confirm or 'no' to cancel.", spaceName), nil
 }
 
 func parseDeleteSpaceRequest(query string) (string, bool) {
@@ -3305,7 +3305,7 @@ func (a *CopilotAgent) Execute(ctx context.Context, toolName string, args map[st
 	for _, t := range a.registry.List() {
 		keys = append(keys, t.Name)
 	}
-	log.Debug(fmt.Sprintf("Tool '%s' not found. Available tools: %v", toolName, keys))
+	log.Debug(fmt.Sprintf("Tool %q not found. Available tools: %v", toolName, keys))
 
 	// Check if it's a script
 	if a.systemDB != nil {
@@ -3601,7 +3601,7 @@ func commitImplicitTransactions(ctx context.Context, initialTransactions map[str
 
 func (a *CopilotAgent) runScript(ctx context.Context, name string, script ai.Script, args map[string]any) (string, error) {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Running script '%s'...\n", name))
+	sb.WriteString(fmt.Sprintf("Running script %q...\n", name))
 	ctx = context.WithValue(ctx, ctxKeyDeferImplicitSessionTxClose, true)
 
 	// Initialize scope and track initial transactions
