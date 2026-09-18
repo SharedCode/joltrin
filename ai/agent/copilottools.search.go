@@ -12,6 +12,7 @@ import (
 	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
+	"github.com/sharedcode/joltrin/ai/internal/logsafe"
 	"github.com/sharedcode/joltrin/ai/memory"
 )
 
@@ -183,7 +184,7 @@ func (a *CopilotAgent) searchKnowledgeBase(ctx context.Context, db *database.Dat
 	query = stripRoutingPrefix(query, kbName)
 	pathQuery, _ := splitCategoryPathInstruction(query)
 
-	log.Info("searchKnowledgeBase start", "kb_name", kbName, "query", query, "category_path_query", pathQuery, "category", category, "category_path", catPath, "limit", limit)
+	log.Info("searchKnowledgeBase start", "kb_name", logsafe.V(kbName), "query", logsafe.V(query), "category_path_query", logsafe.V(pathQuery), "category", category, "category_path", logsafe.V(catPath), "limit", limit)
 
 	tx, err := db.BeginTransaction(ctx, sop.ForReading)
 	if err != nil {
@@ -198,7 +199,7 @@ func (a *CopilotAgent) searchKnowledgeBase(ctx context.Context, db *database.Dat
 
 	kb, err := db.OpenKnowledgeBase(ctx, kbName, tx, a.brain, embedder, false)
 	if err != nil {
-		log.Error("searchKnowledgeBase open failed", "kb_name", kbName, "error", err)
+		log.Error("searchKnowledgeBase open failed", "kb_name", logsafe.V(kbName), "error", logsafe.V(err))
 		return "", fmt.Errorf("failed to open kb %s: %w", kbName, err)
 	}
 

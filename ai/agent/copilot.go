@@ -24,6 +24,7 @@ import (
 	"github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/ai/embed"
 	"github.com/sharedcode/joltrin/ai/generator"
+	"github.com/sharedcode/joltrin/ai/internal/logsafe"
 	"github.com/sharedcode/joltrin/ai/memory"
 	"github.com/sharedcode/joltrin/ai/obfuscation"
 	"github.com/sharedcode/joltrin/jsondb"
@@ -677,7 +678,7 @@ func (a *CopilotAgent) Open(ctx context.Context) error {
 
 	// Initialize strict physical cognitive buffers natively
 	if err := a.InitializePhysicalMemory(ctx); err != nil {
-		log.Warn("CopilotAgent: STM Initialization failure", "error", err)
+		log.Warn("CopilotAgent: STM Initialization failure", "error", logsafe.V(err))
 	}
 
 	// Register tools now that we have a context (and potentially transactions)
@@ -772,7 +773,7 @@ func (a *CopilotAgent) Ask(ctx context.Context, query string, cfg *ai.ConfigMap)
 
 	rawQuery := query
 	if rewrittenQuery, rewritten := a.tryMetaTalkBasedRouting(ctx, query); rewritten {
-		log.Info("Copilot Ask MetaTalkBasedRouting Rewrite", "original_query", query, "effective_query", rewrittenQuery)
+		log.Info("Copilot Ask MetaTalkBasedRouting Rewrite", "original_query", logsafe.V(query), "effective_query", logsafe.V(rewrittenQuery))
 		query = rewrittenQuery
 	}
 
@@ -781,7 +782,7 @@ func (a *CopilotAgent) Ask(ctx context.Context, query string, cfg *ai.ConfigMap)
 
 	// Fast-path routing: If Avatar, execute Avatar Sub-Agent
 	if intent != ai.IntentOmni {
-		log.Info("Ask: Request classified for Avatar", "avatar", intent)
+		log.Info("Ask: Request classified for Avatar", "avatar", logsafe.V(intent))
 		return a.executeAvatarSubAgent(ctx, intent, query)
 	}
 	log.Info("Ask: Request classified for OMNI")
@@ -798,13 +799,13 @@ func (a *CopilotAgent) Ask(ctx context.Context, query string, cfg *ai.ConfigMap)
 		taskContext = &TaskContextClassification{Domain: "General"}
 	}
 	log.Info("Copilot Ask Routing",
-		"routing_gate", taskContext.RoutingGate,
-		"task_context", summarizeTaskContextForLog(*taskContext),
+		"routing_gate", logsafe.V(taskContext.RoutingGate),
+		"task_context", logsafe.V(summarizeTaskContextForLog(*taskContext)),
 	)
 
 	// 4a. KB Search Direct Display (Case 1: Few matches)
 	if taskContext.DirectDisplay && taskContext.KBSearchResults != "" {
-		log.Info("KB routing: Direct display path", "match_count", taskContext.KBMatchCount)
+		log.Info("KB routing: Direct display path", "match_count", logsafe.V(taskContext.KBMatchCount))
 		// Track episode metadata for MRU
 		a.trackEpisodeMetadata(ctx, intent)
 		// Format and return KB results immediately without LLM delegation
@@ -822,7 +823,7 @@ func (a *CopilotAgent) Ask(ctx context.Context, query string, cfg *ai.ConfigMap)
 
 	// 6a. KB Search LLM Integration (Case 2: :llm instruction, Case 3: Too many matches)
 	if !taskContext.DirectDisplay && taskContext.KBSearchResults != "" {
-		log.Info("KB routing: LLM processing path", "match_count", taskContext.KBMatchCount, "has_instruction", taskContext.LLMInstruction != "")
+		log.Info("KB routing: LLM processing path", "match_count", logsafe.V(taskContext.KBMatchCount), "has_instruction", taskContext.LLMInstruction != "")
 		// Use clean query (without :llm meta-token) for LLM context
 		cleanQuery := taskContext.CleanQuery
 		if cleanQuery == "" {
@@ -838,7 +839,7 @@ func (a *CopilotAgent) Ask(ctx context.Context, query string, cfg *ai.ConfigMap)
 		return "", err
 	}
 	log.Info("Copilot Ask Complete",
-		"session_id", sessionID,
+		"session_id", logsafe.V(sessionID),
 		"response_chars", len(finalText),
 	)
 
@@ -874,8 +875,8 @@ func (a *CopilotAgent) logAskStart(ctx context.Context, query string, gen ai.Gen
 			currentThreadID = fmt.Sprintf("%v", thread.ID)
 		}
 	}
-	log.Info("Copilot Ask Start", "generator", gen.Name(), "default_format", getRequestedOutputFormat(ctx), "session_id", sessionID,
-		"current_db", currentDB, "active_domain", activeDomain, "thread_id", currentThreadID, "query_chars", len(query))
+	log.Info("Copilot Ask Start", "generator", gen.Name(), "default_format", logsafe.V(getRequestedOutputFormat(ctx)), "session_id", logsafe.V(sessionID),
+		"current_db", logsafe.V(currentDB), "active_domain", logsafe.V(activeDomain), "thread_id", currentThreadID, "query_chars", len(query))
 	return sessionID
 }
 
@@ -2158,7 +2159,7 @@ func (a *CopilotAgent) resolveGenerator(ctx context.Context) ai.Generator {
 	if err == nil && tempGen != nil {
 		gen = tempGen
 	} else {
-		log.Warn("Failed to resolve to valid provider", "provider", providerOverrideStr, "error", err)
+		log.Warn("Failed to resolve to valid provider", "provider", logsafe.V(providerOverrideStr), "error", err)
 	}
 
 	return gen
@@ -2185,7 +2186,7 @@ func (a *CopilotAgent) handleSlashCommand(ctx context.Context, query string, gen
 		if execErr != nil {
 			if strings.Contains(execErr.Error(), "unknown tool") {
 				if gen != nil {
-					log.Warn("Slash command failed locally (unknown tool), falling back to LLM", "tool", toolName, "error", execErr)
+					log.Warn("Slash command failed locally (unknown tool), falling back to LLM", "tool", toolName, "error", logsafe.V(execErr))
 					return false, "", nil // Handled by LLM
 				}
 				return true, fmt.Sprintf("Error executing command '%s' (and no AI Copilot available to interpret it): %v", toolName, execErr), fmt.Errorf("tool fallback failed")
@@ -2556,7 +2557,7 @@ func (a *CopilotAgent) buildSystemPrompt(ctx context.Context, query string, task
 	// Render as highly structured JSON elements to prevent Prompt confusion
 	fullPrompt, budgetReport := builder.ToJSONWithBudgetReport(a.promptBudgetProfile(taskClassification))
 	log.Info("LLM Context Budget",
-		"routing_gate", taskClassification.RoutingGate,
+		"routing_gate", logsafe.V(taskClassification.RoutingGate),
 		"original_chars", budgetReport.OriginalTotalChars,
 		"final_chars", budgetReport.FinalTotalChars,
 		"components_present", summarizePromptComponentsPresent(budgetReport),
@@ -3170,14 +3171,14 @@ func (a *CopilotAgent) Execute(ctx context.Context, toolName string, args map[st
 	if shouldDeobfuscate {
 		// Log before deobfuscation
 		if b, err := json.Marshal(args); err == nil {
-			log.Debug(fmt.Sprintf("Args before deobfuscation: %s", string(b)))
+			log.Debug(logsafe.V(fmt.Sprintf("Args before deobfuscation: %s", string(b))))
 		}
 
 		a.deobfuscateMap(args)
 
 		// Log after deobfuscation
 		if b, err := json.MarshalIndent(args, "", "  "); err == nil {
-			log.Debug(fmt.Sprintf("Args after deobfuscation: %s", string(b)))
+			log.Debug(logsafe.V(fmt.Sprintf("Args after deobfuscation: %s", string(b))))
 		}
 	}
 
@@ -3204,7 +3205,7 @@ func (a *CopilotAgent) Execute(ctx context.Context, toolName string, args map[st
 	if recorder, ok := ctx.Value(ai.CtxKeyScriptRecorder).(ai.ScriptRecorder); ok {
 		// Debug: Check script content
 		if script, ok := savedArgs["script"]; ok {
-			log.Debug(fmt.Sprintf("Drafting script step. Type: %T, Value: %+v", script, script))
+			log.Debug(logsafe.V(fmt.Sprintf("Drafting script step. Type: %T, Value: %+v", script, script)))
 		}
 
 		// We record it even if it's a meta-tool, because from the Service's perspective, it's an action.
@@ -3273,7 +3274,7 @@ func (a *CopilotAgent) Execute(ctx context.Context, toolName string, args map[st
 	// This is the registry dispatch point for native LLM tool calls.
 	// If the model asked for "search_space", the name resolves here to toolSearchKB.
 	if toolDef, ok := a.registry.Get(toolName); ok {
-		log.Info("LLM Tool Call", "tool", toolName)
+		log.Info("LLM Tool Call", "tool", logsafe.V(toolName))
 		res, err := toolDef.Handler(ctx, args)
 		if deferClose, _ := ctx.Value(ctxKeyDeferImplicitSessionTxClose).(bool); !deferClose {
 			if pAfter := ai.GetSessionPayload(ctx); preExistingTx == nil && pAfter != nil && !pAfter.ExplicitTransaction {
@@ -3419,7 +3420,7 @@ func (a *CopilotAgent) setupImplicitTransaction(ctx context.Context, script ai.S
 		return nil, fmt.Errorf("failed to begin implicit script transaction: %w", err)
 	}
 
-	log.Info("setupImplicitTransaction: Created implicit transaction", "database", dbName, "tx_id", tx.GetID())
+	log.Info("setupImplicitTransaction: Created implicit transaction", "database", logsafe.V(dbName), "tx_id", tx.GetID())
 
 	if p.Transactions == nil {
 		p.Transactions = make(map[string]any)
@@ -3431,7 +3432,7 @@ func (a *CopilotAgent) setupImplicitTransaction(ctx context.Context, script ai.S
 		tx:     tx,
 		dbName: dbName,
 		rollbackFunc: func() {
-			log.Info("scriptTransaction: Rolling back implicit transaction", "database", dbName, "tx_id", tx.GetID())
+			log.Info("scriptTransaction: Rolling back implicit transaction", "database", logsafe.V(dbName), "tx_id", tx.GetID())
 			tx.Rollback(ctx)
 			delete(p.Transactions, dbName)
 			if current, ok := p.Transaction.(sop.Transaction); ok && current == tx {
@@ -3440,7 +3441,7 @@ func (a *CopilotAgent) setupImplicitTransaction(ctx context.Context, script ai.S
 			p.Variables = nil
 		},
 		commitFunc: func() error {
-			log.Info("scriptTransaction: Committing implicit transaction", "database", dbName, "tx_id", tx.GetID())
+			log.Info("scriptTransaction: Committing implicit transaction", "database", logsafe.V(dbName), "tx_id", tx.GetID())
 			err := tx.Commit(ctx)
 			delete(p.Transactions, dbName)
 			if current, ok := p.Transaction.(sop.Transaction); ok && current == tx {
@@ -3474,7 +3475,7 @@ func (a *CopilotAgent) setupSingleTransaction(ctx context.Context, script ai.Scr
 		return ctx, nil, fmt.Errorf("failed to begin global transaction: %w", err)
 	}
 
-	log.Info("setupSingleTransaction: Created global transaction", "database", dbName, "tx_id", tx.GetID())
+	log.Info("setupSingleTransaction: Created global transaction", "database", logsafe.V(dbName), "tx_id", tx.GetID())
 
 	// Inject into context
 	if p := ai.GetSessionPayload(ctx); p != nil {
@@ -3491,14 +3492,14 @@ func (a *CopilotAgent) setupSingleTransaction(ctx context.Context, script ai.Scr
 		tx:     tx,
 		dbName: dbName,
 		rollbackFunc: func() {
-			log.Info("scriptTransaction: Rolling back global transaction", "database", dbName, "tx_id", tx.GetID())
+			log.Info("scriptTransaction: Rolling back global transaction", "database", logsafe.V(dbName), "tx_id", tx.GetID())
 			tx.Rollback(ctx)
 		},
 		commitFunc: func() error {
-			log.Info("scriptTransaction: Committing global transaction", "database", dbName, "tx_id", tx.GetID())
+			log.Info("scriptTransaction: Committing global transaction", "database", logsafe.V(dbName), "tx_id", tx.GetID())
 			err := tx.Commit(ctx)
 			if err == nil {
-				log.Info("scriptTransaction: Successfully committed global transaction", "database", dbName, "tx_id", tx.GetID())
+				log.Info("scriptTransaction: Successfully committed global transaction", "database", logsafe.V(dbName), "tx_id", tx.GetID())
 			}
 			return err
 		},
@@ -3827,7 +3828,7 @@ func (a *CopilotAgent) classifyIntent(ctx context.Context, query string, gen ai.
 		return ai.IntentOmni
 	}
 
-	log.Info("classifyIntent ", "query", query)
+	log.Info("classifyIntent ", "query", logsafe.V(query))
 
 	if shouldRouteToOmniInsteadOfAvatar(query) {
 		return ai.IntentOmni

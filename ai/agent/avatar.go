@@ -7,6 +7,7 @@ import (
 
 	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
+	"github.com/sharedcode/joltrin/ai/internal/logsafe"
 )
 
 func (a *CopilotAgent) executeAvatarSubAgent(ctx context.Context, avatarName, taskContext string) (string, error) {
@@ -97,7 +98,7 @@ func (a *CopilotAgent) buildAvatarPrompt(ctx context.Context, avatarName, taskCo
 	convHistory := a.getSessionMemoryContext()
 
 	fullPrompt := persona + "\n" + convHistory + "\nUser: " + taskContext
-	log.Info("LLM Context (AVATAR)", "AvatarName", avatarName, "SystemPrompt", fullPrompt)
+	log.Info("LLM Context (AVATAR)", "AvatarName", logsafe.V(avatarName), "SystemPrompt", logsafe.V(fullPrompt))
 
 	return fullPrompt
 }

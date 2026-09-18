@@ -194,7 +194,7 @@ func executeHandler(cfg *config) http.HandlerFunc {
 			args = parts[1:]
 		}
 
-		log.Printf("Executing: %s %v", program, args)
+		log.Printf("Executing: %s %v", sanitizeLog(program), sanitizeLogArgs(args))
 
 		// Bound the run: a command that never exits would otherwise pin this
 		// handler (and its goroutine) forever.
@@ -240,6 +240,21 @@ func respondJSON(w http.ResponseWriter, status int, payload any) {
 	if err := json.NewEncoder(w).Encode(payload); err != nil {
 		log.Printf("Error encoding JSON response: %v", err)
 	}
+}
+
+// sanitizeLog strips characters a caller could use to forge extra log lines
+// (newlines, carriage returns) out of a value before it's logged.
+func sanitizeLog(s string) string {
+	r := strings.NewReplacer("\n", "\\n", "\r", "\\r")
+	return r.Replace(s)
+}
+
+func sanitizeLogArgs(args []string) []string {
+	out := make([]string, len(args))
+	for i, a := range args {
+		out[i] = sanitizeLog(a)
+	}
+	return out
 }
 
 // splitCommand splits a shell command string into words, respecting single

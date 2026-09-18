@@ -13,6 +13,7 @@ import (
 	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/embed"
+	"github.com/sharedcode/joltrin/ai/internal/logsafe"
 )
 
 // TODO: refactor Vectorize & VectorizeCategories so they can share common Category/Batched Items'
@@ -63,7 +64,7 @@ func (db *Database) Vectorize(
 	embedder ai.Embeddings,
 	batchSize int,
 ) error {
-	log.Info("Vectorize started", "kb_name", kbName, "batchSize", batchSize)
+	log.Info("Vectorize started", "kb_name", logsafe.V(kbName), "batchSize", batchSize)
 
 	embedder = embed.NewResilientEmbedder(embedder)
 	embedderDim := embedder.Dim()
@@ -279,7 +280,7 @@ func (db *Database) Vectorize(
 			// If batch is full, flush and commit
 			if len(batchTasks) >= batchSize {
 				if len(batchSummaries) > 0 {
-					log.Debug("Vectorize embedding items batch", "kb_name", kbName, "count", len(batchSummaries))
+					log.Debug("Vectorize embedding items batch", "kb_name", logsafe.V(kbName), "count", len(batchSummaries))
 					// Embed as DocumentTexts for item storage (768 dim)
 					allVecs, err := embed.DocumentTexts(ctx, embedder, batchSummaries)
 					if err != nil {
@@ -399,7 +400,7 @@ func (db *Database) Vectorize(
 	// Flush any remaining batch
 	if len(batchTasks) > 0 {
 		if len(batchSummaries) > 0 {
-			log.Debug("Vectorize embedding items batch (final)", "kb_name", kbName, "count", len(batchSummaries))
+			log.Debug("Vectorize embedding items batch (final)", "kb_name", logsafe.V(kbName), "count", len(batchSummaries))
 			// Embed as DocumentTexts for item storage (768 dim)
 			allVecs, err := embed.DocumentTexts(ctx, embedder, batchSummaries)
 			if err != nil {
@@ -444,7 +445,7 @@ func (db *Database) VectorizeCategories(
 	batchSize int,
 	categoryIDs []sop.UUID,
 ) error {
-	log.Info("vectorizeCategories started", "kb_name", kbName, "batchSize", batchSize)
+	log.Info("vectorizeCategories started", "kb_name", logsafe.V(kbName), "batchSize", batchSize)
 
 	embedder = embed.NewResilientEmbedder(embedder)
 	embedderDim := embedder.Dim()
@@ -642,7 +643,7 @@ func (db *Database) VectorizeCategories(
 			// If batch is full, flush and commit
 			if len(batchTasks) >= batchSize {
 				if len(batchSummaries) > 0 {
-					log.Debug("Vectorize embedding items batch", "kb_name", kbName, "count", len(batchSummaries))
+					log.Debug("Vectorize embedding items batch", "kb_name", logsafe.V(kbName), "count", len(batchSummaries))
 					// Embed as DocumentTexts for item storage (768 dim)
 					allVecs, err := embed.DocumentTexts(ctx, embedder, batchSummaries)
 					if err != nil {
@@ -742,7 +743,7 @@ func (db *Database) VectorizeCategories(
 	// Flush any remaining batch
 	if len(batchTasks) > 0 {
 		if len(batchSummaries) > 0 {
-			log.Debug("Vectorize embedding items batch (final)", "kb_name", kbName, "count", len(batchSummaries))
+			log.Debug("Vectorize embedding items batch (final)", "kb_name", logsafe.V(kbName), "count", len(batchSummaries))
 			// Embed as DocumentTexts for item storage (768 dim)
 			allVecs, err := embed.DocumentTexts(ctx, embedder, batchSummaries)
 			if err != nil {

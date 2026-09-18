@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/sharedcode/joltrin/ai"
+	"github.com/sharedcode/joltrin/ai/internal/logsafe"
 )
 
 // gemini implements the Generator interface for Google's Gemini models.
@@ -91,7 +92,7 @@ func (l geminiOwnedReActLoop) Run(ctx context.Context, req ai.ReasoningRequest) 
 	log.Debug("Gemini owned loop started",
 		"model", geminiGeneratorModel(l.generator),
 		"max_iterations", l.maxIterations,
-		"query_preview", geminiPreview(req.UserQuery, 240),
+		"query_preview", logsafe.V(geminiPreview(req.UserQuery, 240)),
 		"has_context", strings.TrimSpace(req.ContextText) != "",
 		"has_history", strings.TrimSpace(req.HistoryText) != "",
 	)
@@ -160,7 +161,7 @@ func (l geminiOwnedReActLoop) Run(ctx context.Context, req ai.ReasoningRequest) 
 			"continuations", len(turn.Options.ToolCallContinuations),
 			"temperature", turn.Options.Temperature,
 			"final_turn", turn.FinalTurn,
-			"prompt_preview", geminiPreview(turn.Prompt, 320),
+			"prompt_preview", logsafe.V(geminiPreview(turn.Prompt, 320)),
 		)
 
 		output, err := l.generator.Generate(ctx, turn.Prompt, turn.Options)
@@ -200,8 +201,8 @@ func (l geminiOwnedReActLoop) Run(ctx context.Context, req ai.ReasoningRequest) 
 				log.Warn("Gemini owned loop short-circuited on terminal tool hint",
 					"iteration", iteration,
 					"tool", toolCall.Name,
-					"hint_status", geminiHintStatus(toolResult.Hint),
-					"result_preview", geminiPreview(toolResult.Result, 320),
+					"hint_status", logsafe.V(geminiHintStatus(toolResult.Hint)),
+					"result_preview", logsafe.V(geminiPreview(toolResult.Result, 320)),
 				)
 				emitGeminiOwnedLoopHydration(req, resp)
 				return resp, nil
@@ -635,8 +636,8 @@ func executeGeminiOwnedLoopToolCall(ctx context.Context, req ai.ReasoningRequest
 		log.Warn("Gemini owned loop tool execution failed",
 			"iteration", iteration,
 			"tool", toolCall.Name,
-			"error", execErr,
-			"raw_result_preview", geminiPreview(rawResult, 320),
+			"error", logsafe.V(execErr),
+			"raw_result_preview", logsafe.V(geminiPreview(rawResult, 320)),
 		)
 		resultText = execErr.Error()
 
@@ -653,8 +654,8 @@ func executeGeminiOwnedLoopToolCall(ctx context.Context, req ai.ReasoningRequest
 		log.Debug("Gemini owned loop tool execution completed",
 			"iteration", iteration,
 			"tool", toolCall.Name,
-			"hint_status", geminiHintStatus(hint),
-			"result_preview", geminiPreview(resultText, 320),
+			"hint_status", logsafe.V(geminiHintStatus(hint)),
+			"result_preview", logsafe.V(geminiPreview(resultText, 320)),
 		)
 		if shouldStreamGeminiToolResult(req, iteration >= maxIterations) {
 			emitGeminiOwnedLoopEvent(req, ai.ReasoningEventToolResult, ai.BuildToolResultEvent(toolCall.Name, cloneGeminiToolArgs(toolCall.Args), resultText, cloneGeminiToolProgressHint(hint), iteration))
@@ -1183,7 +1184,7 @@ func (g *gemini) Generate(ctx context.Context, prompt string, opts ai.GenOptions
 	if g.apiKey == "" || g.apiKey == "YOUR_API_KEY" {
 		log.Warn("Gemini generate running in stub mode",
 			"model", strings.TrimSpace(g.model),
-			"prompt_preview", geminiPreview(prompt, 240),
+			"prompt_preview", logsafe.V(geminiPreview(prompt, 240)),
 		)
 		return ai.GenOutput{
 			Text: fmt.Sprintf("[Gemini Stub] Missing API Key. Please provide api_key in generator configuration. Would send: %q", prompt),
@@ -1195,7 +1196,7 @@ func (g *gemini) Generate(ctx context.Context, prompt string, opts ai.GenOptions
 	reqBody := buildGeminiRequest(prompt, opts)
 	log.Debug("Gemini generate building request",
 		"model", strings.TrimSpace(g.model),
-		"prompt_preview", geminiPreview(prompt, 320),
+		"prompt_preview", logsafe.V(geminiPreview(prompt, 320)),
 		"tool_count", len(opts.Tools),
 		"continuations", len(opts.ToolCallContinuations),
 		"temperature", opts.Temperature,

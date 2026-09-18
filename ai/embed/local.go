@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/sharedcode/joltrin/ai/internal/logsafe"
 	"io"
 	log "log/slog"
 	"net/http"
@@ -302,7 +303,7 @@ func NewLocalWithProvider(providerName, modelPath string, gpuLayers int) (*Local
 	if providerName == "" {
 		providerName = "kelindar"
 	}
-	log.Info("local embedder provider selected", "provider", providerName, "model_path", modelPath, "gpu_layers", gpuLayers)
+	log.Info("local embedder provider selected", "provider", providerName, "model_path", logsafe.V(modelPath), "gpu_layers", gpuLayers)
 	factory, ok := localEmbedderFactories[providerName]
 	if !ok {
 		available := strings.Join(AvailableLocalEmbedders(), ", ")
@@ -386,7 +387,7 @@ func newLocal(modelPath string, gpuLayers int, factory LocalEmbedderFactory) (*L
 
 	model, err := factory(modelPath, gpuLayers)
 	if err != nil {
-		log.Error("local embedder model load failed", "model_path", modelPath, "gpu_layers", gpuLayers, "error", err)
+		log.Error("local embedder model load failed", "model_path", logsafe.V(modelPath), "gpu_layers", gpuLayers, "error", err)
 		return nil, fmt.Errorf("failed to load local embedder model: %w", err)
 	}
 
@@ -401,7 +402,7 @@ func newLocal(modelPath string, gpuLayers int, factory LocalEmbedderFactory) (*L
 		gate:             make(chan struct{}, concurrencyLimit),
 		concurrencyLimit: concurrencyLimit,
 	}
-	log.Debug("local embedder initialized", "name", local.Name(), "model_path", local.modelPath, "dim", local.Dim(), "routing_dim", local.profile.RoutingDim, "document_dim", local.profile.DocumentDim, "concurrency_limit", concurrencyLimit)
+	log.Debug("local embedder initialized", "name", logsafe.V(local.Name()), "model_path", logsafe.V(local.modelPath), "dim", local.Dim(), "routing_dim", local.profile.RoutingDim, "document_dim", local.profile.DocumentDim, "concurrency_limit", concurrencyLimit)
 	return local, nil
 }
 

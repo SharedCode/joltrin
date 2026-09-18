@@ -9,6 +9,7 @@ import (
 
 	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
+	"github.com/sharedcode/joltrin/ai/internal/logsafe"
 )
 
 type routingAnchor struct {
@@ -29,7 +30,7 @@ func isRoutingTestGenerator(gen ai.Generator) bool {
 
 func parseRoutingAnchor(query string) *routingAnchor {
 
-	log.Info("query: ", "query", query)
+	log.Info("query: ", "query", logsafe.V(query))
 	parts := strings.Split(query, ":")
 	if len(parts) <= 1 {
 		return nil
@@ -104,7 +105,7 @@ func (a *CopilotAgent) tryPrefixBasedRouting(ctx context.Context, query string, 
 		return nil, nil
 	}
 
-	log.Info("Prefix-Based Routing Activated", "prefix", anchor.prefix)
+	log.Info("Prefix-Based Routing Activated", "prefix", logsafe.V(anchor.prefix))
 
 	var taskCtx *TaskContextClassification
 	if !isTest && gen != nil {
@@ -156,7 +157,7 @@ func (a *CopilotAgent) tryAskContinuationBasedRouting(ctx context.Context, query
 			return nil, nil
 		}
 		if err == nil && updatedRS != nil {
-			log.Info("Ask-Continuation Routing Activated: Inheriting MRU Context with Updates", "domain", updatedRS.Domain)
+			log.Info("Ask-Continuation Routing Activated: Inheriting MRU Context with Updates", "domain", logsafe.V(updatedRS.Domain))
 			annotateTaskContextIntent(updatedRS, query)
 			updatedRS.RoutingGate = RoutingGateContinuity
 			a.persistRoutingState(ctx, updatedRS)
@@ -165,7 +166,7 @@ func (a *CopilotAgent) tryAskContinuationBasedRouting(ctx context.Context, query
 		return nil, err
 	}
 
-	log.Info("Ask-Continuation Routing Activated: Inheriting MRU Context (Test Mode)", "domain", rs.Domain)
+	log.Info("Ask-Continuation Routing Activated: Inheriting MRU Context (Test Mode)", "domain", logsafe.V(rs.Domain))
 	annotateTaskContextIntent(rs, query)
 	rs.RoutingGate = RoutingGateContinuity
 	a.persistRoutingState(ctx, rs)
