@@ -425,6 +425,9 @@ func ingestImportReader(ctx context.Context, request IngestSpaceRequest) (io.Rea
 		return f, f, nil
 	}
 	if request.URL != "" {
+		if err := validateImportURL(request.URL); err != nil {
+			return nil, nil, fmt.Errorf("import URL rejected: %w", err)
+		}
 		reqHTTP, err := http.NewRequestWithContext(ctx, http.MethodGet, request.URL, nil)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to create import request: %w", err)
