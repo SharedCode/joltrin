@@ -36,6 +36,11 @@ const (
 )
 
 type ExecuteRequest struct {
+	// Command is the legacy field: a single string split into argv by
+	// splitCommand and exec'd directly, with no shell involved. Pipes,
+	// &&/||, redirects, globs, and env expansion are no longer
+	// interpreted; they land as literal argument text. Callers that need
+	// those should prefer Executable+Args, or pipe/chain client-side.
 	Command    string   `json:"command"`
 	Executable string   `json:"executable"`
 	Args       []string `json:"args"`
