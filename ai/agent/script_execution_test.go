@@ -682,7 +682,7 @@ func TestScriptRecording_OverwriteProtection(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to start recording: %v", err)
 	}
-	if !strings.Contains(resp, "Started drafting script 'test_script'") {
+	if !strings.Contains(resp, `Started drafting script "test_script"`) {
 		t.Errorf("Unexpected response: %s", resp)
 	}
 

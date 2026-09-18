@@ -46,7 +46,7 @@ func (s *Service) handleSessionCommand(ctx context.Context, query string, db *da
 		}
 
 		if !isValid {
-			return fmt.Sprintf("Error: Database '%s' not found.", targetDB), true, nil
+			return fmt.Sprintf("Error: Database %q not found.", targetDB), true, nil
 		}
 
 		// Check if already selected
@@ -56,7 +56,7 @@ func (s *Service) handleSessionCommand(ctx context.Context, query string, db *da
 		}
 
 		if currentDB == targetDB {
-			return fmt.Sprintf("Database '%s' is already selected.", targetDB), true, nil
+			return fmt.Sprintf("Database %q is already selected.", targetDB), true, nil
 		}
 
 		return fmt.Sprintf("[[SWITCH_DATABASE: %s]]", targetDB), true, nil
@@ -177,7 +177,7 @@ Use these tools via slash(/) commands. Arguments can be positional (e.g. ` + "`/
 			for k := range s.databases {
 				keys = append(keys, k)
 			}
-			return fmt.Sprintf("Error: Database not found or not selected. Requested: '%s', Available: %v", dbName, keys), true, nil
+			return fmt.Sprintf("Error: Database not found or not selected. Requested: %q, Available: %v", dbName, keys), true, nil
 		}
 
 		// Need transaction
@@ -248,7 +248,7 @@ Use these tools via slash(/) commands. Arguments can be positional (e.g. ` + "`/
 			}
 		}
 
-		return fmt.Sprintf("Stores in '%s':\n%s", dbName, strings.Join(descriptions, "\n")), true, nil
+		return fmt.Sprintf("Stores in %q:\n%s", dbName, strings.Join(descriptions, "\n")), true, nil
 	}
 
 	// Script Drafting Commands
@@ -307,7 +307,7 @@ Use these tools via slash(/) commands. Arguments can be positional (e.g. ` + "`/
 		s.session.CurrentScriptCategory = category
 		s.session.AutoSave = autoSave
 
-		msg := fmt.Sprintf("Started drafting script '%s' (Category: %s).\nUse tools to explore data. When you are happy with a command, type '/step' to add it to the script.\nType '/step <instruction>' to add a manual step.\nType '/save' when finished.", name, category)
+		msg := fmt.Sprintf("Started drafting script %q (Category: %s).\nUse tools to explore data. When you are happy with a command, type '/step' to add it to the script.\nType '/step <instruction>' to add a manual step.\nType '/save' when finished.", name, category)
 		if autoSave {
 			msg += " [Auto-Save Enabled]"
 		}
@@ -386,7 +386,7 @@ Use these tools via slash(/) commands. Arguments can be positional (e.g. ` + "`/
 
 		// Optimization: If autosave is enabled, the script is already saved.
 		if s.session.AutoSave {
-			msg := fmt.Sprintf("Script '%s' is up-to-date (autosave enabled). Drafting ended.", s.session.CurrentScriptName)
+			msg := fmt.Sprintf("Script %q is up-to-date (autosave enabled). Drafting ended.", s.session.CurrentScriptName)
 			s.session.CurrentScript = nil
 			s.session.CurrentScriptName = ""
 			s.session.CurrentScriptCategory = ""
@@ -398,7 +398,7 @@ Use these tools via slash(/) commands. Arguments can be positional (e.g. ` + "`/
 			return fmt.Sprintf("Error saving script: %v", err), true, nil
 		}
 
-		msg := fmt.Sprintf("Script '%s' saved successfully with %d steps. Drafting ended.", s.session.CurrentScriptName, len(s.session.CurrentScript.Steps))
+		msg := fmt.Sprintf("Script %q saved successfully with %d steps. Drafting ended.", s.session.CurrentScriptName, len(s.session.CurrentScript.Steps))
 
 		// Clear the draft after saving
 		s.session.CurrentScript = nil
@@ -450,7 +450,7 @@ Use these tools via slash(/) commands. Arguments can be positional (e.g. ` + "`/
 		var script ai.Script
 		if err := store.Load(ctx, category, name, &script); err != nil {
 			tx.Rollback(ctx)
-			return fmt.Sprintf("Error: Script '%s' (Category: %s) not found.", name, category), true, nil
+			return fmt.Sprintf("Error: Script %q (Category: %s) not found.", name, category), true, nil
 		}
 		tx.Commit(ctx)
 
@@ -489,7 +489,7 @@ Use these tools via slash(/) commands. Arguments can be positional (e.g. ` + "`/
 				}
 			}
 			if step.Type == "call_script" {
-				prompt = fmt.Sprintf("Run '%s'", step.ScriptName)
+				prompt = fmt.Sprintf("Run %q", step.ScriptName)
 			}
 			sb.WriteString(fmt.Sprintf("%d. [%s] %s\n", i+1, step.Type, prompt))
 		}
@@ -584,7 +584,7 @@ Use these tools via slash(/) commands. Arguments can be positional (e.g. ` + "`/
 
 		var script ai.Script
 		if err := store.Load(ctx, ai.DefaultScriptCategory, scriptName, &script); err != nil {
-			return fmt.Sprintf("Error loading script '%s': %v", scriptName, err), true, nil
+			return fmt.Sprintf("Error loading script %q: %v", scriptName, err), true, nil
 		}
 
 		newStep := *s.session.LastStep
@@ -615,7 +615,7 @@ Use these tools via slash(/) commands. Arguments can be positional (e.g. ` + "`/
 			return fmt.Sprintf("Error saving script: %v", err), true, nil
 		}
 		tx.Commit(ctx)
-		return fmt.Sprintf("Step added to script '%s'.", scriptName), true, nil
+		return fmt.Sprintf("Step added to script %q.", scriptName), true, nil
 	}
 
 	if strings.HasPrefix(query, "/run ") {
@@ -851,7 +851,7 @@ Use these tools via slash(/) commands. Arguments can be positional (e.g. ` + "`/
 		var dummy ai.Script
 		if err := store.Load(ctx, category, name, &dummy); err != nil {
 			tx.Rollback(ctx)
-			return fmt.Sprintf("Error: Script '%s' (Category: %s) not found.", name, category), true, nil
+			return fmt.Sprintf("Error: Script %q (Category: %s) not found.", name, category), true, nil
 		}
 
 		if err := store.Delete(ctx, category, name); err != nil {
@@ -861,7 +861,7 @@ Use these tools via slash(/) commands. Arguments can be positional (e.g. ` + "`/
 		if err := tx.Commit(ctx); err != nil {
 			return fmt.Sprintf("Error committing transaction: %v", err), true, nil
 		}
-		return fmt.Sprintf("Script '%s' (Category: %s) deleted.", name, category), true, nil
+		return fmt.Sprintf("Script %q (Category: %s) deleted.", name, category), true, nil
 	}
 
 	// /delete_step <script> <index>
@@ -918,7 +918,7 @@ Use these tools via slash(/) commands. Arguments can be positional (e.g. ` + "`/
 			return fmt.Sprintf("Error saving script: %v", err), true, nil
 		}
 		tx.Commit(ctx)
-		return fmt.Sprintf("Step %d deleted from script '%s'.", idx+1, name), true, nil
+		return fmt.Sprintf("Step %d deleted from script %q.", idx+1, name), true, nil
 	}
 
 	// /update_step <script> <index> <new_instruction>
@@ -993,7 +993,7 @@ Use these tools via slash(/) commands. Arguments can be positional (e.g. ` + "`/
 			return fmt.Sprintf("Error saving script: %v", err), true, nil
 		}
 		tx.Commit(ctx)
-		return fmt.Sprintf("Step %d updated in script '%s'.", idx+1, name), true, nil
+		return fmt.Sprintf("Step %d updated in script %q.", idx+1, name), true, nil
 	}
 
 	// /reorder_steps <script> <from> <to>
@@ -1069,7 +1069,7 @@ Use these tools via slash(/) commands. Arguments can be positional (e.g. ` + "`/
 			return fmt.Sprintf("Error saving script: %v", err), true, nil
 		}
 		tx.Commit(ctx)
-		return fmt.Sprintf("Step moved from %d to %d in script '%s'.", fromIdx+1, toIdx+1, name), true, nil
+		return fmt.Sprintf("Step moved from %d to %d in script %q.", fromIdx+1, toIdx+1, name), true, nil
 	}
 
 	// Data Operations as Slash Commands
@@ -1165,7 +1165,7 @@ Use these tools via slash(/) commands. Arguments can be positional (e.g. ` + "`/
 		// OpenBtree instead of OpenStore
 		store, err := db.OpenBtree(ctx, storeName, tx)
 		if err != nil {
-			return fmt.Sprintf("Error opening store '%s': %v", storeName, err), true, nil
+			return fmt.Sprintf("Error opening store %q: %v", storeName, err), true, nil
 		}
 
 		// Simple scan using cursor methods
@@ -1191,7 +1191,7 @@ Use these tools via slash(/) commands. Arguments can be positional (e.g. ` + "`/
 			}
 		}
 
-		return fmt.Sprintf("Top %d records from '%s':\n%s", limit, storeName, strings.Join(results, "\n")), true, nil
+		return fmt.Sprintf("Top %d records from %q:\n%s", limit, storeName, strings.Join(results, "\n")), true, nil
 	}
 
 	// /add <store> <key> <value>
@@ -1230,7 +1230,7 @@ Use these tools via slash(/) commands. Arguments can be positional (e.g. ` + "`/
 			return fmt.Sprintf("Error adding record: %v", err), true, nil
 		}
 		tx.Commit(ctx)
-		return fmt.Sprintf("Record added to '%s'.", storeName), true, nil
+		return fmt.Sprintf("Record added to %q.", storeName), true, nil
 	}
 
 	// /update <store> <key> <value>
@@ -1269,7 +1269,7 @@ Use these tools via slash(/) commands. Arguments can be positional (e.g. ` + "`/
 			return fmt.Sprintf("Error updating record: %v", err), true, nil
 		}
 		tx.Commit(ctx)
-		return fmt.Sprintf("Record updated in '%s'.", storeName), true, nil
+		return fmt.Sprintf("Record updated in %q.", storeName), true, nil
 	}
 
 	// /delete_record <store> <key>
@@ -1300,7 +1300,7 @@ Use these tools via slash(/) commands. Arguments can be positional (e.g. ` + "`/
 			return fmt.Sprintf("Error deleting record: %v", err), true, nil
 		}
 		tx.Commit(ctx)
-		return fmt.Sprintf("Record '%s' deleted from '%s'.", key, storeName), true, nil
+		return fmt.Sprintf("Record %q deleted from %q.", key, storeName), true, nil
 	}
 
 	if strings.HasPrefix(query, "/list") {

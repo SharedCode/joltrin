@@ -25,9 +25,9 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"runtime"
 	"strings"
 	"time"
+	"unicode"
 )
 
 const (
@@ -36,7 +36,9 @@ const (
 )
 
 type ExecuteRequest struct {
-	Command string `json:"command"`
+	Command    string   `json:"command"`
+	Executable string   `json:"executable"`
+	Args       []string `json:"args"`
 }
 
 type ExecuteResponse struct {
@@ -164,24 +166,37 @@ func executeHandler(cfg *config) http.HandlerFunc {
 			return
 		}
 
-		if req.Command == "" {
-			respondJSON(w, http.StatusBadRequest, ExecuteResponse{Error: "Command cannot be empty"})
+		if req.Executable == "" && req.Command == "" {
+			respondJSON(w, http.StatusBadRequest, ExecuteResponse{Error: "Either 'executable' or 'command' must be provided"})
 			return
 		}
 
-		log.Printf("Executing command: %s", req.Command)
+		var program string
+		var args []string
+
+		if req.Executable != "" {
+			program = req.Executable
+			args = req.Args
+		} else {
+			// Legacy path: split the command string into program + args
+			// to avoid passing raw input through a shell interpreter.
+			parts, err := splitCommand(req.Command)
+			if err != nil || len(parts) == 0 {
+				respondJSON(w, http.StatusBadRequest, ExecuteResponse{Error: "Failed to parse command"})
+				return
+			}
+			program = parts[0]
+			args = parts[1:]
+		}
+
+		log.Printf("Executing: %s %v", program, args)
 
 		// Bound the run: a command that never exits would otherwise pin this
 		// handler (and its goroutine) forever.
 		ctx, cancel := context.WithTimeout(r.Context(), cfg.commandTimeout)
 		defer cancel()
 
-		var cmd *exec.Cmd
-		if runtime.GOOS == "windows" {
-			cmd = exec.CommandContext(ctx, "cmd", "/C", req.Command)
-		} else {
-			cmd = exec.CommandContext(ctx, "sh", "-c", req.Command)
-		}
+		cmd := exec.CommandContext(ctx, program, args...)
 
 		var stdout, stderr bytes.Buffer
 		cmd.Stdout = &stdout
@@ -220,4 +235,52 @@ func respondJSON(w http.ResponseWriter, status int, payload any) {
 	if err := json.NewEncoder(w).Encode(payload); err != nil {
 		log.Printf("Error encoding JSON response: %v", err)
 	}
+}
+
+// splitCommand splits a shell command string into words, respecting single
+// quotes, double quotes, and backslash escapes. This lets callers pass a
+// single "command" string without routing it through sh -c.
+func splitCommand(s string) ([]string, error) {
+	var args []string
+	var current []rune
+	var quote rune // 0 = unquoted, '\'' or '"' = inside that quote type
+	escaped := false
+
+	for _, r := range s {
+		if escaped {
+			current = append(current, r)
+			escaped = false
+			continue
+		}
+		if r == '\\' && quote != '\'' {
+			escaped = true
+			continue
+		}
+		if quote != 0 {
+			if r == quote {
+				quote = 0
+			} else {
+				current = append(current, r)
+			}
+			continue
+		}
+		switch {
+		case r == '\'' || r == '"':
+			quote = r
+		case unicode.IsSpace(r):
+			if len(current) > 0 {
+				args = append(args, string(current))
+				current = current[:0]
+			}
+		default:
+			current = append(current, r)
+		}
+	}
+	if quote != 0 {
+		return nil, fmt.Errorf("unclosed quote")
+	}
+	if len(current) > 0 {
+		args = append(args, string(current))
+	}
+	return args, nil
 }

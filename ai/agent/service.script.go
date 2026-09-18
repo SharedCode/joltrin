@@ -103,7 +103,7 @@ func (s *Service) PlayScript(ctx context.Context, name string, category string, 
 				scriptCtx = context.WithValue(scriptCtx, "session_payload", &newPayload)
 			}
 		} else {
-			return fmt.Errorf("script '%s' requires database '%s' which is not configured", name, script.Database)
+			return fmt.Errorf("script %q requires database %q which is not configured", name, script.Database)
 		}
 	} else {
 		// If portable or no DB specified, use the DB from context payload if available
@@ -213,7 +213,7 @@ func (s *Service) scriptList(ctx context.Context, scriptDB *database.Database, a
 		return fmt.Sprintf("Error listing scripts: %v", err), nil
 	}
 	if len(names) == 0 {
-		return fmt.Sprintf("No scripts found in category '%s'.", category), nil
+		return fmt.Sprintf("No scripts found in category %q.", category), nil
 	}
 	return fmt.Sprintf("Scripts (Category: %s):\n- %s", category, strings.Join(names, "\n- ")), nil
 }
@@ -258,7 +258,7 @@ func (s *Service) scriptCreate(ctx context.Context, scriptDB *database.Database,
 	if err := store.Load(ctx, category, name, &dummy); err == nil {
 		if !force {
 			tx.Rollback(ctx)
-			return fmt.Sprintf("Error: Script '%s' (Category: %s) already exists. Use --force to overwrite.", name, category), nil
+			return fmt.Sprintf("Error: Script %q (Category: %s) already exists. Use --force to overwrite.", name, category), nil
 		}
 	}
 
@@ -285,7 +285,7 @@ func (s *Service) scriptCreate(ctx context.Context, scriptDB *database.Database,
 		return fmt.Sprintf("Error committing transaction: %v", err), nil
 	}
 
-	return fmt.Sprintf("Script '%s' created successfully.", name), nil
+	return fmt.Sprintf("Script %q created successfully.", name), nil
 }
 
 func (s *Service) scriptShow(ctx context.Context, scriptDB *database.Database, args []string) (string, error) {
@@ -342,10 +342,10 @@ func (s *Service) scriptShow(ctx context.Context, scriptDB *database.Database, a
 		if step.Type == "ask" {
 			desc = step.Prompt
 		} else if step.Type == "call_script" || step.Type == "script" {
-			desc = fmt.Sprintf("Run '%s'", step.ScriptName)
+			desc = fmt.Sprintf("Run %q", step.ScriptName)
 		} else if step.Type == "command" {
 			argsJSON, _ := json.Marshal(step.Args)
-			desc = fmt.Sprintf("Execute '%s' %s", step.Command, string(argsJSON))
+			desc = fmt.Sprintf("Execute %q %s", step.Command, string(argsJSON))
 		}
 		sb.WriteString(fmt.Sprintf("%d. [%s] %s", i+1, step.Type, desc))
 		sb.WriteString("\n")
@@ -376,7 +376,7 @@ func (s *Service) scriptDelete(ctx context.Context, scriptDB *database.Database,
 	var dummy ai.Script
 	if err := store.Load(ctx, category, name, &dummy); err != nil {
 		tx.Rollback(ctx)
-		return fmt.Sprintf("Error: Script '%s' (Category: %s) not found.", name, category), nil
+		return fmt.Sprintf("Error: Script %q (Category: %s) not found.", name, category), nil
 	}
 
 	err = store.Delete(ctx, category, name)
@@ -385,7 +385,7 @@ func (s *Service) scriptDelete(ctx context.Context, scriptDB *database.Database,
 		return fmt.Sprintf("Error deleting script: %v", err), nil
 	}
 	tx.Commit(ctx)
-	return fmt.Sprintf("Script '%s' (Category: %s) deleted.", name, category), nil
+	return fmt.Sprintf("Script %q (Category: %s) deleted.", name, category), nil
 }
 
 func (s *Service) scriptSaveAs(ctx context.Context, scriptDB *database.Database, args []string) (string, error) {
@@ -416,7 +416,7 @@ func (s *Service) scriptSaveAs(ctx context.Context, scriptDB *database.Database,
 	var dummy ai.Script
 	if err := store.Load(ctx, category, name, &dummy); err == nil {
 		tx.Rollback(ctx)
-		return fmt.Sprintf("Error: Script '%s' (Category: %s) already exists. Use '/script delete %s' first.", name, category, name), nil
+		return fmt.Sprintf("Error: Script %q (Category: %s) already exists. Use '/script delete %s' first.", name, category, name), nil
 	}
 
 	newScript := ai.Script{
@@ -429,7 +429,7 @@ func (s *Service) scriptSaveAs(ctx context.Context, scriptDB *database.Database,
 		return fmt.Sprintf("Error saving script: %v", err), nil
 	}
 	tx.Commit(ctx)
-	return fmt.Sprintf("Script '%s' (Category: %s) created from last step.", name, category), nil
+	return fmt.Sprintf("Script %q (Category: %s) created from last step.", name, category), nil
 }
 
 func (s *Service) scriptStep(ctx context.Context, scriptDB *database.Database, args []string) (string, error) {
@@ -537,7 +537,7 @@ func (s *Service) scriptStepAdd(ctx context.Context, scriptDB *database.Database
 		return fmt.Sprintf("Error saving script: %v", err), nil
 	}
 	tx.Commit(ctx)
-	return fmt.Sprintf("Step added to script '%s' (Category: %s) at %s.", name, category, position), nil
+	return fmt.Sprintf("Step added to script %q (Category: %s) at %s.", name, category, position), nil
 }
 
 func (s *Service) scriptStepDelete(ctx context.Context, scriptDB *database.Database, name string, category string, args []string) (string, error) {
@@ -582,7 +582,7 @@ func (s *Service) scriptStepDelete(ctx context.Context, scriptDB *database.Datab
 		return fmt.Sprintf("Error saving script: %v", err), nil
 	}
 	tx.Commit(ctx)
-	return fmt.Sprintf("Step %d deleted from script '%s' (Category: %s).", idx+1, name, category), nil
+	return fmt.Sprintf("Step %d deleted from script %q (Category: %s).", idx+1, name, category), nil
 }
 
 func (s *Service) scriptStepUpdate(ctx context.Context, scriptDB *database.Database, name string, category string, args []string) (string, error) {
@@ -631,7 +631,7 @@ func (s *Service) scriptStepUpdate(ctx context.Context, scriptDB *database.Datab
 		return fmt.Sprintf("Error saving script: %v", err), nil
 	}
 	tx.Commit(ctx)
-	return fmt.Sprintf("Step %d updated in script '%s' (Category: %s).", idx+1, name, category), nil
+	return fmt.Sprintf("Step %d updated in script %q (Category: %s).", idx+1, name, category), nil
 }
 
 func (s *Service) scriptParameters(ctx context.Context, scriptDB *database.Database, args []string) (string, error) {
@@ -679,9 +679,9 @@ func (s *Service) scriptParameters(ctx context.Context, scriptDB *database.Datab
 	tx.Commit(ctx)
 
 	if len(params) == 0 {
-		return fmt.Sprintf("Parameters cleared for script '%s' (Category: %s).", name, category), nil
+		return fmt.Sprintf("Parameters cleared for script %q (Category: %s).", name, category), nil
 	}
-	return fmt.Sprintf("Parameters updated for script '%s' (Category: %s): %v", name, category, params), nil
+	return fmt.Sprintf("Parameters updated for script %q (Category: %s): %v", name, category, params), nil
 }
 
 func (s *Service) scriptParameterize(ctx context.Context, scriptDB *database.Database, args []string) (string, error) {
@@ -709,7 +709,7 @@ func (s *Service) scriptParameterize(ctx context.Context, scriptDB *database.Dat
 
 		// If not a flag, treat as param-value pair
 		if i+1 >= len(args) {
-			return fmt.Sprintf("Error: Missing value for parameter '%s'", args[i]), nil
+			return fmt.Sprintf("Error: Missing value for parameter %q", args[i]), nil
 		}
 		pairs = append(pairs, replacePair{Param: args[i], Value: args[i+1]})
 		i++ // Skip value
@@ -836,7 +836,7 @@ func (s *Service) scriptParameterize(ctx context.Context, scriptDB *database.Dat
 	}
 	tx.Commit(ctx)
 
-	return fmt.Sprintf("Script '%s' parameterized. Performed %d replacements across %d parameters.", name, totalCount, len(pairs)), nil
+	return fmt.Sprintf("Script %q parameterized. Performed %d replacements across %d parameters.", name, totalCount, len(pairs)), nil
 }
 
 func (s *Service) scriptRefine(ctx context.Context, scriptDB *database.Database, args []string) (string, error) {
@@ -881,7 +881,7 @@ func (s *Service) scriptRefine(ctx context.Context, scriptDB *database.Database,
 	var script ai.Script
 	if err := store.Load(ctx, category, name, &script); err != nil {
 		tx.Rollback(ctx)
-		return fmt.Sprintf("Error: Script '%s' (Category: %s) not found.", name, category), nil
+		return fmt.Sprintf("Error: Script %q (Category: %s) not found.", name, category), nil
 	}
 	tx.Commit(ctx)
 
@@ -892,7 +892,7 @@ func (s *Service) scriptRefine(ctx context.Context, scriptDB *database.Database,
 Script JSON:
 %s
 
-User Instructions: "%s"
+User Instructions: %q
 
 Tasks:
 1. Identify hardcoded values in the steps that should be parameters (e.g., specific regions, dates, IDs).
@@ -1011,7 +1011,7 @@ IMPORTANT:
 
 	// 7. Generate Preview Output
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Refinement Proposal for '%s':\n\n", name))
+	sb.WriteString(fmt.Sprintf("Refinement Proposal for %q:\n\n", name))
 	sb.WriteString(fmt.Sprintf("Summary:\n  Old: %s\n  New: %s\n\n", script.Description, result.Summary))
 	sb.WriteString("New Parameters:\n")
 	for _, p := range result.NewParameters {
@@ -1053,5 +1053,5 @@ func (s *Service) scriptRefineApply(ctx context.Context, scriptDB *database.Data
 	tx.Commit(ctx)
 	s.session.PendingRefinement = nil
 
-	return fmt.Sprintf("Script '%s' updated successfully with new parameters and documentation.", proposal.ScriptName), nil
+	return fmt.Sprintf("Script %q updated successfully with new parameters and documentation.", proposal.ScriptName), nil
 }
