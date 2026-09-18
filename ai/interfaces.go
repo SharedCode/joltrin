@@ -3,6 +3,7 @@ package ai
 import (
 	"context"
 	"encoding/json"
+	"log/slog"
 	"time"
 
 	"github.com/sharedcode/joltrin"
@@ -12,6 +13,18 @@ import (
 
 // ContextKey is a type for context keys used in the AI package.
 type ContextKey string
+
+// Secret holds a value that must never be written to a log or error message
+// in cleartext, such as a transient API key. Its String/GoString/LogValue
+// implementations redact the value, so an accidental %v, %+v, or structured
+// log.Info("...", "key", value) call can't leak it. Callers that genuinely
+// need the raw value (building an HTTP Authorization header, for example)
+// must convert explicitly with string(secret).
+type Secret string
+
+func (Secret) String() string       { return "[REDACTED]" }
+func (Secret) GoString() string     { return "[REDACTED]" }
+func (Secret) LogValue() slog.Value { return slog.StringValue("[REDACTED]") }
 
 const (
 	// CtxKeyProvider is the context key for overriding the AI provider.
