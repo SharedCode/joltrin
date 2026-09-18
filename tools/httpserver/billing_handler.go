@@ -252,7 +252,7 @@ func handleSimulateCheckout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if redirectURL == "" {
+	if redirectURL == "" || !isSafeRelativeRedirect(redirectURL) {
 		redirectURL = "/app?checkout=success&tier=" + string(tier)
 	}
 	http.Redirect(w, r, redirectURL, http.StatusFound)
