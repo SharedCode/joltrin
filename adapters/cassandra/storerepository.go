@@ -12,6 +12,7 @@ import (
 	retry "github.com/sethvargo/go-retry"
 
 	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/internal/logsafe"
 )
 
 type storeRepository struct {
@@ -95,7 +96,7 @@ func (sr *storeRepository) Add(ctx context.Context, stores ...sop.StoreInfo) err
 		key, err := sr.formatKey(s.Name)
 		if err == nil {
 			if err := sr.cache.SetStruct(ctx, key, &s, s.CacheConfig.StoreInfoCacheDuration); err != nil {
-				log.Warn(fmt.Sprintf("StoreRepository Add failed (redis setstruct), details: %v", err))
+				log.Warn(logsafe.V(fmt.Sprintf("StoreRepository Add failed (redis setstruct), details: %v", err)))
 			}
 		}
 	}
@@ -271,7 +272,7 @@ func (sr *storeRepository) GetWithTTL(ctx context.Context, isCacheTTL bool, cach
 			}
 		}
 		if err != nil {
-			log.Warn("StoreRepository Get (redis getstruct) failed", "error", err)
+			log.Warn("StoreRepository Get (redis getstruct) failed", "error", logsafe.V(err))
 		}
 		if !found || err != nil {
 			paramQ = append(paramQ, "?")
@@ -360,7 +361,7 @@ func (sr *storeRepository) Remove(ctx context.Context, names ...string) error {
 		keys[i] = k
 	}
 	if _, err := sr.cache.Delete(ctx, keys); err != nil {
-		log.Warn("StoreRepository Remove (redis Delete) failed", "error", err)
+		log.Warn("StoreRepository Remove (redis Delete) failed", "error", logsafe.V(err))
 	}
 
 	for i, n := range names {
