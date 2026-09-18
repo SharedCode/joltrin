@@ -667,10 +667,19 @@
         if (typeof crypto !== 'undefined' && crypto.randomUUID) {
             return crypto.randomUUID();
         }
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
+        // Fallback for older browsers without crypto.randomUUID: still use
+        // crypto.getRandomValues (widely supported) instead of Math.random,
+        // which isn't a cryptographically secure source of randomness.
+        var bytes = new Uint8Array(16);
+        if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+            crypto.getRandomValues(bytes);
+        } else {
+            for (var i = 0; i < 16; i++) bytes[i] = Math.floor(Math.random() * 256);
+        }
+        bytes[6] = (bytes[6] & 0x0f) | 0x40; // version 4
+        bytes[8] = (bytes[8] & 0x3f) | 0x80; // variant 10
+        var hex = Array.from(bytes, function(b) { return b.toString(16).padStart(2, '0'); });
+        return hex.slice(0, 4).join('') + '-' + hex.slice(4, 6).join('') + '-' + hex.slice(6, 8).join('') + '-' + hex.slice(8, 10).join('') + '-' + hex.slice(10, 16).join('');
     }
 
     const MAX_CHAT_MESSAGES = 100; // Limit chat history to prevent DOM bloat
@@ -694,12 +703,20 @@
         div.id = msgId;
         if (role === 'ai') currentAiMsgId = msgId;
         
+        // Escape first, then selectively reintroduce the small set of tags
+        // this "simple markdown" supports, so a chat message (whether typed
+        // by the user or an AI response influenced by retrieved/external
+        // content) can't inject arbitrary HTML. escapeHtml (not
+        // window.escapeHTML) is used deliberately here: it leaves \n alone,
+        // which the replace below still needs to find.
+        let safeText = escapeHtml(text);
+
         // Simple markdown-like parsing for code blocks
-        if (text.includes('```')) {
-            text = text.replace(/```([\s\S]*?)```/g, '<pre>$1</pre>');
+        if (safeText.includes('```')) {
+            safeText = safeText.replace(/```([\s\S]*?)```/g, '<pre>$1</pre>');
         }
-        
-        div.innerHTML = text.replace(/\n/g, '<br>');
+
+        div.innerHTML = safeText.replace(/\n/g, '<br>');
 
         history.appendChild(div);
         

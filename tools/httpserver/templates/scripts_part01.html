@@ -1450,7 +1450,7 @@
             fullSpan.innerText = newVal;
             if (shortSpan) {
                 const shortTxt = newVal.length > 150 ? newVal.substring(0, 150) + "..." : newVal;
-                shortSpan.innerHTML = shortTxt.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                shortSpan.innerHTML = window.escapeHTML(shortTxt);
             }
             cleanUp();
         };
@@ -1853,8 +1853,8 @@
                 <!-- Left Sidebar Treeview -->
                 <div id="category-tree-pane" style="width: 254px; min-width: 150px; max-width: 50%; padding-right: 8px; height: 100%; overflow-y: auto; display: flex; flex-direction: column;">
                     <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 0px; flex-shrink: 0;">
-                        <h3 style="margin: 0; font-size: 1.1em; color: var(--text-color); display: flex; align-items: center;">Categories <span ${isInternalKB ? 'title="Vectorize is unavailable for internal KBs"' : 'onclick="event.stopPropagation(); window.vectorizeSpace(\'${name}\')" title="Vectorize Entire Space"'} style="background: none; border: none; color: var(--key-color); font-size: 14px; padding: 0; margin-left: 8px; display: inline-flex; align-items: center; ${isInternalKB ? 'cursor: default;' : 'cursor: pointer; transition: transform 0.2s ease-in-out;'}" ${isInternalKB ? '' : 'onmouseover="this.style.transform=\'scale(1.2)\'" onmouseout="this.style.transform=\'scale(1)\'"'}>✨</span></h3>
-                        <span id="sidebar-view-all-items" title="View All Items" style="cursor: pointer; color: var(--link-color); display: flex; align-items: center; padding: 4px; border-radius: 4px;" onclick="window.fetchItemsForCategory('${name}', '', 'All Items', this)">
+                        <h3 style="margin: 0; font-size: 1.1em; color: var(--text-color); display: flex; align-items: center;">Categories <span ${isInternalKB ? 'title="Vectorize is unavailable for internal KBs"' : 'onclick="event.stopPropagation(); window.vectorizeSpace(\'${window.escapeHTML(name)}\')" title="Vectorize Entire Space"'} style="background: none; border: none; color: var(--key-color); font-size: 14px; padding: 0; margin-left: 8px; display: inline-flex; align-items: center; ${isInternalKB ? 'cursor: default;' : 'cursor: pointer; transition: transform 0.2s ease-in-out;'}" ${isInternalKB ? '' : 'onmouseover="this.style.transform=\'scale(1.2)\'" onmouseout="this.style.transform=\'scale(1)\'"'}>✨</span></h3>
+                        <span id="sidebar-view-all-items" title="View All Items" style="cursor: pointer; color: var(--link-color); display: flex; align-items: center; padding: 4px; border-radius: 4px;" onclick="window.fetchItemsForCategory('${window.escapeHTML(name)}', '', 'All Items', this)">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                                 <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zm8 0A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm-8 8A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm8 0A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3z"/>
                             </svg>
@@ -2062,14 +2062,14 @@
             let pHtml = `<div style="display: flex; gap: 5px; margin-top: 0px; align-items: center; justify-content: center; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--border-color);">`;
             
             if (currentCatPage > 1) {
-                pHtml += `<button onclick="window.selectSpace('${name}', document.querySelector('#sidebar li.active'), false, ${catOffset - catLimit}, ${catLimit})" style="padding: 2px 6px; font-size: 0.85em; border-radius: 4px; border: 1px solid var(--border-color); background: var(--button-bg); color: var(--text-color); cursor: pointer;">&lt;</button>`;
+                pHtml += `<button onclick="window.selectSpace('${window.escapeHTML(name)}', document.querySelector('#sidebar li.active'), false, ${catOffset - catLimit}, ${catLimit})" style="padding: 2px 6px; font-size: 0.85em; border-radius: 4px; border: 1px solid var(--border-color); background: var(--button-bg); color: var(--text-color); cursor: pointer;">&lt;</button>`;
             }
             
             let sPage = Math.max(1, currentCatPage - 1);
             let ePage = Math.min(totalCatPages, currentCatPage + 1);
             
             if (sPage > 1) {
-                pHtml += `<button onclick="window.selectSpace('${name}', document.querySelector('#sidebar li.active'), false, 0, ${catLimit})" style="padding: 2px 6px; font-size: 0.85em; border-radius: 4px; border: 1px solid var(--border-color); background: var(--button-bg); color: var(--text-color); cursor: pointer;">1</button>`;
+                pHtml += `<button onclick="window.selectSpace('${window.escapeHTML(name)}', document.querySelector('#sidebar li.active'), false, 0, ${catLimit})" style="padding: 2px 6px; font-size: 0.85em; border-radius: 4px; border: 1px solid var(--border-color); background: var(--button-bg); color: var(--text-color); cursor: pointer;">1</button>`;
                 if (sPage > 2) pHtml += `<span style="font-size: 0.85em; color: var(--text-muted);">..</span>`;
             }
             
@@ -2080,16 +2080,16 @@
                     ? `padding: 2px 6px; font-size: 0.85em; border-radius: 4px; border: 1px solid #5b6ed1; background: #5b6ed1; color: white; cursor: default;`
                     : `padding: 2px 6px; font-size: 0.85em; border-radius: 4px; border: 1px solid var(--border-color); background: var(--button-bg); color: var(--text-color); cursor: pointer;`;
                 
-                pHtml += `<button ${!isC ? `onclick="window.selectSpace('${name}', document.querySelector('#sidebar li.active'), false, ${poff}, ${catLimit})"` : ''} style="${st}">${i}</button>`;
+                pHtml += `<button ${!isC ? `onclick="window.selectSpace('${window.escapeHTML(name)}', document.querySelector('#sidebar li.active'), false, ${poff}, ${catLimit})"` : ''} style="${st}">${i}</button>`;
             }
             
             if (ePage < totalCatPages) {
                 if (ePage < totalCatPages - 1) pHtml += `<span style="font-size: 0.85em; color: var(--text-muted);">..</span>`;
-                pHtml += `<button onclick="window.selectSpace('${name}', document.querySelector('#sidebar li.active'), false, ${(totalCatPages - 1) * catLimit}, ${catLimit})" style="padding: 2px 6px; font-size: 0.85em; border-radius: 4px; border: 1px solid var(--border-color); background: var(--button-bg); color: var(--text-color); cursor: pointer;">${totalCatPages}</button>`;
+                pHtml += `<button onclick="window.selectSpace('${window.escapeHTML(name)}', document.querySelector('#sidebar li.active'), false, ${(totalCatPages - 1) * catLimit}, ${catLimit})" style="padding: 2px 6px; font-size: 0.85em; border-radius: 4px; border: 1px solid var(--border-color); background: var(--button-bg); color: var(--text-color); cursor: pointer;">${totalCatPages}</button>`;
             }
 
             if (currentCatPage < totalCatPages) {
-                pHtml += `<button onclick="window.selectSpace('${name}', document.querySelector('#sidebar li.active'), false, ${catOffset + catLimit}, ${catLimit})" style="padding: 2px 6px; font-size: 0.85em; border-radius: 4px; border: 1px solid var(--border-color); background: var(--button-bg); color: var(--text-color); cursor: pointer;">&gt;</button>`;
+                pHtml += `<button onclick="window.selectSpace('${window.escapeHTML(name)}', document.querySelector('#sidebar li.active'), false, ${catOffset + catLimit}, ${catLimit})" style="padding: 2px 6px; font-size: 0.85em; border-radius: 4px; border: 1px solid var(--border-color); background: var(--button-bg); color: var(--text-color); cursor: pointer;">&gt;</button>`;
             }
             
             pHtml += `</div>`;
@@ -2257,8 +2257,8 @@
                     const currentPageParams = new URLSearchParams(window.location.search || '');
                     const currentDB = (typeof currentDatabase !== 'undefined' && currentDatabase) ? currentDatabase : (currentPageParams.get('db') || currentPageParams.get('database') || '');
                     const currentSpace = (typeof spaceName !== 'undefined' && spaceName) ? spaceName : (currentPageParams.get('space') || '');
-                    const docIDsAttr = JSON.stringify(docIDs).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-                    const textAttr = JSON.stringify(t.text || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+                    const docIDsAttr = window.escapeHTML(JSON.stringify(docIDs));
+                    const textAttr = window.escapeHTML(JSON.stringify(t.text || ''));
                     let fullDesc = t.description || t.text || "";
                     let isLongDesc = fullDesc.length > 150;
                     let shortDesc = isLongDesc ? fullDesc.substring(0, 150) + "..." : fullDesc;
@@ -2290,7 +2290,7 @@
                             <div class="item-content-wrapper" style="flex: 1; display: flex; flex-direction: column;">
                                 <div style="flex: 1;">
                                     <span class="desc-short">${shortDesc}</span>
-                                    <span class="desc-full" style="display:none; white-space:pre-wrap;">${fullDesc.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
+                                    <span class="desc-full" style="display:none; white-space:pre-wrap;">${window.escapeHTML(fullDesc)}</span>
                                 </div>
                                 <div style="margin-top: 8px; display: flex; align-items: center; position: relative;">
                                     <a class="read-more-btn" onclick="toggleDomainItemDesc(this)" data-item-id="${window.escapeHTML(t.id || '')}" data-item-category="${window.escapeHTML(t.category_id || t.category || '')}" style="cursor:pointer; color:var(--link-color); font-size:0.85em; text-decoration:underline;">Read More</a>
@@ -2312,7 +2312,7 @@
                             <div class="item-content-wrapper" style="flex: 1; display: flex; flex-direction: column;">
                                 <div style="flex: 1;">
                                     <span class="desc-short" style="display:none;">${shortDesc}</span>
-                                    <span class="desc-full" style="display:inline; white-space:pre-wrap;">${fullDesc.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
+                                    <span class="desc-full" style="display:inline; white-space:pre-wrap;">${window.escapeHTML(fullDesc)}</span>
                                 </div>
                                 <div style="margin-top: 8px; display: flex; align-items: center; position: relative;">
                                     ${kbIsReadOnly ? 
@@ -2341,7 +2341,7 @@
                                 
                             </div>
                             <div style="font-size: 1.15em; font-weight: 600; margin-bottom: 10px; color: var(--text-color);">
-                                ${t.summaries && t.summaries.length > 0 ? t.summaries[0].substring(0, 50).replace(/</g, '&lt;') : (t.id ? t.id.substring(0,8) : "Unnamed Item")}
+                                ${t.summaries && t.summaries.length > 0 ? window.escapeHTML(t.summaries[0].substring(0, 50)) : (t.id ? window.escapeHTML(t.id.substring(0,8)) : "Unnamed Item")}
                             </div>
                             <div style="font-size: 0.9em; flex: 1; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px; word-break: break-word; display: flex; flex-direction: column;">
                                 ${descHtml}
@@ -2355,12 +2355,15 @@
                 const currentPage = Math.floor(offset / limit) + 1;
                 
                 let paginationHtml = '';
+                const safeSpaceName = window.escapeHTML(spaceName);
+                const safeCategoryId = window.escapeHTML(categoryId || '');
+                const safeCategoryName = window.escapeHTML(categoryName || '').replace(/'/g, "\\'");
                 if (totalPages > 1) {
                         paginationHtml += `<div style="display: flex; gap: 10px; margin-top: 20px; align-items: center; justify-content: center; width: 100%; grid-column: 1 / -1; padding: 10px; box-sizing: border-box; border-top: 1px solid var(--border-color);">`;
                 
                         // Prev
                         if (currentPage > 1) {
-                                paginationHtml += `<button onclick="window.fetchItemsForCategory('${spaceName}', '${categoryId || ''}', '${categoryName.replace(/'/g, "\\'")}', null, null, ${offset - limit}, ${limit})" style="padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--button-bg); color: var(--text-color); cursor: pointer;">Prev</button>`;
+                                paginationHtml += `<button onclick="window.fetchItemsForCategory('${safeSpaceName}', '${safeCategoryId}', '${safeCategoryName}', null, null, ${offset - limit}, ${limit})" style="padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--button-bg); color: var(--text-color); cursor: pointer;">Prev</button>`;
                         } else {
                                 paginationHtml += `<button disabled style="padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--secondary-bg); color: var(--text-muted); cursor: not-allowed; opacity: 0.5;">Prev</button>`;
                         }
@@ -2368,7 +2371,7 @@
                 	let endPage = Math.min(totalPages, currentPage + 2);
                 	
                 	if (startPage > 1) {
-                		paginationHtml += `<button onclick="window.fetchItemsForCategory('${spaceName}', '${categoryId || ''}', '${categoryName.replace(/'/g, "\\'")}', null, null, 0, ${limit})" style="padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--button-bg); color: var(--text-color); cursor: pointer;">1</button>`;
+                		paginationHtml += `<button onclick="window.fetchItemsForCategory('${safeSpaceName}', '${safeCategoryId}', '${safeCategoryName}', null, null, 0, ${limit})" style="padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--button-bg); color: var(--text-color); cursor: pointer;">1</button>`;
                 		if (startPage > 2) paginationHtml += `<span style="padding: 0 5px; color: var(--text-muted);">...</span>`;
                 	}
                 	
@@ -2382,13 +2385,13 @@
                 		if (isCurrent) {
                 			paginationHtml += `<button style="${style}">${i}</button>`;
                 		} else {
-                			paginationHtml += `<button onclick="window.fetchItemsForCategory('${spaceName}', '${categoryId || ''}', '${categoryName.replace(/'/g, "\\'")}', null, null, ${pageOffset}, ${limit})" style="${style}">${i}</button>`;
+                			paginationHtml += `<button onclick="window.fetchItemsForCategory('${safeSpaceName}', '${safeCategoryId}', '${safeCategoryName}', null, null, ${pageOffset}, ${limit})" style="${style}">${i}</button>`;
                 		}
                 	}
                 	
                 	if (endPage < totalPages) {
                 		if (endPage < totalPages - 1) paginationHtml += `<span style="padding: 0 5px; color: var(--text-muted);">...</span>`;
-                		paginationHtml += `<button onclick="window.fetchItemsForCategory('${spaceName}', '${categoryId || ''}', '${categoryName.replace(/'/g, "\\'")}', null, null, ${(totalPages - 1) * limit}, ${limit})" style="padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--button-bg); color: var(--text-color); cursor: pointer;">${totalPages}</button>`;
+                		paginationHtml += `<button onclick="window.fetchItemsForCategory('${safeSpaceName}', '${safeCategoryId}', '${safeCategoryName}', null, null, ${(totalPages - 1) * limit}, ${limit})" style="padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--button-bg); color: var(--text-color); cursor: pointer;">${totalPages}</button>`;
                 	}
 
                 	// Next
@@ -2402,7 +2405,7 @@
 			}
 
 			if (currentPage < totalPages) {
-				paginationHtml += `<button onclick="window.fetchItemsForCategory('${spaceName}', '${categoryId || ''}', '${categoryName.replace(/'/g, "\\'")}', null, null, ${offset + limit}, ${limit}, '${lastRenderedCatId}', '${lastRenderedItemId}')" style="padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--button-bg); color: var(--text-color); cursor: pointer;">Next</button>`;
+				paginationHtml += `<button onclick="window.fetchItemsForCategory('${safeSpaceName}', '${safeCategoryId}', '${safeCategoryName}', null, null, ${offset + limit}, ${limit}, '${window.escapeHTML(lastRenderedCatId).replace(/'/g, "\\'")}', '${window.escapeHTML(lastRenderedItemId).replace(/'/g, "\\'")}')" style="padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--button-bg); color: var(--text-color); cursor: pointer;">Next</button>`;
                 		paginationHtml += `<button disabled style="padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--secondary-bg); color: var(--text-muted); cursor: not-allowed; opacity: 0.5;">Next</button>`;
                 	}
 
@@ -2414,7 +2417,7 @@
 
             } catch (err) {
                 console.error(err);
-                tg.innerHTML = "<div style='padding: 15px; color: red;'>Error fetching items: " + err.message + "</div>";
+                tg.innerHTML = "<div style='padding: 15px; color: red;'>Error fetching items: " + window.escapeHTML(err.message) + "</div>";
             }
         };
 

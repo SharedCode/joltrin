@@ -400,7 +400,7 @@
             });
 
             if (keyFields.length > 0) {
-                helpContent += `<div style="margin-bottom:5px;"><strong>Available Fields (mapX/mapY):</strong> ${keyFields.map(f => `<code>${f}</code>`).join(', ')}</div>`;
+                helpContent += `<div style="margin-bottom:5px;"><strong>Available Fields (mapX/mapY):</strong> ${keyFields.map(f => `<code>${window.escapeHTML(f)}</code>`).join(', ')}</div>`;
                 
                 if (generatedExpr) {
                     helpContent += `
@@ -408,7 +408,7 @@
                             <strong>Generated from Index Spec:</strong>
                             <div style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 2px;">Equivalent CEL for current index configuration:</div>
                             <code style="display:block; padding:5px; background:var(--input-bg); border:1px solid var(--border-color); margin-top:3px; cursor:pointer; user-select:all; white-space: pre-wrap;" 
-                                onclick="document.getElementById('cel-expression-input').value = this.innerText">${generatedExpr}</code>
+                                onclick="document.getElementById('cel-expression-input').value = this.innerText">${window.escapeHTML(generatedExpr)}</code>
                         </div>
                         <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;">
                     `;
@@ -419,7 +419,7 @@
                     helpContent += `
                         <div><strong>Sample Expression (Click to use):</strong></div>
                         <code style="display:block; padding:5px; background:var(--input-bg); border:1px solid var(--border-color); margin-top:3px; cursor:pointer; user-select:all;" 
-                              onclick="document.getElementById('cel-expression-input').value = this.innerText">${sampleExpr}</code>
+                              onclick="document.getElementById('cel-expression-input').value = this.innerText">${window.escapeHTML(sampleExpr)}</code>
                     `;
                 }
             } else {
@@ -474,7 +474,7 @@
                     <strong>Generated from Index Spec:</strong>
                     <div style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 2px;">Equivalent CEL for current index configuration:</div>
                     <code style="display:block; padding:5px; background:var(--input-bg); border:1px solid var(--border-color); margin-top:3px; cursor:pointer; user-select:all; white-space: pre-wrap;" 
-                          onclick="document.getElementById('cel-expression-input').value = this.innerText">${generatedExpr}</code>
+                          onclick="document.getElementById('cel-expression-input').value = this.innerText">${window.escapeHTML(generatedExpr)}</code>
                 </div>
                 <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;">
              `;
@@ -489,10 +489,10 @@
                 const sampleExpr = `mapX['${fieldName}'] < mapY['${fieldName}'] ? -1 : mapX['${fieldName}'] > mapY['${fieldName}'] ? 1 : 0`;
                 
                 helpContent += `
-                    <div style="margin-bottom:5px;"><strong>Available Fields (mapX/mapY):</strong> ${fields.map(f => `<code>${f}</code>`).join(', ')}</div>
+                    <div style="margin-bottom:5px;"><strong>Available Fields (mapX/mapY):</strong> ${fields.map(f => `<code>${window.escapeHTML(f)}</code>`).join(', ')}</div>
                     <div><strong>Sample Expression (Click to use):</strong></div>
                     <code style="display:block; padding:5px; background:var(--input-bg); border:1px solid var(--border-color); margin-top:3px; cursor:pointer; user-select:all;" 
-                          onclick="document.getElementById('cel-expression-input').value = this.innerText">${sampleExpr}</code>
+                          onclick="document.getElementById('cel-expression-input').value = this.innerText">${window.escapeHTML(sampleExpr)}</code>
                 `;
             }
         } else {

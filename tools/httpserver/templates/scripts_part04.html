@@ -499,7 +499,7 @@
 
     function renderAddKeyJson(content = '') {
         const container = document.getElementById('add-key-container');
-        container.innerHTML = `<textarea id="add-key-json" placeholder="Key (JSON Object or simple value)" style="width:100%; height:60px; padding:5px; font-family:monospace; border:1px solid var(--input-border); border-radius:3px; background: var(--input-bg); color: var(--text-color); box-sizing: border-box;">${content}</textarea>`;
+        container.innerHTML = `<textarea id="add-key-json" placeholder="Key (JSON Object or simple value)" style="width:100%; height:60px; padding:5px; font-family:monospace; border:1px solid var(--input-border); border-radius:3px; background: var(--input-bg); color: var(--text-color); box-sizing: border-box;">${window.escapeHTML(content)}</textarea>`;
     }
 
     function toggleAddValueMode() {
@@ -558,7 +558,7 @@
 
     function renderAddValueJson(content = '') {
         const container = document.getElementById('add-value-container');
-        container.innerHTML = `<textarea id="add-value-json" placeholder="Enter JSON Object, Array, or simple value (String, Number, Boolean)" style="width:100%; height:200px; padding:5px; font-family:monospace; border:1px solid var(--input-border); border-radius:3px; background: var(--input-bg); color: var(--text-color); box-sizing: border-box;">${content}</textarea>`;
+        container.innerHTML = `<textarea id="add-value-json" placeholder="Enter JSON Object, Array, or simple value (String, Number, Boolean)" style="width:100%; height:200px; padding:5px; font-family:monospace; border:1px solid var(--input-border); border-radius:3px; background: var(--input-bg); color: var(--text-color); box-sizing: border-box;">${window.escapeHTML(content)}</textarea>`;
     }
 
 

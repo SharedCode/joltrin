@@ -588,16 +588,16 @@
             const ecSummary = dbErasureConfigs ? `${dbErasureConfigs.length} entries configured` : 'None';
 
             let summaryHtml = `
-                <strong>User Database:</strong> ${dbName}<br>
-                <strong>Path:</strong> ${dbPath}<br>
-                <strong>Type:</strong> ${dbType} ${dbType === 'clustered' ? `(${dbConn})` : ''}<br>
-                <strong>Data Files (EC):</strong> ${ecSummary}<br>
+                <strong>User Database:</strong> ${window.escapeHTML(dbName)}<br>
+                <strong>Path:</strong> ${window.escapeHTML(dbPath)}<br>
+                <strong>Type:</strong> ${window.escapeHTML(dbType)} ${dbType === 'clustered' ? `(${window.escapeHTML(dbConn)})` : ''}<br>
+                <strong>Data Files (EC):</strong> ${window.escapeHTML(ecSummary)}<br>
                 <strong>Demo Data:</strong> ${populateDemo ? 'Yes' : 'No'}<br>
-                <strong>Spaces:</strong> ${selectedTemplate}<br>
+                <strong>Spaces:</strong> ${window.escapeHTML(selectedTemplate)}<br>
                 <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;">
-                <strong>System Database:</strong> ${regPath}<br>
-                <strong>Port:</strong> ${port}<br>
-                <strong>Type:</strong> ${sysType} ${sysType === 'clustered' ? `(${sysConn})` : ''}<br>
+                <strong>System Database:</strong> ${window.escapeHTML(regPath)}<br>
+                <strong>Port:</strong> ${window.escapeHTML(port)}<br>
+                <strong>Type:</strong> ${window.escapeHTML(sysType)} ${sysType === 'clustered' ? `(${window.escapeHTML(sysConn)})` : ''}<br>
                 <strong>Configuration:</strong> System Defaults applied<br>
             `;
             
