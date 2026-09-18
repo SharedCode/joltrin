@@ -10,6 +10,7 @@ import (
 
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
+	"github.com/sharedcode/joltrin/ai/internal/logsafe"
 )
 
 type LayerInfo struct {
@@ -167,7 +168,7 @@ func (a *CopilotAgent) ClassifyFocusedTaskContext(ctx context.Context, query, en
 
 func looksLikeSpecializedRoutingQuery(query string) bool {
 
-	log.Info("routing ", "query", query)
+	log.Info("routing ", "query", logsafe.V(query))
 
 	trimmed := strings.TrimSpace(query)
 	lower := strings.ToLower(trimmed)
@@ -232,7 +233,7 @@ func (a *CopilotAgent) trySpecializedFocusedRouting(ctx context.Context, query, 
 		return nil, false, nil
 	}
 
-	log.Info("Specialized focused routing activated", "query", query, "entity", entity, "domain", domain, "artifact", artifact)
+	log.Info("Specialized focused routing activated", "query", logsafe.V(query), "entity", logsafe.V(entity), "domain", logsafe.V(domain), "artifact", logsafe.V(artifact))
 
 	kbName := ai.CanonicalKBName("sop")
 	if routedKB := routingKBName(query); routedKB != "" {
@@ -259,11 +260,11 @@ func (a *CopilotAgent) trySpecializedFocusedRouting(ctx context.Context, query, 
 		llmMode = true
 	}
 
-	log.Info("Specialized focused routing parsed", "normalized_query", normalizedQuery, "path_query", pathQuery, "clean_query", cleanQuery, "llm_instruction", llmInstruction, "llm_mode", llmMode, "page", pageNum, "kb_name", kbName)
+	log.Info("Specialized focused routing parsed", "normalized_query", logsafe.V(normalizedQuery), "path_query", logsafe.V(pathQuery), "clean_query", logsafe.V(cleanQuery), "llm_instruction", logsafe.V(llmInstruction), "llm_mode", llmMode, "page", pageNum, "kb_name", logsafe.V(kbName))
 
 	db := a.resolveDBForKB(ctx, kbName)
 	if db == nil {
-		log.Info("Specialized focused routing skipped: no KB database resolved", "kb_name", kbName)
+		log.Info("Specialized focused routing skipped: no KB database resolved", "kb_name", logsafe.V(kbName))
 		return nil, false, nil
 	}
 
@@ -283,7 +284,7 @@ func (a *CopilotAgent) trySpecializedFocusedRouting(ctx context.Context, query, 
 		if err != nil {
 			return nil, false, err
 		}
-		log.Info("Specialized focused routing: showing root categories", "kb_name", kbName, "page", pageNum)
+		log.Info("Specialized focused routing: showing root categories", "kb_name", logsafe.V(kbName), "page", pageNum)
 	} else {
 		// Normal KB search
 		candidateText, err = a.searchKnowledgeBase(ctx, db, kbName, normalizedQuery, pathQuery, "", 5)
@@ -301,14 +302,14 @@ func (a *CopilotAgent) trySpecializedFocusedRouting(ctx context.Context, query, 
 				if err == nil && subcatText != "" {
 					candidateText = fmt.Sprintf("No items found at this path.\n\n%s", subcatText)
 					showSubcategories = true
-					log.Info("Specialized focused routing: showing subcategories for path", "path", pathQuery, "page", pageNum)
+					log.Info("Specialized focused routing: showing subcategories for path", "path", logsafe.V(pathQuery), "page", pageNum)
 				}
 			}
 		}
 	}
 
 	handled := looksLikeSpecializedRoutingQuery(query) || llmMode || candidateCount > 0 || showSubcategories
-	log.Info("Specialized focused routing decision", "handled", handled, "llm_mode", llmMode, "candidate_count", candidateCount, "show_subcategories", showSubcategories, "candidate_text_preview", summarizeCandidatePreview(candidateText))
+	log.Info("Specialized focused routing decision", "handled", handled, "llm_mode", llmMode, "candidate_count", candidateCount, "show_subcategories", showSubcategories, "candidate_text_preview", logsafe.V(summarizeCandidatePreview(candidateText)))
 	if !handled {
 		return nil, false, nil
 	}
@@ -338,7 +339,7 @@ func (a *CopilotAgent) trySpecializedFocusedRouting(ctx context.Context, query, 
 		// Case 0: User wants LLM to process (highest priority)
 		taskCtx.DirectDisplay = false
 		taskCtx.Layers = append(taskCtx.Layers, LayerInfo{Name: "LLMFilter", CRUD: []string{"R"}})
-		log.Info("KB routing: LLM filter mode", "instruction", llmInstruction)
+		log.Info("KB routing: LLM filter mode", "instruction", logsafe.V(llmInstruction))
 	} else if showSubcategories {
 		// Case 1: Showing subcategories for navigation - direct display
 		taskCtx.DirectDisplay = true
@@ -359,7 +360,7 @@ func (a *CopilotAgent) trySpecializedFocusedRouting(ctx context.Context, query, 
 		// Fallback for no matches
 		taskCtx.Layers = append(taskCtx.Layers, LayerInfo{Name: "KBRoute", CRUD: []string{"R"}})
 	}
-	log.Info("Specialized focused routing resolved", "routing_gate", taskCtx.RoutingGate, "layers", taskCtx.Layers, "spaces_artifacts", taskCtx.SpacesArtifacts, "direct_display", taskCtx.DirectDisplay)
+	log.Info("Specialized focused routing resolved", "routing_gate", taskCtx.RoutingGate, "layers", taskCtx.Layers, "spaces_artifacts", logsafe.V(taskCtx.SpacesArtifacts), "direct_display", taskCtx.DirectDisplay)
 
 	normalizeTaskContext(taskCtx)
 	taskCtx.RoutingGate = RoutingGateFocused

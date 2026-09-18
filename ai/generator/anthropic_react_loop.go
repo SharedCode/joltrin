@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/sharedcode/joltrin/ai"
+	"github.com/sharedcode/joltrin/ai/internal/logsafe"
 )
 
 // anthropicOwnedReActLoop implements Claude's native multi-turn conversation loop
@@ -30,7 +31,7 @@ func (l anthropicOwnedReActLoop) Run(ctx context.Context, req ai.ReasoningReques
 	log.Debug("Anthropic owned loop started",
 		"model", l.generator.model,
 		"max_iterations", l.maxIterations,
-		"query_preview", anthropicPreview(req.UserQuery, 240),
+		"query_preview", logsafe.V(anthropicPreview(req.UserQuery, 240)),
 		"has_context", strings.TrimSpace(req.ContextText) != "",
 		"has_history", strings.TrimSpace(req.HistoryText) != "",
 	)
@@ -83,7 +84,7 @@ func (l anthropicOwnedReActLoop) Run(ctx context.Context, req ai.ReasoningReques
 			"tool_count", len(opts.Tools),
 			"continuations", len(opts.ToolCallContinuations),
 			"temperature", opts.Temperature,
-			"prompt_preview", anthropicPreview(prompt, 320),
+			"prompt_preview", logsafe.V(anthropicPreview(prompt, 320)),
 		)
 
 		output, err := l.generator.Generate(ctx, prompt, opts)
@@ -124,8 +125,8 @@ func (l anthropicOwnedReActLoop) Run(ctx context.Context, req ai.ReasoningReques
 				log.Warn("Anthropic owned loop short-circuited on terminal tool hint",
 					"iteration", iteration,
 					"tool", toolCall.Name,
-					"hint_status", anthropicHintStatus(toolResult.Hint),
-					"result_preview", anthropicPreview(toolResult.Result, 320),
+					"hint_status", logsafe.V(anthropicHintStatus(toolResult.Hint)),
+					"result_preview", logsafe.V(anthropicPreview(toolResult.Result, 320)),
 				)
 				emitAnthropicOwnedLoopHydration(req, resp)
 				return resp, nil
@@ -162,7 +163,7 @@ func (l anthropicOwnedReActLoop) Run(ctx context.Context, req ai.ReasoningReques
 		"iteration", l.maxIterations+1,
 		"continuations", len(finalOpts.ToolCallContinuations),
 		"tool_results", len(toolResults),
-		"prompt_preview", anthropicPreview(finalPrompt, 320),
+		"prompt_preview", logsafe.V(anthropicPreview(finalPrompt, 320)),
 	)
 
 	output, err := l.generator.Generate(ctx, finalPrompt, finalOpts)
@@ -303,8 +304,8 @@ func executeAnthropicOwnedLoopToolCall(ctx context.Context, req ai.ReasoningRequ
 		log.Warn("Anthropic owned loop tool execution failed",
 			"iteration", iteration,
 			"tool", toolCall.Name,
-			"error", execErr,
-			"raw_result_preview", anthropicPreview(rawResult, 320),
+			"error", logsafe.V(execErr),
+			"raw_result_preview", logsafe.V(anthropicPreview(rawResult, 320)),
 		)
 		resultText = execErr.Error()
 		if shouldStreamAnthropicToolResult(req, iteration >= maxIterations) {
@@ -320,8 +321,8 @@ func executeAnthropicOwnedLoopToolCall(ctx context.Context, req ai.ReasoningRequ
 		log.Debug("Anthropic owned loop tool execution completed",
 			"iteration", iteration,
 			"tool", toolCall.Name,
-			"hint_status", anthropicHintStatus(hint),
-			"result_preview", anthropicPreview(resultText, 320),
+			"hint_status", logsafe.V(anthropicHintStatus(hint)),
+			"result_preview", logsafe.V(anthropicPreview(resultText, 320)),
 		)
 		if shouldStreamAnthropicToolResult(req, iteration >= maxIterations) {
 			emitAnthropicOwnedLoopEvent(req, ai.ReasoningEventToolResult, ai.BuildToolResultEvent(toolCall.Name, cloneAnthropicToolArgs(toolCall.Args), resultText, cloneAnthropicToolProgressHint(hint), iteration))

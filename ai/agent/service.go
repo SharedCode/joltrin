@@ -17,6 +17,7 @@ import (
 	"github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/ai/embed"
 	"github.com/sharedcode/joltrin/ai/generator"
+	"github.com/sharedcode/joltrin/ai/internal/logsafe"
 	"github.com/sharedcode/joltrin/ai/memory"
 	"github.com/sharedcode/joltrin/ai/obfuscation"
 	"github.com/sharedcode/joltrin/search"
@@ -456,7 +457,7 @@ func (s *Service) resolveTopicRoutingGenerator(ctx context.Context) ai.Generator
 				gen = overriddenGen
 			} else {
 				log.Warn("Failed to initialize topic-routing provider, falling back to default generator",
-					"provider", provider, "error", err)
+					"provider", logsafe.V(provider), "error", logsafe.V(err))
 			}
 		}
 	}
@@ -471,7 +472,7 @@ func (s *Service) identifyTopic(ctx context.Context, query string) (*TopicAssess
 
 	gen := s.resolveTopicRoutingGenerator(ctx)
 	if gen == nil {
-		log.Warn("Topic routing generator unavailable; defaulting to a new topic", "query", query)
+		log.Warn("Topic routing generator unavailable; defaulting to a new topic", "query", logsafe.V(query))
 		return &TopicAssessment{IsNewTopic: true, Reasoning: "No generator available for topic routing"}, nil
 	}
 
@@ -570,7 +571,7 @@ func (s *Service) Open(ctx context.Context) error {
 	// If DB mismatch, we commit the previous transaction as we are switching context.
 	if s.session.CurrentDB != "" && s.session.CurrentDB != p.CurrentDB {
 		if p.ExplicitTransaction {
-			log.Warn("Switching databases with an explicit transaction is not recommended. Committing the previous transaction before switching.", "from_db", s.session.CurrentDB, "to_db", p.CurrentDB)
+			log.Warn("Switching databases with an explicit transaction is not recommended. Committing the previous transaction before switching.", "from_db", s.session.CurrentDB, "to_db", logsafe.V(p.CurrentDB))
 			// Since we are switching, we clear the explicit transaction flag & onto implicit.
 			p.ExplicitTransaction = false
 		}
@@ -654,7 +655,7 @@ func (s *Service) Close(ctx context.Context) error {
 		// Do NOT auto-commit or auto-rollback explicit transactions. They may span multiple requests.
 		// Language bindings will call manage_transaction to commit/rollback explicitly.
 		if p.ExplicitTransaction {
-			log.Debug("Explicit transaction left open for external management", "db", p.CurrentDB)
+			log.Debug("Explicit transaction left open for external management", "db", logsafe.V(p.CurrentDB))
 			// Do NOT clear p.Transaction - language bindings may reuse it across requests
 			return closeRegistryAgents()
 		}
@@ -804,7 +805,7 @@ func (s *Service) Search(ctx context.Context, query string, limit int) ([]ai.Hit
 	// 2a. Check for explicit CategoryPath in query (rare but supported)
 	categoryPath, cleanQuery := extractCategoryPath(query)
 	if categoryPath != "" {
-		log.Debug("CategoryPath detected in query", "path", categoryPath, "clean_query", cleanQuery)
+		log.Debug("CategoryPath detected in query", "path", logsafe.V(categoryPath), "clean_query", logsafe.V(cleanQuery))
 	}
 	queryToEmbed := cleanQuery
 	if queryToEmbed == "" {
@@ -845,7 +846,7 @@ func (s *Service) Search(ctx context.Context, query string, limit int) ([]ai.Hit
 			}
 			return false
 		}
-		log.Debug("Scoping search to CategoryPath", "path", categoryPath)
+		log.Debug("Scoping search to CategoryPath", "path", logsafe.V(categoryPath))
 	}
 	vectorHits, vecErr = idx.Query(ctx, vecs[0], limit, queryFilter)
 
@@ -1130,7 +1131,7 @@ func (s *Service) RecordStep(ctx context.Context, step ai.ScriptStep) {
 	// Debug: Log what we are recording
 	if step.Type == "command" {
 		if script, ok := step.Args["script"]; ok {
-			log.Debug(fmt.Sprintf("Service.RecordStep: Drafting script. Type: %T, Value: %+v", script, script))
+			log.Debug(logsafe.V(fmt.Sprintf("Service.RecordStep: Drafting script. Type: %T, Value: %+v", script, script)))
 		} else {
 			keys := make([]string, 0, len(step.Args))
 			for k := range step.Args {
@@ -1842,7 +1843,7 @@ func (s *Service) hydrateSessionPreferences(ctx context.Context, session *ai.Ses
 
 	pref, ok, err := loadPreference(ctx, s.systemDB, session, memory.PreferenceKeyVerbose)
 	if err != nil {
-		log.Warn("Failed to hydrate verbose preference", "error", err)
+		log.Warn("Failed to hydrate verbose preference", "error", logsafe.V(err))
 		return
 	}
 	if !ok {
@@ -2014,7 +2015,7 @@ func (s *Service) ask(ctx context.Context, req AskRequest) (AskResponse, error) 
 	if len(hits) > 0 {
 		log.Info("KB retrieval enriched context", "domain", s.domain.ID(), "hits", len(hits), "top_score", hits[0].Score)
 	} else if s.domain != nil && s.domain.Embedder() != nil {
-		log.Debug("KB retrieval returned no results", "domain", s.domain.ID(), "query", query)
+		log.Debug("KB retrieval returned no results", "domain", s.domain.ID(), "query", logsafe.V(query))
 	}
 
 	// 8. Build system/context/history prompt inputs
@@ -2241,7 +2242,7 @@ func (s *Service) resolveGeneratorAndCarryoverWithRequest(ctx context.Context, g
 			gen = overriddenGen
 		} else {
 			log.Warn("Failed to initialize requested provider, falling back to provided generator",
-				"provider", provider, "error", err)
+				"provider", logsafe.V(provider), "error", logsafe.V(err))
 		}
 	}
 

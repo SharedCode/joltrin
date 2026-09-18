@@ -13,6 +13,7 @@ import (
 
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/agent/parser"
+	"github.com/sharedcode/joltrin/ai/internal/logsafe"
 	"github.com/sharedcode/joltrin/ai/obfuscation"
 )
 
@@ -134,7 +135,7 @@ func (e *NativeReActEngine) runDefaultLoop(ctx context.Context, req ai.Reasoning
 	}
 	log.Info("Native ReAct Engine Start",
 		"generator", req.Generator.Name(),
-		"default_format", getRequestedOutputFormat(ctx),
+		"default_format", logsafe.V(getRequestedOutputFormat(ctx)),
 		"tool_count", len(tools),
 		"tools", summarizeToolDefinitions(tools),
 		"query_chars", len(req.UserQuery),
@@ -200,9 +201,9 @@ func (e *NativeReActEngine) runDefaultLoop(ctx context.Context, req ai.Reasoning
 			"iteration", iteration+1,
 			"tool_results_count", len(toolResults),
 			"prompt_chars", len(mainPrompt),
-			"prompt", formatLogSeparatedMessage("prompt", mainPrompt),
+			"prompt", logsafe.V(formatLogSeparatedMessage("prompt", mainPrompt)),
 			"effective_prompt_chars", len(effectivePrompt),
-			"effective_prompt", formatLogSeparatedMessage("effective_prompt", effectivePrompt),
+			"effective_prompt", logsafe.V(formatLogSeparatedMessage("effective_prompt", effectivePrompt)),
 		)
 		if firstTrimmed := firstTrimmedPromptComponent(promptProfile, promptReport); firstTrimmed != "" {
 			emitVerboseProgress(ctx, "Prompt budget trimmed %s first; reduced components: %s.", firstTrimmed, summarizePromptBudgetTrim(promptReport))
@@ -324,7 +325,7 @@ func (e *NativeReActEngine) runDefaultLoop(ctx context.Context, req ai.Reasoning
 						Result: formatClarificationRequiredToolError(repairPlan, toolCall.Args, err),
 						Args:   cloneToolEventMap(toolCall.Args),
 					}, priorRepair, toolCall.Name)
-					log.Warn("Native ReAct Engine Escalated Repair To Clarification", "tool", toolCall.Name, "error", err)
+					log.Warn("Native ReAct Engine Escalated Repair To Clarification", "tool", toolCall.Name, "error", logsafe.V(err))
 					continue
 				}
 				repairAttempts++
@@ -335,10 +336,10 @@ func (e *NativeReActEngine) runDefaultLoop(ctx context.Context, req ai.Reasoning
 					Result: formatRecoverableToolError(repairPlan, toolCall.Args, err),
 					Args:   cloneToolEventMap(toolCall.Args),
 				}, priorRepair, toolCall.Name)
-				log.Warn("Native ReAct Engine Recoverable Tool Failure", "tool", toolCall.Name, "error", err)
+				log.Warn("Native ReAct Engine Recoverable Tool Failure", "tool", toolCall.Name, "error", logsafe.V(err))
 				continue
 			}
-			log.Error("Native ReAct Engine Tool Failure", "tool", toolCall.Name, "error", err)
+			log.Error("Native ReAct Engine Tool Failure", "tool", toolCall.Name, "error", logsafe.V(err))
 			return ai.ReasoningResponse{}, fmt.Errorf("tool execution failed: %w", err)
 		}
 		result, hint := unwrapToolResultEnvelope(rawResult)

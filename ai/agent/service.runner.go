@@ -18,6 +18,7 @@ import (
 	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
+	"github.com/sharedcode/joltrin/ai/internal/logsafe"
 )
 
 type contextKey string
@@ -1076,7 +1077,7 @@ func isToolUnavailableError(err error) bool {
 }
 
 func (e *ServiceToolExecutor) Execute(ctx context.Context, toolName string, args map[string]any) (string, error) {
-	log.Debug("Executing Tool call", "tool", toolName, "args", args)
+	log.Debug("Executing Tool call", "tool", logsafe.V(toolName), "args", logsafe.V(args))
 
 	// Get or build tool execution context
 	toolCtx := e.toolCtx
@@ -1356,7 +1357,7 @@ func (s *Service) runSteps(ctx context.Context, steps []ai.ScriptStep, scope map
 			stepDBName = currentDBName
 		}
 
-		log.Debug("Determined effective database for step", "step_type", step.Type, "db", stepDBName)
+		log.Debug("Determined effective database for step", "step_type", step.Type, "db", logsafe.V(stepDBName))
 
 		// Prepare Context and DB for this step
 		stepCtx := groupCtx
@@ -1446,7 +1447,7 @@ func (s *Service) runSteps(ctx context.Context, steps []ai.ScriptStep, scope map
 					if err := s.runStep(asyncCtx, st, scope, scopeMu, sb, asyncDB, cfg); err != nil {
 						if st.ContinueOnError && !shouldShortCircuitScriptOnError(st.Command, st.Args, err) {
 							// Log error but don't stop the group
-							log.Error("Async step failed (continuing)", "step_type", st.Type, "error", err)
+							log.Error("Async step failed (continuing)", "step_type", st.Type, "error", logsafe.V(err))
 							return nil
 						}
 						return err // This cancels groupCtx
@@ -1461,7 +1462,7 @@ func (s *Service) runSteps(ctx context.Context, steps []ai.ScriptStep, scope map
 		if err := s.runStep(stepCtx, step, scope, scopeMu, sb, stepDB, cfg); err != nil {
 			if step.ContinueOnError && !shouldShortCircuitScriptOnError(step.Command, step.Args, err) {
 				// Log error and continue
-				log.Error("Step failed (continuing)", "step_type", step.Type, "error", err)
+				log.Error("Step failed (continuing)", "step_type", step.Type, "error", logsafe.V(err))
 				continue
 			}
 			// Stop everything
