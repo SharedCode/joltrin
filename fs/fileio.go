@@ -9,6 +9,7 @@ import (
 
 	retry "github.com/sethvargo/go-retry"
 	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/internal/pathsafety"
 )
 
 // FileIO defines filesystem operations used by this package. The default
@@ -92,9 +93,11 @@ func (dio defaultFileIO) MkdirAll(ctx context.Context, path string, perm os.File
 	return dio.retryIO(ctx, func(context.Context) error { return os.MkdirAll(path, perm) })
 }
 
-// RemoveAll removes a directory tree with retry on transient errors.
+// RemoveAll removes a directory tree with retry on transient errors, after
+// checking the path isn't the filesystem root or a well-known system
+// directory (see internal/pathsafety).
 func (dio defaultFileIO) RemoveAll(ctx context.Context, path string) error {
-	return dio.retryIO(ctx, func(context.Context) error { return os.RemoveAll(path) })
+	return dio.retryIO(ctx, func(context.Context) error { return pathsafety.RemoveAll(path) })
 }
 
 // Exists returns true if the given path exists (file or directory).
