@@ -22,7 +22,7 @@ func handleViewer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if isExternalDocID(docID) {
-		http.Redirect(w, r, docID, http.StatusFound)
+		writeExternalLinkInterstitial(w, docID)
 		return
 	}
 
@@ -96,7 +96,7 @@ func handleViewer(w http.ResponseWriter, r *http.Request) {
 			redirectURL += "#:~:text=" + encodedText
 		}
 
-		http.Redirect(w, r, redirectURL, http.StatusFound)
+		writeExternalLinkInterstitial(w, redirectURL)
 		return
 	}
 

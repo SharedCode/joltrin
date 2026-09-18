@@ -110,6 +110,23 @@ func TestHandleSimulateCheckout(t *testing.T) {
 	}
 }
 
+func TestHandleSimulateCheckout_RejectsOpenRedirect(t *testing.T) {
+	gate := getServerFeatureGate()
+	gate.SetTier(governance.TierCore)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/billing/checkout/simulate?session_id=cs_sim_evil&tenant_id=tenant-sim&tier=pro&redirect=https://evil.example/phish", nil)
+	w := httptest.NewRecorder()
+
+	handleSimulateCheckout(w, req)
+
+	if w.Code != http.StatusFound {
+		t.Fatalf("expected 302 redirect, got %d: %s", w.Code, w.Body.String())
+	}
+	if loc := w.Header().Get("Location"); loc == "https://evil.example/phish" {
+		t.Fatalf("attacker-controlled redirect target was honored: %s", loc)
+	}
+}
+
 func TestHandleSubmitEnterpriseInquiry(t *testing.T) {
 	inq := map[string]any{
 		"name":      "VP of Engineering",
