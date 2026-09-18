@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/assets/joltrin-org-logo.jpg" alt="Joltrin logo" width="120" />
+  <img src="docs/assets/joltrin-org-logo.jpg" alt="Joltrin logo" width="220" />
 </p>
 
 [![Discussions](https://img.shields.io/github/discussions/SharedCode/joltrin)](https://github.com/SharedCode/joltrin/discussions)
