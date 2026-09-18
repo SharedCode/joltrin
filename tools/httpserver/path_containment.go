@@ -2,9 +2,13 @@ package main
 
 import (
 	"fmt"
+	log "log/slog"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/sharedcode/joltrin/internal/logsafe"
+	"github.com/sharedcode/joltrin/internal/pathsafety"
 )
 
 // safeOpenContained resolves path to an absolute path and verifies that
@@ -30,6 +34,20 @@ func safeOpenContained(path string, allowedRoots []string) (*os.File, error) {
 		}
 	}
 	return nil, fmt.Errorf("path %q is outside all allowed directories", path)
+}
+
+// safeRemoveAll runs pathsafety.RejectDangerous before calling os.RemoveAll,
+// logging and skipping the removal instead of proceeding if the path is
+// judged too dangerous to touch. Database storage paths are otherwise
+// allowed to point anywhere on disk (admins choose where their data
+// lives), so this is a narrow safety net against a catastrophic value,
+// not a containment boundary.
+func safeRemoveAll(path string) error {
+	if err := pathsafety.RejectDangerous(path); err != nil {
+		log.Error(logsafe.V(fmt.Sprintf("Refusing to remove %q: %v", path, err)))
+		return err
+	}
+	return os.RemoveAll(path)
 }
 
 // preloadAllowedRoots returns the set of directories that file-path

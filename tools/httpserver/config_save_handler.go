@@ -502,7 +502,7 @@ func setupUserDBs(ctx context.Context, req *SaveConfigRequest) ([]DatabaseConfig
 			if entries, err := os.ReadDir(uOpts.StoresFolders[0]); err == nil && len(entries) > 0 {
 				log.Error(logsafe.V(fmt.Sprintf("Failed to setup User DB [%d] '%s': destination path '%s' is not empty. Cannot create a fresh database here, as it may corrupt existing data.", i, udb.Name, uOpts.StoresFolders[0])))
 				for _, cp := range createdPaths {
-					os.RemoveAll(cp)
+					safeRemoveAll(cp)
 				}
 				return nil, fmt.Errorf("user destination path '%s' is not empty. Cannot create a fresh database here as it may corrupt existing data", uOpts.StoresFolders[0])
 			}
@@ -510,15 +510,15 @@ func setupUserDBs(ctx context.Context, req *SaveConfigRequest) ([]DatabaseConfig
 				log.Error(logsafe.V(fmt.Sprintf("Failed to setup User DB [%d] '%s': %v. Rolling back user DBs...", i, udb.Name, err)))
 				// Rollback all user DB paths created so far
 				for _, cp := range createdPaths {
-					os.RemoveAll(cp)
+					safeRemoveAll(cp)
 				}
 				// Also rollback current DB attempt partials
 				for _, f := range storeFolders {
-					os.RemoveAll(f)
+					safeRemoveAll(f)
 				}
 				for _, ec := range uOpts.ErasureConfig {
 					for _, bp := range ec.BaseFolderPathsAcrossDrives {
-						os.RemoveAll(bp)
+						safeRemoveAll(bp)
 					}
 				}
 				return nil, fmt.Errorf("user db setup failed: %v", err)
@@ -602,16 +602,16 @@ func cleanupSystemDB(req *SaveConfigRequest) {
 	log.Warn(logsafe.V(fmt.Sprintf("Cleaning up System DB at '%s'", req.RegistryPath)))
 	// 1. Registry Path
 	if req.RegistryPath != "" {
-		os.RemoveAll(req.RegistryPath)
+		safeRemoveAll(req.RegistryPath)
 	}
 	// 2. Stores Folders
 	for _, sf := range req.SystemOptions.StoresFolders {
-		os.RemoveAll(sf)
+		safeRemoveAll(sf)
 	}
 	// 3. Erasure Paths
 	for _, config := range req.SystemOptions.ErasureConfig {
 		for _, bp := range config.BaseFolderPathsAcrossDrives {
-			os.RemoveAll(bp)
+			safeRemoveAll(bp)
 		}
 	}
 }
