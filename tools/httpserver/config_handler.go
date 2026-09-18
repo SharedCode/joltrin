@@ -67,13 +67,12 @@ func handleCreateEnvironment(w http.ResponseWriter, r *http.Request) {
 		log.Debug(logsafe.V(fmt.Sprintf("DEBUG-NAME-HEX (CreateEnv): Name='%s', Hex=%x", req.Name, []byte(req.Name))))
 	}
 
-	// Sanitize Name
-	req.Name = sanitizePath(req.Name)
-
-	if req.Name == "" {
-		http.Error(w, "Name is required", http.StatusBadRequest)
+	validName, err := validateEnvironmentFilename(req.Name)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	req.Name = validName
 
 	// Ensure .json extension
 	filename := req.Name
@@ -132,10 +131,12 @@ func handleSwitchEnvironment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Filename == "" {
-		http.Error(w, "Filename required", http.StatusBadRequest)
+	validFilename, err := validateEnvironmentFilename(req.Filename)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	req.Filename = validFilename
 
 	// Verify it exists
 	if _, err := os.Stat(req.Filename); os.IsNotExist(err) {
@@ -190,10 +191,12 @@ func handleDeleteEnvironment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Filename == "" {
-		http.Error(w, "Filename is required", http.StatusBadRequest)
+	validFilename, err := validateEnvironmentFilename(req.Filename)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	req.Filename = validFilename
 
 	// 1. Read config to find paths
 	// If any delete flag is true
@@ -772,6 +775,25 @@ func resolveConfigRelativePath(p string) string {
 		return filepath.Join(configDir, p)
 	}
 	return p
+}
+
+// validateEnvironmentFilename ensures a client-supplied environment config
+// filename is a bare filename in the working directory (where
+// handleListEnvironments reads them from), never a path that could escape
+// it. Environment files are always flat JSONs in ".", so there is no
+// legitimate reason for this value to contain a path separator or "..".
+func validateEnvironmentFilename(name string) (string, error) {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return "", fmt.Errorf("filename is required")
+	}
+	if name == "." || name == ".." {
+		return "", fmt.Errorf("invalid filename %q", name)
+	}
+	if filepath.IsAbs(name) || filepath.Base(name) != name {
+		return "", fmt.Errorf("invalid filename %q: must be a bare filename with no path separators", name)
+	}
+	return name, nil
 }
 
 // sanitizePath removes leading/trailing whitespace and non-graphic characters
