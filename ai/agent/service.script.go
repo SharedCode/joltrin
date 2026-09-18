@@ -416,7 +416,7 @@ func (s *Service) scriptSaveAs(ctx context.Context, scriptDB *database.Database,
 	var dummy ai.Script
 	if err := store.Load(ctx, category, name, &dummy); err == nil {
 		tx.Rollback(ctx)
-		return fmt.Sprintf("Error: Script %q (Category: %s) already exists. Use '/script delete %s' first.", name, category, name), nil
+		return fmt.Sprintf("Error: Script %q (Category: %s) already exists. Use %q first.", name, category, "/script delete "+name), nil
 	}
 
 	newScript := ai.Script{

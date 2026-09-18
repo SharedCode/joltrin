@@ -49,7 +49,7 @@ func TestHandlePendingUserConfirmation_CatchesPrefixedReversedDeletePhrase(t *te
 	if !handled {
 		t.Fatal("expected delete confirmation flow to intercept reversed delete phrase")
 	}
-	if !strings.Contains(msg, "Delete Space 'task3' from database 'dev_db'?") {
+	if !strings.Contains(msg, `Delete Space "task3" from database "dev_db"?`) {
 		t.Fatalf("unexpected confirmation prompt: %q", msg)
 	}
 	if svc.session.PendingConfirmation == nil || svc.session.PendingConfirmation.SpaceName != "task3" {

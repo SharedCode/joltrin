@@ -72,7 +72,7 @@ func (a *CopilotAgent) DeleteSpace(ctx context.Context, args DeleteSpaceArgs) (s
 	}
 
 	emitSpaceMutationEvent(ctx, "delete", args.Database, args.KBName)
-	return fmt.Sprintf("Space/KnowledgeBase '%s' deleted successfully.\n[[REFRESH_SPACES]]", args.KBName), nil
+	return fmt.Sprintf("Space/KnowledgeBase %q deleted successfully.\n[[REFRESH_SPACES]]", args.KBName), nil
 }
 
 // UpdateSpaceConfig updates the configuration of a Space (first-class API)
