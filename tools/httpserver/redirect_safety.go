@@ -10,10 +10,16 @@ import (
 // isSafeRelativeRedirect reports whether target is safe to hand to
 // http.Redirect without an open-redirect risk: it must be a same-origin,
 // relative path, never an absolute URL ("https://evil.example/...") and
-// never a protocol-relative one ("//evil.example/...", which browsers
-// still resolve against evil.example even without a scheme).
+// never a protocol-relative one. Browsers resolve both "//evil.example/..."
+// and the backslash variant "/\evil.example/..." (some browsers normalize
+// a leading backslash to a slash) against evil.example even without a
+// scheme, so both of the first two characters must be checked, not just
+// the second.
 func isSafeRelativeRedirect(target string) bool {
-	if target == "" || target[0] != '/' || len(target) > 1 && target[1] == '/' {
+	if target == "" || target[0] != '/' {
+		return false
+	}
+	if len(target) > 1 && (target[1] == '/' || target[1] == '\\') {
 		return false
 	}
 	u, err := url.Parse(target)
