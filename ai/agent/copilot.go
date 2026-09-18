@@ -2051,7 +2051,7 @@ func (a *CopilotAgent) resolveGeneratorWithOverride(ctx context.Context, provide
 					model = DefaultModelGemini
 				}
 				tempGen, err = generator.New(ProviderGemini, map[string]any{
-					"api_key": providerOverride.APIKey,
+					"api_key": string(providerOverride.APIKey),
 					"model":   model,
 				})
 			}
@@ -2062,7 +2062,7 @@ func (a *CopilotAgent) resolveGeneratorWithOverride(ctx context.Context, provide
 					model = DefaultModelOpenAI
 				}
 				options := map[string]any{
-					"api_key": providerOverride.APIKey,
+					"api_key": string(providerOverride.APIKey),
 					"model":   model,
 				}
 				if providerOverride.BaseURL != "" {
@@ -2077,7 +2077,7 @@ func (a *CopilotAgent) resolveGeneratorWithOverride(ctx context.Context, provide
 					model = DefaultModelAnthropic
 				}
 				tempGen, err = generator.New(ProviderAnthropic, map[string]any{
-					"api_key": providerOverride.APIKey,
+					"api_key": string(providerOverride.APIKey),
 					"model":   model,
 				})
 			}
@@ -2110,7 +2110,8 @@ func (a *CopilotAgent) resolveGenerator(ctx context.Context) ai.Generator {
 	var err error
 	var tempGen ai.Generator
 
-	customAPIKey, _ := ctx.Value(ai.CtxKeyAPIKey).(string)
+	rawCustomAPIKey, _ := ctx.Value(ai.CtxKeyAPIKey).(string)
+	customAPIKey := ai.Secret(rawCustomAPIKey)
 	customBaseURL, _ := ctx.Value(ai.CtxKeyBaseURL).(string)
 
 	switch providerOverrideStr {
@@ -2121,7 +2122,7 @@ func (a *CopilotAgent) resolveGenerator(ctx context.Context) ai.Generator {
 				model = DefaultModelGemini
 			}
 			tempGen, err = generator.New(ProviderGemini, map[string]any{
-				"api_key": customAPIKey,
+				"api_key": string(customAPIKey),
 				"model":   model,
 			})
 		}
@@ -2132,7 +2133,7 @@ func (a *CopilotAgent) resolveGenerator(ctx context.Context) ai.Generator {
 				model = DefaultModelOpenAI
 			}
 			options := map[string]any{
-				"api_key": customAPIKey,
+				"api_key": string(customAPIKey),
 				"model":   model,
 				"api_url": customBaseURL,
 			}

@@ -415,8 +415,10 @@ type ProviderDetails struct {
 	// Model optionally specifies a specific model within the provider (e.g., "gemini-2.0-flash-thinking-exp")
 	Model string
 
-	// APIKey provides a transient API key override for the provider
-	APIKey string
+	// APIKey provides a transient API key override for the provider. Typed as
+	// ai.Secret so it can't be logged in cleartext by accident; unwrap with
+	// string(...) only at the point it's handed to the actual HTTP client.
+	APIKey ai.Secret
 
 	// BaseURL provides a transient base URL override for the provider
 	BaseURL string
@@ -443,7 +445,7 @@ func (s *Service) resolveTopicRoutingGenerator(ctx context.Context) ai.Generator
 
 		configMap := make(map[string]any)
 		if providerOverride.APIKey != "" {
-			configMap["api_key"] = providerOverride.APIKey
+			configMap["api_key"] = string(providerOverride.APIKey)
 		}
 		if providerOverride.BaseURL != "" {
 			configMap["base_url"] = providerOverride.BaseURL
@@ -1632,7 +1634,7 @@ func (s *Service) resolveGeneratorAndCarryover(ctx context.Context, topicAssessm
 		// Build config map for generator initialization
 		configMap := make(map[string]any)
 		if providerOverride.APIKey != "" {
-			configMap["api_key"] = providerOverride.APIKey
+			configMap["api_key"] = string(providerOverride.APIKey)
 		}
 		if providerOverride.BaseURL != "" {
 			configMap["base_url"] = providerOverride.BaseURL
@@ -2176,7 +2178,7 @@ func extractProviderOverrideFromContext(ctx context.Context) *ProviderDetails {
 	}
 
 	if apiKey, ok := ctx.Value(ai.CtxKeyAPIKey).(string); ok && apiKey != "" {
-		config.APIKey = apiKey
+		config.APIKey = ai.Secret(apiKey)
 	}
 
 	if baseURL, ok := ctx.Value(ai.CtxKeyBaseURL).(string); ok && baseURL != "" {
@@ -2228,7 +2230,7 @@ func (s *Service) resolveGeneratorAndCarryoverWithRequest(ctx context.Context, g
 		// Build config map for generator initialization
 		configMap := make(map[string]any)
 		if providerOverride.APIKey != "" {
-			configMap["api_key"] = providerOverride.APIKey
+			configMap["api_key"] = string(providerOverride.APIKey)
 		}
 		if providerOverride.BaseURL != "" {
 			configMap["base_url"] = providerOverride.BaseURL

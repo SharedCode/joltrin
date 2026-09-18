@@ -499,7 +499,7 @@ func constructPayload(ctx context.Context, w http.ResponseWriter, req *aiChatReq
 		providerDetails := &agent.ProviderDetails{
 			Provider: llmSettings.Provider,
 			Model:    llmSettings.Model,
-			APIKey:   llmSettings.APIKey,
+			APIKey:   ai.Secret(llmSettings.APIKey),
 			BaseURL:  llmSettings.URL,
 		}
 		cfg.Set("provider_details", providerDetails)
