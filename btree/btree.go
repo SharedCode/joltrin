@@ -840,8 +840,20 @@ func (btree *Btree[TK, TV]) isUnique() bool {
 	return btree.StoreInfo.IsUnique
 }
 
+// getSlotLength returns the node's item capacity, clamped to
+// [2, sop.MaxSlotLength]. StoreInfo normally goes through sop.NewStoreInfo,
+// which already enforces this range, but a StoreInfo loaded straight from
+// persisted storage bypasses that and could otherwise carry an unbounded
+// or corrupted value straight into a node allocation.
 func (btree *Btree[TK, TV]) getSlotLength() int {
-	return btree.StoreInfo.SlotLength
+	n := btree.StoreInfo.SlotLength
+	if n < 2 {
+		return 2
+	}
+	if n > sop.MaxSlotLength {
+		return sop.MaxSlotLength
+	}
+	return n
 }
 
 func (btree *Btree[TK, TV]) isCurrentItemSelected() bool {

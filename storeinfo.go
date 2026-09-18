@@ -7,6 +7,13 @@ import (
 	"time"
 )
 
+// MaxSlotLength is the maximum number of items a node can accommodate.
+// Enforced both when a StoreInfo is first created (NewStoreInfo) and again
+// at the point a node is allocated (btree.getSlotLength), since a StoreInfo
+// loaded from persisted storage doesn't go through NewStoreInfo and could
+// otherwise carry an unbounded or corrupted value straight into a make().
+const MaxSlotLength = 20000
+
 // StoreInfo describes a B-Tree store configuration and runtime state persisted in the backend.
 type StoreInfo struct {
 	// Name is the short store name.
@@ -280,13 +287,10 @@ func NewStoreInfo(si StoreOptions) *StoreInfo {
 		}
 	}
 
-	// Maximum number of items a node can accommodate.
-	const maxSlotLength = 20000
-
 	// Maximum slot length is 20,000. It may be ridiculously huge blob if too big.
 	// Even 20,000 may be too much, depending on key & value data size you'll store.
-	if si.SlotLength > maxSlotLength {
-		si.SlotLength = maxSlotLength
+	if si.SlotLength > MaxSlotLength {
+		si.SlotLength = MaxSlotLength
 	}
 
 	// Enforce some basic rule not to create conflicting setup.
