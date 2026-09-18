@@ -2163,7 +2163,7 @@ func handleListItems(w http.ResponseWriter, r *http.Request) {
 					return v
 				}
 			case uint:
-				if v, err := strconv.ParseUint(kStr, 10, 64); err == nil {
+				if v, err := strconv.ParseUint(kStr, 10, strconv.IntSize); err == nil {
 					return uint(v)
 				}
 			case uint8:
@@ -2551,7 +2551,7 @@ func handleUpdateItem(w http.ResponseWriter, r *http.Request) {
 					finalKey = v
 				}
 			case uint:
-				if v, err := strconv.ParseUint(s, 10, 64); err == nil {
+				if v, err := strconv.ParseUint(s, 10, strconv.IntSize); err == nil {
 					finalKey = uint(v)
 				}
 			case uint8:

@@ -885,7 +885,7 @@ func coerce(val any, target any) any {
 		case float64:
 			return uint(v)
 		case string:
-			if i, err := strconv.ParseUint(v, 10, 64); err == nil {
+			if i, err := strconv.ParseUint(v, 10, strconv.IntSize); err == nil {
 				return uint(i)
 			}
 		}
