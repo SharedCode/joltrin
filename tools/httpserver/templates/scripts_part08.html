@@ -854,7 +854,7 @@
             const val = currentValues[name] || '';
             
             div.innerHTML = `
-                <label style="width: 100px; font-size: 12px; overflow:hidden; text-overflow:ellipsis;" title="${window.escapeHTML(name)}">${name} (${type}):</label>
+                <label style="width: 100px; font-size: 12px; overflow:hidden; text-overflow:ellipsis;" title="${window.escapeHTML(name)}">${window.escapeHTML(name)} (${window.escapeHTML(type)}):</label>
                 <input type="text" class="seed-key-field-value" value="${window.escapeHTML(val)}" style="flex:1; padding: 4px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-color);">
             `;
             container.appendChild(div);
