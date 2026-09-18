@@ -27,6 +27,7 @@ import (
 	"github.com/sharedcode/joltrin/ai/obfuscation"
 	"github.com/sharedcode/joltrin/btree"
 	"github.com/sharedcode/joltrin/database"
+	"github.com/sharedcode/joltrin/internal/logsafe"
 )
 
 // ObfuscationMode defines the global obfuscation policy.
@@ -105,7 +106,7 @@ func seedMetaCognitionAsync(userID, kbName string, sysOpts sop.DatabaseOptions) 
 		}
 		_ = wKb.IngestThought(ctx, thoughtText, "Meta_Cognition", "system", vecs[0], data)
 		if wTrans.Commit(ctx) == nil {
-			log.Info("Successfully seeded lightweight Meta_Cognition to LTM", "user_id", userID)
+			log.Info("Successfully seeded lightweight Meta_Cognition to LTM", "user_id", logsafe.V(userID))
 		}
 	}
 }
@@ -138,12 +139,12 @@ func handleAIChat(w http.ResponseWriter, r *http.Request) {
 	sessionMu.Lock()
 	defer sessionMu.Unlock()
 	log.Info("HTTP AI Chat Request",
-		"session_id", req.SessionID,
-		"agent", req.Agent,
+		"session_id", logsafe.V(req.SessionID),
+		"agent", logsafe.V(req.Agent),
 		"agent_type", fmt.Sprintf("%T", agentSvc),
-		"provider", req.Provider,
-		"database", req.Database,
-		"domain", req.Domain,
+		"provider", logsafe.V(req.Provider),
+		"database", logsafe.V(req.Database),
+		"domain", logsafe.V(req.Domain),
 		"selected_kb_count", len(req.SelectedKBs),
 		"message_chars", len(req.Message),
 	)
@@ -158,10 +159,10 @@ func handleAIChat(w http.ResponseWriter, r *http.Request) {
 	llmSettings := resolveLLMSettings(r)
 	ctx, payload, cfg, fullMessage := constructPayload(r.Context(), w, req, llmSettings, sendEvent, rs)
 	log.Info("HTTP AI Chat Payload",
-		"session_id", req.SessionID,
-		"current_db", payload.CurrentDB,
-		"active_domain", payload.ActiveDomain,
-		"avatar_scope", payload.AvatarScope,
+		"session_id", logsafe.V(req.SessionID),
+		"current_db", logsafe.V(payload.CurrentDB),
+		"active_domain", logsafe.V(payload.ActiveDomain),
+		"avatar_scope", logsafe.V(payload.AvatarScope),
 		"selected_kbs", len(payload.SelectedKBs),
 		"full_message_chars", len(fullMessage),
 	)
@@ -177,17 +178,17 @@ func handleAIChat(w http.ResponseWriter, r *http.Request) {
 	// Ensure Close is ALWAYS called, even on panic or context cancellation
 	defer func() {
 		if r := recover(); r != nil {
-			log.Error("Panic during agent execution", "panic", r, "session_id", req.SessionID)
+			log.Error("Panic during agent execution", "panic", r, "session_id", logsafe.V(req.SessionID))
 			// Use background context since original may be canceled
 			if err := agentSvc.Close(context.Background()); err != nil {
-				log.Error(fmt.Sprintf("Agent '%s' failed to close after panic: %v", req.Agent, err))
+				log.Error(logsafe.V(fmt.Sprintf("Agent '%s' failed to close after panic: %v", req.Agent, err)))
 			}
 			sendEvent("error", fmt.Sprintf("Internal error: %v", r))
 			panic(r) // Re-throw after cleanup
 		}
 		// Normal close - use original context to allow proper commit/rollback decisions
 		if err := agentSvc.Close(ctx); err != nil {
-			log.Error(fmt.Sprintf("Agent '%s' failed to close session: %v", req.Agent, err))
+			log.Error(logsafe.V(fmt.Sprintf("Agent '%s' failed to close session: %v", req.Agent, err)))
 		}
 	}()
 
@@ -195,13 +196,13 @@ func handleAIChat(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// Check if error is due to context cancellation
 		if ctx.Err() != nil {
-			log.Warn("Request canceled by client", "session_id", req.SessionID, "error", ctx.Err())
+			log.Warn("Request canceled by client", "session_id", logsafe.V(req.SessionID), "error", ctx.Err())
 			sendEvent("error", "Request canceled")
 		}
 		return
 	}
 	log.Info("HTTP AI Chat Response",
-		"session_id", req.SessionID,
+		"session_id", logsafe.V(req.SessionID),
 		"response_chars", len(response),
 	)
 
@@ -265,7 +266,7 @@ func initializeRequest(w http.ResponseWriter, r *http.Request) (*aiChatRequest, 
 	}
 	r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
-	log.Debug("Received AIChat Request", "body", string(bodyBytes))
+	log.Debug("Received AIChat Request", "body", logsafe.V(string(bodyBytes)))
 
 	var req aiChatRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -444,7 +445,7 @@ func resolveContextAndAgent(ctx context.Context, req *aiChatRequest, sendEvent f
 	if req.Database != "" {
 		if _, err := getDBOptions(ctx, req.Database); err != nil {
 			msg := fmt.Sprintf("Invalid database '%s': %v", req.Database, err)
-			log.Info("Response: Invalid Database", "error", msg)
+			log.Info("Response: Invalid Database", "error", logsafe.V(msg))
 			sendEvent("error", msg)
 			return nil, err
 		}
@@ -455,7 +456,7 @@ func resolveContextAndAgent(ctx context.Context, req *aiChatRequest, sendEvent f
 	blueprint, exists := loadedAgents[req.Agent]
 	if !exists {
 		msg := fmt.Sprintf("Agent '%s' is not initialized or not found.", req.Agent)
-		log.Info("Response: Agent Not Found", "error", msg)
+		log.Info("Response: Agent Not Found", "error", logsafe.V(msg))
 		sendEvent("error", msg)
 		return nil, fmt.Errorf("agent not found")
 	}
@@ -470,7 +471,7 @@ func lockSession(req *aiChatRequest, blueprint ai.Agent[map[string]any]) (ai.Age
 		if cloneable, ok := blueprint.(interface {
 			Clone() ai.Agent[map[string]any]
 		}); ok {
-			log.Debug("Cloned new pristine agent instance for session", "session_id", req.SessionID)
+			log.Debug("Cloned new pristine agent instance for session", "session_id", logsafe.V(req.SessionID))
 			return cloneable.Clone()
 		}
 		return blueprint
@@ -546,7 +547,7 @@ func constructPayload(ctx context.Context, w http.ResponseWriter, req *aiChatReq
 						cfg, err := kb.GetConfig(ctx)
 						if err == nil && cfg != nil && cfg.IsExclusive {
 							avatarScope = kbRef.Name
-							log.Info("[Copilot] Avatar Mode Active. LLM Sandboxed to: " + kbRef.Name)
+							log.Info(logsafe.V("[Copilot] Avatar Mode Active. LLM Sandboxed to: " + kbRef.Name))
 						}
 					}
 					trans.Rollback(ctx)
@@ -607,7 +608,7 @@ func executeAgentLifecycle(ctx context.Context, r *http.Request, agentSvc ai.Age
 
 	if err := agentSvc.Open(ctx); err != nil {
 		msg := fmt.Sprintf("Agent '%s' failed to open session: %v", req.Agent, err)
-		log.Error("Response: Session Open Failed", "error", msg)
+		log.Error("Response: Session Open Failed", "error", logsafe.V(msg))
 		sendEvent("error", msg)
 		return err
 	}
@@ -618,7 +619,7 @@ func executeRAG(ctx context.Context, agentSvc ai.Agent[map[string]any], req *aiC
 	response, err := agentSvc.Ask(ctx, fullMessage, cfg)
 	if err != nil {
 		msg := fmt.Sprintf("Agent '%s' failed: %v", req.Agent, err)
-		log.Error("Response: Agent Ask Failed", "error", msg)
+		log.Error("Response: Agent Ask Failed", "error", logsafe.V(msg))
 		sendEvent("error", msg)
 		return "", err
 	}
@@ -650,9 +651,9 @@ func interpretOutput(response string, sendEvent func(string, any)) {
 	cleanText = strings.TrimSpace(cleanText)
 
 	if err := json.Unmarshal([]byte(cleanText), &toolCall); err == nil && toolCall.Tool != "" {
-		log.Debug(fmt.Sprintf("Agent returned raw tool call (unexpected): %s", toolCall.Tool))
+		log.Debug(logsafe.V(fmt.Sprintf("Agent returned raw tool call (unexpected): %s", toolCall.Tool)))
 		msg := fmt.Sprintf("Agent attempted to call tool '%s' but failed to execute it internally.", toolCall.Tool)
-		log.Info("Response: Raw Tool Call", "response", msg)
+		log.Info("Response: Raw Tool Call", "response", logsafe.V(msg))
 		sendEvent("content", msg)
 		return
 	}
@@ -1134,7 +1135,7 @@ func handleAIFeedback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info("AI Feedback Received", "msgId", req.MsgID, "type", req.Type)
+	log.Info("AI Feedback Received", "msgId", logsafe.V(req.MsgID), "type", logsafe.V(req.Type))
 
 	ctx := r.Context()
 
@@ -1172,7 +1173,7 @@ func handleAIFeedback(w http.ResponseWriter, r *http.Request) {
 
 	store, err := database.NewBtree[string, string](ctx, opts, storeName, trans, comparer, so)
 	if err != nil {
-		log.Error("Failed to open feedback store", "error", err)
+		log.Error("Failed to open feedback store", "error", logsafe.V(err))
 		http.Error(w, "Store open error", http.StatusInternalServerError)
 		return
 	}
@@ -1218,7 +1219,7 @@ func handleAIFeedback(w http.ResponseWriter, r *http.Request) {
 			sysDB := aidb.NewDatabase(opts)
 			kb, err := sysDB.OpenKnowledgeBase(ctx, kbName, trans, nil, embedder, false, true)
 			if err != nil {
-				log.Error("Failed to open physical knowledge base", "error", err)
+				log.Error("Failed to open physical knowledge base", "error", logsafe.V(err))
 				http.Error(w, "Knowledge base open error", http.StatusInternalServerError)
 				return
 			}
@@ -1259,7 +1260,7 @@ func handleCloseSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	activeSessions.Close(sessionID)
-	log.Info("Closed session explicitly", "session_id", sessionID)
+	log.Info("Closed session explicitly", "session_id", logsafe.V(sessionID))
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -1306,7 +1307,7 @@ func handleToolExecute(w http.ResponseWriter, r *http.Request) {
 		ctx := context.Background()
 
 		if err := agentSvc.Open(ctx); err != nil {
-			log.Error("Failed to open agent session", "error", err)
+			log.Error("Failed to open agent session", "error", logsafe.V(err))
 			http.Error(w, "Failed to initialize AI session", http.StatusInternalServerError)
 			return
 		}
@@ -1315,7 +1316,7 @@ func handleToolExecute(w http.ResponseWriter, r *http.Request) {
 		cfg := ai.NewConfigMap()
 		response, err := agentSvc.Ask(ctx, prompt, cfg)
 		if err != nil {
-			log.Error("Failed to ask agent", "error", err)
+			log.Error("Failed to ask agent", "error", logsafe.V(err))
 			http.Error(w, "Failed to generate text", http.StatusInternalServerError)
 			return
 		}

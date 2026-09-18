@@ -8,6 +8,7 @@ import (
 
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/embed"
+	"github.com/sharedcode/joltrin/internal/logsafe"
 )
 
 type embedderSettings struct {
@@ -141,32 +142,32 @@ func GetConfiguredEmbedderForSpace(r *http.Request, spaceName, preloadPath strin
 		warmupBuiltinLocalEmbedder(spaceName, preloadPath)
 		embedder, err := newConfiguredEmbedder(embedderSettings{Provider: "local", Model: "kelindar", URL: "kelindar"})
 		if err != nil {
-			log.Error("pinned internal kelindar embedder initialization failed", "space", spaceName, "err", err)
+			log.Error("pinned internal kelindar embedder initialization failed", "space", logsafe.V(spaceName), "err", err)
 			return nil
 		}
-		log.Debug("embedder selection using pinned internal local kelindar", "space", spaceName)
+		log.Debug("embedder selection using pinned internal local kelindar", "space", logsafe.V(spaceName))
 		return embedder
 	}
 
-	log.Debug("embedder selection", "space", spaceName, "preload_path", preloadPath, "forced_local", false, "production_mode", config.ProductionMode)
+	log.Debug("embedder selection", "space", logsafe.V(spaceName), "preload_path", logsafe.V(preloadPath), "forced_local", false, "production_mode", config.ProductionMode)
 	return GetConfiguredEmbedder(r)
 }
 
 // GetConfiguredEmbedder returns an AI embedder based on the server configuration.
 func GetConfiguredEmbedder(r *http.Request) ai.Embeddings {
 	settings := resolveEmbedderSettings(r)
-	log.Debug("embedder selection details", "production_mode", config.ProductionMode, "provider", settings.Provider, "model", settings.Model, "url", settings.URL)
+	log.Debug("embedder selection details", "production_mode", config.ProductionMode, "provider", logsafe.V(settings.Provider), "model", logsafe.V(settings.Model), "url", logsafe.V(settings.URL))
 
 	if !config.ProductionMode {
-		log.Warn("embedder selection using mock embedder", "reason", "production_mode=false", "provider", settings.Provider, "model", settings.Model)
+		log.Warn("embedder selection using mock embedder", "reason", "production_mode=false", "provider", logsafe.V(settings.Provider), "model", logsafe.V(settings.Model))
 		return embed.NewSimple("mock_embedder", 384, nil)
 	}
 
 	embedder, err := newConfiguredEmbedder(settings)
 	if err != nil {
-		log.Error("embedder selection failed, using mock embedder", "err", err, "provider", settings.Provider, "model", settings.Model)
+		log.Error("embedder selection failed, using mock embedder", "err", logsafe.V(err), "provider", logsafe.V(settings.Provider), "model", logsafe.V(settings.Model))
 		return embed.NewSimple("mock_embedder", 384, nil)
 	}
-	log.Debug("embedder selection using configured real embedder", "provider", settings.Provider, "model", settings.Model)
+	log.Debug("embedder selection using configured real embedder", "provider", logsafe.V(settings.Provider), "model", logsafe.V(settings.Model))
 	return embedder
 }

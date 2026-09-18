@@ -11,6 +11,7 @@ import (
 	"github.com/sharedcode/joltrin/btree"
 	"github.com/sharedcode/joltrin/common"
 	"github.com/sharedcode/joltrin/fs"
+	"github.com/sharedcode/joltrin/internal/logsafe"
 	sd "github.com/sharedcode/joltrin/streamingdata"
 )
 
@@ -91,7 +92,7 @@ func RemoveBtree(ctx context.Context, name string, storesFolders []string, erasu
 		return fmt.Errorf("unable to get L2 cache for type %v", cacheType)
 	}
 
-	log.Info(fmt.Sprintf("Btree %s%c%s is about to be deleted", storesFolders[0], os.PathSeparator, name))
+	log.Info(logsafe.V(fmt.Sprintf("Btree %s%c%s is about to be deleted", storesFolders[0], os.PathSeparator, name)))
 
 	// If storesFolders is 2 or more, replicated mode is achieved, remove will delete on two store folder paths.
 	replicationTracker, err := fs.NewReplicationTracker(ctx, storesFolders, len(storesFolders) >= 2, cache)

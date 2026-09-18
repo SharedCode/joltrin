@@ -17,6 +17,7 @@ import (
 
 	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/encoding"
+	"github.com/sharedcode/joltrin/internal/logsafe"
 )
 
 // StoreRepository is a filesystem-backed implementation of sop.StoreRepository.
@@ -176,7 +177,7 @@ func (sr *StoreRepository) Add(ctx context.Context, stores ...sop.StoreInfo) err
 	// Cache each of the stores.
 	for _, store := range stores {
 		if err := sr.cache.SetStruct(ctx, sr.formatCacheKey(store.Name), &store, store.CacheConfig.StoreInfoCacheDuration); err != nil {
-			log.Warn(fmt.Sprintf("StoreRepository Add failed (redis setstruct), details: %v", err))
+			log.Warn(logsafe.V(fmt.Sprintf("StoreRepository Add failed (redis setstruct), details: %v", err)))
 		}
 	}
 	return nil
@@ -402,7 +403,7 @@ func (sr *StoreRepository) GetWithTTL(ctx context.Context, isCacheTTL bool, cach
 		}
 		if !found || err != nil {
 			if err != nil {
-				log.Warn(fmt.Sprintf("StoreRepository Get (redis getstruct) failed, details: %v", err))
+				log.Warn(logsafe.V(fmt.Sprintf("StoreRepository Get (redis getstruct) failed, details: %v", err)))
 			}
 			storesNotInCache = append(storesNotInCache, names[i])
 			continue
@@ -499,12 +500,12 @@ func (sr *StoreRepository) Remove(ctx context.Context, storeNames ...string) err
 		if _, ok := storesLookup[storeName]; !ok {
 			// If store not found in list, it might be because the list is stale or the store was manually deleted.
 			// We should still attempt to remove the folder to ensure cleanup.
-			log.Info(fmt.Sprintf("Store %s not found in store list, proceeding with folder removal attempt.", storeName))
+			log.Info(logsafe.V(fmt.Sprintf("Store %s not found in store list, proceeding with folder removal attempt.", storeName)))
 		}
 
 		// Tolerate Redis cache failure.
 		if _, err := sr.cache.Delete(ctx, []string{sr.formatCacheKey(storeName)}); err != nil {
-			log.Warn(fmt.Sprintf("StoreRepository Remove (redis Delete) failed, details: %v", err))
+			log.Warn(logsafe.V(fmt.Sprintf("StoreRepository Remove (redis Delete) failed, details: %v", err)))
 		}
 		// Delete store folder (contains blobs, store config & registry data files).
 		if err := storeWriter.removeStore(ctx, storeName); err != nil {
@@ -512,7 +513,7 @@ func (sr *StoreRepository) Remove(ctx context.Context, storeNames ...string) err
 		}
 		delete(storesLookup, storeName)
 
-		log.Debug(fmt.Sprintf("removed store %s", storeName))
+		log.Debug(logsafe.V(fmt.Sprintf("removed store %s", storeName)))
 	}
 
 	// Update Store list file of removed entries.

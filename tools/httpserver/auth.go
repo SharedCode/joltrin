@@ -22,6 +22,7 @@ import (
 	aidb "github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/btree"
 	"github.com/sharedcode/joltrin/database"
+	"github.com/sharedcode/joltrin/internal/logsafe"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -351,7 +352,7 @@ func (s *SessionStore) ValidateToken(ctx context.Context, token string) (*UserRe
 	now := time.Now().UTC()
 	if now.After(r.ExpiresAt) {
 		log.Debug("ValidateToken: expired session",
-			"token_prefix", tokenPrefix(token),
+			"token_prefix", logsafe.V(tokenPrefix(token)),
 			"expires_at", r.ExpiresAt)
 		if err := removeSessionRecord(ctx, store, r); err != nil {
 			log.Warn("ValidateToken: failed to remove expired session", "error", err)
@@ -367,7 +368,7 @@ func (s *SessionStore) ValidateToken(ctx context.Context, token string) (*UserRe
 	}
 
 	log.Debug("ValidateToken: successful validation",
-		"token_prefix", tokenPrefix(token),
+		"token_prefix", logsafe.V(tokenPrefix(token)),
 		"expires_at", r.ExpiresAt)
 
 	return &UserRecord{Username: r.Username, Role: r.Role}, nil
@@ -376,7 +377,7 @@ func (s *SessionStore) ValidateToken(ctx context.Context, token string) (*UserRe
 func (s *SessionStore) RevokeToken(ctx context.Context, token string) {
 	store, tx, err := s.getStore(ctx)
 	if err != nil {
-		log.Warn("failed to get store for token revocation", "error", err)
+		log.Warn("failed to get store for token revocation", "error", logsafe.V(err))
 		return
 	}
 	defer tx.Rollback(ctx)
@@ -535,13 +536,13 @@ func (c *Config) AuthenticateBearerToken(ctx context.Context, token string) (boo
 		return false, nil, nil
 	}
 
-	log.Debug("AuthenticateBearerToken: validating token", "token_prefix", tokenPrefix(token))
+	log.Debug("AuthenticateBearerToken: validating token", "token_prefix", logsafe.V(tokenPrefix(token)))
 	user, err := currentTokenFacade().ValidateToken(ctx, token)
 	if err != nil {
-		log.Warn("AuthenticateBearerToken: token rejected", "error", err)
+		log.Warn("AuthenticateBearerToken: token rejected", "error", logsafe.V(err))
 		return false, nil, err
 	}
-	log.Debug("AuthenticateBearerToken: token accepted", "user", user.Username, "role", user.Role, "token_prefix", tokenPrefix(token))
+	log.Debug("AuthenticateBearerToken: token accepted", "user", logsafe.V(user.Username), "role", logsafe.V(user.Role), "token_prefix", logsafe.V(tokenPrefix(token)))
 	return true, user, nil
 }
 
@@ -565,33 +566,33 @@ func authTokenFromRequest(r *http.Request) string {
 
 func requireAuth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Debug("requireAuth: handler invocation", "handler", handlerName(next), "method", r.Method, "path", r.URL.Path)
+		log.Debug("requireAuth: handler invocation", "handler", handlerName(next), "method", r.Method, "path", logsafe.V(r.URL.Path))
 		if !hasConfigFileOnDisk() {
-			log.Debug("requireAuth: skipping session validation", "path", r.URL.Path, "method", r.Method, "reason", "config file not present on disk")
+			log.Debug("requireAuth: skipping session validation", "path", logsafe.V(r.URL.Path), "method", r.Method, "reason", "config file not present on disk")
 			next(w, r)
 			return
 		}
 
 		token := authTokenFromRequest(r)
-		log.Debug("requireAuth: checking auth token", "path", r.URL.Path, "has_token", token != "")
+		log.Debug("requireAuth: checking auth token", "path", logsafe.V(r.URL.Path), "has_token", token != "")
 		if token == "" {
-			log.Warn("requireAuth: unauthenticated redirect", "path", r.URL.Path, "reason", "missing session token", "method", r.Method)
+			log.Warn("requireAuth: unauthenticated redirect", "path", logsafe.V(r.URL.Path), "reason", "missing session token", "method", r.Method)
 			http.Redirect(w, r, "/login?next="+url.QueryEscape(r.URL.RequestURI()), http.StatusFound)
 			return
 		}
 
-		log.Debug("requireAuth: executing token validation", "path", r.URL.Path, "token_prefix", tokenPrefix(token), "cookie_present", r.Header.Get("Cookie") != "")
+		log.Debug("requireAuth: executing token validation", "path", logsafe.V(r.URL.Path), "token_prefix", logsafe.V(tokenPrefix(token)), "cookie_present", r.Header.Get("Cookie") != "")
 		ok, user, err := config.AuthenticateBearerToken(r.Context(), token)
 		if err != nil || !ok {
 			reason := "invalid or expired session token"
 			if err != nil {
 				reason = strings.ToLower(err.Error())
 			}
-			log.Warn("requireAuth: unauthenticated redirect", "path", r.URL.Path, "reason", reason, "error", err, "ok", ok, "method", r.Method, "token_prefix", tokenPrefix(token))
+			log.Warn("requireAuth: unauthenticated redirect", "path", logsafe.V(r.URL.Path), "reason", reason, "error", logsafe.V(err), "ok", ok, "method", r.Method, "token_prefix", logsafe.V(tokenPrefix(token)))
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
-		log.Debug("requireAuth: token accepted", "path", r.URL.Path, "user", user.Username, "role", user.Role)
+		log.Debug("requireAuth: token accepted", "path", logsafe.V(r.URL.Path), "user", logsafe.V(user.Username), "role", logsafe.V(user.Role))
 
 		// Add user info to context for downstream handlers
 		authCtx := sop.AuthContext{

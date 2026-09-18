@@ -15,6 +15,7 @@ import (
 	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/agent"
+	"github.com/sharedcode/joltrin/internal/logsafe"
 )
 
 // ExecuteScriptRequest defines the payload for executing a script.
@@ -107,7 +108,7 @@ func handleExecuteScript(w http.ResponseWriter, r *http.Request) {
 		// or we can log it here.
 		// Since we are streaming JSON, appending a JSON error object might be invalid if the stream is mid-object.
 		// For now, we just log it.
-		fmt.Printf("Error executing script '%s': %v\n", req.Name, err)
+		fmt.Printf("Error executing script '%s': %v\n", logsafe.V(req.Name), logsafe.V(err))
 	}
 }
 
@@ -138,7 +139,7 @@ func isLoopbackRequest(r *http.Request) bool {
 
 func withAuth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Debug("withAuth: handler invocation", "handler", handlerName(next), "method", r.Method, "path", r.URL.Path)
+		log.Debug("withAuth: handler invocation", "handler", handlerName(next), "method", r.Method, "path", logsafe.V(r.URL.Path))
 		// First-run bootstrap: before a config file exists there are no
 		// users to authenticate against, so the setup flow has to be
 		// reachable unauthenticated. Restrict that window to loopback
@@ -147,41 +148,41 @@ func withAuth(next http.HandlerFunc) http.HandlerFunc {
 		// to anyone who could reach an unconfigured server over the network.
 		if !hasConfigFileOnDisk() {
 			if !isLoopbackRequest(r) {
-				log.Warn("withAuth: unauthenticated request denied", "path", r.URL.Path, "method", r.Method,
+				log.Warn("withAuth: unauthenticated request denied", "path", logsafe.V(r.URL.Path), "method", r.Method,
 					"reason", "server is unconfigured and the caller is not on loopback", "remote_addr", r.RemoteAddr)
 				http.Error(w, "Unauthorized: server is not configured yet; complete first-run setup from the local machine", http.StatusUnauthorized)
 				return
 			}
-			log.Debug("withAuth: skipping bearer-token validation", "path", r.URL.Path, "method", r.Method, "reason", "first-run setup from loopback, no config file on disk")
+			log.Debug("withAuth: skipping bearer-token validation", "path", logsafe.V(r.URL.Path), "method", r.Method, "reason", "first-run setup from loopback, no config file on disk")
 			next(w, r)
 			return
 		}
 
-		log.Debug("withAuth: enforcing bearer-token validation", "path", r.URL.Path, "method", r.Method)
+		log.Debug("withAuth: enforcing bearer-token validation", "path", logsafe.V(r.URL.Path), "method", r.Method)
 
 		token := authTokenFromRequest(r)
 		hasHeader := r.Header.Get("Authorization") != ""
 		cookie, errCookie := r.Cookie("sop_access_token")
 		hasCookie := errCookie == nil && strings.TrimSpace(cookie.Value) != ""
-		log.Debug("withAuth: checking bearer token", "path", r.URL.Path, "has_header", hasHeader, "has_cookie", hasCookie)
+		log.Debug("withAuth: checking bearer token", "path", logsafe.V(r.URL.Path), "has_header", hasHeader, "has_cookie", hasCookie)
 		if token == "" {
-			log.Warn("withAuth: unauthenticated request denied", "path", r.URL.Path, "reason", "missing bearer token", "method", r.Method)
+			log.Warn("withAuth: unauthenticated request denied", "path", logsafe.V(r.URL.Path), "reason", "missing bearer token", "method", r.Method)
 			http.Error(w, "Unauthorized: Missing bearer token", http.StatusUnauthorized)
 			return
 		}
 
-		log.Debug("withAuth: executing token validation", "path", r.URL.Path, "token_prefix", tokenPrefix(token), "header_present", hasHeader)
+		log.Debug("withAuth: executing token validation", "path", logsafe.V(r.URL.Path), "token_prefix", logsafe.V(tokenPrefix(token)), "header_present", hasHeader)
 		ok, user, err := config.AuthenticateBearerToken(r.Context(), token)
 		if err != nil || !ok {
 			reason := "invalid or expired session token"
 			if err != nil {
 				reason = strings.ToLower(err.Error())
 			}
-			log.Warn("withAuth: unauthenticated request denied", "path", r.URL.Path, "reason", reason, "error", err, "ok", ok, "method", r.Method, "token_prefix", tokenPrefix(token))
+			log.Warn("withAuth: unauthenticated request denied", "path", logsafe.V(r.URL.Path), "reason", reason, "error", logsafe.V(err), "ok", ok, "method", r.Method, "token_prefix", logsafe.V(tokenPrefix(token)))
 			http.Error(w, "Unauthorized: Invalid token", http.StatusUnauthorized)
 			return
 		}
-		log.Debug("withAuth: bearer token accepted", "path", r.URL.Path, "user", user.Username, "role", user.Role)
+		log.Debug("withAuth: bearer token accepted", "path", logsafe.V(r.URL.Path), "user", logsafe.V(user.Username), "role", logsafe.V(user.Role))
 
 		if ok, user, err := config.AuthenticateBearerToken(r.Context(), token); err == nil && ok {
 			auth := sop.AuthContext{
