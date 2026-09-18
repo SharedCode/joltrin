@@ -18,6 +18,7 @@ import (
 	"github.com/sharedcode/joltrin/fs"
 	"github.com/sharedcode/joltrin/incfs"
 	"github.com/sharedcode/joltrin/infs"
+	"github.com/sharedcode/joltrin/internal/logsafe"
 )
 
 // DatabaseOptions holds the configuration for the database.
@@ -410,7 +411,7 @@ func Remove(ctx context.Context, dbPath string) error {
 			os.RemoveAll(filepath.Join(folder, databaseOptionsFilename))
 			os.RemoveAll(filepath.Join(folder, "replstat.txt")) // fs.replicationStatusFilename
 
-			log.Warn("Skipping os.RemoveAll because it is the current working directory. Removed SOP metadata only.", "path", folder)
+			log.Warn("Skipping os.RemoveAll because it is the current working directory. Removed SOP metadata only.", "path", logsafe.V(folder))
 		} else {
 			if err := os.RemoveAll(folder); err != nil {
 				return err

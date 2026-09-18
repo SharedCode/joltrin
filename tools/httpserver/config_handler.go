@@ -17,6 +17,7 @@ import (
 	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/database"
 	"github.com/sharedcode/joltrin/fs"
+	"github.com/sharedcode/joltrin/internal/logsafe"
 	"github.com/sharedcode/joltrin/tools/confighub"
 )
 
@@ -52,7 +53,7 @@ func handleCreateEnvironment(w http.ResponseWriter, r *http.Request) {
 	}
 	// Debug: Dump raw body
 	bodyBytes, _ := io.ReadAll(r.Body)
-	log.Debug(fmt.Sprintf("RAW INIT DB PAYLOAD: %s", string(bodyBytes)))
+	log.Debug(logsafe.V(fmt.Sprintf("RAW INIT DB PAYLOAD: %s", string(bodyBytes))))
 
 	// Refill body for decoder
 	r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
@@ -63,7 +64,7 @@ func handleCreateEnvironment(w http.ResponseWriter, r *http.Request) {
 	}
 	// Debug hex dump to find source of corruption
 	if req.Name != "" {
-		log.Debug(fmt.Sprintf("DEBUG-NAME-HEX (CreateEnv): Name='%s', Hex=%x", req.Name, []byte(req.Name)))
+		log.Debug(logsafe.V(fmt.Sprintf("DEBUG-NAME-HEX (CreateEnv): Name='%s', Hex=%x", req.Name, []byte(req.Name))))
 	}
 
 	// Sanitize Name
@@ -121,7 +122,7 @@ func handleSwitchEnvironment(w http.ResponseWriter, r *http.Request) {
 	}
 	// Debug: Dump raw body
 	bodyBytes, _ := io.ReadAll(r.Body)
-	log.Debug(fmt.Sprintf("RAW INIT DB PAYLOAD: %s", string(bodyBytes)))
+	log.Debug(logsafe.V(fmt.Sprintf("RAW INIT DB PAYLOAD: %s", string(bodyBytes))))
 
 	// Refill body for decoder
 	r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
@@ -179,7 +180,7 @@ func handleDeleteEnvironment(w http.ResponseWriter, r *http.Request) {
 	}
 	// Debug: Dump raw body
 	bodyBytes, _ := io.ReadAll(r.Body)
-	log.Debug(fmt.Sprintf("RAW DELETE ENV PAYLOAD: %s", string(bodyBytes)))
+	log.Debug(logsafe.V(fmt.Sprintf("RAW DELETE ENV PAYLOAD: %s", string(bodyBytes))))
 
 	// Refill body for decoder
 	r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
@@ -207,7 +208,7 @@ func handleDeleteEnvironment(w http.ResponseWriter, r *http.Request) {
 				// System DB
 				if shouldDeleteSystem && targetConfig.SystemDB != nil && targetConfig.SystemDB.Path != "" {
 					if err := database.Remove(r.Context(), targetConfig.SystemDB.Path); err != nil {
-						log.Warn(fmt.Sprintf("Failed to remove SystemDB path %s: %v", targetConfig.SystemDB.Path, err))
+						log.Warn(logsafe.V(fmt.Sprintf("Failed to remove SystemDB path %s: %v", targetConfig.SystemDB.Path, err)))
 					}
 				}
 				// User DBs
@@ -215,7 +216,7 @@ func handleDeleteEnvironment(w http.ResponseWriter, r *http.Request) {
 					for _, db := range targetConfig.Databases {
 						if db.Path != "" {
 							if err := database.Remove(r.Context(), db.Path); err != nil {
-								log.Warn(fmt.Sprintf("Failed to remove UserDB path %s: %v", db.Path, err))
+								log.Warn(logsafe.V(fmt.Sprintf("Failed to remove UserDB path %s: %v", db.Path, err)))
 							}
 						}
 					}
@@ -264,7 +265,7 @@ func handleInitDatabase(w http.ResponseWriter, r *http.Request) {
 
 	// Debug: Dump raw body
 	bodyBytes, _ := io.ReadAll(r.Body)
-	log.Debug(fmt.Sprintf("RAW INIT DB PAYLOAD: %s", string(bodyBytes)))
+	log.Debug(logsafe.V(fmt.Sprintf("RAW INIT DB PAYLOAD: %s", string(bodyBytes))))
 
 	// Refill body for decoder
 	r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
@@ -276,7 +277,7 @@ func handleInitDatabase(w http.ResponseWriter, r *http.Request) {
 
 	// Debug hex dump to find source of corruption
 	if req.Path != "" {
-		log.Debug(fmt.Sprintf("DEBUG-PATH-HEX (InitDatabase): Path='%s', Hex=%x", req.Path, []byte(req.Path)))
+		log.Debug(logsafe.V(fmt.Sprintf("DEBUG-PATH-HEX (InitDatabase): Path='%s', Hex=%x", req.Path, []byte(req.Path))))
 	}
 
 	// Sanitize paths
@@ -312,7 +313,7 @@ func handleInitDatabase(w http.ResponseWriter, r *http.Request) {
 
 	for _, ec := range req.ErasureConfigs {
 		if err := checkErasureIsolation(ec.BasePaths, ec.DataChunks, ec.ParityChunks, fmt.Sprintf("Erasure Config (Key: %s)", ec.Key)); err != nil {
-			log.Error(fmt.Sprintf("TRACE: Validation Failed (Erasure): %v", err))
+			log.Error(logsafe.V(fmt.Sprintf("TRACE: Validation Failed (Erasure): %v", err)))
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -353,14 +354,14 @@ func handleInitDatabase(w http.ResponseWriter, r *http.Request) {
 
 		alreadyConfigured := collectAllConfiguredPaths(req.Name)
 		if err := validatePathSafety(newPaths, alreadyConfigured); err != nil {
-			log.Error(fmt.Sprintf("TRACE: Validation Failed (PathSafety): %v", err))
+			log.Error(logsafe.V(fmt.Sprintf("TRACE: Validation Failed (PathSafety): %v", err)))
 			http.Error(w, fmt.Sprintf("Path Safety Error: %v", err), http.StatusBadRequest)
 			return
 		}
 
 		// Check Write Permissions for ALL paths provided
 		if err := validateWritePermissions(newPaths); err != nil {
-			log.Error(fmt.Sprintf("TRACE: Validation Failed (WritePermissions): %v", err))
+			log.Error(logsafe.V(fmt.Sprintf("TRACE: Validation Failed (WritePermissions): %v", err)))
 			http.Error(w, fmt.Sprintf("Write Permission Error: %v", err), http.StatusBadRequest)
 			return
 		}
@@ -390,7 +391,7 @@ func handleInitDatabase(w http.ResponseWriter, r *http.Request) {
 		req.RegistryHashMod = fs.MinimumModValue
 	}
 
-	log.Info(fmt.Sprintf("InitUserDB: Path='%s', Name='%s', StoresFolders=%v", req.Path, req.Name, storeFolders))
+	log.Info(logsafe.V(fmt.Sprintf("InitUserDB: Path='%s', Name='%s', StoresFolders=%v", req.Path, req.Name, storeFolders)))
 
 	options := sop.DatabaseOptions{
 		StoresFolders:        storeFolders,
@@ -405,7 +406,7 @@ func handleInitDatabase(w http.ResponseWriter, r *http.Request) {
 			if keyLog == "" {
 				keyLog = "<EMPTY_STRING>"
 			}
-			log.Info(fmt.Sprintf("Processing Erasure Config: Key='%s', Data=%d, Parity=%d, Paths=%v", keyLog, ec.DataChunks, ec.ParityChunks, ec.BasePaths))
+			log.Info(logsafe.V(fmt.Sprintf("Processing Erasure Config: Key='%s', Data=%d, Parity=%d, Paths=%v", keyLog, ec.DataChunks, ec.ParityChunks, ec.BasePaths)))
 
 			// Sanitize key if it comes in as explicitly quoted empty string
 			finalKey := ec.Key
@@ -450,7 +451,7 @@ func handleInitDatabase(w http.ResponseWriter, r *http.Request) {
 		if _, err := os.Stat(filepath.Join(subDBPath, "dboptions.json")); err == nil {
 			req.Path = subDBPath
 			hasDBOptions = true
-			log.Info(fmt.Sprintf("Relaxed User DB Path: '%s' -> '%s'", filepath.Dir(req.Path), req.Path))
+			log.Info(logsafe.V(fmt.Sprintf("Relaxed User DB Path: '%s' -> '%s'", filepath.Dir(req.Path), req.Path)))
 
 			// Also update the storeFolders if they were just set to default root
 			// Logic above was: storeFolders = []string{req.Path}
@@ -472,7 +473,7 @@ func handleInitDatabase(w http.ResponseWriter, r *http.Request) {
 		// User wants to reuse existing DB
 		if hasDBOptions {
 			shouldSetup = false
-			log.Info(fmt.Sprintf("Shared User DB detected at '%s'. Reusing...", req.Path))
+			log.Info(logsafe.V(fmt.Sprintf("Shared User DB detected at '%s'. Reusing...", req.Path)))
 
 			// Check Write Permissions
 			testFile := filepath.Join(req.Path, ".sop_write_test")
@@ -506,12 +507,12 @@ func handleInitDatabase(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	if shouldSetup {
 		if _, err := os.Stat(req.Path); err == nil {
-			log.Warn(fmt.Sprintf("TRACE: WARNING - Target path '%s' ALREADY EXISTS before Setup! (Possible race or external creation)", req.Path))
+			log.Warn(logsafe.V(fmt.Sprintf("TRACE: WARNING - Target path '%s' ALREADY EXISTS before Setup! (Possible race or external creation)", req.Path)))
 		} else {
-			log.Debug(fmt.Sprintf("TRACE: Target path '%s' does not exist. Safe to create.", req.Path))
+			log.Debug(logsafe.V(fmt.Sprintf("TRACE: Target path '%s' does not exist. Safe to create.", req.Path)))
 		}
 
-		log.Debug(fmt.Sprintf("TRACE: Executing database.Setup for UserDB at '%s'", req.Path))
+		log.Debug(logsafe.V(fmt.Sprintf("TRACE: Executing database.Setup for UserDB at '%s'", req.Path)))
 		if _, err := database.Setup(ctx, options); err != nil {
 			// If the database is already setup (e.g. valid retry), legitimate warning but we can proceed
 			// This branch might not be reached given the checks above, but kept for robustness against race/parallel
@@ -519,7 +520,7 @@ func handleInitDatabase(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, fmt.Sprintf("Failed to setup database: %v", err), http.StatusInternalServerError)
 				return
 			}
-			log.Warn(fmt.Sprintf("Database setup check: %v. Proceeding to populate/init...", err))
+			log.Warn(logsafe.V(fmt.Sprintf("Database setup check: %v. Proceeding to populate/init...", err)))
 		}
 	}
 
@@ -673,7 +674,7 @@ func handleValidatePath(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Debug Validation
-		log.Info(fmt.Sprintf("ValidatePath: Path='%s', DBOptions=%v, RegHashMod=%v", path, hasDBOptions, hasRegHashMod))
+		log.Info(logsafe.V(fmt.Sprintf("ValidatePath: Path='%s', DBOptions=%v, RegHashMod=%v", path, hasDBOptions, hasRegHashMod)))
 	}
 
 	json.NewEncoder(w).Encode(map[string]any{
@@ -699,7 +700,7 @@ func handleUninstallSystem(w http.ResponseWriter, r *http.Request) {
 	}
 	// Debug: Dump raw body
 	bodyBytes, _ := io.ReadAll(r.Body)
-	log.Debug(fmt.Sprintf("RAW UNINSTALL PAYLOAD: %s", string(bodyBytes)))
+	log.Debug(logsafe.V(fmt.Sprintf("RAW UNINSTALL PAYLOAD: %s", string(bodyBytes))))
 
 	// Refill body for decoder
 	r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
@@ -722,7 +723,7 @@ func handleUninstallSystem(w http.ResponseWriter, r *http.Request) {
 		// System DB
 		if shouldDeleteSystem && config.SystemDB != nil && config.SystemDB.Path != "" {
 			if err := os.RemoveAll(config.SystemDB.Path); err != nil {
-				log.Error(fmt.Sprintf("Failed to remove system db path %s: %v", config.SystemDB.Path, err))
+				log.Error(logsafe.V(fmt.Sprintf("Failed to remove system db path %s: %v", config.SystemDB.Path, err)))
 				// Continue anyway to try cleaning up others
 			}
 		}
@@ -731,7 +732,7 @@ func handleUninstallSystem(w http.ResponseWriter, r *http.Request) {
 			for _, db := range config.Databases {
 				if db.Path != "" {
 					if err := os.RemoveAll(db.Path); err != nil {
-						log.Error(fmt.Sprintf("Failed to remove db path %s: %v", db.Path, err))
+						log.Error(logsafe.V(fmt.Sprintf("Failed to remove db path %s: %v", db.Path, err)))
 					}
 				}
 			}

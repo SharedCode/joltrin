@@ -13,6 +13,7 @@ import (
 
 	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/encoding"
+	"github.com/sharedcode/joltrin/internal/logsafe"
 )
 
 // ReplicationTrackedDetails captures the replication state shared across processes,
@@ -63,7 +64,7 @@ func NewReplicationTracker(ctx context.Context, storesBaseFolders []string, repl
 	if l2Cache == nil {
 		return nil, fmt.Errorf("l2Cache can't be nil")
 	}
-	log.Debug(fmt.Sprintf("storesBaseFolders: %v", storesBaseFolders))
+	log.Debug(logsafe.V(fmt.Sprintf("storesBaseFolders: %v", storesBaseFolders)))
 
 	isFirstFolderActive := true
 	rt := replicationTracker{

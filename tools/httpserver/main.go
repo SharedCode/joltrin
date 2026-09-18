@@ -31,6 +31,7 @@ import (
 	"github.com/sharedcode/joltrin/encoding"
 	"github.com/sharedcode/joltrin/fs"
 	"github.com/sharedcode/joltrin/governance"
+	"github.com/sharedcode/joltrin/internal/logsafe"
 	"github.com/sharedcode/joltrin/jsondb"
 	"github.com/sharedcode/joltrin/tools/confighub"
 )
@@ -284,9 +285,9 @@ func main() {
 			if _, err := loadModelCatalog(targetConfigPath); err != nil {
 				log.Error(fmt.Sprintf("Failed to load model catalog: %v", err))
 			}
-			log.Info(fmt.Sprintf("Loaded configuration from: %s", targetConfigPath))
+			log.Info(logsafe.V(fmt.Sprintf("Loaded configuration from: %s", targetConfigPath)))
 			if len(config.Databases) == 0 && config.SystemDB == nil {
-				log.Warn(fmt.Sprintf("Loaded configuration file '%s' but found 0 databases defined.", targetConfigPath))
+				log.Warn(logsafe.V(fmt.Sprintf("Loaded configuration file '%s' but found 0 databases defined.", targetConfigPath)))
 			}
 		}
 	} else if _, err := loadModelCatalog(""); err != nil {
@@ -307,7 +308,7 @@ func main() {
 		// Ensure database path exists (basic check)
 		if _, err := os.Stat(config.Databases[i].Path); os.IsNotExist(err) {
 			msg := fmt.Sprintf("Warning: Database '%s' does not exist at path '%s'.", config.Databases[i].Name, config.Databases[i].Path)
-			log.Warn(msg)
+			log.Warn(logsafe.V(msg))
 			config.Databases[i].Warning = msg
 		} else {
 			// Check Erasure configs
@@ -315,7 +316,7 @@ func main() {
 				for _, bp := range ec.BasePaths {
 					if _, err := os.Stat(bp); os.IsNotExist(err) {
 						msg := fmt.Sprintf("Warning: EC data path '%s' does not exist for database '%s'.", bp, config.Databases[i].Name)
-						log.Warn(msg)
+						log.Warn(logsafe.V(msg))
 						if config.Databases[i].Warning == "" {
 							config.Databases[i].Warning = msg
 						} else {
@@ -333,7 +334,7 @@ func main() {
 		}
 		if _, err := os.Stat(config.SystemDB.Path); os.IsNotExist(err) {
 			msg := fmt.Sprintf("Warning: System DB does not exist at path '%s'.", config.SystemDB.Path)
-			log.Warn(msg)
+			log.Warn(logsafe.V(msg))
 			config.SystemDB.Warning = msg
 		} else {
 			// Check Erasure config base paths
@@ -341,7 +342,7 @@ func main() {
 				for _, bp := range ec.BasePaths {
 					if _, err := os.Stat(bp); os.IsNotExist(err) {
 						msg := fmt.Sprintf("Warning: System DB EC data path does not exist at '%s'.", bp)
-						log.Warn(msg)
+						log.Warn(logsafe.V(msg))
 						if config.SystemDB.Warning == "" {
 							config.SystemDB.Warning = msg
 						} else {
@@ -358,7 +359,7 @@ func main() {
 		}
 		implPath := filepath.Join(implicitPath, SystemDBName)
 		if _, err := os.Stat(implPath); os.IsNotExist(err) {
-			log.Warn(fmt.Sprintf("Warning: Implicit System DB does not exist at path '%s'.", implPath))
+			log.Warn(logsafe.V(fmt.Sprintf("Warning: Implicit System DB does not exist at path '%s'.", implPath)))
 		}
 	}
 
@@ -457,9 +458,9 @@ func main() {
 
 	// Start Server
 	addr := fmt.Sprintf(":%d", config.Port)
-	log.Info(fmt.Sprintf("SOP Data Manager v%s running at http://localhost%s", sop.Version, addr))
+	log.Info(logsafe.V(fmt.Sprintf("SOP Data Manager v%s running at http://localhost%s", sop.Version, addr)))
 	for _, db := range config.Databases {
-		log.Debug(fmt.Sprintf("Database '%s': %s (%s)", db.Name, db.Path, db.Mode))
+		log.Debug(logsafe.V(fmt.Sprintf("Database '%s': %s (%s)", db.Name, db.Path, db.Mode)))
 	}
 
 	// Open Browser
@@ -920,10 +921,10 @@ func handleDatabases(w http.ResponseWriter, r *http.Request) {
 		// Delete the database.
 		if deleteData {
 			if err := database.Remove(r.Context(), dbPath); err != nil {
-				log.Warn(fmt.Sprintf("Cleanup: Failed to remove database (some metadata may persist): %v", err))
+				log.Warn(logsafe.V(fmt.Sprintf("Cleanup: Failed to remove database (some metadata may persist): %v", err)))
 			}
 		} else {
-			log.Info(fmt.Sprintf("Database '%s' removed from config only. Data at '%s' preserved.", name, dbPath))
+			log.Info(logsafe.V(fmt.Sprintf("Database '%s' removed from config only. Data at '%s' preserved.", name, dbPath)))
 		}
 
 		// Remove from config
@@ -998,7 +999,7 @@ func handleDatabases(w http.ResponseWriter, r *http.Request) {
 			// User wants to reuse existing DB
 			if hasDBOptions {
 				shouldSetup = false
-				log.Info(fmt.Sprintf("Shared User DB detected at '%s'. Reusing...", req.Path))
+				log.Info(logsafe.V(fmt.Sprintf("Shared User DB detected at '%s'. Reusing...", req.Path)))
 
 				// Check Write Permissions
 				testFile := filepath.Join(req.Path, ".sop_write_test")
@@ -1094,7 +1095,7 @@ func handleDatabases(w http.ResponseWriter, r *http.Request) {
 			// Clean up the dummy store (best effort)
 			if err := database.RemoveBtree(ctx, options, "system_check"); err != nil {
 				// It's okay if this fails, it's just a clean up.
-				log.Warn(fmt.Sprintf("Cleanup: Failed to remove init store 'system_check': %v", err))
+				log.Warn(logsafe.V(fmt.Sprintf("Cleanup: Failed to remove init store 'system_check': %v", err)))
 			}
 		}
 
@@ -1686,11 +1687,11 @@ func handleUpdateStoreInfo(w http.ResponseWriter, r *http.Request) {
 	si := store.GetStoreInfo()
 
 	// DEBUG LOGGING
-	log.Info("UpdateStoreInfo", "Name", req.StoreName, "Desc", req.Description)
-	log.Info("REQ", "Cel", req.CelExpression, "IndexSpec", req.IndexSpec, "SeedValue", req.SeedValue)
+	log.Info("UpdateStoreInfo", "Name", logsafe.V(req.StoreName), "Desc", logsafe.V(req.Description))
+	log.Info("REQ", "Cel", logsafe.V(req.CelExpression), "IndexSpec", logsafe.V(req.IndexSpec), "SeedValue", logsafe.V(req.SeedValue))
 	log.Info("SI", "Cel", si.CELexpression, "IndexSpec", si.MapKeyIndexSpecification)
 	if req.IndexSpec != nil {
-		log.Info("IndexSpec Diff", "REQ", *req.IndexSpec, "SI", si.MapKeyIndexSpecification)
+		log.Info("IndexSpec Diff", "REQ", logsafe.V(*req.IndexSpec), "SI", si.MapKeyIndexSpecification)
 	}
 
 	// Update Description and metadata hints (Allowed for all stores)
@@ -1855,7 +1856,7 @@ func handleUpdateStoreInfo(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Cannot modify existing Index Specification or CEL Expression on a non-empty store. This action risks data corruption. Please delete and recreate the store if you need to change its structure.", http.StatusBadRequest)
 				return
 			}
-			log.Warn("Admin Token used to modify existing Index/CEL on non-empty store", "Store", req.StoreName)
+			log.Warn("Admin Token used to modify existing Index/CEL on non-empty store", "Store", logsafe.V(req.StoreName))
 		}
 
 		// If IndexSpec already exists on a non-empty store, CEL is locked even if missing.
@@ -2082,7 +2083,7 @@ func handleListItems(w http.ResponseWriter, r *http.Request) {
 	// Open the B-Tree using 'any' for Key and Value to support generic browsing.
 	store, err := database.OpenBtree[any, any](ctx, dbOpts, storeName, trans, comparer)
 	if err != nil {
-		log.Error(fmt.Sprintf("Failed to open store '%s': %v.", storeName, err))
+		log.Error(logsafe.V(fmt.Sprintf("Failed to open store '%s': %v.", storeName, err)))
 		http.Error(w, fmt.Sprintf("Failed to open store '%s': %v.", storeName, err), http.StatusInternalServerError)
 		return
 	}
@@ -2341,7 +2342,7 @@ func handleListItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		log.Error(fmt.Sprintf("Error during iteration: %v", err))
+		log.Error(logsafe.V(fmt.Sprintf("Error during iteration: %v", err)))
 	}
 
 	if !isNDJSON {

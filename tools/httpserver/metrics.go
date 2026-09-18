@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/internal/logsafe"
 )
 
 // serverMetrics holds process-wide request counters exposed at /metrics
@@ -66,9 +67,9 @@ func metricsMiddleware(next http.Handler) http.Handler {
 		}
 
 		if rec.status >= 500 {
-			log.Error("request failed", "method", r.Method, "path", r.URL.Path, "status", rec.status, "duration_ms", elapsed.Milliseconds())
+			log.Error("request failed", "method", r.Method, "path", logsafe.V(r.URL.Path), "status", rec.status, "duration_ms", elapsed.Milliseconds())
 		} else {
-			log.Debug("request", "method", r.Method, "path", r.URL.Path, "status", rec.status, "duration_ms", elapsed.Milliseconds())
+			log.Debug("request", "method", r.Method, "path", logsafe.V(r.URL.Path), "status", rec.status, "duration_ms", elapsed.Milliseconds())
 		}
 	})
 }

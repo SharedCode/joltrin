@@ -19,6 +19,7 @@ import (
 	"github.com/sharedcode/joltrin/ai/model"
 	"github.com/sharedcode/joltrin/database"
 	"github.com/sharedcode/joltrin/fs"
+	"github.com/sharedcode/joltrin/internal/logsafe"
 )
 
 // --- Helper Types for handleSaveConfig ---
@@ -114,7 +115,7 @@ func handleSaveConfig(w http.ResponseWriter, r *http.Request) {
 
 	// 2. Validate Safety (Paths, Conflicts, Permissions)
 	if err := validatePathConflictsAndPermissions(req); err != nil {
-		log.Error(fmt.Sprintf("TRACE: Validation Failed (SaveConfig): %v", err))
+		log.Error(logsafe.V(fmt.Sprintf("TRACE: Validation Failed (SaveConfig): %v", err)))
 		http.Error(w, fmt.Sprintf("Safety Check Failed: %v", err), http.StatusBadRequest)
 		return
 	}
@@ -174,7 +175,7 @@ func handleSaveConfig(w http.ResponseWriter, r *http.Request) {
 func parseSaveConfigRequest(r *http.Request) (*SaveConfigRequest, error) {
 	var req SaveConfigRequest
 	bodyBytes, _ := io.ReadAll(r.Body)
-	log.Debug(fmt.Sprintf("RAW CONFIG PAYLOAD: %s", string(bodyBytes)))
+	log.Debug(logsafe.V(fmt.Sprintf("RAW CONFIG PAYLOAD: %s", string(bodyBytes))))
 	r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -381,7 +382,7 @@ func setupSystemDB(ctx context.Context, req *SaveConfigRequest) (*DatabaseConfig
 	if req.UseSharedBrain {
 		if hasDBOptions && hasRegHashMod {
 			shouldSetup = false
-			log.Info(fmt.Sprintf("Shared Brain detected at '%s'. Reusing...", req.RegistryPath))
+			log.Info(logsafe.V(fmt.Sprintf("Shared Brain detected at '%s'. Reusing...", req.RegistryPath)))
 			// Load options to ensure match
 			dbOptionsPath := filepath.Join(req.RegistryPath, "dboptions.json")
 			if existingOptsBytes, err := os.ReadFile(dbOptionsPath); err == nil {
@@ -400,7 +401,7 @@ func setupSystemDB(ctx context.Context, req *SaveConfigRequest) (*DatabaseConfig
 	}
 
 	if shouldSetup {
-		log.Debug(fmt.Sprintf("TRACE: Executing database.Setup for SystemDB at '%s'", req.RegistryPath))
+		log.Debug(logsafe.V(fmt.Sprintf("TRACE: Executing database.Setup for SystemDB at '%s'", req.RegistryPath)))
 		if _, err := database.Setup(ctx, sysOpts); err != nil {
 			// Local cleanup if failed new setup
 			if !req.UseSharedBrain {
@@ -499,14 +500,14 @@ func setupUserDBs(ctx context.Context, req *SaveConfigRequest) ([]DatabaseConfig
 		shouldSetupUser := !udb.UseSharedDB
 		if shouldSetupUser {
 			if entries, err := os.ReadDir(uOpts.StoresFolders[0]); err == nil && len(entries) > 0 {
-				log.Error(fmt.Sprintf("Failed to setup User DB [%d] '%s': destination path '%s' is not empty. Cannot create a fresh database here, as it may corrupt existing data.", i, udb.Name, uOpts.StoresFolders[0]))
+				log.Error(logsafe.V(fmt.Sprintf("Failed to setup User DB [%d] '%s': destination path '%s' is not empty. Cannot create a fresh database here, as it may corrupt existing data.", i, udb.Name, uOpts.StoresFolders[0])))
 				for _, cp := range createdPaths {
 					os.RemoveAll(cp)
 				}
 				return nil, fmt.Errorf("user destination path '%s' is not empty. Cannot create a fresh database here as it may corrupt existing data", uOpts.StoresFolders[0])
 			}
 			if _, err := database.Setup(ctx, uOpts); err != nil {
-				log.Error(fmt.Sprintf("Failed to setup User DB [%d] '%s': %v. Rolling back user DBs...", i, udb.Name, err))
+				log.Error(logsafe.V(fmt.Sprintf("Failed to setup User DB [%d] '%s': %v. Rolling back user DBs...", i, udb.Name, err)))
 				// Rollback all user DB paths created so far
 				for _, cp := range createdPaths {
 					os.RemoveAll(cp)
@@ -544,27 +545,27 @@ func setupUserDBs(ctx context.Context, req *SaveConfigRequest) ([]DatabaseConfig
 				wg.Wait()
 
 				if errDemo != nil {
-					log.Error(fmt.Sprintf("Failed to populate demo data for User DB '%s': %v", udb.Name, errDemo))
+					log.Error(logsafe.V(fmt.Sprintf("Failed to populate demo data for User DB '%s': %v", udb.Name, errDemo)))
 				} else {
-					log.Info(fmt.Sprintf("Demo data populated for User DB '%s'", udb.Name))
+					log.Info(logsafe.V(fmt.Sprintf("Demo data populated for User DB '%s'", udb.Name)))
 				}
 			} else {
 
 				func() {
 					tx, err := database.BeginTransaction(ctx, uOpts, sop.ForWriting)
 					if err != nil {
-						log.Error(fmt.Sprintf("Failed to begin transaction for 'system_check' in User DB '%s': %v", udb.Name, err))
+						log.Error(logsafe.V(fmt.Sprintf("Failed to begin transaction for 'system_check' in User DB '%s': %v", udb.Name, err)))
 						return
 					}
 					if _, err := database.NewBtree[string, string](ctx, uOpts, "system_check", tx, cmp.Compare[string]); err != nil {
-						log.Error(fmt.Sprintf("Failed to create 'system_check' store in User DB '%s': %v", udb.Name, err))
+						log.Error(logsafe.V(fmt.Sprintf("Failed to create 'system_check' store in User DB '%s': %v", udb.Name, err)))
 						tx.Rollback(ctx)
 						return
 					}
 					if err := tx.Commit(ctx); err != nil {
-						log.Error(fmt.Sprintf("Failed to commit 'system_check' in User DB '%s': %v", udb.Name, err))
+						log.Error(logsafe.V(fmt.Sprintf("Failed to commit 'system_check' in User DB '%s': %v", udb.Name, err)))
 					} else {
-						log.Info(fmt.Sprintf("'system_check' store created for User DB '%s'", udb.Name))
+						log.Info(logsafe.V(fmt.Sprintf("'system_check' store created for User DB '%s'", udb.Name)))
 					}
 				}()
 			}
@@ -598,7 +599,7 @@ func setupUserDBs(ctx context.Context, req *SaveConfigRequest) ([]DatabaseConfig
 
 // cleanupSystemDB performs a forceful rollback of all System DB related folders.
 func cleanupSystemDB(req *SaveConfigRequest) {
-	log.Warn(fmt.Sprintf("Cleaning up System DB at '%s'", req.RegistryPath))
+	log.Warn(logsafe.V(fmt.Sprintf("Cleaning up System DB at '%s'", req.RegistryPath)))
 	// 1. Registry Path
 	if req.RegistryPath != "" {
 		os.RemoveAll(req.RegistryPath)

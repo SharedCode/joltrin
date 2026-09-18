@@ -18,6 +18,7 @@ import (
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/ai/memory"
+	"github.com/sharedcode/joltrin/internal/logsafe"
 )
 
 func autoVectorizeBuiltinSpace(ctx context.Context, db *database.Database, spaceName, preloadPath string, emb ai.Embeddings, llm ai.Generator, onProgress func(progress int, total int, msg string)) error {
@@ -710,7 +711,7 @@ func handleIngestSpace(w http.ResponseWriter, r *http.Request) {
 	go func(taskId string, request IngestSpaceRequest, emb ai.Embeddings, llm ai.Generator) {
 		defer func() {
 			if rec := recover(); rec != nil {
-				log.Error("Panic during preload", "task_id", taskId, "space", request.SpaceName, "database", request.DatabaseName, "error", rec)
+				log.Error("Panic during preload", "task_id", taskId, "space", logsafe.V(request.SpaceName), "database", logsafe.V(request.DatabaseName), "error", rec)
 				UpdateTask(taskId, "error", 0, 0, "", fmt.Sprintf("Panic during preload: %v", rec))
 			}
 		}()
@@ -720,7 +721,7 @@ func handleIngestSpace(w http.ResponseWriter, r *http.Request) {
 			UpdateTask(taskId, "in_progress", progress, total, msg, "")
 		}, nil)
 		if err != nil {
-			log.Error("Space preload failed", "task_id", taskId, "space", request.SpaceName, "database", request.DatabaseName, "error", err)
+			log.Error("Space preload failed", "task_id", taskId, "space", logsafe.V(request.SpaceName), "database", logsafe.V(request.DatabaseName), "error", logsafe.V(err))
 			UpdateTask(taskId, "error", 0, 0, "", err.Error())
 			return
 		}
@@ -757,7 +758,7 @@ func handleIngestImportSpace(w http.ResponseWriter, r *http.Request) {
 	if dbEmbedder != nil {
 		embedderName = dbEmbedder.Name()
 	}
-	log.Debug("ingest import embedder selection", "space", req.SpaceName, "preload_path", req.PreloadFilePath, "production_mode", config.ProductionMode, "embedder_name", embedderName, "embedder_nil", dbEmbedder == nil, "llm_nil", dbLLM == nil)
+	log.Debug("ingest import embedder selection", "space", logsafe.V(req.SpaceName), "preload_path", logsafe.V(req.PreloadFilePath), "production_mode", config.ProductionMode, "embedder_name", embedderName, "embedder_nil", dbEmbedder == nil, "llm_nil", dbLLM == nil)
 
 	task := RegisterTask("SpaceIngestImport", 100)
 
@@ -771,7 +772,7 @@ func handleIngestImportSpace(w http.ResponseWriter, r *http.Request) {
 	go func(taskId string, request IngestSpaceRequest, emb ai.Embeddings, llm ai.Generator) {
 		defer func() {
 			if rec := recover(); rec != nil {
-				log.Error("Panic during ingest import", "task_id", taskId, "space", request.SpaceName, "database", request.DatabaseName, "error", rec)
+				log.Error("Panic during ingest import", "task_id", taskId, "space", logsafe.V(request.SpaceName), "database", logsafe.V(request.DatabaseName), "error", rec)
 				UpdateTask(taskId, "error", 0, 0, "", fmt.Sprintf("Panic during ingest import: %v", rec))
 			}
 		}()
@@ -781,7 +782,7 @@ func handleIngestImportSpace(w http.ResponseWriter, r *http.Request) {
 			UpdateTask(taskId, "in_progress", progress, total, msg, "")
 		}, nil)
 		if err != nil {
-			log.Error("Space ingest import failed", "task_id", taskId, "space", request.SpaceName, "database", request.DatabaseName, "error", err)
+			log.Error("Space ingest import failed", "task_id", taskId, "space", logsafe.V(request.SpaceName), "database", logsafe.V(request.DatabaseName), "error", logsafe.V(err))
 			UpdateTask(taskId, "error", 0, 0, "", err.Error())
 			return
 		}
