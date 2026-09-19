@@ -243,7 +243,7 @@ func TestBtree_Extended(t *testing.T) {
 	}
 
 	// 8. Test GetValues
-	keysPayload := fmt.Sprintf(`{"items": [{"key": "key1"}]}`)
+	keysPayload := `{"items": [{"key": "key1"}]}`
 	valRes, valErr := GetValuesForTest(ctxID, metaPayload, keysPayload)
 	if valErr != "" {
 		t.Errorf("GetValuesForTest returned error: %s", valErr)

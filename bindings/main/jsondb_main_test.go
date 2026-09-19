@@ -320,9 +320,10 @@ func TestRedisConnection(t *testing.T) {
 	}
 
 	// Test close (should fail if not open, or just return nil if it handles it)
-	// The implementation calls redis.CloseConnection() which might return error if not open
-	res = CloseRedisConnectionForTest()
-	// It might return error if no connection. That's fine, we just want to cover the code.
+	// The implementation calls redis.CloseConnection() which might return error if not open.
+	// It might return error if no connection. That's fine, we just want to cover the code,
+	// so the return value is deliberately not captured here.
+	CloseRedisConnectionForTest()
 }
 
 func TestCassandraConnection(t *testing.T) {
@@ -341,8 +342,9 @@ func TestCassandraConnection(t *testing.T) {
 		CloseCassandraConnectionForTest()
 	}
 
-	// Test close
-	res = CloseCassandraConnectionForTest()
+	// Test close; return value deliberately not captured, same reasoning as
+	// the Redis case above - we just want to exercise the code path.
+	CloseCassandraConnectionForTest()
 }
 
 func TestManageLogging_ErrorPaths(t *testing.T) {

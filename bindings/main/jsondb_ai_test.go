@@ -365,10 +365,10 @@ func TestVectorDB_Extended(t *testing.T) {
 	}
 
 	// Search Vector
-	searchPayload := fmt.Sprintf(`{
+	searchPayload := `{
 		"vector": [0.4, 0.5, 0.6],
 		"top_k": 1
-	}`)
+	}`
 
 	resSearch := ManageVectorDBForTest(ctxID, 5, metaPayload, searchPayload) // Search
 	if resSearch == "" {
