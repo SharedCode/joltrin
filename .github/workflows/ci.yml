@@ -168,6 +168,33 @@ jobs:
             go test -timeout 20m ./...
           fi
 
+      # search, jsondb, incfs, adapters/cassandra, and adapters/redis are
+      # each their own Go module under go.work, same reason ai/ needed its
+      # own step above - go list ./... from the root module never crosses
+      # into a nested module's directory. Before this step, none of these
+      # five were ever built, vet'd, or tested anywhere in CI (confirmed by
+      # grepping every go test/go build/go vet invocation across every
+      # workflow file: incfs only appeared via go.yml's plain `go build`
+      # and ci.yml's tagged `./incfs/integrationtests/...`, the other four
+      # didn't appear at all). Their unit tests pass locally with no Redis
+      # or Cassandra listening (confirmed via lsof before relying on that),
+      # so real service-backed coverage stays where it already lives (the
+      # build-and-test job's infs/incfs integration tests, and presumably
+      # each adapter's own integration-tagged tests, not audited here) -
+      # this step only closes the "never even compiled or unit-tested"
+      # gap. Verified via GOOS=windows cross-compile + vet (including test
+      # files) before adding this, given tonight's pattern of Windows-only
+      # surprises in newly-covered packages.
+      - name: Build, vet, and test the other workspace modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          for m in search jsondb incfs adapters/cassandra adapters/redis; do
+            echo "::group::$m"
+            (cd "$m" && go build ./... && go vet ./... && go test -timeout 20m ./...)
+            echo "::endgroup::"
+          done
+
   # Heavier validation that needs Redis and Cassandra as GitHub Actions
   # `services:` containers. That keyword only runs a Docker daemon on
   # Linux-hosted runners (macos-latest has no Docker daemon at all, and
