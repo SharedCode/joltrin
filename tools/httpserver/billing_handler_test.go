@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"testing"
 	"time"
@@ -124,6 +125,74 @@ func TestHandleSimulateCheckout_RejectsOpenRedirect(t *testing.T) {
 	}
 	if loc := w.Header().Get("Location"); loc == "https://evil.example/phish" {
 		t.Fatalf("attacker-controlled redirect target was honored: %s", loc)
+	}
+}
+
+// TestHandleSimulateCheckout_BypassAttemptsStaySameOrigin is the end-to-end
+// half of the CodeQL alert 268 investigation: it drives the real handler
+// with a "redirect" query parameter built the way an actual attacker
+// request would carry one (via url.Values, so encoding matches the wire
+// format exactly) for every bypass class considered, and asserts the
+// resulting Location header, when resolved against the site's own origin,
+// never ends up pointing at a different host. This is the property that
+// actually matters; isSafeRelativeRedirect's own accept/reject choice for
+// each payload is exercised separately in redirect_safety_test.go.
+func TestHandleSimulateCheckout_BypassAttemptsStaySameOrigin(t *testing.T) {
+	gate := getServerFeatureGate()
+	gate.SetTier(governance.TierCore)
+
+	payloads := []string{
+		"https://evil.example/phish",
+		"http://evil.example/phish",
+		"//evil.example/phish",
+		"///evil.example/phish",
+		`/\evil.example/phish`,
+		`/\\evil.example/phish`,
+		"/%2F%2Fevil.example",
+		"/%5Cevil.example",
+		"/%252F%252Fevil.example",
+		"/\t/evil.example",
+		"/\n/evil.example",
+		"/\r/evil.example",
+		"/\r\nSet-Cookie: pwn=1",
+		"/ /evil.example",
+		" //evil.example",
+		"/../../evil.example",
+		"/%2e%2e/evil.example",
+		"/@evil.example",
+		"/HTTP://evil.example",
+		"/JAVASCRIPT:alert(1)",
+		"/／evil.example",
+	}
+
+	origin := &url.URL{Scheme: "https", Host: "joltrin.example"}
+
+	for _, redirect := range payloads {
+		t.Run(redirect, func(t *testing.T) {
+			q := url.Values{}
+			q.Set("session_id", "cs_sim_bypass")
+			q.Set("tenant_id", "tenant-sim")
+			q.Set("tier", "pro")
+			q.Set("redirect", redirect)
+
+			req := httptest.NewRequest(http.MethodGet, "/api/billing/checkout/simulate?"+q.Encode(), nil)
+			w := httptest.NewRecorder()
+
+			handleSimulateCheckout(w, req)
+
+			loc := w.Header().Get("Location")
+			if loc == "" {
+				t.Fatalf("no Location header set for redirect=%q", redirect)
+			}
+			resolved, err := origin.Parse(loc)
+			if err != nil {
+				t.Fatalf("Location header %q from redirect=%q did not parse: %v", loc, redirect, err)
+			}
+			if resolved.Host != origin.Host {
+				t.Errorf("redirect=%q produced off-origin Location %q (resolved host %q, want %q)",
+					redirect, loc, resolved.Host, origin.Host)
+			}
+		})
 	}
 }
 
