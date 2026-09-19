@@ -158,3 +158,47 @@ func TestAnthropicPromptCaching_CostSavings(t *testing.T) {
 	t.Log("                 + 10,000 × 99 × $0.0000003 = $0.30  (reads)")
 	t.Log("                 = $0.33 total (89% savings)")
 }
+
+// buildMessages always appends the current prompt as the final message,
+// even with tool call continuations. Generate() used to append it a second
+// time onto its own local copy of the slice, which staticcheck flagged as
+// a dead store since it was assigned before that copy existed - so it
+// never reached the actual request body. Removed rather than "fixed",
+// since propagating it would have put two consecutive user messages in
+// the request, which the Anthropic API rejects. This guards against that
+// duplication ever coming back.
+func TestAnthropicGenerate_NoDuplicateTrailingUserPrompt(t *testing.T) {
+	gen := &anthropic{apiKey: "test-key", model: "claude-3-5-sonnet-20241022"}
+
+	prompt := "continue with the next step"
+	messages := gen.buildMessages(prompt, ai.GenOptions{
+		ToolCallContinuations: []ai.ToolCallContinuation{{
+			ToolCall: ai.ToolCall{Name: "select", NativeID: "toolu_1"},
+			Response: "ok",
+		}},
+	})
+
+	// Mirrors how Generate() builds the request body: messages goes
+	// straight into reqBody.Messages with no further appends.
+	reqBody := anthropicRequest{Messages: messages}
+
+	matches := 0
+	for _, m := range reqBody.Messages {
+		if m.Role == "user" {
+			if s, ok := m.Content.(string); ok && s == prompt {
+				matches++
+			}
+		}
+	}
+	if matches != 1 {
+		t.Fatalf("expected exactly 1 user message with the current prompt, got %d in %+v", matches, reqBody.Messages)
+	}
+
+	last := reqBody.Messages[len(reqBody.Messages)-1]
+	if last.Role != "user" {
+		t.Fatalf("expected the last message to be the current user prompt, got role %q", last.Role)
+	}
+	if s, ok := last.Content.(string); !ok || s != prompt {
+		t.Fatalf("expected last message content to be %q, got %v", prompt, last.Content)
+	}
+}

@@ -186,15 +186,6 @@ func (g *anthropic) Generate(ctx context.Context, prompt string, opts ai.GenOpti
 		reqBody.CacheControl = cacheControl
 	}
 
-	// if there are messages, then let's prepare them
-	if len(messages) > 0 {
-		// Add current user prompt (explicit parameter)
-		messages = append(messages, anthropicMessage{
-			Role:    "user",
-			Content: prompt, // Simple string content
-		})
-	}
-
 	jsonBody, err := json.Marshal(reqBody)
 	if err != nil {
 		return ai.GenOutput{}, fmt.Errorf("failed to marshal request: %w", err)

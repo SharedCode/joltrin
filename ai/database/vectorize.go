@@ -709,10 +709,6 @@ func (db *Database) VectorizeCategories(
 				}
 
 				// Restore category cursors
-				catPath := cat.Path
-				if catPath == "" {
-					catPath = cat.Name
-				}
 				_, err = catBtree.Find(ctx, catID, false)
 				if err != nil {
 					tx.Rollback(ctx)
