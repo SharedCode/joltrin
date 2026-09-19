@@ -432,7 +432,7 @@ func ingestImportReader(ctx context.Context, request IngestSpaceRequest) (io.Rea
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to create import request: %w", err)
 		}
-		resp, err := http.DefaultClient.Do(reqHTTP)
+		resp, err := ssrfSafeHTTPClient().Do(reqHTTP)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to fetch import URL: %w", err)
 		}

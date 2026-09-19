@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net"
+	"net/http"
 	"net/url"
 )
 
@@ -45,4 +47,36 @@ func isDisallowedImportTarget(ip net.IP) bool {
 		ip.IsLinkLocalMulticast() ||
 		ip.IsUnspecified() ||
 		ip.IsMulticast()
+}
+
+// ssrfSafeHTTPClient returns an http.Client whose transport re-resolves and
+// re-validates the target of every connection it dials, including redirect
+// hops. validateImportURL alone only checks the address at request-build
+// time; a DNS answer can legitimately change between that check and the
+// actual TCP connect (DNS rebinding), which would otherwise let a
+// rebound name reach an internal address anyway.
+func ssrfSafeHTTPClient() *http.Client {
+	dialer := &net.Dialer{}
+	transport := &http.Transport{
+		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			host, port, err := net.SplitHostPort(addr)
+			if err != nil {
+				return nil, err
+			}
+			ips, err := net.DefaultResolver.LookupIP(ctx, "ip", host)
+			if err != nil {
+				return nil, fmt.Errorf("cannot resolve host %q: %w", host, err)
+			}
+			if len(ips) == 0 {
+				return nil, fmt.Errorf("host %q did not resolve to any address", host)
+			}
+			for _, ip := range ips {
+				if isDisallowedImportTarget(ip) {
+					return nil, fmt.Errorf("refusing to connect to internal address %s (host %q)", ip, host)
+				}
+			}
+			return dialer.DialContext(ctx, network, net.JoinHostPort(ips[0].String(), port))
+		},
+	}
+	return &http.Client{Transport: transport}
 }
