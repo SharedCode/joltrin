@@ -823,56 +823,12 @@ func (jp *JoinProcessor) processLeftItem(k any, vProvider func() (any, error)) (
 	}
 
 	if !jp.canUseLookup {
-		// Hash Join Probe
-		// We need V for emitMatch later on match, but probing relies on leftJoinVals.
-		probeKey := generateJoinKey(k, nil, jp.leftFields)
-		// Note: generateJoinKey typically takes (k, v). But we passed extracted vals map? No.
-		// generateJoinKey(k, v, fields) uses extractVal internally.
-		// So we should construct probeKey from our `leftJoinVals`.
-		// But existing `generateJoinKey` takes k, v.
-		// We should duplicate generation logic using `leftJoinVals` values?
-		// Actually `leftJoinVals` relies on `jp.leftFields` mapping to `jp.rightFields`.
-		// `probeKey` must match `rightCache` format.
-		// `rightCache` was built using `generateJoinKey(rKey, rVal, jp.rightFields)`.
-		// `generateJoinKey` concats string usages.
-
-		// Optimization: We can reconstruct the key part from `leftJoinVals`.
-		// But `generateJoinKey` does sorting/formatting.
-		// To avoid re-implementing `generateJoinKey`, let's just use it with lazy value.
-		// But `generateJoinKey` takes `any` value.
-
-		// If we already extracted everything into `leftJoinVals` without fetching V,
-		// we know the join key.
-		// But `generateJoinKey` iterates fields again.
-
-		// Let's assume for Hash Probe we constructed `leftJoinVals` correctly.
-		// We can form the probe key by iterating `jp.rightFields` and grabbing from `leftJoinVals`.
-
-		var parts []string
-		for _, f := range jp.rightFields {
-			val := leftJoinVals[f]
-			parts = append(parts, fmt.Sprintf("%v", val))
-		}
-		probeKey = strings.Join(parts, "|") // Simplified assumption of generateJoinKey logic?
-		// Wait, `generateJoinKey` might have specific formatting.
-		// Using the actual function is safer.
-
-		// Let's rely on cachedVal.
-		// If `generateJoinKey` calls `extractVal` and misses (searching Value), we need V.
-		// But we already did extraction above!
-		// So we know if we need V.
-
-		// If we fetched V above, `cachedVal` is set.
-		// If we didn't, we can pass nil to `generateJoinKey` IF we are sure keys are in Key.
-		// But `generateJoinKey` doesn't know.
-
-		// Let's verify `generateJoinKey` implementation.
-		// It's in `copilottools.utils.go`.
-		// It does `extractVal`.
-
-		// So:
+		// Hash Join Probe. rightCache was built with generateJoinKey(rKey, rVal,
+		// jp.rightFields), so the probe key must be generated the same way. If V was
+		// already fetched above (during Bloom filter / leftJoinVals extraction),
+		// cachedVal holds it and generateJoinKey won't need to fetch it again.
 		vToPass := cachedVal // nil if not fetched
-		probeKey = generateJoinKey(k, vToPass, jp.leftFields)
+		probeKey := generateJoinKey(k, vToPass, jp.leftFields)
 
 		matches, ok := jp.rightCache[probeKey]
 
