@@ -159,6 +159,55 @@ func TestDigestKnowledgeBase_ClampsUnboundedCallerSuppliedLimit(t *testing.T) {
 	}
 }
 
+func TestDigestKnowledgeBase_ClampsUnboundedQueryCount(t *testing.T) {
+	ctx := context.Background()
+
+	cats := inmemory.NewBtree[sop.UUID, *Category](true)
+	vecs := inmemory.NewBtree[VectorKey, Vector](true)
+	items := inmemory.NewBtree[ItemKey, Item[map[string]any]](true)
+
+	store := NewStore[map[string]any](
+		"digest_kb_query_count_clamp",
+		nil,
+		cats.Btree,
+		inmemory.NewBtree[string, sop.UUID](false).Btree,
+		inmemory.NewBtree[DistanceKey, byte](false).Btree,
+		vecs.Btree,
+		items.Btree,
+		inmemory.NewBtree[sop.UUID, Document](false).Btree,
+	).(*store[map[string]any])
+	store.SetTextIndex(&MockTextIndex{})
+
+	embedder := &MockPlaybookEmbedder{Rules: []PlaybookRule{
+		{Keywords: []string{"architecture"}, CategoryName: "Architecture", Vector: []float32{1, 0, 0}},
+	}}
+	llm := &mapDigestLLM{}
+	store.SetLLM(llm)
+
+	kb := &KnowledgeBase[map[string]any]{
+		Store:   store,
+		Manager: NewMemoryManager[map[string]any](store, llm, embedder),
+	}
+
+	// A caller-supplied Queries slice this large would, before the fix, be
+	// handed straight to len(queries)*perQueryLimit as an allocation-size
+	// hint (both directly here and inside normalizeDigestQueries). It must
+	// be capped, not passed through verbatim, so this call has to return
+	// quickly and without error.
+	queries := make([]string, 2_000_000)
+	for i := range queries {
+		queries[i] = "architecture"
+	}
+	_, err := DigestKnowledgeBase(ctx, kb, embedder, KBDigestRequest{
+		Queries:       queries,
+		PerQueryLimit: 5,
+		MaxResults:    5,
+	})
+	if err != nil {
+		t.Fatalf("DigestKnowledgeBase with an unbounded query count failed: %v", err)
+	}
+}
+
 func TestMergeDigestHit_DeduplicatesByDocIDOrContent(t *testing.T) {
 	merged := map[string]KBDigestHit{}
 

@@ -33,15 +33,20 @@ func DigestKnowledgeBase(ctx context.Context, kb *KnowledgeBase[map[string]any],
 		return nil, nil
 	}
 
-	queries := normalizeDigestQueries(req.Queries)
-	if len(queries) == 0 {
-		return nil, nil
-	}
-
 	// Bounded on both ends: an unbounded caller-supplied limit would make
 	// the map-size hint below (and the search calls that use perQueryLimit)
 	// an easy way to force a huge allocation.
 	const maxDigestLimit = 1000
+	const maxDigestQueries = 1000
+
+	rawQueries := req.Queries
+	if len(rawQueries) > maxDigestQueries {
+		rawQueries = rawQueries[:maxDigestQueries]
+	}
+	queries := normalizeDigestQueries(rawQueries)
+	if len(queries) == 0 {
+		return nil, nil
+	}
 
 	perQueryLimit := req.PerQueryLimit
 	if perQueryLimit <= 0 {
