@@ -172,6 +172,9 @@ func (sc *StoreCursor) Next(ctx context.Context) (any, bool, error) {
 				} else {
 					ok, err = sc.store.Next(ctx)
 				}
+				if err != nil {
+					return nil, false, err
+				}
 				continue
 			}
 		}
