@@ -21,10 +21,21 @@ var dangerousTargetList = []string{
 	`C:\`, `C:\Windows`, `C:\Program Files`, `C:\Program Files (x86)`,
 }
 
+// normalizeSlashes gives a path a deterministic, OS-independent form for
+// comparison against dangerousTargetList: filepath.ToSlash only replaces
+// os.PathSeparator, which is '/' on non-Windows, so it silently does
+// nothing to a backslash path when this code happens to be running on
+// Unix. A plain string replace does the same job regardless of which OS
+// the process is currently running on.
+func normalizeSlashes(s string) string {
+	return strings.ReplaceAll(s, `\`, "/")
+}
+
 var dangerousTargets = func() map[string]bool {
 	m := make(map[string]bool, len(dangerousTargetList))
 	for _, p := range dangerousTargetList {
 		m[p] = true
+		m[normalizeSlashes(p)] = true
 	}
 	return m
 }()
@@ -37,6 +48,21 @@ func RejectDangerous(path string) error {
 	if trimmed == "" {
 		return fmt.Errorf("empty path")
 	}
+
+	// Checked in its own OS-independent, slash-normalized form first.
+	// filepath.Abs below resolves a path using the current OS's own
+	// semantics, so a Unix-style value like "/etc" running on Windows
+	// becomes something like "C:\etc" via drive-relative resolution -
+	// which matches nothing in dangerousTargets, silently letting through
+	// exactly the kind of well-known dangerous path this package exists
+	// to block. A path value isn't guaranteed to match the OS it's
+	// running on (cross-platform config, a copy-pasted path, a WSL-style
+	// value reaching native Windows code), so this check doesn't depend
+	// on the runtime OS's path resolution at all.
+	if dangerousTargets[normalizeSlashes(trimmed)] {
+		return fmt.Errorf("refusing to remove protected directory %q", trimmed)
+	}
+
 	abs, err := filepath.Abs(trimmed)
 	if err != nil {
 		return fmt.Errorf("cannot resolve path %q: %w", path, err)
