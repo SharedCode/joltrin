@@ -71,8 +71,6 @@ const (
 	nativeRepairStrategyResearchFirst nativeRepairStrategy = "research_first"
 )
 
-type progressSink func(string)
-
 // Run executes the orchestration loop relying on native tool calls.
 func (e *NativeReActEngine) Run(ctx context.Context, req ai.ReasoningRequest) (ai.ReasoningResponse, error) {
 	if resp, handled, err := handleDirectSlashReasoningRequest(ctx, req); handled {
@@ -2469,18 +2467,6 @@ func formatPendingRepairReminder(repair pendingToolRepair, attemptedToolName str
 
 func shouldEscalateRepairToClarification(repairAttempts int) bool {
 	return repairAttempts >= 1
-}
-
-func isRoutedAskContext(ctx context.Context) bool {
-	p := ai.GetSessionPayload(ctx)
-	if p == nil || p.Variables == nil {
-		return false
-	}
-	routingState, ok := p.Variables["RoutingState"].(*TaskContextClassification)
-	if !ok || routingState == nil {
-		return false
-	}
-	return strings.TrimSpace(routingState.RoutingGate) != ""
 }
 
 func shouldResetRepairAttempts(priorRepair *pendingToolRepair, toolName string) bool {

@@ -291,17 +291,6 @@ func (c *RightOuterJoinStoreCursor) generateKey(item any, isLeft bool) string {
 	return sb.String()
 }
 
-// Helper for debugging which keys exist
-func getMapKeys(item any) []string {
-	var keys []string
-	if m, ok := item.(map[string]any); ok {
-		for k := range m {
-			keys = append(keys, k)
-		}
-	}
-	return keys
-}
-
 func (c *RightOuterJoinStoreCursor) merge(lItem any, rKey, rVal any) any {
 	// Standard merge of two items (Left + Right)
 	// Similar to JoinRightCursor.mergeResult but stripped down
