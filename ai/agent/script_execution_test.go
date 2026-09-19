@@ -1130,7 +1130,7 @@ func TestRunStepCommand_ExecuteScriptSuppressesInnerStepHeaders(t *testing.T) {
 	ctx = context.WithValue(ctx, ai.CtxKeyExecutor, &StreamingExecuteScriptMock{})
 	ctx = context.WithValue(ctx, CtxKeyJSONStreamer, streamer)
 	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{})
-	ctx = context.WithValue(ctx, "step_index", 1)
+	ctx = context.WithValue(ctx, ctxKeyStepIndex, 1)
 
 	var sb strings.Builder
 	step := ai.ScriptStep{Type: "command", Command: "execute_script", Args: map[string]any{"script": []any{}}}
@@ -1190,7 +1190,7 @@ func TestRunStepCommand_ExecuteScriptSuppressesDuplicateUIRecord(t *testing.T) {
 	ctx = context.WithValue(ctx, CtxKeyJSONStreamer, streamer)
 	ctx = context.WithValue(ctx, ai.CtxKeyEventStreamer, func(eventType string, payload any) {})
 	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{})
-	ctx = context.WithValue(ctx, "step_index", 1)
+	ctx = context.WithValue(ctx, ctxKeyStepIndex, 1)
 
 	var sb strings.Builder
 	step := ai.ScriptStep{Type: "command", Command: "execute_script", Args: map[string]any{"script": []any{}}}
