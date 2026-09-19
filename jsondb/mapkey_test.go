@@ -199,6 +199,9 @@ func TestJsonDBMapKey_WithIndexSpec(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Add 2 failed: %v", err)
 	}
+	if !ok {
+		t.Errorf("Add 2 returned false")
+	}
 
 	// Verify order (id 1 < id 2)
 	db.First(ctx)
@@ -310,6 +313,9 @@ func TestJsonDBMapKey_OpenNoIndexSpec(t *testing.T) {
 	ok, err = db.Add(ctx, items2)
 	if err != nil {
 		t.Fatalf("Add 2 failed: %v", err)
+	}
+	if !ok {
+		t.Errorf("Add 2 returned false")
 	}
 	trans.Commit(ctx)
 }

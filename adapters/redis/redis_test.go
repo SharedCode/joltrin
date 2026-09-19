@@ -69,6 +69,12 @@ func TestBasicUse(t *testing.T) {
 	}
 
 	found, err := c.GetStruct(ctx, "fooBar", &user)
+	if err != nil {
+		// GetStruct converts "key not found" into (false, nil); a non-nil
+		// error here means something else actually went wrong (a real
+		// Redis/unmarshal error), not just that the delete worked.
+		t.Errorf("GetStruct after delete failed: %v", err)
+	}
 	if found {
 		t.Error("Struct foo still exists after delete.")
 	}
