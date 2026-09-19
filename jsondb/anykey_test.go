@@ -287,12 +287,18 @@ func TestJsonDBAnyKey_Pagination(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetKeys FetchCount failed: %v", err)
 	}
+	if keysJson == "" {
+		t.Errorf("GetKeys FetchCount > PageSize returned empty")
+	}
 
 	// Test FetchCount = 0
 	db.First(ctx)
 	keysJson, err = db.GetKeys(ctx, PagingInfo{PageSize: 3, FetchCount: 0, Direction: Forward})
 	if err != nil {
 		t.Fatalf("GetKeys FetchCount=0 failed: %v", err)
+	}
+	if keysJson == "" {
+		t.Errorf("GetKeys FetchCount=0 returned empty")
 	}
 
 	// Test GetItems Backward Offset
