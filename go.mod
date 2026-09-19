@@ -5,7 +5,7 @@ go 1.26.8
 require (
 	github.com/a2aproject/a2a-go v0.3.15
 	github.com/goccy/go-json v0.9.11
-	github.com/google/cel-go v0.29.0
+	github.com/google/cel-go v0.30.0
 	github.com/google/uuid v1.6.0
 	github.com/klauspost/reedsolomon v1.12.4
 	github.com/mark3labs/mcp-go v1.0.0
@@ -39,6 +39,6 @@ require (
 	github.com/gocql/gocql v1.7.0
 	github.com/ncw/directio v1.0.5
 	github.com/sethvargo/go-retry v0.3.0
-	golang.org/x/crypto v0.55.0
+	golang.org/x/crypto v0.56.0
 	golang.org/x/sync v0.22.0
 )
