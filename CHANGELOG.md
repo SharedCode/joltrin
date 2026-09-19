@@ -1,5 +1,30 @@
 # Changelog
 
+## v5.6.0
+
+### Security
+- Closed the remaining open CodeQL alert classes across the codebase: shell injection in sop-daemon, unsafe quoting in agent errors, log injection (ai module, sop-daemon, tools/httpserver, fs, database), clear-text logging of a transient API key, path injection in environment switch/delete/create, two open-redirect variants (including a backslash-encoded bypass), SSRF in space ingest-from-URL, uncontrolled/overflowing allocation sizes in node slot length and KB digest limits, an incorrect integer conversion in uint parsing, and DOM XSS/sanitization gaps in the web UI.
+- Extracted the SSRF and redirect-safety guards that were duplicated across `tools/httpserver` into a single `internal/netguard` package, with the exploitability investigation and citations kept in the package doc comment.
+- Hardened `os.RemoveAll` call sites (both the storage engine and `fs.defaultFileIO`) against catastrophic paths, and closed a real gap in that guard on Windows.
+- Bumped `golang.org/x/crypto` and `cel-go` to close 3 known dependency advisories.
+
+### Bug Fixes
+- `resolveTemplate` (ai/agent script engine) returned `nil` instead of the correct value whenever a template field lookup fell back to a "value"-wrapped map - a shadowed variable meant the fallback's success never reached the check that decided whether to return it.
+- `StoreCursor.Next` silently swallowed real store errors while skipping rows that didn't match a filter, returning "no more items" instead of the actual error - same shadowing root cause.
+- Removed `BaselineReActEngine`, a superseded ReAct loop implementation that was never constructed anywhere in the codebase; its dead fenced-code-block branch would have silently dropped tool calls if it had ever run.
+- Removed a stale cursor-restore leftover in `VectorizeCategories` copy-pasted from a sibling function that didn't apply here, and a duplicate-user-message append in the Anthropic client that never reached the actual API request but would have broken it had it ever been "fixed" instead of understood.
+- Fixed a flaky billing checkout test and closed a gap where a stale `*FeatureGate` reference could be picked up across test resets.
+
+### AI Features
+- Retrieved knowledge-base passages injected into agent context now carry a citable `[source: X]` tag, and the model is instructed to cite it inline in its answer.
+- The HTTP chat SSE stream now emits a separate `citations` event with the distinct `[source: X]` labels a model's answer cited, in first-appearance order, so a UI can render them as structured references instead of having to parse the prose.
+- `execute_step`/`validate_step` now return structured blocked/malformed results instead of opaque failures, and `execute_step` accepts an optional idempotency key so retries are safe.
+
+### CI & Test Coverage
+- The `ai` module (a separate `go.mod` under the `go.work` workspace) and 5 other previously-uncovered workspace modules (`search`, `jsondb`, `incfs`, `adapters/cassandra`, `adapters/redis`) now build, vet, and test in CI - closing a real gap where `./...` from the root module silently never reached them.
+- Widened the root module's CI unit-test step from a hardcoded package list to the same exclusion-based pattern already used for build/vet.
+- Cleared a staticcheck sweep across the codebase: typed context keys that were previously untyped strings, dead code removal in `tools/httpserver`, `bindings/main` tests, the core storage engine, and several `ai/agent` files, plus missing test assertions on results that were computed but never checked.
+
 ## v5.5.0
 
 ### DevSecOps Pipeline
