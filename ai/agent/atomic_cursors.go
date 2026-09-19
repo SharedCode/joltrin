@@ -215,14 +215,14 @@ type JoinPlan struct {
 // JoinRightCursor performs a streaming join with probing and scanning support.
 // It replaces both JoinCursor (Lookup) and NestedLoopJoinCursor (Scan).
 type JoinRightCursor struct {
-	left      ScriptCursor
-	right     jsondb.StoreAccessor
-	joinType  string
-	on        map[string]any
-	ctx       context.Context
-	engine    *ScriptEngine
-	currentL  any
-	matched   bool
+	left     ScriptCursor
+	right    jsondb.StoreAccessor
+	joinType string
+	on       map[string]any
+	ctx      context.Context
+	engine   *ScriptEngine
+	currentL any
+	matched  bool
 
 	// Execution Plan
 	plan      JoinPlan
