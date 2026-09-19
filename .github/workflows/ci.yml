@@ -90,11 +90,83 @@ jobs:
           fi
           go build $(go list ./... 2>/dev/null | grep -Ev "$exclude")
 
+      # Previously hardcoded to six packages; everything else in this
+      # module (tools/httpserver, governance, internal/*, cel, the tools/*
+      # binaries, ...) was vet'd and built above but never actually had its
+      # tests executed in CI - go vet/go build can't catch a broken
+      # assertion or a regression a test would. The infs/integrationtests
+      # and incfs/integrationtests packages are excluded here because their
+      # test files are gated behind `//go:build integration` and need
+      # Redis/Cassandra (see the build-and-test job below); the stress
+      # packages need `-tags=stress` and a 2h budget (see go.yml). Neither
+      # of those tags is passed here, so a plain `go test` on those import
+      # paths would fail to find any tests, not silently skip them.
       - name: Unit tests (no integration/stress tags, no external services)
         shell: bash
         run: |
           set -euo pipefail
-          go test -timeout 20m ./inmemory ./btree ./common ./cache ./encoding ./database
+          exclude='/demo$|/demo-agents$|/infs/integrationtests|/incfs/integrationtests|/infs/stresstests'
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            # bindings/main: cgo, no C compiler on this runner (see the go
+            # vet step's comment above). fs (not fs/erasure, which is
+            # fine): its test suite simulates permission-denied and
+            # file-locked conditions with os.Chmod against Unix permission
+            # bits (e.g. prioritylog_scenarios_test.go), which doesn't
+            # carry the same meaning on Windows - confirmed by actually
+            # running it here: TestBlobStore_AllScenarios,
+            # Test_PriorityLog_Add_WriteFile_Error_ReturnsError, and
+            # several hashmap/registry scenario tests fail because Windows
+            # either doesn't deny the simulated access or holds a file
+            # handle open across the test's own cleanup. Making that
+            # suite genuinely cross-platform is a real, larger project
+            # (Windows ACLs and file-locking semantics aren't a drop-in
+            # swap for os.Chmod), not a one-line fix - excluded here
+            # rather than attempted blind. It's still tested on
+            # ubuntu-latest and macos-latest above, and separately via
+            # go.yml on ubuntu-latest.
+            exclude="$exclude|/bindings/main$|^github.com/sharedcode/joltrin/fs$"
+          fi
+          go test -timeout 20m $(go list ./... 2>/dev/null | grep -Ev "$exclude")
+
+      # ai/ is its own Go module (separate go.mod, joined to this one only
+      # via go.work's replace directive) so none of the go list/build/vet
+      # steps above ever touch it - go list ./... does not cross a nested
+      # module boundary even in workspace mode. Before this step, nothing
+      # in CI built, vet'd, or tested any ai/* package that tools/httpserver
+      # doesn't happen to import transitively (ai/etl and ai/cmd/etl were
+      # the ones actually missing coverage; a compile error there could
+      # have shipped unnoticed). No cgo or GOOS=js packages in this module,
+      # so it runs on every OS the same as the root module above.
+      - name: Build, vet, and test the ai module
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd ai
+          go build ./...
+          go vet ./...
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            # ai/agent's tests never ran on Windows before this workflow
+            # existed. Found 6 failures across two CI round trips, all the
+            # same root cause: a test opens a database rooted at
+            # t.TempDir() and never explicitly commits or rolls back every
+            # transaction before returning, so a transaction log file is
+            # still open when TempDir's own cleanup tries to delete it -
+            # Unix allows unlinking an open file, Windows doesn't. A grep
+            # across the package for the same setup shape
+            # (t.TempDir() + database.NewDatabase(dbOpts)) turns up 26
+            # files using it, not just the ones caught so far, so this
+            # looks like a systemic gap in this package's test hygiene
+            # rather than a short, enumerable list - individually
+            # discovering and skipping each one costs a full CI round trip
+            # per test found. Excluding the whole package on Windows until
+            # someone can either fix the underlying pattern package-wide
+            # or audit all 26 call sites properly, rather than keep
+            # whack-a-moling one test at a time. Still tested on
+            # ubuntu-latest and macos-latest below.
+            go test -timeout 20m $(go list ./... | grep -v '^github.com/sharedcode/joltrin/ai/agent$')
+          else
+            go test -timeout 20m ./...
+          fi
 
   # Heavier validation that needs Redis and Cassandra as GitHub Actions
   # `services:` containers. That keyword only runs a Docker daemon on
