@@ -2290,6 +2290,26 @@ func (a *CopilotAgent) getScriptToolsPrompt(ctx context.Context) string {
 	return toolsDef
 }
 
+// citationLabel returns a short, stable identifier for a retrieved
+// knowledge-base hit, suitable for an inline "[source: X]" citation in the
+// model's context so an answer built from it can point back to exactly
+// which entry it came from - today that traceability doesn't exist at all:
+// DigestKnowledgeBase already returns Category and DocID per hit, but
+// getLTMSemanticContext/getPlaybooksContext only ever forward hit.Text and
+// hit.Score into the prompt, silently dropping the rest. Category is
+// preferred when set (stable, human-readable, usually shared by several
+// hits so citations group naturally); falls back to the first DocID, then
+// to a generic marker if a hit somehow has neither.
+func citationLabel(hit memory.KBDigestHit) string {
+	if hit.Category != "" {
+		return hit.Category
+	}
+	if len(hit.DocID) > 0 && hit.DocID[0] != "" {
+		return hit.DocID[0]
+	}
+	return "kb"
+}
+
 func (a *CopilotAgent) getLTMSemanticContext(ctx context.Context, query string) string {
 	toolsDef := ""
 	if a.systemDB != nil && a.service != nil && a.service.Domain() != nil && a.service.Domain().Embedder() != nil && a.Memory.AgentID != "" {
@@ -2308,9 +2328,9 @@ func (a *CopilotAgent) getLTMSemanticContext(ctx context.Context, query string) 
 				if err == nil && len(hits) > 0 {
 					knowledgeStr := ""
 					for _, hit := range hits {
-						knowledgeStr += fmt.Sprintf("- (Score: %.2f) %s\n", hit.Score, hit.Text)
+						knowledgeStr += fmt.Sprintf("- [source: %s] (Score: %.2f) %s\n", citationLabel(hit), hit.Score, hit.Text)
 					}
-					toolsDef += "\nContext Section (Learned Knowledge):\n" + knowledgeStr
+					toolsDef += "\nContext Section (Learned Knowledge). When you use one of these facts in your answer, cite it inline exactly as shown, e.g. [source: X]:\n" + knowledgeStr
 				}
 			}
 			tx.Rollback(ctx)
@@ -2404,11 +2424,11 @@ func (a *CopilotAgent) getPlaybooksContext(ctx context.Context, query string, ta
 					if err == nil && len(hits) > 0 {
 						for _, hit := range hits {
 							hasGoodHits = true
-							accumStr += fmt.Sprintf("- Context (Score: %.2f): %s\n", hit.Score, hit.Text)
+							accumStr += fmt.Sprintf("- [source: %s] Context (Score: %.2f): %s\n", citationLabel(hit), hit.Score, hit.Text)
 						}
 
 						if hasGoodHits {
-							toolsDef += fmt.Sprintf("\nActive Playbook Context (%s):\n%s", domain, accumStr)
+							toolsDef += fmt.Sprintf("\nActive Playbook Context (%s). When you use one of these facts in your answer, cite it inline exactly as shown, e.g. [source: X]:\n%s", domain, accumStr)
 							a.markMRUCategoryWithSource(playbookMRUCategory(domain), fmt.Sprintf("Retrieved Semantics:\n%s", accumStr), MRUSourcePlaybook)
 						}
 					}
