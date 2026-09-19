@@ -389,30 +389,6 @@ func (a *CopilotAgent) toolFindNearest(ctx context.Context, args map[string]any)
 	}, true)
 }
 
-func (a *CopilotAgent) toolNext(ctx context.Context, args map[string]any) (string, error) {
-	return a.runNavigation(ctx, args, func(ctx context.Context, store jsondb.StoreAccessor) (bool, error) {
-		return store.Next(ctx)
-	})
-}
-
-func (a *CopilotAgent) toolPrevious(ctx context.Context, args map[string]any) (string, error) {
-	return a.runNavigation(ctx, args, func(ctx context.Context, store jsondb.StoreAccessor) (bool, error) {
-		return store.Previous(ctx)
-	})
-}
-
-func (a *CopilotAgent) toolFirst(ctx context.Context, args map[string]any) (string, error) {
-	return a.runNavigation(ctx, args, func(ctx context.Context, store jsondb.StoreAccessor) (bool, error) {
-		return store.First(ctx)
-	})
-}
-
-func (a *CopilotAgent) toolLast(ctx context.Context, args map[string]any) (string, error) {
-	return a.runNavigation(ctx, args, func(ctx context.Context, store jsondb.StoreAccessor) (bool, error) {
-		return store.Last(ctx)
-	})
-}
-
 func extractStartKey(keyMatch any, indexSpec *jsondb.IndexSpecification) map[string]any {
 	m, ok := keyMatch.(map[string]any)
 	if !ok {
