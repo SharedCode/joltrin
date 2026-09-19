@@ -64,7 +64,7 @@ func TestEvaluateRoutingGates_SpecializedRoutingHandlesDeepPathQueries(t *testin
 	}
 	ag.service.session = &RunnerSession{MRU: []MRUItem{}}
 
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{Variables: make(map[string]any)})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{Variables: make(map[string]any)})
 
 	taskCtx, err := ag.evaluateRoutingGates(ctx, "SOP:language/c#/tutorial", nil)
 	if err != nil {
@@ -105,7 +105,7 @@ func TestThreeGates_RoutingArchitecture(t *testing.T) {
 			Response: `{"entity": "Omni", "domain": "Stores", "db_artifacts": ["TestStore"], "layers": []}`,
 		}
 		payload := &ai.SessionPayload{Variables: make(map[string]any)}
-		ctx = context.WithValue(ctx, "session_payload", payload)
+		ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 		query := "Omni:Stores:TestStore"
 		taskCtx, err := ag.evaluateRoutingGates(ctx, query, gen)
@@ -145,7 +145,7 @@ func TestThreeGates_RoutingArchitecture(t *testing.T) {
 			Entity: "Omni",
 			Domain: "OldDomain",
 		}
-		ctx = context.WithValue(ctx, "session_payload", payload)
+		ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 		query := "Keep going but use TestInherited"
 		taskCtx, err := ag.evaluateRoutingGates(ctx, query, gen)
@@ -178,7 +178,7 @@ func TestThreeGates_RoutingArchitecture(t *testing.T) {
 			Entity: "Omni",
 			Domain: "OldDomain",
 		}
-		ctx = context.WithValue(ctx, "session_payload", payload)
+		ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 		ag.markMRUCategoryWithSource(SYSTEM_TOOLS, "stale tools", MRUSourceSystemTools)
 		ag.markMRUCategoryWithSource(playbookMRUCategory("Spaces"), "stale spaces playbook", MRUSourcePlaybook)
 		ag.markMRUCategoryWithSource(playbookMRUCategory("sop"), "stale kb context", MRUSourcePlaybook)
@@ -214,7 +214,7 @@ func TestThreeGates_RoutingArchitecture(t *testing.T) {
 		}
 		// Empty payload
 		payload := &ai.SessionPayload{Variables: make(map[string]any)}
-		ctx = context.WithValue(ctx, "session_payload", payload)
+		ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 		query := "Cold start query"
 		taskCtx, err := ag.evaluateRoutingGates(ctx, query, gen)
@@ -239,7 +239,7 @@ func TestThreeGates_RoutingArchitecture(t *testing.T) {
 	t.Run("Gate 2: Rehydrates Routing State From STM", func(t *testing.T) {
 		gen := &RouterTestGen{}
 		payload := &ai.SessionPayload{Variables: make(map[string]any)}
-		ctx = context.WithValue(ctx, "session_payload", payload)
+		ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 		ag.service.session.Memory = NewShortTermMemory()
 		ag.service.session.Memory.SetRoutingState(&TaskContextClassification{
 			Entity:      "Omni",

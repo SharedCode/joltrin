@@ -22,7 +22,7 @@ func TestJoinPerformance_SmallDataset(t *testing.T) {
 	payload := &ai.SessionPayload{
 		CurrentDB: "test_db",
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	agent, cleanup := setupTestAgent(t)
 	defer cleanup()
@@ -111,7 +111,7 @@ func TestBulkAdd_Performance(t *testing.T) {
 	payload := &ai.SessionPayload{
 		CurrentDB: "test_db",
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	agent, cleanup := setupTestAgent(t)
 	defer cleanup()
@@ -182,7 +182,7 @@ func TestBulkAdd_TransactionModes(t *testing.T) {
 			payload := &ai.SessionPayload{
 				CurrentDB: "test_db",
 			}
-			ctx = context.WithValue(ctx, "session_payload", payload)
+			ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 			agent, cleanup := setupTestAgent(t)
 			defer cleanup()
@@ -234,7 +234,7 @@ func BenchmarkJoin_InnerJoin(b *testing.B) {
 	payload := &ai.SessionPayload{
 		CurrentDB: "test_db",
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	agent, cleanup := setupTestAgent(b)
 	defer cleanup()

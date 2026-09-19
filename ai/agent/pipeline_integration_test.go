@@ -103,7 +103,7 @@ func TestServiceIntegration_LastTool(t *testing.T) {
 	ctx = context.WithValue(ctx, ai.CtxKeyExecutor, executor)
 
 	// Set Session Payload
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{
+	ctx = context.WithValue(ctx, agent.SessionPayloadKey, &ai.SessionPayload{
 		CurrentDB: "mydb",
 	})
 

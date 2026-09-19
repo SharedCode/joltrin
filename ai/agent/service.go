@@ -1424,7 +1424,7 @@ func (s *Service) resetInteractionBuffer(query string) {
 // 			if strings.TrimSpace(p.CurrentUserQuery) == "" {
 // 				p.CurrentUserQuery = query
 // 			}
-// 			ctx = context.WithValue(ctx, "session_payload", p)
+// 			ctx = context.WithValue(ctx, SessionPayloadKey, p)
 // 			if db == nil && p.CurrentDB != "" {
 // 				if dbOpts, ok := s.databases[p.CurrentDB]; ok {
 // 					db = database.NewDatabase(dbOpts)
@@ -1454,7 +1454,7 @@ func (s *Service) resetInteractionBuffer(query string) {
 // 			p.Variables = s.session.Variables
 // 			p.ExplicitTransaction = true
 // 		}
-// 		ctx = context.WithValue(ctx, "session_payload", p)
+// 		ctx = context.WithValue(ctx, SessionPayloadKey, p)
 
 // 		if db == nil && p.CurrentDB != "" {
 // 			if dbOpts, ok := s.databases[p.CurrentDB]; ok {
@@ -1788,7 +1788,7 @@ func (s *Service) Ask(ctx context.Context, query string, cfg *ai.ConfigMap) (str
 	session := opts.Payload
 	if session == nil {
 		// Backwards compatibility: fall back to context-based session payload
-		if ctxPayload, ok := ctx.Value("session_payload").(*ai.SessionPayload); ok && ctxPayload != nil {
+		if ctxPayload, ok := ctx.Value(SessionPayloadKey).(*ai.SessionPayload); ok && ctxPayload != nil {
 			session = ctxPayload
 		} else {
 			session = &ai.SessionPayload{
@@ -1967,7 +1967,7 @@ func (s *Service) ask(ctx context.Context, req AskRequest) (AskResponse, error) 
 	if handled, resp, err := s.handlePendingUserConfirmationWithRequest(ctx, query, req.Session); handled {
 		return AskResponse{FinalText: resp, UpdatedSession: req.Session}, err
 	}
-	ctx = context.WithValue(ctx, "session_payload", req.Session)
+	ctx = context.WithValue(ctx, SessionPayloadKey, req.Session)
 	ctx = context.WithValue(ctx, RunnerSessionKey, s.session)
 
 	// 5. Perform topic routing and short-term memory thread promotion/initialization
@@ -1977,7 +1977,7 @@ func (s *Service) ask(ctx context.Context, req AskRequest) (AskResponse, error) 
 	if len(s.pipeline) > 0 {
 		// TODO: Refactor RunPipeline to accept explicit parameters
 		// For now, fall back to context-based approach for pipeline
-		ctx = context.WithValue(ctx, "session_payload", req.Session)
+		ctx = context.WithValue(ctx, SessionPayloadKey, req.Session)
 		if req.Executor != nil {
 			ctx = context.WithValue(ctx, ai.CtxKeyExecutor, req.Executor)
 		}
@@ -2196,25 +2196,25 @@ func extractProviderOverrideFromContext(ctx context.Context) *ProviderDetails {
 // handleSessionCommandWithRequest is the explicit-parameter version of handleSessionCommand
 func (s *Service) handleSessionCommandWithRequest(ctx context.Context, query string, db *database.Database, session *ai.SessionPayload) (string, bool, error) {
 	// Temporarily inject session into context for legacy compatibility
-	ctx = context.WithValue(ctx, "session_payload", session)
+	ctx = context.WithValue(ctx, SessionPayloadKey, session)
 	return s.handleSessionCommand(ctx, query, db)
 }
 
 // handlePendingUserConfirmationWithRequest is the explicit-parameter version of handlePendingUserConfirmation
 func (s *Service) handlePendingUserConfirmationWithRequest(ctx context.Context, query string, session *ai.SessionPayload) (bool, string, error) {
-	ctx = context.WithValue(ctx, "session_payload", session)
+	ctx = context.WithValue(ctx, SessionPayloadKey, session)
 	return s.handlePendingUserConfirmation(ctx, query)
 }
 
 // performTopicRoutingWithRequest is the explicit-parameter version of performTopicRouting
 func (s *Service) performTopicRoutingWithRequest(ctx context.Context, query string, session *ai.SessionPayload) *topicRoutingResult {
-	ctx = context.WithValue(ctx, "session_payload", session)
+	ctx = context.WithValue(ctx, SessionPayloadKey, session)
 	return s.performTopicRouting(ctx, query)
 }
 
 // buildPromptInputsWithRequest is the explicit-parameter version of buildPromptInputs
 func (s *Service) buildPromptInputsWithRequest(ctx context.Context, query string, hits []ai.Hit[map[string]any], session *ai.SessionPayload) *promptInputs {
-	ctx = context.WithValue(ctx, "session_payload", session)
+	ctx = context.WithValue(ctx, SessionPayloadKey, session)
 	return s.buildPromptInputs(ctx, query, hits)
 }
 
@@ -2305,6 +2305,6 @@ func (s *Service) executeReasoningEngineWithRequest(ctx context.Context, query s
 // updateSessionMemoryWithRequest is the explicit-parameter version with explicit session
 func (s *Service) updateSessionMemoryWithRequest(ctx context.Context, query string, finalText string, topicAssessment *TopicAssessment, engineResp ai.ReasoningResponse, gen ai.Generator, session *ai.SessionPayload) {
 	// Temporarily inject session into context for legacy compatibility
-	ctx = context.WithValue(ctx, "session_payload", session)
+	ctx = context.WithValue(ctx, SessionPayloadKey, session)
 	s.updateSessionMemory(ctx, query, finalText, topicAssessment, engineResp, gen)
 }

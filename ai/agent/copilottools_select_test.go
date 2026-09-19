@@ -98,7 +98,7 @@ func TestToolSelect_WithFilter(t *testing.T) {
 	}
 	defer readTx.Rollback(ctx)
 	sessionPayload.Transaction = readTx
-	ctx = context.WithValue(ctx, "session_payload", sessionPayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, sessionPayload)
 
 	// 3. Test Cases
 	tests := []struct {
@@ -254,7 +254,7 @@ func TestToolSelect_WithAlias(t *testing.T) {
 	}
 	defer readTx.Rollback(ctx)
 	sessionPayload.Transaction = readTx
-	ctx = context.WithValue(ctx, "session_payload", sessionPayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, sessionPayload)
 
 	// 3. Execute Select with Alias
 	args := map[string]any{
@@ -360,7 +360,7 @@ func TestToolSelect_OutputFormat(t *testing.T) {
 	}
 	defer readTx.Rollback(ctx)
 	payload.Transaction = readTx
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	// Test 1: Select All
 	args := map[string]any{
@@ -410,7 +410,7 @@ func TestToolSelect_OrderBy(t *testing.T) {
 
 	ctx := context.Background()
 	payload := &ai.SessionPayload{CurrentDB: "system"}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 	agent.Open(ctx)
 
 	// Create Store and Data using sopdb directly
@@ -594,7 +594,7 @@ func TestToolSelect_OrderedOutput(t *testing.T) {
 	}
 	defer readTx.Rollback(ctx)
 	sessionPayload.Transaction = readTx
-	ctx = context.WithValue(ctx, "session_payload", sessionPayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, sessionPayload)
 
 	// 3. Test
 	args := map[string]any{
@@ -662,7 +662,7 @@ func TestToolSelect_OrderedOutput(t *testing.T) {
 	}
 	defer readTx.Rollback(ctx)
 	sessionPayload.Transaction = readTx
-	ctx = context.WithValue(ctx, "session_payload", sessionPayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, sessionPayload)
 
 	// Select again
 	result, err = agent.toolSelect(ctx, args)
@@ -805,7 +805,7 @@ func TestToolSelect_LegacyOrderedOutput(t *testing.T) {
 	}
 	defer readTx.Rollback(ctx)
 	sessionPayload.Transaction = readTx
-	ctx = context.WithValue(ctx, "session_payload", sessionPayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, sessionPayload)
 
 	// 3. Test
 	args := map[string]any{
@@ -893,7 +893,7 @@ func TestReproSelect_NestedFilter(t *testing.T) {
 	}
 	defer readTx.Rollback(ctx)
 	sessionPayload.Transaction = readTx
-	ctx = context.WithValue(ctx, "session_payload", sessionPayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, sessionPayload)
 
 	// 3. Run Select with nested filter
 	args := map[string]any{

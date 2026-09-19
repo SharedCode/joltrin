@@ -587,7 +587,7 @@ func constructPayload(ctx context.Context, w http.ResponseWriter, req *aiChatReq
 		fullMessage = req.Message
 	}
 
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, agent.SessionPayloadKey, payload)
 
 	return ctx, payload, cfg, fullMessage
 }

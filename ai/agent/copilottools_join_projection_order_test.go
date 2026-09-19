@@ -46,7 +46,7 @@ func TestToolJoin_ProjectionOrder_WithFieldsString(t *testing.T) {
 		t.Fatalf("Commit failed: %v", err)
 	}
 
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "default"})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "default"})
 
 	args := map[string]any{
 		"database":          "default",

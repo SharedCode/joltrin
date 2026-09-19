@@ -13,7 +13,7 @@ import (
 )
 
 func TestExplicitMinting_MintToSpaceTool(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "session_payload", &ai.SessionPayload{UserID: "test", SessionID: "sess", CurrentDB: "sop"})
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, &ai.SessionPayload{UserID: "test", SessionID: "sess", CurrentDB: "sop"})
 	testDir := "./test_data/minting_test"
 	os.RemoveAll(testDir)
 	defer os.RemoveAll(testDir)
@@ -82,7 +82,7 @@ func TestExplicitMinting_MintToSpaceTool(t *testing.T) {
 }
 
 func TestExplicitMinting_MintToSpaceTool_InfersKBNameFromCurrentUserQuery(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "session_payload", &ai.SessionPayload{
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, &ai.SessionPayload{
 		UserID:           "test",
 		SessionID:        "sess",
 		CurrentDB:        "sop",
@@ -128,7 +128,7 @@ func TestExplicitMinting_MintToSpaceTool_InfersKBNameFromCurrentUserQuery(t *tes
 }
 
 func TestDeleteSpaceTool_InfersKBNameFromCurrentUserQuery(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "session_payload", &ai.SessionPayload{
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, &ai.SessionPayload{
 		UserID:           "test",
 		SessionID:        "sess",
 		CurrentDB:        "sop",
@@ -183,7 +183,7 @@ func TestDeleteSpaceTool_InfersKBNameFromCurrentUserQuery(t *testing.T) {
 }
 
 func TestImplicitEnrichment_TriggerSleepCycle(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "session_payload", &ai.SessionPayload{UserID: "test", SessionID: "sess", CurrentDB: "sop"})
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, &ai.SessionPayload{UserID: "test", SessionID: "sess", CurrentDB: "sop"})
 	testDir := "./test_data/sleepcycle_test"
 	os.RemoveAll(testDir)
 	defer os.RemoveAll(testDir)

@@ -96,7 +96,7 @@ func (tx *fakeMemoryTx) OnCommit(callback func(ctx context.Context) error) {
 }
 
 func TestMemoryStoreNames_IncludeUserIDWhenBound(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "session_payload", &ai.SessionPayload{UserID: "user42"})
+	ctx := context.WithValue(context.Background(), ai.CtxKeySessionPayload, &ai.SessionPayload{UserID: "user42"})
 	m := NewMemoryUnit("omni")
 	m.BindSession(ctx)
 

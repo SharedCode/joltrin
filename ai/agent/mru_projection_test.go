@@ -82,7 +82,7 @@ func TestResetTopicSwitchProjection_ClearsRoutingStateAndCarryover(t *testing.T)
 	session.Memory.SetMRUSnapshot([]MRUItem{{Category: "PERSONA_omni", Context: "persona context", Source: MRUSourcePersona, Scope: MRUScopeSession}})
 
 	payload := &ai.SessionPayload{Variables: map[string]any{"RoutingState": &TaskContextClassification{Domain: StoresDomain}}}
-	ctx := context.WithValue(context.Background(), "session_payload", payload)
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, payload)
 
 	resetTopicSwitchProjection(ctx, session)
 
@@ -113,7 +113,7 @@ func TestRehydrateMRUFromMemory_RestoresRoutingAndProjectsActiveKB(t *testing.T)
 	ag.service.session.Memory.AddThread(&ConversationThread{Exchanges: []Interaction{{ActiveKB: "sop, medical"}}})
 
 	payload := &ai.SessionPayload{Variables: map[string]any{}}
-	ctx := context.WithValue(context.Background(), "session_payload", payload)
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, payload)
 
 	ag.rehydrateMRUFromMemory(ctx)
 

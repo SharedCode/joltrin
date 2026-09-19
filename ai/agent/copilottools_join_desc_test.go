@@ -26,7 +26,7 @@ func TestToolJoin_OrderBy_RightStoreDirection(t *testing.T) {
 	agent := NewCopilotAgent(cfg, dbs, sysDB)
 
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "system"})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "system"})
 	agent.Open(ctx)
 
 	// Create Stores and Data

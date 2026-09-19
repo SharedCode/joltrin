@@ -153,7 +153,7 @@ func TestReproLoadFailedError_Legacy(t *testing.T) {
 	// Create CopilotAgent
 	daAgent := NewCopilotAgent(Config{}, map[string]sop.DatabaseOptions{"testdb": dbOpts}, systemDB)
 	daAgent.SetGenerator(gen)
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "testdb"})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "testdb"})
 	daAgent.Open(ctx)
 
 	registry := map[string]ai.Agent[map[string]any]{
@@ -320,7 +320,7 @@ func TestReproLoadFailedError_Native(t *testing.T) {
 	// Create CopilotAgent
 	daAgent := NewCopilotAgent(Config{}, map[string]sop.DatabaseOptions{"testdb": dbOpts}, systemDB)
 	daAgent.SetGenerator(gen)
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "testdb"})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "testdb"})
 	daAgent.Open(ctx)
 
 	registry := map[string]ai.Agent[map[string]any]{

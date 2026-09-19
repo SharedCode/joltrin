@@ -155,7 +155,7 @@ func TestToolSaveScript_AcceptsScriptAlias(t *testing.T) {
 	sysDB := database.NewDatabase(sop.DatabaseOptions{Type: sop.Standalone, StoresFolders: []string{t.TempDir()}})
 	agent := NewCopilotAgent(Config{}, nil, sysDB)
 
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "dev_db"})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "dev_db"})
 	resp, err := agent.toolSaveScript(ctx, map[string]any{
 		"name":        "expensive_orders",
 		"description": "Find orders over 1000",

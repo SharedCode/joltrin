@@ -28,7 +28,7 @@ func TestCopilotAgent_DelegateToReasoningEngineStreamsToolEvents(t *testing.T) {
 		events = append(events, eventType)
 	})
 	ctx = context.WithValue(ctx, ai.CtxKeyExecutor, a)
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "dev"})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "dev"})
 
 	_, _, _, _, _, err := a.delegateToReasoningEngine(ctx, "show me users", &loopMockGenerator{}, "system prompt")
 	if err != nil {

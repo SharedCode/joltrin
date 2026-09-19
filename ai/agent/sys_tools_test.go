@@ -65,7 +65,7 @@ func TestSystemTools_OmniAndAvatar_Injections(t *testing.T) {
 	p := &ai.SessionPayload{
 		CurrentDB: SystemDBName, // avoid nil deref
 	}
-	sessionCtx := context.WithValue(ctx, "session_payload", p)
+	sessionCtx := context.WithValue(ctx, SessionPayloadKey, p)
 
 	omniPrompt := ag.buildSystemPrompt(sessionCtx, "Test user query", TaskContextClassification{})
 	if !strings.Contains(omniPrompt, "INJECTED_SYSTEM_TOOL_DEFINITION") {

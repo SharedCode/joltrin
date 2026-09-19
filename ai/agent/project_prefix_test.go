@@ -67,7 +67,7 @@ func TestProject_JoinedFields_PrefixIssue(t *testing.T) {
 ]`
 
 	sessionPayload := &ai.SessionPayload{CurrentDB: "test_db"}
-	ctx = context.WithValue(ctx, "session_payload", sessionPayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, sessionPayload)
 
 	respRaw, err := agent.toolExecuteScript(ctx, map[string]any{"script": scriptJSON})
 	if err != nil {
@@ -150,7 +150,7 @@ func TestProject_EmptyFields_Flattening(t *testing.T) {
 ]`
 
 	sessionPayload := &ai.SessionPayload{CurrentDB: "test_db"}
-	ctx = context.WithValue(ctx, "session_payload", sessionPayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, sessionPayload)
 
 	respRaw, err := agent.toolExecuteScript(ctx, map[string]any{"script": scriptJSON})
 	if err != nil {
@@ -215,7 +215,7 @@ func TestProject_Unprefixed_Match_Prefixed(t *testing.T) {
 ]`
 
 	sessionPayload := &ai.SessionPayload{CurrentDB: "test_db"}
-	ctx = context.WithValue(ctx, "session_payload", sessionPayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, sessionPayload)
 	respRaw, err := agent.toolExecuteScript(ctx, map[string]any{"script": scriptJSON})
 	if err != nil {
 		t.Fatalf("Script failed: %v", err)
@@ -279,7 +279,7 @@ func TestProject_Mixed_Prefix_Scenarios(t *testing.T) {
 ]`
 
 	sessionPayload := &ai.SessionPayload{CurrentDB: "test_db"}
-	ctx = context.WithValue(ctx, "session_payload", sessionPayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, sessionPayload)
 	respRaw, err := agent.toolExecuteScript(ctx, map[string]any{"script": scriptJSON})
 	if err != nil {
 		t.Fatalf("Script failed: %v", err)
@@ -359,7 +359,7 @@ func TestProject_Alias_Explicit(t *testing.T) {
 ]`
 
 	sessionPayload := &ai.SessionPayload{CurrentDB: "test_db"}
-	ctx = context.WithValue(ctx, "session_payload", sessionPayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, sessionPayload)
 
 	respRaw, err := agent.toolExecuteScript(ctx, map[string]any{"script": scriptJSON})
 	if err != nil {

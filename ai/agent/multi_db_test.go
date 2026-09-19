@@ -63,7 +63,7 @@ func TestMultiDBScriptExecution(t *testing.T) {
 		"db2": dbOpts2,
 	}, systemDB)
 
-	ctx = context.WithValue(context.Background(), "session_payload", &ai.SessionPayload{CurrentDB: "db1"})
+	ctx = context.WithValue(context.Background(), SessionPayloadKey, &ai.SessionPayload{CurrentDB: "db1"})
 	daAgent.Open(ctx)
 
 	// 3. Define Script
@@ -105,7 +105,7 @@ func TestMultiDBScriptExecution(t *testing.T) {
 		payload := &ai.SessionPayload{
 			CurrentDB: "db1",
 		}
-		ctxWithPayload := context.WithValue(ctx, "session_payload", payload)
+		ctxWithPayload := context.WithValue(ctx, SessionPayloadKey, payload)
 
 		res, err := daAgent.Execute(ctxWithPayload, "multidb_script", map[string]any{})
 		if err != nil {
@@ -124,7 +124,7 @@ func TestMultiDBScriptExecution(t *testing.T) {
 			CurrentDB:   "db1",
 			Transaction: tx,
 		}
-		ctxWithPayload := context.WithValue(ctx, "session_payload", payload)
+		ctxWithPayload := context.WithValue(ctx, SessionPayloadKey, payload)
 
 		res, err := daAgent.Execute(ctxWithPayload, "multidb_script", map[string]any{})
 		if err != nil {
@@ -151,7 +151,7 @@ func TestMultiDBScriptExecution(t *testing.T) {
 				"db2": tx2,
 			},
 		}
-		ctxWithPayload := context.WithValue(ctx, "session_payload", payload)
+		ctxWithPayload := context.WithValue(ctx, SessionPayloadKey, payload)
 
 		res, err := daAgent.Execute(ctxWithPayload, "multidb_script", map[string]any{})
 		if err != nil {

@@ -99,7 +99,7 @@ func TestContextHistoryControl(t *testing.T) {
 	ctx = context.WithValue(ctx, ai.CtxKeyExecutor, mockExecutor)
 
 	// Set Payload to avoid implicit transaction errors and set CurrentDB
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{
+	ctx = context.WithValue(ctx, agent.SessionPayloadKey, &ai.SessionPayload{
 		// CurrentDB: "testdb", // Commented out to avoid transaction panic in minimal mock
 	})
 

@@ -71,7 +71,7 @@ func TestExecuteScript_RelationTargetJoinCompatibility(t *testing.T) {
 		t.Fatalf("marshal script: %v", err)
 	}
 
-	ctxWithPayload := context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "dev_db"})
+	ctxWithPayload := context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "dev_db"})
 	resultRaw, err := agent.toolExecuteScript(ctxWithPayload, map[string]any{"script": string(scriptBytes)})
 	if err != nil {
 		t.Fatalf("toolExecuteScript failed: %v", err)
@@ -145,7 +145,7 @@ func TestExecuteScript_JoinResolvesStoreByUnderlyingNameWhenResultVarDiffers(t *
 		t.Fatalf("marshal script: %v", err)
 	}
 
-	ctxWithPayload := context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "dev_db"})
+	ctxWithPayload := context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "dev_db"})
 	resultRaw, err := agent.toolExecuteScript(ctxWithPayload, map[string]any{"script": string(scriptBytes)})
 	if err != nil {
 		t.Fatalf("toolExecuteScript failed: %v", err)
@@ -221,7 +221,7 @@ func TestExecuteScript_OpenStoreWithoutResultVarCompatibility(t *testing.T) {
 		t.Fatalf("marshal script: %v", err)
 	}
 
-	ctxWithPayload := context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "dev_db"})
+	ctxWithPayload := context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "dev_db"})
 	resultRaw, err := agent.toolExecuteScript(ctxWithPayload, map[string]any{"script": string(scriptBytes)})
 	if err != nil {
 		t.Fatalf("toolExecuteScript failed: %v", err)
@@ -298,7 +298,7 @@ func TestExecuteScript_JoinAutoOpensRightStoresByUnderlyingName(t *testing.T) {
 		t.Fatalf("marshal script: %v", err)
 	}
 
-	ctxWithPayload := context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "dev_db"})
+	ctxWithPayload := context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "dev_db"})
 	resultRaw, err := agent.toolExecuteScript(ctxWithPayload, map[string]any{"script": string(scriptBytes)})
 	if err != nil {
 		t.Fatalf("toolExecuteScript failed: %v", err)
@@ -379,7 +379,7 @@ func TestExecuteScript_ExplicitCommitMaterializesJoinChainWithoutReturn(t *testi
 		t.Fatalf("marshal script: %v", err)
 	}
 
-	ctxWithPayload := context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "dev_db"})
+	ctxWithPayload := context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "dev_db"})
 	resultRaw, err := agent.toolExecuteScript(ctxWithPayload, map[string]any{"script": string(scriptBytes)})
 	if err != nil {
 		t.Fatalf("toolExecuteScript failed: %v", err)
@@ -459,7 +459,7 @@ func TestExecuteScript_ImplicitFilteredCursorSurvivesExplicitCommit(t *testing.T
 		t.Fatalf("marshal script: %v", err)
 	}
 
-	ctxWithPayload := context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "dev_db"})
+	ctxWithPayload := context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "dev_db"})
 	resultRaw, err := agent.toolExecuteScript(ctxWithPayload, map[string]any{"script": string(scriptBytes)})
 	if err != nil {
 		t.Fatalf("toolExecuteScript failed: %v", err)

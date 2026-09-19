@@ -1111,7 +1111,7 @@ func (e *ServiceToolExecutor) Execute(ctx context.Context, toolName string, args
 		if db, ok := ctx.Value(ai.CtxKeyDatabase).(*database.Database); ok {
 			toolCtx.Database = db
 		}
-		if session, ok := ctx.Value("session_payload").(*ai.SessionPayload); ok {
+		if session, ok := ctx.Value(SessionPayloadKey).(*ai.SessionPayload); ok {
 			toolCtx.Session = session
 		}
 	}
@@ -1178,7 +1178,7 @@ func (e *ServiceToolExecutor) injectToolContextToLegacyContext(ctx context.Conte
 		ctx = context.WithValue(ctx, ai.CtxKeyDatabase, toolCtx.Database)
 	}
 	if toolCtx.Session != nil {
-		ctx = context.WithValue(ctx, "session_payload", toolCtx.Session)
+		ctx = context.WithValue(ctx, SessionPayloadKey, toolCtx.Session)
 	}
 	if toolCtx.EventStreamer != nil {
 		ctx = context.WithValue(ctx, ai.CtxKeyEventStreamer, toolCtx.EventStreamer)
@@ -1374,7 +1374,7 @@ func (s *Service) runSteps(ctx context.Context, steps []ai.ScriptStep, scope map
 				// This forces the step to start a new local transaction (or session one if we could, but local is safer fallback).
 				newPayload := *p
 				newPayload.Transaction = nil
-				stepCtx = context.WithValue(stepCtx, "session_payload", &newPayload)
+				stepCtx = context.WithValue(stepCtx, SessionPayloadKey, &newPayload)
 				// Update p to point to newPayload so subsequent logic uses the clean state
 				p = &newPayload
 			}
@@ -1390,7 +1390,7 @@ func (s *Service) runSteps(ctx context.Context, steps []ai.ScriptStep, scope map
 				// Clear transaction if switching DB
 				newPayload.Transaction = nil
 
-				stepCtx = context.WithValue(groupCtx, "session_payload", &newPayload)
+				stepCtx = context.WithValue(groupCtx, SessionPayloadKey, &newPayload)
 				// ...
 			}
 			// ...
@@ -1427,7 +1427,7 @@ func (s *Service) runSteps(ctx context.Context, steps []ai.ScriptStep, scope map
 					// Clone payload and remove transaction
 					newPayload := *p
 					newPayload.Transaction = nil
-					asyncCtx = context.WithValue(stepCtx, "session_payload", &newPayload)
+					asyncCtx = context.WithValue(stepCtx, SessionPayloadKey, &newPayload)
 				}
 
 				// Capture step for closure

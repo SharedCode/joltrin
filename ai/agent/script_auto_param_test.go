@@ -43,7 +43,7 @@ func TestScript_AutoParameterize(t *testing.T) {
 	payload := &ai.SessionPayload{
 		CurrentDB: "system",
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	// 2. Create Script with hardcoded values
 	svc.handleSessionCommand(ctx, "/create auto_test", sysDB)

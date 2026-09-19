@@ -56,7 +56,7 @@ func TestBuildSystemPrompt_IncludesFocusedStoreContext(t *testing.T) {
 	ag.service = &Service{session: &RunnerSession{MRU: []MRUItem{}}}
 
 	payload := &ai.SessionPayload{CurrentDB: "appdb", Variables: make(map[string]any)}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	prompt := ag.buildSystemPrompt(ctx, "Find users", TaskContextClassification{
 		Domain:      StoresDomain,
@@ -134,7 +134,7 @@ func TestBuildSystemPrompt_StoresFocusedContext_StaysWithinBudgetGuardrail(t *te
 	ag.service = &Service{session: &RunnerSession{MRU: []MRUItem{}}}
 
 	payload := &ai.SessionPayload{CurrentDB: "appdb", Variables: make(map[string]any)}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	prompt := ag.buildSystemPrompt(ctx, "Find John and inspect related orders", TaskContextClassification{
 		Domain:      StoresDomain,
@@ -205,7 +205,7 @@ func TestBuildSystemPrompt_IncludesCrossDomainFocusedContext(t *testing.T) {
 	ag.service = &Service{session: &RunnerSession{MRU: []MRUItem{}}}
 
 	payload := &ai.SessionPayload{Variables: make(map[string]any)}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	prompt := ag.buildSystemPrompt(ctx, "Search release notes and inspect users", TaskContextClassification{
 		Domain:          StoresDomain,
@@ -266,7 +266,7 @@ func TestBuildSystemPrompt_IncludesScriptAuthoringContextForStores(t *testing.T)
 	ag.service = &Service{session: &RunnerSession{MRU: []MRUItem{}}}
 
 	payload := &ai.SessionPayload{CurrentDB: SystemDBName, Variables: make(map[string]any)}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	prompt := ag.buildSystemPrompt(ctx, "Create a script named expensive_orders to find orders over 1000", TaskContextClassification{
 		Domain:          StoresDomain,
@@ -312,7 +312,7 @@ func TestBuildSystemPrompt_DedupesFocusedToolSectionsAgainstSystemToolsBaseline(
 	ag.service = &Service{session: &RunnerSession{MRU: []MRUItem{}}}
 
 	payload := &ai.SessionPayload{CurrentDB: SystemDBName, Variables: make(map[string]any)}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	ag.markMRUCategoryWithSource(SYSTEM_TOOLS, buildScriptToolDescriptionContext(StoresDomain, map[string]bool{"R": true}), MRUSourceSystemTools)
 

@@ -33,7 +33,7 @@ func TestTransactionLifecycle_ContextCancellation(t *testing.T) {
 		ExplicitTransaction: false,
 		CurrentDB:           "testdb",
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	// Cancel the context to simulate user abort
 	cancel()
@@ -78,7 +78,7 @@ func TestTransactionLifecycle_NormalCommit(t *testing.T) {
 		Transaction: mockTx,
 		CurrentDB:   "testdb",
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	err := service.Close(ctx)
 	if err != nil {
@@ -130,7 +130,7 @@ func TestTransactionLifecycle_ExplicitTransaction(t *testing.T) {
 		ExplicitTransaction: true, // Explicit transaction (e.g., from script that didn't commit)
 		CurrentDB:           "testdb",
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	err := service.Close(ctx)
 	if err != nil {

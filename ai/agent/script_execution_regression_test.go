@@ -149,7 +149,7 @@ func TestScriptExecution_JoinRegression(t *testing.T) {
 	t.Log("Executing script...")
 
 	// We mock the context payload to inject current DB
-	ctxWithPayload := context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "dev_db"})
+	ctxWithPayload := context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "dev_db"})
 
 	resultRaw, err := agent.toolExecuteScript(ctxWithPayload, map[string]any{"script": scriptJSON})
 	if err != nil {

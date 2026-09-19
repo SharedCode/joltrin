@@ -28,7 +28,7 @@ func TestRepro_SchemaValidation(t *testing.T) {
 	agent := NewCopilotAgent(Config{}, dbs, nil)
 
 	// 2. Prepare Data
-	ctx := context.WithValue(context.Background(), "session_payload", &ai.SessionPayload{CurrentDB: "dev_db"})
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, &ai.SessionPayload{CurrentDB: "dev_db"})
 	agent.Open(ctx)
 
 	// Populate directly
@@ -92,7 +92,7 @@ func TestRepro_SchemaValidation(t *testing.T) {
 	payload := &ai.SessionPayload{
 		CurrentDB: "dev_db",
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	_, err = agent.toolExecuteScript(ctx, map[string]any{"script": scriptSteps})
 

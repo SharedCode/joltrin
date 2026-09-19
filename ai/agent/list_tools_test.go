@@ -17,7 +17,7 @@ func TestListTools(t *testing.T) {
 	payload := &ai.SessionPayload{
 		CurrentDB: "system",
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	agent.registerTools(ctx)
 
@@ -50,7 +50,7 @@ func TestListTools_StoresRoutingExposesStoresProtocolTools(t *testing.T) {
 			},
 		},
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	agent.registerTools(ctx)
 	tools, err := agent.ListTools(ctx)
@@ -87,7 +87,7 @@ func TestListTools_SpacesRoutingHidesStoresProtocolTools(t *testing.T) {
 			},
 		},
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	agent.registerTools(ctx)
 	tools, err := agent.ListTools(ctx)
@@ -119,7 +119,7 @@ func TestListTools_StoresReadRoutingHidesMutationTools(t *testing.T) {
 			},
 		},
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	agent.registerTools(ctx)
 	tools, err := agent.ListTools(ctx)
@@ -151,7 +151,7 @@ func TestListTools_StoresUpdateRoutingExposesOnlyUpdateMutation(t *testing.T) {
 			},
 		},
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	agent.registerTools(ctx)
 	tools, err := agent.ListTools(ctx)
@@ -183,7 +183,7 @@ func TestListTools_SpacesUpdateRoutingExposesSpaceMutationTools(t *testing.T) {
 			},
 		},
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	agent.registerTools(ctx)
 	tools, err := agent.ListTools(ctx)
@@ -206,7 +206,7 @@ func TestListTools_SpacesUpdateRoutingExposesSpaceMutationTools(t *testing.T) {
 func TestListTools_LowRiskExposedToolsUseJSONSchemas(t *testing.T) {
 	agent := NewCopilotAgent(Config{}, nil, nil)
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "system"})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "system"})
 
 	agent.registerTools(ctx)
 	tools, err := agent.ListTools(ctx)

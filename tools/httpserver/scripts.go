@@ -84,7 +84,7 @@ func handleExecuteScript(w http.ResponseWriter, r *http.Request) {
 		CurrentDB:   "system", // Default to system or make configurable
 		AvatarScope: "",       // System scripts do not run in Avatar Mode
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, agent.SessionPayloadKey, payload)
 	if rs := agentSvc.RunnerSession(); rs != nil {
 		ctx = context.WithValue(ctx, agent.RunnerSessionKey, rs)
 	}

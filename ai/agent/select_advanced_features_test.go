@@ -155,7 +155,7 @@ func TestToolSelect_ValueMatch(t *testing.T) {
 	agent := &CopilotAgent{
 		databases: map[string]sop.DatabaseOptions{"testdb": dbOpts},
 	}
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "testdb"})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "testdb"})
 
 	// Test: Select where region='APAC' and department='HR'
 	args := map[string]any{
@@ -255,7 +255,7 @@ func TestToolSelect_ScriptView(t *testing.T) {
 		systemDB:  systemDB,
 	}
 	agent.registerTools(context.Background())
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "testdb"})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "testdb"})
 
 	// Query: Select name from 'active_users'
 	args := map[string]any{

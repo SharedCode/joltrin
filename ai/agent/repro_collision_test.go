@@ -92,7 +92,7 @@ func TestReproJoinCollision(t *testing.T) {
 	payload := &ai.SessionPayload{
 		CurrentDB: "default",
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, agent.SessionPayloadKey, payload)
 	ag.Open(ctx)
 
 	// 4. Execute

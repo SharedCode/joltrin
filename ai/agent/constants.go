@@ -29,6 +29,10 @@ const (
 	DefaultModelOllama    = ai.DefaultModelOllama
 
 	// Session Keys
-	SessionPayloadKey = "session_payload"
-	RunnerSessionKey  = "runner_session"
+	SessionPayloadKey = ai.CtxKeySessionPayload
+	// RunnerSessionKey was an untyped string constant (SA1029: same
+	// collision risk as SessionPayloadKey above, just contained to this
+	// package - every call site already goes through this one constant
+	// rather than a scattered literal, so retyping it here is enough).
+	RunnerSessionKey ai.ContextKey = "ai_runner_session"
 )

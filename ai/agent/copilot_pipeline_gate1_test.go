@@ -237,7 +237,7 @@ func TestEvaluateRoutingGates_HandlesBareSopQuery(t *testing.T) {
 	}
 	ag.service.session = &RunnerSession{MRU: []MRUItem{}}
 
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{Variables: make(map[string]any)})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{Variables: make(map[string]any)})
 
 	tests := []struct {
 		name                string

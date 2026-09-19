@@ -93,7 +93,7 @@ func TestFakeAgentGeneration(t *testing.T) {
 	// Create a dummy script manually to test execution
 	ctx = context.WithValue(ctx, ai.CtxKeyWriter, os.Stdout)
 	// We need to mock the session payload
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{
+	ctx = context.WithValue(ctx, agent.SessionPayloadKey, &ai.SessionPayload{
 		CurrentDB: "mydb",
 	})
 	adminAgent.Open(ctx)

@@ -76,7 +76,7 @@ func TestToolJoin_SuffixHandling(t *testing.T) {
 	payload := &ai.SessionPayload{
 		CurrentDB: "test_db",
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	respRaw, err := adminAgent.toolJoin(ctx, args)
 	if err != nil {
@@ -194,7 +194,7 @@ func TestToolJoin_WithAlias(t *testing.T) {
 	sessionPayload := &ai.SessionPayload{
 		CurrentDB: "testdb",
 	}
-	ctx = context.WithValue(ctx, "session_payload", sessionPayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, sessionPayload)
 
 	// 3. Execute Join with Alias
 	// SQL: select a.region, b.name as employee from departments a inner join employees b on a.region=b.region
@@ -310,7 +310,7 @@ func TestToolJoin_StoreNamePrefix(t *testing.T) {
 
 	// Register DB
 	agent.databases["default"] = dbOpts
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "default"})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "default"})
 	agent.Open(ctx)
 
 	// Execute Join
@@ -400,7 +400,7 @@ func TestToolJoin_ReproUserScenario(t *testing.T) {
 	agent := NewCopilotAgent(cfg, dbs, sysDB)
 
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "system"})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "system"})
 	agent.Open(ctx)
 
 	// Create Stores and Data

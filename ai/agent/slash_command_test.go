@@ -20,7 +20,7 @@ func TestCopilotAgent_Ask_SlashCommand(t *testing.T) {
 	payload := &ai.SessionPayload{
 		CurrentDB: "system",
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	// Case 1: Slash Command with simple args
 	// /list_databases

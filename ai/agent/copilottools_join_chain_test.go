@@ -82,7 +82,7 @@ func TestToolJoin_Chained_InnerThenRight(t *testing.T) {
 ]`
 
 	sessionPayload := &ai.SessionPayload{CurrentDB: "test_db"}
-	ctx = context.WithValue(ctx, "session_payload", sessionPayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, sessionPayload)
 
 	respRaw, err := agent.toolExecuteScript(ctx, map[string]any{"script": scriptJSON})
 	if err != nil {
@@ -229,7 +229,7 @@ func TestToolJoin_Chained_InnerThenLeft(t *testing.T) {
 ]`
 
 	sessionPayload := &ai.SessionPayload{CurrentDB: "test_db"}
-	ctx = context.WithValue(ctx, "session_payload", sessionPayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, sessionPayload)
 
 	respRaw, err := agent.toolExecuteScript(ctx, map[string]any{"script": scriptJSON})
 	if err != nil {
@@ -344,7 +344,7 @@ func TestToolJoin_Full(t *testing.T) {
 	]`
 
 	sessionPayload := &ai.SessionPayload{CurrentDB: "test_db"}
-	ctx = context.WithValue(ctx, "session_payload", sessionPayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, sessionPayload)
 
 	respRaw, err := agent.toolExecuteScript(ctx, map[string]any{"script": scriptJSON})
 	if err != nil {
