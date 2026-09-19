@@ -242,7 +242,7 @@ func (e *ScriptEngine) resolveTemplate(tmpl string) any {
 			current, ok = currentMap[part]
 			if !ok {
 
-				if valMap, ok := currentMap["value"].(map[string]any); ok {
+				if valMap, isMap := currentMap["value"].(map[string]any); isMap {
 					current, ok = valMap[part]
 				}
 			}
