@@ -12,17 +12,22 @@ import (
 	"strings"
 
 	"github.com/sharedcode/joltrin/ai/agent"
+	"github.com/sharedcode/joltrin/internal/netguard"
 )
 
 // PrepareData downloads a CSV dataset and converts it to the agent DataItem JSON format.
 func PrepareData(ctx context.Context, url, out string, limit int) error {
+	if err := netguard.ValidateFetchURL(url); err != nil {
+		return fmt.Errorf("dataset URL rejected: %w", err)
+	}
+
 	fmt.Printf("Downloading dataset from %s...\n", url)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := netguard.SafeClient().Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to download dataset: %w", err)
 	}
