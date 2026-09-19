@@ -36,6 +36,16 @@ func DigestKnowledgeBase(ctx context.Context, kb *KnowledgeBase[map[string]any],
 	// Bounded on both ends: an unbounded caller-supplied limit would make
 	// the map-size hint below (and the search calls that use perQueryLimit)
 	// an easy way to force a huge allocation.
+	//
+	// CodeQL alert 212 (go/allocation-size-overflow) flags
+	// len(queries)*perQueryLimit at the make() call below despite both
+	// clamps existing, because its static analysis doesn't propagate
+	// bounds through two separate conditional blocks to prove the product
+	// stays <=1000*1000 by the time the multiplication runs. Verified,
+	// not assumed: TestDigestKnowledgeBase_ClampsCombinedAllocationSize
+	// supplies an extreme value for both operands in the same call (the
+	// actual shape the alert is warning about, not just one clamp tested
+	// in isolation) and asserts it returns quickly without error.
 	const maxDigestLimit = 1000
 	const maxDigestQueries = 1000
 

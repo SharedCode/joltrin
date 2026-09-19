@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
@@ -205,6 +206,77 @@ func TestDigestKnowledgeBase_ClampsUnboundedQueryCount(t *testing.T) {
 	})
 	if err != nil {
 		t.Fatalf("DigestKnowledgeBase with an unbounded query count failed: %v", err)
+	}
+}
+
+// TestDigestKnowledgeBase_ClampsCombinedAllocationSize is the record of the
+// investigation for CodeQL alert 212 (go/allocation-size-overflow), flagged
+// on line 68's `make(map[string]KBDigestHit, len(queries)*perQueryLimit)`.
+// The two preceding tests each clamp one operand of that multiplication in
+// isolation; this one supplies an extreme value for BOTH Queries and
+// PerQueryLimit in the same call, which is the actual shape CodeQL's query
+// is warning about - two independently attacker-controlled values whose
+// product feeds an allocation size. If either clamp were missing or wrong,
+// this would either hang building an enormous map or panic on an
+// unreasonable size hint; it doesn't, so the two separate caps do compose
+// safely into a bounded product (<=1000*1000, nowhere near overflow and a
+// reasonable map hint), not just work individually. Alert 212 is a false
+// positive: CodeQL's static analysis doesn't reason through the two
+// separate clamp blocks above line 68 to see that both operands are
+// bounded by the time the multiplication runs.
+func TestDigestKnowledgeBase_ClampsCombinedAllocationSize(t *testing.T) {
+	ctx := context.Background()
+
+	cats := inmemory.NewBtree[sop.UUID, *Category](true)
+	vecs := inmemory.NewBtree[VectorKey, Vector](true)
+	items := inmemory.NewBtree[ItemKey, Item[map[string]any]](true)
+
+	store := NewStore[map[string]any](
+		"digest_kb_combined_clamp",
+		nil,
+		cats.Btree,
+		inmemory.NewBtree[string, sop.UUID](false).Btree,
+		inmemory.NewBtree[DistanceKey, byte](false).Btree,
+		vecs.Btree,
+		items.Btree,
+		inmemory.NewBtree[sop.UUID, Document](false).Btree,
+	).(*store[map[string]any])
+	store.SetTextIndex(&MockTextIndex{})
+
+	embedder := &MockPlaybookEmbedder{Rules: []PlaybookRule{
+		{Keywords: []string{"architecture"}, CategoryName: "Architecture", Vector: []float32{1, 0, 0}},
+	}}
+	llm := &mapDigestLLM{}
+	store.SetLLM(llm)
+
+	kb := &KnowledgeBase[map[string]any]{
+		Store:   store,
+		Manager: NewMemoryManager[map[string]any](store, llm, embedder),
+	}
+
+	queries := make([]string, 2_000_000)
+	for i := range queries {
+		queries[i] = "architecture"
+	}
+
+	done := make(chan struct{})
+	var digestErr error
+	go func() {
+		_, digestErr = DigestKnowledgeBase(ctx, kb, embedder, KBDigestRequest{
+			Queries:       queries,
+			PerQueryLimit: 2_000_000_000,
+			MaxResults:    2_000_000_000,
+		})
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		if digestErr != nil {
+			t.Fatalf("DigestKnowledgeBase with unbounded queries AND unbounded PerQueryLimit failed: %v", digestErr)
+		}
+	case <-time.After(10 * time.Second):
+		t.Fatal("DigestKnowledgeBase did not return within 10s - the combined allocation-size clamp likely regressed")
 	}
 }
 
