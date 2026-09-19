@@ -113,6 +113,9 @@ func TestInMemoryCache_IsLockedByOthers(t *testing.T) {
 
 	// Acquire lock
 	ok, _, err := c.Lock(ctx, time.Minute, lockKeys)
+	if err != nil {
+		t.Fatalf("Lock failed: %v", err)
+	}
 	if !ok {
 		t.Fatalf("Lock failed")
 	}

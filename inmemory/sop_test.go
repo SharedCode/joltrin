@@ -319,10 +319,6 @@ func TestComplexDataMgmtCases(t *testing.T) {
 					t.Errorf("Failed FindOne item with key %d.\n", k)
 				}
 			case 3:
-				if test.name == "remove all" && k == 99999 {
-					i := 90
-					i++
-				}
 				if !b3.Remove(k) {
 					t.Errorf("Failed Remove item with key %d.\n", k)
 				}
