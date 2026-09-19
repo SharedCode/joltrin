@@ -173,9 +173,9 @@ func TestSearch_Extended(t *testing.T) {
 	}
 
 	// Search
-	searchPayload := fmt.Sprintf(`{
+	searchPayload := `{
 		"query": "universe"
-	}`)
+	}`
 
 	resSearch := ManageSearchForTest(ctxID, 2, metaPayload, searchPayload) // Search
 	if resSearch == "" {
