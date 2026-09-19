@@ -9,7 +9,7 @@ import (
 
 // HydrateToolCallsFromMockText bridges old baseline text-based JSON tool calls
 // to the new Native ToolCall format. This ensures that MockGenerators can run
-// seamlessly under both BaselineReActEngine and NativeReActEngine.
+// seamlessly under NativeReActEngine.
 func HydrateToolCallsFromMockText(text string) []ai.ToolCall {
 	clean := strings.TrimSpace(text)
 	clean = strings.TrimPrefix(clean, "```json")
