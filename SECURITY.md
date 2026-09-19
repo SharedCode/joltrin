@@ -35,6 +35,18 @@ Every push and pull request against `master` runs:
 
 Run the same checks locally before pushing with `make security-scan` (or the individual `make lint-sec`, `make sca`, `make secrets-scan`, `make iac-scan` targets). `secrets-scan` and `iac-scan` require `gitleaks` and `trivy` on your PATH respectively.
 
+### Outbound requests and redirects: internal/netguard
+
+`internal/netguard` is the shared guard for the two SSRF/open-redirect risks that recur across this codebase: a caller-supplied URL steering an outbound fetch, and a caller-supplied redirect target sending a user's browser off-origin.
+
+- `ValidateFetchURL(url) error` rejects loopback, RFC1918, link-local (including the `169.254.169.254` cloud metadata address), and other non-routable targets at request-build time.
+- `SafeClient() *http.Client` closes the gap `ValidateFetchURL` alone can't: a DNS answer can change between that check and the actual connect (DNS rebinding). Its `Transport.DialContext` re-resolves and re-validates on every dial, including redirect hops, so the address that's actually checked is the address that's actually dialed.
+- `IsSafeRelativeRedirect(target) bool` accepts only a same-origin relative path — never absolute, protocol-relative, or the backslash variant browsers also normalize to protocol-relative.
+
+Import it for any new code that fetches a URL or redirects based on caller input; don't reimplement this per call site. `tools/httpserver` and `ai/etl` are the current consumers.
+
+**A known false-positive pattern with CodeQL:** `go/request-forgery` and `go/unvalidated-url-redirection` both flag call sites guarded by this package, because CodeQL's Go dataflow analysis doesn't model a custom validating function or a custom `Transport.DialContext` as a sanitizer — it only sees a tainted value reaching a client `.Do()`/`http.Redirect` call. Alerts 268 and 649 in this repo's history are both this pattern, each closed with a full exploitability investigation (bypass classes tried against both Go's `net/url` and a WHATWG-conformant parser) rather than a bare dismissal. If this fires again on a `netguard`-guarded call site: don't dismiss it without redoing that investigation, and don't assume a previous dismissal covers a new one — CodeQL treats a changed call expression as a new alert even when the underlying guard is unchanged. See the doc comments on `ValidateFetchURL`, `SafeClient`, and `IsSafeRelativeRedirect` in `internal/netguard/` for the full citations (RFC 3986, the WHATWG URL Standard, and the specific Go stdlib source line that makes the redirect guard sound).
+
 ### Claude Code review and remediation
 
 - `.github/workflows/claude-review.yml` runs an automated security-focused review on every PR open/update and posts findings as a comment. It has read-only tool access and never modifies files.
