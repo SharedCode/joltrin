@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	log "log/slog"
-	"sort"
 	"strings"
 
 	"github.com/sharedcode/joltrin/jsondb"
@@ -254,25 +253,7 @@ func (jc *JoinRightCursor) Next(ctx context.Context) (any, bool, error) {
 	if jc.closed {
 		return nil, false, nil
 	}
-	val, ok, err := jc.NextOptimized(ctx)
-	if ok && err == nil {
-
-		// Attempt to inspect if the result is an OrderedMap
-		var fields []string
-		if om, isOm := val.(*OrderedMap); isOm {
-			fields = om.keys
-		} else if om, isOm := val.(OrderedMap); isOm {
-			fields = om.keys
-		} else if m, isM := val.(map[string]any); isM {
-
-			for k := range m {
-				fields = append(fields, k)
-			}
-			sort.Strings(fields)
-		}
-
-	}
-	return val, ok, err
+	return jc.NextOptimized(ctx)
 }
 
 func (jc *JoinRightCursor) Close() error {
