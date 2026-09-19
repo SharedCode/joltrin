@@ -2355,9 +2355,9 @@
                 const currentPage = Math.floor(offset / limit) + 1;
                 
                 let paginationHtml = '';
-                const safeSpaceName = window.escapeHTML(spaceName);
-                const safeCategoryId = window.escapeHTML(categoryId || '');
-                const safeCategoryName = window.escapeHTML(categoryName || '').replace(/'/g, "\\'");
+                const safeSpaceName = window.escapeHTML(spaceName).replace(/\\/g, '\\\\');
+                const safeCategoryId = window.escapeHTML(categoryId || '').replace(/\\/g, '\\\\');
+                const safeCategoryName = window.escapeHTML(categoryName || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
                 if (totalPages > 1) {
                         paginationHtml += `<div style="display: flex; gap: 10px; margin-top: 20px; align-items: center; justify-content: center; width: 100%; grid-column: 1 / -1; padding: 10px; box-sizing: border-box; border-top: 1px solid var(--border-color);">`;
                 
@@ -2405,7 +2405,7 @@
 			}
 
 			if (currentPage < totalPages) {
-				paginationHtml += `<button onclick="window.fetchItemsForCategory('${safeSpaceName}', '${safeCategoryId}', '${safeCategoryName}', null, null, ${offset + limit}, ${limit}, '${window.escapeHTML(lastRenderedCatId).replace(/'/g, "\\'")}', '${window.escapeHTML(lastRenderedItemId).replace(/'/g, "\\'")}')" style="padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--button-bg); color: var(--text-color); cursor: pointer;">Next</button>`;
+				paginationHtml += `<button onclick="window.fetchItemsForCategory('${safeSpaceName}', '${safeCategoryId}', '${safeCategoryName}', null, null, ${offset + limit}, ${limit}, '${window.escapeHTML(lastRenderedCatId).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '${window.escapeHTML(lastRenderedItemId).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}')" style="padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--button-bg); color: var(--text-color); cursor: pointer;">Next</button>`;
                 		paginationHtml += `<button disabled style="padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--secondary-bg); color: var(--text-muted); cursor: not-allowed; opacity: 0.5;">Next</button>`;
                 	}
 
