@@ -90,16 +90,6 @@ func (a *CopilotAgent) persistRoutingState(ctx context.Context, taskCtx *TaskCon
 	}
 }
 
-func (a *CopilotAgent) tryPathStyleRouting(ctx context.Context, query string) *TaskContextClassification {
-
-	log.Info("Path-Style Routing Activated", "path_query", query)
-	taskCtx := buildFocusedFallbackTaskContext("Omni", SpacesDomain, query)
-	taskCtx.RoutingGate = RoutingGateFocused
-	annotateTaskContextIntent(taskCtx, query)
-	a.persistRoutingState(ctx, taskCtx)
-	return taskCtx
-}
-
 func (a *CopilotAgent) tryPrefixBasedRouting(ctx context.Context, query string, gen ai.Generator, isTest bool, anchor *routingAnchor) (*TaskContextClassification, error) {
 	if anchor == nil {
 		return nil, nil

@@ -598,39 +598,6 @@ func normalizeToolResultPayload(result string) json.RawMessage {
 	return json.RawMessage(strconv.Quote(result))
 }
 
-func (a *CopilotAgent) toolSwitchDatabase(ctx context.Context, args map[string]any) (string, error) {
-	dbName, _ := args["database"].(string)
-	if dbName == "" {
-		return "", fmt.Errorf("argument 'database' is required")
-	}
-
-	exists := false
-	if dbName == "system" && a.systemDB != nil {
-		exists = true
-	} else {
-		_, exists = a.databases[dbName]
-	}
-
-	if !exists {
-		var names []string
-		for k := range a.databases {
-			names = append(names, k)
-		}
-		if a.systemDB != nil {
-			names = append(names, "system")
-		}
-		sort.Strings(names)
-		return "", fmt.Errorf("database '%s' not found. Available: %v", dbName, names)
-	}
-
-	if p := ai.GetSessionPayload(ctx); p != nil {
-		p.CurrentDB = dbName
-		p.Transaction = nil
-	}
-
-	return fmt.Sprintf("Active database context switched to '%s'.", dbName), nil
-}
-
 // toolConcludeTopic is a placeholder. The actual logic requires Session access and is handled/overridden in Service.
 func (a *CopilotAgent) toolConcludeTopic(ctx context.Context, args map[string]interface{}) (string, error) {
 	return "Topic concluded.", nil
