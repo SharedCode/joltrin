@@ -149,18 +149,6 @@ func ensureModelCatalogDefaults(catalog *ModelCatalog) bool {
 	return changed
 }
 
-func resolveModelCatalogPath(configPath string) string {
-	if configPath != "" {
-		return filepath.Join(filepath.Dir(configPath), modelCatalogFilename)
-	}
-
-	if cwd, err := os.Getwd(); err == nil {
-		return filepath.Join(cwd, modelCatalogFilename)
-	}
-
-	return modelCatalogFilename
-}
-
 func modelCatalogCandidatePaths(configPath string) []string {
 	seen := map[string]struct{}{}
 	var paths []string

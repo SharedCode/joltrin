@@ -105,10 +105,6 @@ func firstNonEmpty(values ...string) string {
 	return ""
 }
 
-func candidateConfigPaths() []string {
-	return confighub.CandidateConfigPaths(config.ConfigFile)
-}
-
 func findExistingConfigFile() string {
 	return confighub.FindExistingConfigFile(config.ConfigFile)
 }
