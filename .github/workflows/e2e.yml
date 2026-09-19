@@ -99,7 +99,7 @@ jobs:
         run: bash scripts/build-site.sh
 
       - name: Cache Playwright Browser Binaries
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
