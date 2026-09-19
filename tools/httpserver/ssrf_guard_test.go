@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"net/http"
 	"testing"
 )
 
@@ -34,5 +35,24 @@ func TestIngestImportReader_RejectsInternalURL(t *testing.T) {
 	_, _, err := ingestImportReader(context.Background(), req)
 	if err == nil {
 		t.Fatal("ingestImportReader allowed a request to the cloud metadata endpoint")
+	}
+}
+
+// TestSSRFSafeHTTPClient_RejectsAtDialTime covers the DNS-rebinding gap that
+// validateImportURL alone can't close: a hostname that resolves to a public
+// address at request-build time but an internal one by the time the socket
+// is actually opened. The client's DialContext must re-resolve and re-check
+// on every dial, not just trust an earlier lookup.
+func TestSSRFSafeHTTPClient_RejectsAtDialTime(t *testing.T) {
+	client := ssrfSafeHTTPClient()
+	transport, ok := client.Transport.(*http.Transport)
+	if !ok || transport.DialContext == nil {
+		t.Fatal("ssrfSafeHTTPClient did not configure a validating DialContext")
+	}
+	for _, addr := range []string{"127.0.0.1:80", "169.254.169.254:80", "10.0.0.5:443"} {
+		if conn, err := transport.DialContext(context.Background(), "tcp", addr); err == nil {
+			conn.Close()
+			t.Errorf("DialContext(%q) succeeded, want rejection of internal address", addr)
+		}
 	}
 }

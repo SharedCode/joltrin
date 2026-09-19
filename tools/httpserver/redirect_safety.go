@@ -15,6 +15,49 @@ import (
 // a leading backslash to a slash) against evil.example even without a
 // scheme, so both of the first two characters must be checked, not just
 // the second.
+//
+// CodeQL alert 268 (go/unvalidated-url-redirection) flags the call site in
+// billing_handler.go that uses this function as a guard, because its
+// dataflow analysis doesn't model arbitrary boolean functions as sanitizer
+// barriers. This was investigated for a real bypass rather than dismissed;
+// the property below is what makes the guard sound, verified against real
+// behavior rather than assumed:
+//
+//   - A relative reference can only become a network-path reference (i.e.
+//     get an authority/host) if it begins with two literal '/' characters,
+//     or a scheme + ':' if it begins with a letter. Percent-encoding a
+//     slash or backslash (%2F, %5C) does not count: encoded delimiters are
+//     never re-decoded during scheme/authority parsing. Confirmed against
+//     Node's WHATWG URL implementation (same algorithm real browsers use to
+//     resolve a Location header) — new URL("/%2F%2Fevil.example", base)
+//     resolves same-origin, not to evil.example. See the WHATWG URL
+//     Standard, "basic URL parser": https://url.spec.whatwg.org/#url-parsing
+//   - The WHATWG parser also strips every ASCII tab/CR/LF from anywhere in
+//     the string before parsing (not just the ends), so a payload like
+//     "/\t/evil.example" collapses to "//evil.example" in a real browser.
+//     That path is still closed here because Go's net/url.Parse rejects any
+//     ASCII control byte anywhere in the input before this function ever
+//     inspects target[1] or u.Host — see stringContainsCTLByte's use in the
+//     unexported parse() in $GOROOT/src/net/url/url.go (verified against
+//     go1.23.2 locally: url.Parse("/\t/evil.example") returns
+//     "invalid control character in URL"). If a future Go release ever
+//     relaxed that rejection, this function would need its own explicit
+//     control-byte check; it does not have one today because it doesn't
+//     need one, not because the case was overlooked.
+//   - A target that begins with '/' can never enter the URL scheme-parsing
+//     state (schemes must start with an ASCII letter), so upper/lower/mixed
+//     -case scheme smuggling ("/JAVASCRIPT:...", "/HTTP://evil.example")
+//     is structurally impossible, not just blocked by luck.
+//
+// Bypass classes tried and confirmed non-exploitable: absolute URLs,
+// protocol-relative and its backslash variant (single and doubled),
+// triple-slash, single- and double-percent-encoded slash/backslash,
+// embedded tab/CR/LF/vertical-tab/form-feed, plain whitespace, dot-segment
+// traversal ("/../evil.example", collapsed safely by both Go's path.Clean
+// inside http.Redirect and the WHATWG parser), "@"-prefixed hosts, and a
+// Unicode fullwidth solidus. See redirect_safety_test.go for the exact
+// payloads and TestHandleSimulateCheckout_RejectsOpenRedirect variants in
+// billing_handler_test.go for the end-to-end handler assertions.
 func isSafeRelativeRedirect(target string) bool {
 	if target == "" || target[0] != '/' {
 		return false

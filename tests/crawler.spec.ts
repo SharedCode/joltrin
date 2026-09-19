@@ -57,11 +57,16 @@ test.describe('Crawler & Deep Link Integrity Suite', () => {
       );
 
       for (const href of hrefs) {
-        // Skip purely in-page hash fragments or javascript links (case-
+        // Skip purely in-page hash fragments or script-executing links (case-
         // insensitive and tolerant of leading whitespace, since browsers
         // accept both when resolving an href's scheme).
         const trimmedHref = href.trim().toLowerCase();
-        if (href.startsWith('#') || trimmedHref.startsWith('javascript:')) {
+        if (
+          href.startsWith('#') ||
+          trimmedHref.startsWith('javascript:') ||
+          trimmedHref.startsWith('vbscript:') ||
+          trimmedHref.startsWith('data:')
+        ) {
           continue;
         }
 
