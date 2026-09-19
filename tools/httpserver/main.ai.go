@@ -774,8 +774,47 @@ func interpretOutput(response string, sendEvent func(string, any)) {
 	}
 
 	if response != "" {
+		if citations := extractCitations(response); len(citations) > 0 {
+			sendEvent("citations", citations)
+		}
 		sendEvent("content", response)
 	}
+}
+
+// citationTagPrefix is the exact inline marker the model is instructed to
+// use when citing retrieved knowledge (see citationLabel in
+// ai/agent/copilot.go's getLTMSemanticContext/getPlaybooksContext). Today
+// that marker only ever reaches clients as opaque prose inside the
+// "content" event, so a UI has no way to render citations as structured
+// references without re-parsing the answer text itself.
+const citationTagPrefix = "[source:"
+
+// extractCitations pulls the distinct "[source: X]" labels a model's final
+// answer cited inline, in first-appearance order, so callers can send them
+// as a separate structured event alongside the prose.
+func extractCitations(text string) []string {
+	var citations []string
+	seen := make(map[string]bool)
+	rest := text
+	for {
+		idx := strings.Index(rest, citationTagPrefix)
+		if idx == -1 {
+			break
+		}
+		rest = rest[idx+len(citationTagPrefix):]
+		end := strings.Index(rest, "]")
+		if end == -1 {
+			break
+		}
+		label := strings.TrimSpace(rest[:end])
+		rest = rest[end+1:]
+		if label == "" || seen[label] {
+			continue
+		}
+		seen[label] = true
+		citations = append(citations, label)
+	}
+	return citations
 }
 
 func initAgents(ctx context.Context) error {
