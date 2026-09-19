@@ -3,7 +3,6 @@ package agent
 import (
 	"bytes"
 	"context"
-	"crypto/sha256"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -21,7 +20,6 @@ import (
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/agent/parser"
 	"github.com/sharedcode/joltrin/ai/database"
-	"github.com/sharedcode/joltrin/ai/embed"
 	"github.com/sharedcode/joltrin/ai/generator"
 	"github.com/sharedcode/joltrin/ai/internal/logsafe"
 	"github.com/sharedcode/joltrin/ai/memory"
@@ -477,23 +475,6 @@ func normalizeMRUScope(scope string) string {
 	default:
 		return MRUScopeSession
 	}
-}
-
-func (a *CopilotAgent) clearMRUCategory(category string) {
-	if a.service == nil || a.service.session == nil {
-		return
-	}
-	sess := a.service.session
-	sess.MRUMu.Lock()
-	defer sess.MRUMu.Unlock()
-
-	filtered := sess.MRU[:0]
-	for _, item := range sess.MRU {
-		if item.Category != category {
-			filtered = append(filtered, item)
-		}
-	}
-	sess.MRU = filtered
 }
 
 func (a *CopilotAgent) clearMRUBySourceAndScope(source string, scope string) {
@@ -1340,32 +1321,6 @@ func (a *CopilotAgent) evaluateRoutingGates(ctx context.Context, query string, g
 	return a.tryColdStartBasedRouting(ctx, query, gen, isTest)
 }
 
-func (a *CopilotAgent) renderToolDefinitionContext(title string, toolNames []string) string {
-	if a == nil || a.registry == nil || strings.TrimSpace(title) == "" {
-		return ""
-	}
-	var lines []string
-	for _, name := range toolNames {
-		name = strings.TrimSpace(name)
-		if name == "" {
-			continue
-		}
-		toolDef, ok := a.registry.Get(name)
-		if !ok {
-			continue
-		}
-		description := strings.Join(strings.Fields(strings.TrimSpace(toolDef.Description)), " ")
-		if description == "" {
-			continue
-		}
-		lines = append(lines, fmt.Sprintf("- %s: %s", toolDef.Name, description))
-	}
-	if len(lines) == 0 {
-		return ""
-	}
-	return title + "\n" + strings.Join(lines, "\n")
-}
-
 func (a *CopilotAgent) buildStoresToolDescriptionContext() string {
 	return strings.Join([]string{
 		"Structured Context: Stores Tools",
@@ -1630,10 +1585,6 @@ func (a *CopilotAgent) updateClarificationState(ctx context.Context, query strin
 	if p.ClarificationState != nil {
 		p.ClarificationState = nil
 	}
-}
-
-func summarizeAskOutcomeMRU(ctx context.Context, query string, finalText string, toolCalls []ai.ToolCall, outcomeFacts []string) string {
-	return renderAskOutcomeMRUItems(buildAskOutcomeMRUItems(ctx, query, finalText, toolCalls, outcomeFacts, nil))
 }
 
 func buildAskOutcomeMRUItems(ctx context.Context, query string, finalText string, toolCalls []ai.ToolCall, outcomeFacts []string, carryoverState *ai.CarryoverState) []MRUItem {
@@ -2202,11 +2153,6 @@ func (a *CopilotAgent) handleSlashCommand(ctx context.Context, query string, gen
 	return false, "", nil
 }
 
-func (a *CopilotAgent) resolvePersona(ctx context.Context) string {
-	persona, _ := a.resolvePersonaWithMetadata(ctx)
-	return persona
-}
-
 func personaSourceCacheKey(agentID string) string {
 	return personaSourceMRUCategoryPrefix + agentID
 }
@@ -2263,34 +2209,6 @@ func (a *CopilotAgent) resolvePersonaWithMetadata(ctx context.Context) (string, 
 	}
 
 	return persona, personaFromKB
-}
-
-func (a *CopilotAgent) getScriptToolsPrompt(ctx context.Context) string {
-	toolsDef := ""
-	if a.systemDB != nil {
-		if tx, err := a.systemDB.BeginTransaction(ctx, sop.ForReading); err == nil {
-			if store, err := a.systemDB.OpenModelStore(ctx, "scripts", tx); err == nil {
-				if names, err := store.List(ctx, ai.DefaultScriptCategory); err == nil {
-					for _, name := range names {
-						var script ai.Script
-						if err := store.Load(ctx, ai.DefaultScriptCategory, name, &script); err == nil {
-							argsSchema := "()"
-							if len(script.Parameters) > 0 {
-								var params []string
-								for _, p := range script.Parameters {
-									params = append(params, fmt.Sprintf("%s: string", p))
-								}
-								argsSchema = fmt.Sprintf("(%s)", strings.Join(params, ", "))
-							}
-							toolsDef += fmt.Sprintf("- %s: %s %s\n", name, script.Description, argsSchema)
-						}
-					}
-				}
-			}
-			tx.Commit(ctx)
-		}
-	}
-	return toolsDef
 }
 
 // citationLabel returns a short, stable identifier for a retrieved
@@ -2950,70 +2868,6 @@ func (a *CopilotAgent) InitializePhysicalMemory(ctx context.Context) error {
 	return nil
 }
 
-func (a *CopilotAgent) logThought(ctx context.Context, query string, toolsExecuted string, outcome string) {
-	if a.systemDB == nil {
-		return
-	}
-
-	if a.Memory == nil {
-		return
-	}
-	a.Memory.BindSession(ctx)
-	kbName := a.Memory.LongTermMemoryName()
-
-	var embedder ai.Embeddings
-	if a.service != nil && a.service.Domain() != nil && a.service.Domain().Embedder() != nil {
-		embedder = a.service.Domain().Embedder()
-	}
-	if embedder == nil {
-		return
-	}
-
-	status := "Success"
-	thought := fmt.Sprintf("Intent: %s\nAST: %s\nStatus: %s\nOutcome: %s\n", query, toolsExecuted, status, outcome)
-
-	go func() {
-		embedCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-		defer cancel()
-
-		vecs, err := embed.DocumentTexts(embedCtx, embedder, []string{thought})
-		if err != nil || len(vecs) == 0 {
-			return
-		}
-		vec := vecs[0]
-
-		tx, err := a.systemDB.BeginTransaction(embedCtx, sop.ForWriting)
-		if err != nil {
-			return
-		}
-
-		kb, err := a.systemDB.OpenKnowledgeBase(embedCtx, kbName, tx, a.brain, embedder, false, true)
-		if err != nil {
-			tx.Rollback(embedCtx)
-			return
-		}
-
-		hash := sha256.Sum256([]byte(thought))
-		itemID := fmt.Sprintf("%x", hash)
-
-		payload := map[string]any{
-			"id":      itemID,
-			"intent":  query,
-			"ast":     toolsExecuted,
-			"status":  status,
-			"outcome": outcome,
-			"ts":      time.Now().UnixMilli(),
-			"type":    "episode",
-		}
-		if err := kb.IngestThought(embedCtx, thought, "", "System", vec, payload); err != nil {
-			tx.Rollback(embedCtx)
-			return
-		}
-		tx.Commit(embedCtx)
-		log.Debug("Active Memory: Episode logged successfully", "temp_id", itemID)
-	}()
-}
-
 // Execute executes the requested tool against the session payload.
 func (a *CopilotAgent) Execute(ctx context.Context, toolName string, args map[string]any) (string, error) {
 	resolvePayloadTx := func(payload *ai.SessionPayload, targetDB string) sop.Transaction {
@@ -3551,54 +3405,6 @@ func (a *CopilotAgent) runScript(ctx context.Context, name string, script ai.Scr
 	}
 
 	return sb.String(), nil
-}
-
-func (a *CopilotAgent) runScriptRaw(ctx context.Context, script ai.Script, args map[string]any) (string, error) {
-	// Scope for template resolution
-	scope := make(map[string]any)
-	for k, v := range args {
-		scope[k] = v
-	}
-
-	var lastResult string
-
-	for i, step := range script.Steps {
-		if step.Type == "command" {
-			// Resolve args
-			resolvedArgs := make(map[string]any)
-			for k, v := range step.Args {
-				if strVal, ok := v.(string); ok {
-					resolvedArgs[k] = resolveTemplate(strVal, scope)
-				} else {
-					resolvedArgs[k] = v
-				}
-			}
-
-			// Handle Database Override
-			stepCtx := ctx
-			if step.Database != "" {
-				if p := ai.GetSessionPayload(ctx); p != nil {
-					// Clone payload to update CurrentDB for this step only
-					newPayload := *p
-					newPayload.CurrentDB = step.Database
-					// Clear transaction if switching DB, as the existing transaction is bound to the old DB
-					if p.CurrentDB != step.Database {
-						newPayload.Transaction = nil
-					}
-					stepCtx = context.WithValue(ctx, SessionPayloadKey, &newPayload)
-				}
-			}
-
-			res, err := a.Execute(stepCtx, step.Command, resolvedArgs)
-			if err != nil {
-				if !step.ContinueOnError || shouldShortCircuitScriptOnError(step.Command, resolvedArgs, err) {
-					return "", fmt.Errorf("step %d (%s) failed: %w", i+1, step.Command, err)
-				}
-			}
-			lastResult = res
-		}
-	}
-	return lastResult, nil
 }
 
 func resolveTemplate(tmplStr string, scope map[string]any) string {
