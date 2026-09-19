@@ -90,11 +90,44 @@ jobs:
           fi
           go build $(go list ./... 2>/dev/null | grep -Ev "$exclude")
 
+      # Previously hardcoded to six packages; everything else in this
+      # module (tools/httpserver, governance, internal/*, cel, the tools/*
+      # binaries, ...) was vet'd and built above but never actually had its
+      # tests executed in CI - go vet/go build can't catch a broken
+      # assertion or a regression a test would. The infs/integrationtests
+      # and incfs/integrationtests packages are excluded here because their
+      # test files are gated behind `//go:build integration` and need
+      # Redis/Cassandra (see the build-and-test job below); the stress
+      # packages need `-tags=stress` and a 2h budget (see go.yml). Neither
+      # of those tags is passed here, so a plain `go test` on those import
+      # paths would fail to find any tests, not silently skip them.
       - name: Unit tests (no integration/stress tags, no external services)
         shell: bash
         run: |
           set -euo pipefail
-          go test -timeout 20m ./inmemory ./btree ./common ./cache ./encoding ./database
+          exclude='/demo$|/demo-agents$|/infs/integrationtests|/incfs/integrationtests|/infs/stresstests'
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            exclude="$exclude|/bindings/main$"
+          fi
+          go test -timeout 20m $(go list ./... 2>/dev/null | grep -Ev "$exclude")
+
+      # ai/ is its own Go module (separate go.mod, joined to this one only
+      # via go.work's replace directive) so none of the go list/build/vet
+      # steps above ever touch it - go list ./... does not cross a nested
+      # module boundary even in workspace mode. Before this step, nothing
+      # in CI built, vet'd, or tested any ai/* package that tools/httpserver
+      # doesn't happen to import transitively (ai/etl and ai/cmd/etl were
+      # the ones actually missing coverage; a compile error there could
+      # have shipped unnoticed). No cgo or GOOS=js packages in this module,
+      # so it runs on every OS the same as the root module above.
+      - name: Build, vet, and test the ai module
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd ai
+          go build ./...
+          go vet ./...
+          go test -timeout 20m ./...
 
   # Heavier validation that needs Redis and Cassandra as GitHub Actions
   # `services:` containers. That keyword only runs a Docker daemon on
