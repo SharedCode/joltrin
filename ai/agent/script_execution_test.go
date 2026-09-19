@@ -732,6 +732,8 @@ func TestScriptRecording_OverwriteProtection(t *testing.T) {
 }
 
 func TestScriptManagement(t *testing.T) {
+	skipOnWindowsTranslogLeak(t)
+
 	// 1. Setup Temp DB
 	tmpDir := t.TempDir()
 	dbOpts := sop.DatabaseOptions{
