@@ -131,14 +131,6 @@ func normalizeCompatibilitySortStep(step map[string]any, argsObj map[string]any)
 	delete(argsObj, "direction")
 }
 
-func normalizeCompatibilityConditionMap(condition map[string]any) map[string]any {
-	return normalizeCompatibilityConditionMapWithQueryAndAliases(condition, "", nil, nil)
-}
-
-func normalizeCompatibilityConditionMapWithQuery(condition map[string]any, currentQuery string) map[string]any {
-	return normalizeCompatibilityConditionMapWithQueryAndAliases(condition, currentQuery, nil, nil)
-}
-
 func normalizeCompatibilityConditionMapWithQueryAndAliases(condition map[string]any, currentQuery string, aliases []string, storeFields map[string]map[string]struct{}) map[string]any {
 	normalized := make(map[string]any, len(condition))
 	for field, raw := range condition {
