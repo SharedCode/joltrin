@@ -2,7 +2,6 @@ package agent
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 )
 
@@ -152,16 +151,4 @@ func (a *CopilotAgent) Join(ctx context.Context, args JoinArgs) (string, error) 
 		return "", err
 	}
 	return formatToolResult(ctx, res)
-}
-
-// Helper to convert map to struct (for adapters)
-func mapToStruct(input map[string]any, output any) error {
-	bytes, err := json.Marshal(input)
-	if err != nil {
-		return fmt.Errorf("marshal failed: %w", err)
-	}
-	if err := json.Unmarshal(bytes, output); err != nil {
-		return fmt.Errorf("unmarshal failed: %w", err)
-	}
-	return nil
 }
