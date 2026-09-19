@@ -98,7 +98,6 @@ func TestResolveConfigRelativePath(t *testing.T) {
 		want      string
 	}{
 		{"relative path joins configDir", "./data", "/cfg/dir", filepath.Join("/cfg/dir", "data")},
-		{"absolute path passes through unchanged", "/abs/data", "/cfg/dir", "/abs/data"},
 		{"empty path stays empty, not configDir", "", "/cfg/dir", ""},
 		{"whitespace is trimmed before resolving", "  ./data  ", "/cfg/dir", filepath.Join("/cfg/dir", "data")},
 		{"whitespace-only path stays empty", "   ", "/cfg/dir", ""},
@@ -110,4 +109,17 @@ func TestResolveConfigRelativePath(t *testing.T) {
 			}
 		})
 	}
+
+	// Separate from the table above: filepath.IsAbs is deliberately
+	// OS-native (a config file's absolute paths are written in whatever
+	// form the OS running the server uses), so a hardcoded "/abs/data"
+	// literal isn't a valid absolute path on Windows and would wrongly
+	// fail here - t.TempDir() gives a path that's guaranteed absolute in
+	// the current OS's own terms, whichever OS that is.
+	t.Run("absolute path passes through unchanged", func(t *testing.T) {
+		abs := t.TempDir()
+		if got := resolveConfigRelativePath(abs, "/cfg/dir"); got != abs {
+			t.Errorf("resolveConfigRelativePath(%q, ...) = %q, want unchanged %q", abs, got, abs)
+		}
+	})
 }
