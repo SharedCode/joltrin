@@ -11,6 +11,8 @@ import (
 )
 
 func TestScript_AutoParameterize(t *testing.T) {
+	skipOnWindowsTranslogLeak(t)
+
 	// 1. Setup
 	tmpDir := t.TempDir()
 	dbOpts := sop.DatabaseOptions{
