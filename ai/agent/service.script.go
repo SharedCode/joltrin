@@ -100,7 +100,7 @@ func (s *Service) PlayScript(ctx context.Context, name string, category string, 
 				newPayload := *p
 				newPayload.CurrentDB = script.Database
 				newPayload.Transaction = nil // Ensure Open starts a new one
-				scriptCtx = context.WithValue(scriptCtx, "session_payload", &newPayload)
+				scriptCtx = context.WithValue(scriptCtx, SessionPayloadKey, &newPayload)
 			}
 		} else {
 			return fmt.Errorf("script %q requires database %q which is not configured", name, script.Database)

@@ -79,7 +79,7 @@ func TestToolJoin_RightOuterJoin(t *testing.T) {
 	sessionPayload := &ai.SessionPayload{
 		CurrentDB: "test_db",
 	}
-	ctx = context.WithValue(ctx, "session_payload", sessionPayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, sessionPayload)
 
 	// Since we use jsondb.OpenStore default, and we created stores using core_database.NewBtree in the same process/path,
 	// it should work fine as long as cache doesn't conflict or lock.

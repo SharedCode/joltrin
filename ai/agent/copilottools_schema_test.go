@@ -98,7 +98,7 @@ func TestToolListStores_SchemaEnrichment(t *testing.T) {
 	payload := &ai.SessionPayload{
 		CurrentDB: dbName,
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	// 4. Call list_stores
 	// We pass "database" arg explicitly or rely on session payload?
@@ -202,7 +202,7 @@ func TestToolListStores_FiltersRequestedStores(t *testing.T) {
 		t.Fatalf("Commit failed: %v", err)
 	}
 
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: dbName})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: dbName})
 	res, err := agent.toolListStores(ctx, map[string]any{"database": dbName, "stores": []any{"orders"}})
 	if err != nil {
 		t.Fatalf("toolListStores failed: %v", err)
@@ -267,7 +267,7 @@ func TestToolListStores_FuzzyMatchesRequestedStores(t *testing.T) {
 		t.Fatalf("Commit failed: %v", err)
 	}
 
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: dbName, CurrentUserQuery: "Find order totals"})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: dbName, CurrentUserQuery: "Find order totals"})
 	res, err := agent.toolListStores(ctx, map[string]any{"database": dbName, "stores": []any{"order"}})
 	if err != nil {
 		t.Fatalf("toolListStores failed: %v", err)
@@ -323,7 +323,7 @@ func TestToolListStores_InfersLikelyStoresFromUserQuery(t *testing.T) {
 		t.Fatalf("Commit failed: %v", err)
 	}
 
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: dbName, CurrentUserQuery: "Find orders for users named John"})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: dbName, CurrentUserQuery: "Find orders for users named John"})
 	res, err := agent.toolListStores(ctx, map[string]any{"database": dbName})
 	if err != nil {
 		t.Fatalf("toolListStores failed: %v", err)
@@ -378,7 +378,7 @@ func TestToolListStores_ReturnsProgressEnvelopeForNativeHints(t *testing.T) {
 		t.Fatalf("Commit failed: %v", err)
 	}
 
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: dbName})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: dbName})
 	ctx = context.WithValue(ctx, ai.CtxKeyNativeToolHints, true)
 
 	res, err := agent.toolListStores(ctx, map[string]any{"database": dbName})
@@ -477,7 +477,7 @@ func TestToolListStores_StructKeySchema(t *testing.T) {
 	}
 
 	// Query schema via list_stores tool
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: dbName})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: dbName})
 	res, err := agent.toolListStores(ctx, map[string]any{"database": dbName})
 	if err != nil {
 		t.Fatalf("toolListStores failed: %v", err)

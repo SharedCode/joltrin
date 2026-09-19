@@ -28,7 +28,7 @@ func TestToolJoin_BloomFilter(t *testing.T) {
 
 	ctx := context.Background()
 	// Mock Session Payload manually as in other tests
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "system"})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "system"})
 	agent.Open(ctx)
 
 	// Create Large Right Store (> 101 items to trigger Bloom Filter)

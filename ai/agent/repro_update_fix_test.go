@@ -28,7 +28,7 @@ func TestReproScriptUpdateCorruption(t *testing.T) {
 	// Verify NewCopilotAgent signature
 	// func NewCopilotAgent(cfg Config, databases map[string]sop.DatabaseOptions, systemDB *database.Database) *CopilotAgent
 	agent := NewCopilotAgent(Config{}, nil, sysDB)
-	ctx := context.WithValue(context.Background(), "session_payload", &ai.SessionPayload{CurrentDB: "system"})
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, &ai.SessionPayload{CurrentDB: "system"})
 	agent.Open(ctx)
 
 	// 3. Create the script (Preparation)

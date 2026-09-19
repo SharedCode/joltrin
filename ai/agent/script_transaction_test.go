@@ -153,7 +153,7 @@ func TestScript_Transactions(t *testing.T) {
 		Name: "Data Admin",
 	}
 	copilot := NewCopilotAgent(cfg, databases, sysDB)
-	ctx = context.WithValue(context.Background(), "session_payload", &ai.SessionPayload{CurrentDB: "system"})
+	ctx = context.WithValue(context.Background(), SessionPayloadKey, &ai.SessionPayload{CurrentDB: "system"})
 	copilot.Open(ctx)
 	registry["copilot"] = copilot
 

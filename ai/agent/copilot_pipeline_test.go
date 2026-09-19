@@ -56,7 +56,7 @@ func TestRewriteRetryMetaAsk_UsesLatestAskOutcomeQuery(t *testing.T) {
 		Scope:    MRUScopeSession,
 	}}
 	payload := &ai.SessionPayload{Variables: make(map[string]any)}
-	ctx := context.WithValue(context.Background(), "session_payload", payload)
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, payload)
 
 	rewritten, ok := ag.rewriteRetryMetaAsk(ctx, "Can we retry the same ask?")
 	if !ok {
@@ -86,7 +86,7 @@ func TestRewriteRetryMetaAsk_AcceptsQualifiedRetryQuery(t *testing.T) {
 		Scope:    MRUScopeSession,
 	}}
 	payload := &ai.SessionPayload{Variables: make(map[string]any)}
-	ctx := context.WithValue(context.Background(), "session_payload", payload)
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, payload)
 
 	query := "Since you failed, can you retry the same ask? perhaps I can supply missing info you need."
 	rewritten, ok := ag.rewriteRetryMetaAsk(ctx, query)
@@ -136,7 +136,7 @@ func TestCopilotAsk_RewritesRetryMetaAskBeforeRoutingAndEngine(t *testing.T) {
 	payload := &ai.SessionPayload{Variables: map[string]any{
 		"RoutingState": &TaskContextClassification{Entity: "Omni", Domain: StoresDomain, DBArtifacts: []string{"users"}, StoresArtifacts: []string{"users"}, Layers: []LayerInfo{{Name: "Single-Domain", CRUD: []string{"R"}}}},
 	}}
-	ctx := context.WithValue(context.Background(), "session_payload", payload)
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, payload)
 
 	resp, err := ag.Ask(ctx, "Can we retry the same ask?", nil)
 	if err != nil {
@@ -174,7 +174,7 @@ func TestCopilotAsk_RewritesQualifiedRetryMetaAskBeforeRoutingAndEngine(t *testi
 	payload := &ai.SessionPayload{Variables: map[string]any{
 		"RoutingState": &TaskContextClassification{Entity: "Omni", Domain: StoresDomain, DBArtifacts: []string{"users"}, StoresArtifacts: []string{"users"}, Layers: []LayerInfo{{Name: "Single-Domain", CRUD: []string{"R"}}}},
 	}}
-	ctx := context.WithValue(context.Background(), "session_payload", payload)
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, payload)
 
 	query := "Since you failed, can you retry the same ask? perhaps I can supply missing info you need."
 	resp, err := ag.Ask(ctx, query, nil)
@@ -244,7 +244,7 @@ func TestRewriteConversationalMetaAsk_UsesLastAssistantQuestionAndTargetAsk(t *t
 	}}
 	ag.service.session.Memory.AddThread(&ConversationThread{ID: sop.NewUUID(), RootPrompt: "Find John orders", Exchanges: []Interaction{{Role: RoleUser, Content: "Find John orders"}, {Role: RoleAssistant, Content: "Wait, join outputs a combined record. Do you want flat joined fields or nested objects?"}}})
 	payload := &ai.SessionPayload{Variables: make(map[string]any), ClarificationState: &ai.ClarificationState{TargetQuery: "Find John orders", AssistantQuestion: "Wait, join outputs a combined record. Do you want flat joined fields or nested objects?", Status: "pending"}}
-	ctx := context.WithValue(context.Background(), "session_payload", payload)
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, payload)
 
 	rewritten, ok := ag.rewriteConversationalMetaAsk(ctx, "Flat joined fields. Keep dotted names.")
 	if !ok {
@@ -328,7 +328,7 @@ func TestRewriteConversationalMetaAsk_DetectsUserQuestionReply(t *testing.T) {
 	}}
 	ag.service.session.Memory.AddThread(&ConversationThread{ID: sop.NewUUID(), RootPrompt: "Find John orders", Exchanges: []Interaction{{Role: RoleUser, Content: "Find John orders"}, {Role: RoleAssistant, Content: "Before I proceed, which output shape do you want for joined rows: flat dotted fields or nested objects?"}}})
 	payload := &ai.SessionPayload{Variables: make(map[string]any)}
-	ctx := context.WithValue(context.Background(), "session_payload", payload)
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, payload)
 
 	rewritten, ok := ag.rewriteConversationalMetaAsk(ctx, "Should I go with flat joined fields?")
 	if !ok {
@@ -351,7 +351,7 @@ func TestRewriteConversationalMetaAsk_DetectsBroaderClarifyingQuestionStyle(t *t
 	}}
 	ag.service.session.Memory.AddThread(&ConversationThread{ID: sop.NewUUID(), RootPrompt: "Find John orders", Exchanges: []Interaction{{Role: RoleUser, Content: "Find John orders"}, {Role: RoleAssistant, Content: "Before I proceed, which output shape do you want for joined rows: flat dotted fields or nested objects?"}}})
 	payload := &ai.SessionPayload{Variables: make(map[string]any)}
-	ctx := context.WithValue(context.Background(), "session_payload", payload)
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, payload)
 
 	rewritten, ok := ag.rewriteConversationalMetaAsk(ctx, "Flat dotted fields.")
 	if !ok {
@@ -374,7 +374,7 @@ func TestRewriteConversationalMetaAsk_DetectsTranscriptStyleGoalQuestion(t *test
 	}}
 	ag.service.session.Memory.AddThread(&ConversationThread{ID: sop.NewUUID(), RootPrompt: "Should the agent search the KB naturally for execute_script docs?", Exchanges: []Interaction{{Role: RoleUser, Content: "Should the agent search the KB naturally for execute_script docs?"}, {Role: RoleAssistant, Content: "Is your goal to remove the hardcoded queries from Go and adjust the MD file so the agent searches the KB naturally based on the use case?"}}})
 	payload := &ai.SessionPayload{Variables: make(map[string]any)}
-	ctx := context.WithValue(context.Background(), "session_payload", payload)
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, payload)
 
 	rewritten, ok := ag.rewriteConversationalMetaAsk(ctx, "Yes, remove the hardcoded queries and let the agent search on demand.")
 	if !ok {
@@ -404,7 +404,7 @@ func TestRewriteConversationalMetaAsk_IgnoresNonMetaAssistantTurn(t *testing.T) 
 func TestEpilogueAndCleanup_SetsPendingClarificationState(t *testing.T) {
 	ag := NewCopilotAgent(Config{}, nil, nil)
 	payload := &ai.SessionPayload{Variables: make(map[string]any)}
-	ctx := context.WithValue(context.Background(), "session_payload", payload)
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, payload)
 
 	ag.epilogueAndCleanup(ctx, "Find John orders", ai.IntentOmni, "Before I proceed, which output shape do you want for joined rows: flat dotted fields or nested objects?", nil, nil, nil, nil)
 
@@ -419,7 +419,7 @@ func TestEpilogueAndCleanup_SetsPendingClarificationState(t *testing.T) {
 func TestEpilogueAndCleanup_ClearsPendingClarificationStateOnNormalAnswer(t *testing.T) {
 	ag := NewCopilotAgent(Config{}, nil, nil)
 	payload := &ai.SessionPayload{Variables: make(map[string]any), ClarificationState: &ai.ClarificationState{TargetQuery: "Find John orders", AssistantQuestion: "Which output shape?", Status: "pending"}}
-	ctx := context.WithValue(context.Background(), "session_payload", payload)
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, payload)
 
 	ag.epilogueAndCleanup(ctx, "Find John orders", ai.IntentOmni, "Found matching orders.", nil, nil, nil, nil)
 
@@ -444,7 +444,7 @@ func TestCopilotAsk_RewritesConversationalMetaAskBeforeRoutingAndEngine(t *testi
 	payload := &ai.SessionPayload{Variables: map[string]any{
 		"RoutingState": &TaskContextClassification{Entity: "Omni", Domain: StoresDomain, DBArtifacts: []string{"users"}, StoresArtifacts: []string{"users"}, Layers: []LayerInfo{{Name: "Single-Domain", CRUD: []string{"R"}}}},
 	}}
-	ctx := context.WithValue(context.Background(), "session_payload", payload)
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, payload)
 
 	resp, err := ag.Ask(ctx, "Flat joined fields. Keep dotted names.", nil)
 	if err != nil {
@@ -466,7 +466,7 @@ func TestCopilotAsk_RewritesConversationalMetaAskBeforeRoutingAndEngine(t *testi
 
 func TestBuildAskOutcomeMRUItems_UsesAskOutcomeOverride(t *testing.T) {
 	payload := &ai.SessionPayload{Variables: make(map[string]any), ClarificationState: &ai.ClarificationState{TargetQuery: "Find John orders", Status: "resolved"}}
-	ctx := context.WithValue(context.Background(), "session_payload", payload)
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, payload)
 	items := buildAskOutcomeMRUItems(ctx, "Flat joined fields. Keep dotted names.", "Found orders", nil, nil, nil)
 	found := false
 	for _, item := range items {
@@ -481,7 +481,7 @@ func TestBuildAskOutcomeMRUItems_UsesAskOutcomeOverride(t *testing.T) {
 
 func TestBuildAskOutcomeMRUItems_UsesRetryRewriteState(t *testing.T) {
 	payload := &ai.SessionPayload{Variables: make(map[string]any), RetryRewriteState: &ai.RetryRewriteState{OriginalQuery: "Can we retry the same ask?", ResolvedQuery: "Find John orders", Status: "resolved"}}
-	ctx := context.WithValue(context.Background(), "session_payload", payload)
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, payload)
 	items := buildAskOutcomeMRUItems(ctx, "Can we retry the same ask?", "Found orders", nil, nil, nil)
 	found := false
 	for _, item := range items {
@@ -565,7 +565,7 @@ func TestCopilotPipeline_Phases(t *testing.T) {
 	payload := &ai.SessionPayload{
 		ActiveDomain: "Spaces",
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	prompt := ag.buildSystemPrompt(ctx, query, *taskCtx)
 
@@ -635,7 +635,7 @@ func TestCopilotPipeline_StoresSchemaFallback_NoArtifacts(t *testing.T) {
 	payload := &ai.SessionPayload{
 		CurrentDB: SystemDBName,
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	prompt := ag.buildSystemPrompt(ctx, "List stores", TaskContextClassification{
 		Domain: StoresDomain,
@@ -809,7 +809,7 @@ func TestBuildSystemPrompt_IncludesCoreSOPPlaybooksWhenNoKBIsSelected(t *testing
 	ag := NewCopilotAgent(Config{}, map[string]sop.DatabaseOptions{}, sysDB)
 	ag.service = &Service{session: &RunnerSession{MRU: []MRUItem{}, Memory: NewShortTermMemory()}}
 	ag.markMRUCategoryWithSource(playbookMRUCategory("sop"), "Retrieved Semantics:\n- Context (Score: 1.00): SOP playbook context", MRUSourcePlaybook)
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{
 		SelectedKBs: nil,
 	})
 
@@ -869,7 +869,7 @@ func TestBuildSystemPrompt_DoesNotUseSelectedKBPersonaForOmni(t *testing.T) {
 	ag := NewCopilotAgent(Config{}, map[string]sop.DatabaseOptions{}, sysDB)
 	ag.service = &Service{session: &RunnerSession{MRU: []MRUItem{}, Memory: NewShortTermMemory()}}
 	ag.Memory.AgentID = "legal_kb"
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{
 		CurrentDB: SystemDBName,
 		SelectedKBs: []ai.ArtifactReference{{
 			Name:         "legal_kb",

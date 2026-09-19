@@ -40,7 +40,7 @@ func TestParseDeleteSpaceRequest_AcceptsCurrentDatabasePrefixedReversedSpacePhra
 
 func TestHandlePendingUserConfirmation_CatchesPrefixedReversedDeletePhrase(t *testing.T) {
 	svc := &Service{session: &RunnerSession{}}
-	ctx := context.WithValue(context.Background(), "session_payload", &ai.SessionPayload{CurrentDB: "dev_db"})
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, &ai.SessionPayload{CurrentDB: "dev_db"})
 
 	handled, msg, err := svc.handlePendingUserConfirmation(ctx, "Current Database: dev_db\ndelete task3 space")
 	if err != nil {

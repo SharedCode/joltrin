@@ -99,7 +99,7 @@ func TestAtomicKBOperations(t *testing.T) {
 		CurrentDB: "testdb",
 		AgentID:   "omni", // to default to "sop" workspace
 	}
-	ctx := context.WithValue(context.Background(), "session_payload", payload)
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, payload)
 
 	tests := []struct {
 		op          string

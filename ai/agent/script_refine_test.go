@@ -44,7 +44,7 @@ func TestScript_Refine(t *testing.T) {
 	payload := &ai.SessionPayload{
 		CurrentDB: "system",
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	// 2. Create Script with hardcoded value
 	_, _, err := svc.handleSessionCommand(ctx, "/create refine_test --category general", sysDB)

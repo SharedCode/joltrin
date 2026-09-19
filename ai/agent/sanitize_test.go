@@ -176,7 +176,7 @@ func TestSanitizeToolCallArgs_StripsQuotedKeysAndValues(t *testing.T) {
 }
 
 func TestValidateExecuteScriptPlaceholders_RejectsBooleanFilterWithCategoryAndExample(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "session_payload", &ai.SessionPayload{CurrentUserQuery: "Find orders for users with first_name 'John' with total amount > 500"})
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, &ai.SessionPayload{CurrentUserQuery: "Find orders for users with first_name 'John' with total amount > 500"})
 	script := []ScriptInstruction{
 		{Op: "filter", Args: map[string]any{"condition": map[string]any{"first_name": true}}},
 	}
@@ -209,7 +209,7 @@ func TestValidateExecuteScriptPlaceholders_AllowsBooleanFilterForBooleanField(t 
 }
 
 func TestValidateExecuteScriptPlaceholders_RejectsOperatorOnlyFilterPlaceholder(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "session_payload", &ai.SessionPayload{CurrentUserQuery: "Find orders for users with first_name 'John' with total amount > 500"})
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, &ai.SessionPayload{CurrentUserQuery: "Find orders for users with first_name 'John' with total amount > 500"})
 	script := []ScriptInstruction{
 		{Op: "filter", Args: map[string]any{"condition": map[string]any{"orders.total_amount": "$gt"}}},
 	}
@@ -221,7 +221,7 @@ func TestValidateExecuteScriptPlaceholders_RejectsOperatorOnlyFilterPlaceholder(
 }
 
 func TestValidateExecuteScriptPlaceholders_RejectsNullFilterValuePlaceholder(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "session_payload", &ai.SessionPayload{CurrentUserQuery: "Find orders for users with first_name 'John' with total amount > 500"})
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, &ai.SessionPayload{CurrentUserQuery: "Find orders for users with first_name 'John' with total amount > 500"})
 	script := []ScriptInstruction{
 		{Op: "filter", Args: map[string]any{"condition": map[string]any{"first_name": nil}}},
 	}
@@ -266,7 +266,7 @@ func TestValidateExecuteScriptPlaceholders_RejectsStringJoinValuePlaceholder(t *
 }
 
 func TestValidateExecuteScriptPlaceholders_AggregatesMultipleIssues(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "session_payload", &ai.SessionPayload{CurrentUserQuery: "Find orders for users with first_name 'John' with total amount > 500"})
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, &ai.SessionPayload{CurrentUserQuery: "Find orders for users with first_name 'John' with total amount > 500"})
 	script := []ScriptInstruction{
 		{Op: "open_store", ResultVar: "users_store", Args: map[string]any{"name": "users", "transaction": "tx"}},
 		{Op: "filter", InputVar: "users_store", Args: map[string]any{"condition": map[string]any{"first_name": true}}, ResultVar: "john_users"},
@@ -351,7 +351,7 @@ func TestSanitizeScript_NormalizesLiveJohnQueryBooleanAliasPlaceholders(t *testi
 
 func TestToolExecuteScript_RewritesRecordedArgsToNormalizedScript(t *testing.T) {
 	agent := NewCopilotAgent(Config{StubMode: true}, nil, nil)
-	ctx := context.WithValue(context.Background(), "session_payload", &ai.SessionPayload{CurrentUserQuery: "Find orders for users with first_name 'John' with total amount > 500"})
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, &ai.SessionPayload{CurrentUserQuery: "Find orders for users with first_name 'John' with total amount > 500"})
 	args := map[string]any{
 		"script": []any{
 			map[string]any{"op": "begin_tx", "args": map[string]any{"mode": "read"}},
@@ -389,7 +389,7 @@ func TestToolExecuteScript_RewritesRecordedArgsToNormalizedScript(t *testing.T) 
 
 func TestToolExecuteScript_UsesClarificationTargetQueryForAliasPredicateGrounding(t *testing.T) {
 	agent := NewCopilotAgent(Config{StubMode: true}, nil, nil)
-	ctx := context.WithValue(context.Background(), "session_payload", &ai.SessionPayload{
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, &ai.SessionPayload{
 		CurrentUserQuery: "Use this script then plugin your 500 condition.",
 		ClarificationState: &ai.ClarificationState{
 			TargetQuery: "Find orders for users with first_name 'John' with total amount > 500",

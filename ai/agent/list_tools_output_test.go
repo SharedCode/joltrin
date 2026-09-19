@@ -14,7 +14,7 @@ func TestListToolsOutput(t *testing.T) {
 	payload := &ai.SessionPayload{
 		CurrentDB: "system",
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	agent.registerTools(ctx)
 

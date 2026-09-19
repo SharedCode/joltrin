@@ -62,6 +62,15 @@ const (
 	// CtxKeyIsNewTopic carries the is-new-topic signal from the orchestrating Service down to pipeline agents.
 	// When true it indicates the current request starts a fresh conversation thread rather than continuing one.
 	CtxKeyIsNewTopic ContextKey = "ai_is_new_topic"
+	// CtxKeySessionPayload is the context key for the current *SessionPayload.
+	// Previously carried under the bare string "session_payload" everywhere
+	// it was set or read (18+ call sites across ai, ai/agent, and
+	// tools/httpserver) - flagged by staticcheck (SA1029): a string used
+	// directly as a context.WithValue key risks silently colliding with
+	// an unrelated value some other package sets under the identical
+	// string, and go vet/the stdlib context docs call this out
+	// specifically as the reason to use an unexported type instead.
+	CtxKeySessionPayload ContextKey = "ai_session_payload"
 )
 
 // ArtifactType represents the type of a database artifact.
@@ -806,7 +815,7 @@ func (s *SessionPayload) GetDatabase() string {
 
 // GetSessionPayload retrieves the session payload from the context.
 func GetSessionPayload(ctx context.Context) *SessionPayload {
-	if val := ctx.Value("session_payload"); val != nil {
+	if val := ctx.Value(CtxKeySessionPayload); val != nil {
 		if p, ok := val.(*SessionPayload); ok {
 			return p
 		}

@@ -83,7 +83,7 @@ func TestToolFind_ClosestItem(t *testing.T) {
 	sessionPayload := &ai.SessionPayload{
 		CurrentDB: "testdb",
 	}
-	ctx = context.WithValue(ctx, "session_payload", sessionPayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, sessionPayload)
 
 	// 3. Test Cases
 	tests := []struct {

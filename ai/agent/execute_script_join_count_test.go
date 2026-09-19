@@ -242,7 +242,7 @@ func TestExecuteScript_JoinCountIsolation(t *testing.T) {
 		t.Fatalf("marshal script: %v", err)
 	}
 
-	ctxWithPayload := context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "test_db"})
+	ctxWithPayload := context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "test_db"})
 	resultRaw, err := agent.toolExecuteScript(ctxWithPayload, map[string]any{"script": string(scriptBytes)})
 	if err != nil {
 		t.Fatalf("toolExecuteScript failed: %v", err)
@@ -468,7 +468,7 @@ func countReadableRows(v any) (realRows int, noticeCount int) {
 
 func executeScriptHelper(t *testing.T, agent *CopilotAgent, ctx context.Context, script []map[string]any) string {
 	scriptBytes, _ := json.Marshal(script)
-	ctxWithPayload := context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "test_db"})
+	ctxWithPayload := context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "test_db"})
 	resultRaw, err := agent.toolExecuteScript(ctxWithPayload, map[string]any{"script": string(scriptBytes)})
 	if err != nil {
 		t.Fatalf("toolExecuteScript failed: %v", err)

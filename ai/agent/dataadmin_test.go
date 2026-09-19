@@ -44,7 +44,7 @@ func TestCopilotAgent_Execute(t *testing.T) {
 		CurrentDB: "test_db",
 	}
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	// Test list_databases
 	resp, err := agent.Execute(ctx, "list_databases", nil)

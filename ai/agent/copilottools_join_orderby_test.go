@@ -27,7 +27,7 @@ func TestToolJoin_OrderBy(t *testing.T) {
 
 	ctx := context.Background()
 	payload := &ai.SessionPayload{CurrentDB: "system"}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 	agent.Open(ctx)
 
 	// Create Stores and Data

@@ -33,7 +33,7 @@ func TestServiceListTools(t *testing.T) {
 	payload := &ai.SessionPayload{
 		CurrentDB: "system",
 	}
-	ctx := context.WithValue(context.Background(), "session_payload", payload)
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, payload)
 
 	out, handled, err := handler(ctx, "/list_tools", nil)
 

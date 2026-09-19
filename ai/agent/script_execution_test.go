@@ -210,7 +210,7 @@ func TestScriptExecution_SelectTwice(t *testing.T) {
 		CurrentDB: filepath.Base(tmpDir),
 	}
 
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 	// ctx = context.WithValue(ctx, ai.CtxKeyExecutor, &MockToolExecutor{}) // Use real executor
 
 	// We need to save the script first
@@ -524,7 +524,7 @@ func TestScriptRecording_SelectTwice_Legacy(t *testing.T) {
 		CurrentDB: filepath.Base(tmpDir),
 	}
 
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	// Open Session (Starts Transaction)
 	if err := svc.Open(ctx); err != nil {
@@ -641,7 +641,7 @@ func TestScriptRecording_SelectTwice_Native(t *testing.T) {
 		CurrentDB: filepath.Base(tmpDir),
 	}
 
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	// Open Session (Starts Transaction)
 	if err := svc.Open(ctx); err != nil {
@@ -1129,7 +1129,7 @@ func TestRunStepCommand_ExecuteScriptSuppressesInnerStepHeaders(t *testing.T) {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, ai.CtxKeyExecutor, &StreamingExecuteScriptMock{})
 	ctx = context.WithValue(ctx, CtxKeyJSONStreamer, streamer)
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{})
 	ctx = context.WithValue(ctx, "step_index", 1)
 
 	var sb strings.Builder
@@ -1189,7 +1189,7 @@ func TestRunStepCommand_ExecuteScriptSuppressesDuplicateUIRecord(t *testing.T) {
 	ctx = context.WithValue(ctx, ai.CtxKeyExecutor, &StreamingExecuteScriptMock{})
 	ctx = context.WithValue(ctx, CtxKeyJSONStreamer, streamer)
 	ctx = context.WithValue(ctx, ai.CtxKeyEventStreamer, func(eventType string, payload any) {})
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{})
 	ctx = context.WithValue(ctx, "step_index", 1)
 
 	var sb strings.Builder
@@ -1288,7 +1288,7 @@ func TestToolScriptAddStepFromLast_MetaToolExclusion(t *testing.T) {
 	agent := NewCopilotAgent(cfg, dbs, sysDB)
 
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "system"})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "system"})
 	agent.Open(ctx)
 
 	// 1. Create a Script
@@ -1355,7 +1355,7 @@ func TestToolScriptUpdateStep(t *testing.T) {
 	agent := NewCopilotAgent(cfg, dbs, sysDB)
 
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "system"})
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{CurrentDB: "system"})
 	if err := agent.Open(ctx); err != nil {
 		t.Fatalf("Failed to open agent: %v", err)
 	}

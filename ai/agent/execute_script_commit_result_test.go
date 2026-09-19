@@ -47,7 +47,7 @@ func TestExecuteScript_CommitDoesNotClobberSortedResult(t *testing.T) {
 	adminAgent := agent.NewCopilotAgent(agent.Config{Verbose: true}, map[string]sop.DatabaseOptions{"dev_db": dbOpts}, database.NewDatabase(sop.DatabaseOptions{StoresFolders: []string{"/tmp/sysdb_commit_result"}}))
 	defer os.RemoveAll("/tmp/sysdb_commit_result")
 
-	execCtx := context.WithValue(ctx, "session_payload", &ai.SessionPayload{CurrentDB: "dev_db"})
+	execCtx := context.WithValue(ctx, agent.SessionPayloadKey, &ai.SessionPayload{CurrentDB: "dev_db"})
 	if err := adminAgent.Open(execCtx); err != nil {
 		t.Fatalf("open agent: %v", err)
 	}

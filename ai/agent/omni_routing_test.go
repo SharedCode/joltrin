@@ -59,7 +59,7 @@ func (m *omniMockGenerator) Name() string { return "mock" }
 
 func TestOmni_HandoffToAvatar(t *testing.T) {
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{
 		CurrentDB: "default",
 	})
 
@@ -180,7 +180,7 @@ func (m *restrictedMockGenerator) Name() string { return "mock" }
 
 func TestOmni_RestrictedAvatarTools(t *testing.T) {
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{
 		CurrentDB: "default",
 	})
 

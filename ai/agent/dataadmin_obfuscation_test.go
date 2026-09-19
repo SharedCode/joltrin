@@ -35,7 +35,7 @@ func TestCopilotAgent_Execute_Deobfuscation(t *testing.T) {
 	payload := &ai.SessionPayload{
 		CurrentDB: "testdb",
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	// Execute
 	// We expect "unknown tool" error, but lastToolCall should be set.
@@ -89,7 +89,7 @@ func TestCopilotAgent_Execute_Deobfuscation_Nested(t *testing.T) {
 	payload := &ai.SessionPayload{
 		CurrentDB: "testdb",
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	// Execute
 	agent.Execute(ctx, "some_tool", args)

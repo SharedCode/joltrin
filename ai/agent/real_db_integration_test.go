@@ -36,7 +36,7 @@ func TestRealDBIntegration_JoinFlow(t *testing.T) {
 	agent := NewCopilotAgent(cfg, databases, nil)
 
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{
 		Variables: make(map[string]any),
 		CurrentDB: "dev_db",
 	})

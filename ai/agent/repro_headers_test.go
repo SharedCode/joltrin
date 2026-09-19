@@ -49,7 +49,7 @@ func TestRepro_SelectMissingHeaders(t *testing.T) {
 	payload := &ai.SessionPayload{
 		CurrentDB: filepath.Base(tmpDir),
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 	ctx = context.WithValue(ctx, CtxKeyJSONStreamer, js)
 
 	args := map[string]any{

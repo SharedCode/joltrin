@@ -68,9 +68,9 @@ func TestSingleBlobScriptExecution(t *testing.T) {
 	// Key used in copilottools.utils.go
 	payload.Variables["_atomic_script_context"] = scriptCtx
 
-	// Assuming "session_payload" is the key string for context value in ai/interfaces.go
-	// But since `ai.GetSessionPayload` uses `ctx.Value("session_payload")`, we use that string key.
-	ctx := context.WithValue(context.Background(), "session_payload", payload)
+	// Assuming SessionPayloadKey is the key string for context value in ai/interfaces.go
+	// But since `ai.GetSessionPayload` uses `ctx.Value(SessionPayloadKey)`, we use that string key.
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, payload)
 
 	// 4. Define the Script (Single Blob)
 	// Script: scan department -> join employees -> project -> limit -> return

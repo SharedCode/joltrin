@@ -170,7 +170,7 @@ func TestRepro_Leakage_StateCleaning_Legacy(t *testing.T) {
 		Name: "Repro",
 	}, databases, systemDB)
 
-	ctx = context.WithValue(context.Background(), "session_payload", &ai.SessionPayload{CurrentDB: "dev_db"})
+	ctx = context.WithValue(context.Background(), agent.SessionPayloadKey, &ai.SessionPayload{CurrentDB: "dev_db"})
 	svc.Open(ctx)
 
 	svc.SetGenerator(mockBrain)
@@ -182,7 +182,7 @@ func TestRepro_Leakage_StateCleaning_Legacy(t *testing.T) {
 	payload := &ai.SessionPayload{
 		CurrentDB: "dev_db",
 	}
-	runCtx := context.WithValue(ctx, "session_payload", payload)
+	runCtx := context.WithValue(ctx, agent.SessionPayloadKey, payload)
 
 	// Cmd 1: Sort Users
 	// Expecting "all_users" (2 users)
@@ -283,7 +283,7 @@ func TestRepro_Leakage_StateCleaning_Native(t *testing.T) {
 		Name: "Repro",
 	}, databases, systemDB)
 
-	ctx = context.WithValue(context.Background(), "session_payload", &ai.SessionPayload{CurrentDB: "dev_db"})
+	ctx = context.WithValue(context.Background(), agent.SessionPayloadKey, &ai.SessionPayload{CurrentDB: "dev_db"})
 	svc.Open(ctx)
 
 	svc.SetGenerator(mockBrain)
@@ -295,7 +295,7 @@ func TestRepro_Leakage_StateCleaning_Native(t *testing.T) {
 	payload := &ai.SessionPayload{
 		CurrentDB: "dev_db",
 	}
-	runCtx := context.WithValue(ctx, "session_payload", payload)
+	runCtx := context.WithValue(ctx, agent.SessionPayloadKey, payload)
 
 	// Cmd 1: Sort Users
 	// Expecting "all_users" (2 users)
@@ -389,7 +389,7 @@ func TestAliasProjection_JoinRight_Legacy(t *testing.T) {
 	svc.SetGenerator(mockBrain)
 
 	payload := &ai.SessionPayload{CurrentDB: "dev_db"}
-	runCtx := context.WithValue(ctx, "session_payload", payload)
+	runCtx := context.WithValue(ctx, agent.SessionPayloadKey, payload)
 
 	res, err := svc.Ask(runCtx, "Run alias test", nil)
 	if err != nil {
@@ -457,7 +457,7 @@ func TestAliasProjection_JoinRight_Native(t *testing.T) {
 	svc.SetGenerator(mockBrain)
 
 	payload := &ai.SessionPayload{CurrentDB: "dev_db"}
-	runCtx := context.WithValue(ctx, "session_payload", payload)
+	runCtx := context.WithValue(ctx, agent.SessionPayloadKey, payload)
 
 	res, err := svc.Ask(runCtx, "Run alias test", nil)
 	if err != nil {

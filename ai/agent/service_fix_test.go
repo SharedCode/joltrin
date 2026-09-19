@@ -52,7 +52,7 @@ func TestService_ExecuteScript_StringDB(t *testing.T) {
 		CurrentDB: "test_db", // String!
 	}
 
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	// This should NOT panic
 	resp, err := svc.Ask(ctx, "/run test_script", nil)

@@ -35,7 +35,7 @@ func TestOmniAIConversationalMemoryHarness(t *testing.T) {
 
 	// Create common session context
 	payload := &ai.SessionPayload{}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, agent.SessionPayloadKey, payload)
 
 	err = copilot.Open(ctx)
 	if err != nil {

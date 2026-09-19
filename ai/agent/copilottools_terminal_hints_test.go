@@ -51,7 +51,7 @@ func TestToolFetch_ReturnsTerminalEnvelopeForMissingKeyInNativeLoop(t *testing.T
 	}
 	defer readTx.Rollback(ctx)
 	readPayload.Transaction = readTx
-	ctx = context.WithValue(ctx, "session_payload", readPayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, readPayload)
 	ctx = context.WithValue(ctx, ai.CtxKeyNativeToolHints, true)
 
 	res, err := agent.toolFetch(ctx, map[string]any{"store": "users", "key": "missing"})
@@ -96,7 +96,7 @@ func TestToolUpdate_ReturnsTerminalEnvelopeForMissingItemInNativeLoop(t *testing
 	}
 	defer writeTx.Rollback(ctx)
 	writePayload.Transaction = writeTx
-	ctx = context.WithValue(ctx, "session_payload", writePayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, writePayload)
 	ctx = context.WithValue(ctx, ai.CtxKeyNativeToolHints, true)
 
 	res, err := agent.toolUpdate(ctx, map[string]any{
@@ -145,7 +145,7 @@ func TestToolDelete_ReturnsTerminalEnvelopeForMissingItemInNativeLoop(t *testing
 	}
 	defer writeTx.Rollback(ctx)
 	writePayload.Transaction = writeTx
-	ctx = context.WithValue(ctx, "session_payload", writePayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, writePayload)
 	ctx = context.WithValue(ctx, ai.CtxKeyNativeToolHints, true)
 
 	res, err := agent.toolDelete(ctx, map[string]any{"store": "users", "key": "missing"})

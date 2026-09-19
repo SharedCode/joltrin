@@ -1600,7 +1600,7 @@ func TestNativeReActEngine_RoutedSameToolRepairEscalatesToClarificationAfterFirs
 	payload := &ai.SessionPayload{Variables: map[string]any{
 		"RoutingState": &TaskContextClassification{RoutingGate: RoutingGateFocused, Domain: SpacesDomain},
 	}}
-	ctx := context.WithValue(context.Background(), "session_payload", payload)
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, payload)
 	ctx = context.WithValue(ctx, RunnerSessionKey, &RunnerSession{Verbose: true})
 	ctx = context.WithValue(ctx, ai.CtxKeyProgressSink, func(msg string) {
 		progress = append(progress, msg)
@@ -1686,7 +1686,7 @@ func TestNativeReActEngine_RoutedAmbiguityEscalatesToClarificationAfterFirstRepa
 	payload := &ai.SessionPayload{Variables: map[string]any{
 		"RoutingState": &TaskContextClassification{RoutingGate: RoutingGateFocused, Domain: StoresDomain},
 	}}
-	ctx := context.WithValue(context.Background(), "session_payload", payload)
+	ctx := context.WithValue(context.Background(), SessionPayloadKey, payload)
 	ctx = context.WithValue(ctx, RunnerSessionKey, &RunnerSession{Verbose: true})
 	ctx = context.WithValue(ctx, ai.CtxKeyProgressSink, func(msg string) {
 		progress = append(progress, msg)

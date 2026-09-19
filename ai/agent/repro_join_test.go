@@ -149,7 +149,7 @@ func TestJoinRightReproduction(t *testing.T) {
 		StoresFolders: []string{"/tmp/sysdb_repro"},
 	})
 
-	execCtx := context.WithValue(ctx, "session_payload", &ai.SessionPayload{
+	execCtx := context.WithValue(ctx, agent.SessionPayloadKey, &ai.SessionPayload{
 		CurrentDB: "mydb",
 	})
 

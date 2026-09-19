@@ -39,7 +39,7 @@ func TestReproSlowJoin(t *testing.T) {
 	payload := &ai.SessionPayload{
 		CurrentDB: dbName,
 	}
-	ctx = context.WithValue(ctx, "session_payload", payload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, payload)
 
 	// Direct DB access for setup
 	db := aidatabase.NewDatabase(dbOpts)

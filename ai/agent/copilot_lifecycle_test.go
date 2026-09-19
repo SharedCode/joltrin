@@ -144,7 +144,7 @@ func TestAgentFullMemoryLifeCycleTest(t *testing.T) {
 	tx4.Rollback(ctx)
 
 	// 5. Query / MRU Injection
-	ctx = context.WithValue(ctx, "session_payload", &ai.SessionPayload{
+	ctx = context.WithValue(ctx, SessionPayloadKey, &ai.SessionPayload{
 		ActiveDomain: "ltm_agent123",
 		CurrentDB:    "test_db",
 	})

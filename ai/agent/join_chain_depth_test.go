@@ -61,7 +61,7 @@ func TestToolJoin_Chained_ABCD(t *testing.T) {
 	sessionPayload := &ai.SessionPayload{
 		CurrentDB: "testdb",
 	}
-	ctx = context.WithValue(ctx, "session_payload", sessionPayload)
+	ctx = context.WithValue(ctx, SessionPayloadKey, sessionPayload)
 
 	// 4. Executing Script via ToolJoin calls (Simulating Chain)
 	// We can't easily valid "toolJoin" chaining in one go because toolJoin handles ONE join.
