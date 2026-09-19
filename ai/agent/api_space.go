@@ -2,7 +2,6 @@ package agent
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/sharedcode/joltrin"
@@ -415,13 +414,4 @@ func (a *CopilotAgent) SearchItemsByPath(ctx context.Context, args SearchItemsBy
 		return nil, err
 	}
 	return items, nil
-}
-
-// Helper to convert struct to JSON string for backward compatibility
-func spaceResultToJSON(v any) (string, error) {
-	b, err := json.Marshal(v)
-	if err != nil {
-		return "", err
-	}
-	return string(b), nil
 }
