@@ -371,18 +371,6 @@ func buildScriptToolDescriptionContext(domain string, flags map[string]bool) str
 	return "Structured Context: Script Authoring Tools\n" + buildScriptAuthoringContext(domain, flags)
 }
 
-func isOnlyLayer1(layers []LayerInfo) bool {
-	if len(layers) == 0 {
-		return false
-	}
-	for _, layer := range layers {
-		if !strings.Contains(layer.Name, "Single-Domain") {
-			return false
-		}
-	}
-	return true
-}
-
 func isCrossDomain(layers []LayerInfo) bool {
 	for _, layer := range layers {
 		if strings.Contains(layer.Name, "Cross-Domain") {
@@ -390,66 +378,6 @@ func isCrossDomain(layers []LayerInfo) bool {
 		}
 	}
 	return false
-}
-
-func trimManualSection(manual string, heading string) string {
-	idx := strings.Index(manual, heading)
-	if idx < 0 {
-		return manual
-	}
-	return strings.TrimSpace(manual[:idx])
-}
-
-func extractManualSection(manual string, heading string, nextHeading string) string {
-	start := strings.Index(manual, heading)
-	if start < 0 {
-		return ""
-	}
-	section := manual[start:]
-	if nextHeading != "" {
-		if end := strings.Index(section, nextHeading); end >= 0 {
-			section = section[:end]
-		}
-	}
-	return strings.TrimSpace(section)
-}
-
-func buildCompactStoresToolContext(manual string) string {
-	heading := trimManualSection(manual, "<h2> Core Conventions</h2>")
-	if heading == "" {
-		heading = manual
-	}
-
-	coreSection := extractManualSection(manual, "<h2> Core Conventions</h2>", "<h2> Research & Orchestration Rules</h2>")
-
-	coreLines := []string{
-		"<h2> Core Conventions</h2>",
-		"- Use `result_var` and `input_var` to chain multi-step reads.",
-		"- Use concrete predicate objects such as `{\"first_name\":{\"$eq\":\"John\"}}`, not placeholder booleans or nulls.",
-		"- Take predicate field names from researched `schema=...` output and take predicate values/operators from the user's criteria; match value types to schema types (string for first_name:string, number for age:number, etc.).",
-		"- Never use boolean true/false or null as predicate values unless checking for actual boolean/null values in the data.",
-	}
-	if coreSection != "" && strings.Contains(coreSection, "begin_tx") {
-		// Keep only the minimal execution-shape reminder; orchestration details live in recipes and focused execution context.
-		coreLines = append(coreLines, "- Keep `execute_script` focused on orchestration; rely on workflow recipes and focused execution context for the full read/write flow.")
-	}
-	researchLines := []string{
-		"<h2> Research & Orchestration Rules</h2>",
-		"- Use `list_stores` to research schema, relations, field types, and field mappings when field names, value types, predicate shapes, or join mappings are ambiguous.",
-		"- Scope research with `stores:[...]` when likely target stores are already known.",
-		"- `list_stores` returns grounded `schema=...` and optional `relations=[...]` per store; reuse those as the source of truth.",
-		"- Read relations literally: in `users_orders(key->users.key)`, `users_orders` is the target store, `key` is the target-store join field, and `users.key` is the current-store field path.",
-		"- If you must emit `on`, convert those grounded relation fields into the join op's concrete field mapping; never use store names where field paths are required.",
-		"- `join` and `join_right` emit a combined flat record by default; reuse dotted store-qualified field paths unless a later `project` reshapes the output.",
-		"- Use `gettoolinfo('execute_script')` only when the AST shape itself is unclear.",
-	}
-
-	parts := []string{strings.TrimSpace(heading), strings.Join(coreLines, "\n"), strings.Join(researchLines, "\n")}
-	return strings.TrimSpace(strings.Join(parts, "\n\n"))
-}
-
-func trimStoresManualForCombinedContext(manual string) string {
-	return buildCompactStoresToolContext(manual)
 }
 
 func compactFocusedToolContextAgainstBaseline(baseline string, focused string) string {
