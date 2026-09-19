@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -17,10 +18,36 @@ import (
 // test runs. getBillingService() is a package-level sync.Once singleton
 // that persists billing state under config.DatabasePath; without this,
 // config.DatabasePath is "" during `go test` (main()'s flag.Parse never
-// runs), so the singleton would write real files under a relative
-// "_billing" path in the source tree, and that state would leak across
-// separate `go test` invocations (a duplicate-event false positive once
-// bit TestHandleSimulateCheckout locally).
+// runs), so the singleton would fall back to the fixed "/tmp/sop_data"
+// default and write real files there instead of a sandboxed temp dir.
+//
+// This alone doesn't fully sandbox billing state: many test files in this
+// package do a blanket `config = Config{}` reset for their own isolation
+// needs, without preserving DatabasePath, and getBillingService()'s
+// sync.Once only cares about whatever config.DatabasePath happens to be at
+// the moment something *first* calls it. Depending on execution order that
+// can still land on the /tmp/sop_data fallback (confirmed locally: this is
+// exactly what caused TestHandleSimulateCheckout to intermittently fail
+// with a stale "duplicate webhook event" error days after it was last
+// run - /tmp/sop_data/_billing had accumulated real state across separate
+// `go test` invocations on the same machine). Forcing getBillingService()
+// to initialize eagerly right here was tried and made things worse: it
+// then reliably captured the FeatureGate that exists at TestMain time,
+// before auth_oidc_test.go's setupTestOIDC deliberately does
+// `oidcOnce = sync.Once{}` for its own isolation - which replaces the
+// package-level serverFeatureGate with a new instance that
+// getBillingService()'s already-captured gate reference has no way to
+// find out about. Two singletons that are each individually correct for
+// their own test file become permanently out of sync with each other
+// depending on which one initializes first; fixing that for real means
+// DefaultBillingService not caching a gate reference across its own
+// lifetime, which is a production code change out of scope here.
+//
+// So this only closes the DatabasePath gap, not gate staleness: it does
+// not eagerly force initialization, and any test asserting on
+// getServerFeatureGate() state after a billing webhook needs its own
+// event/session ID to be unique (see TestHandleSimulateCheckout and
+// siblings) rather than relying on this to guarantee a clean slate.
 func TestMain(m *testing.M) {
 	tmpDir, err := os.MkdirTemp("", "joltrin-httpserver-test-*")
 	if err != nil {
@@ -92,7 +119,13 @@ func TestHandleSimulateCheckout(t *testing.T) {
 	gate := getServerFeatureGate()
 	gate.SetTier(governance.TierCore)
 
-	req := httptest.NewRequest(http.MethodGet, "/api/billing/checkout/simulate?session_id=cs_sim_123&tenant_id=tenant-sim&tier=pro&redirect=/app", nil)
+	// The webhook event ID must be unique per test run, not a hardcoded
+	// literal: getBillingService() treats it as an idempotency key and
+	// rejects a repeat as a duplicate, which previously made this test
+	// depend on never having run before against whatever storage path the
+	// billing service singleton happened to land on (see TestMain).
+	sessionID := fmt.Sprintf("cs_sim_%d", time.Now().UnixNano())
+	req := httptest.NewRequest(http.MethodGet, "/api/billing/checkout/simulate?session_id="+sessionID+"&tenant_id=tenant-sim&tier=pro&redirect=/app", nil)
 	w := httptest.NewRecorder()
 
 	handleSimulateCheckout(w, req)
@@ -115,7 +148,8 @@ func TestHandleSimulateCheckout_RejectsOpenRedirect(t *testing.T) {
 	gate := getServerFeatureGate()
 	gate.SetTier(governance.TierCore)
 
-	req := httptest.NewRequest(http.MethodGet, "/api/billing/checkout/simulate?session_id=cs_sim_evil&tenant_id=tenant-sim&tier=pro&redirect=https://evil.example/phish", nil)
+	sessionID := fmt.Sprintf("cs_sim_evil_%d", time.Now().UnixNano())
+	req := httptest.NewRequest(http.MethodGet, "/api/billing/checkout/simulate?session_id="+sessionID+"&tenant_id=tenant-sim&tier=pro&redirect=https://evil.example/phish", nil)
 	w := httptest.NewRecorder()
 
 	handleSimulateCheckout(w, req)
@@ -166,11 +200,16 @@ func TestHandleSimulateCheckout_BypassAttemptsStaySameOrigin(t *testing.T) {
 	}
 
 	origin := &url.URL{Scheme: "https", Host: "joltrin.example"}
+	runID := time.Now().UnixNano()
 
 	for _, redirect := range payloads {
 		t.Run(redirect, func(t *testing.T) {
 			q := url.Values{}
-			q.Set("session_id", "cs_sim_bypass")
+			// Unique per test run (not per payload - the point here is the
+			// redirect target, and a repeat event ID is fine since
+			// getBillingService() treats it as an already-handled
+			// duplicate rather than an error).
+			q.Set("session_id", fmt.Sprintf("cs_sim_bypass_%d", runID))
 			q.Set("tenant_id", "tenant-sim")
 			q.Set("tier", "pro")
 			q.Set("redirect", redirect)
