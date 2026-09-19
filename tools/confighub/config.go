@@ -154,16 +154,14 @@ func resolveDatabaseConfig(value reflect.Value, configDir string) {
 	}
 
 	if pathField := value.FieldByName("Path"); pathField.IsValid() && pathField.CanSet() && pathField.Kind() == reflect.String {
-		if path := strings.TrimSpace(pathField.String()); path != "" && !filepath.IsAbs(path) {
-			pathField.SetString(filepath.Join(configDir, path))
-		}
+		pathField.SetString(resolveConfigRelativePath(pathField.String(), configDir))
 	}
 
 	if storesField := value.FieldByName("StoresFolders"); storesField.IsValid() && storesField.Kind() == reflect.Slice {
 		for i := 0; i < storesField.Len(); i++ {
 			item := storesField.Index(i)
-			if item.Kind() == reflect.String && !filepath.IsAbs(item.String()) {
-				storesField.Index(i).SetString(filepath.Join(configDir, item.String()))
+			if item.Kind() == reflect.String {
+				item.SetString(resolveConfigRelativePath(item.String(), configDir))
 			}
 		}
 	}
@@ -174,8 +172,8 @@ func resolveDatabaseConfig(value reflect.Value, configDir string) {
 			if basePaths := entry.FieldByName("BasePaths"); basePaths.IsValid() && basePaths.Kind() == reflect.Slice {
 				for j := 0; j < basePaths.Len(); j++ {
 					item := basePaths.Index(j)
-					if item.Kind() == reflect.String && !filepath.IsAbs(item.String()) {
-						basePaths.Index(j).SetString(filepath.Join(configDir, item.String()))
+					if item.Kind() == reflect.String {
+						item.SetString(resolveConfigRelativePath(item.String(), configDir))
 					}
 				}
 			}
@@ -183,7 +181,14 @@ func resolveDatabaseConfig(value reflect.Value, configDir string) {
 	}
 }
 
+// resolveConfigRelativePath joins path onto configDir when path is relative,
+// leaving an absolute path (or an empty one) unchanged. Used for every
+// filesystem path a loaded config can carry - the single Path field, each
+// StoresFolders entry, and each ErasureConfigEntry.BasePaths entry - so a
+// relative value in the config file resolves against the config file's own
+// directory rather than the process's current working directory.
 func resolveConfigRelativePath(path, configDir string) string {
+	path = strings.TrimSpace(path)
 	if path == "" {
 		return path
 	}
