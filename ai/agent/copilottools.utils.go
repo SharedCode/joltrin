@@ -233,32 +233,6 @@ func matchOperator(val any, opMap map[string]any) bool {
 	return true
 }
 
-func isMap(v any) bool {
-	_, ok := v.(map[string]any)
-	return ok
-}
-
-func getOptimizationKey(filter any) any {
-	if filter == nil {
-		return nil
-	}
-	if !isMap(filter) {
-		return filter
-	}
-	m := filter.(map[string]any)
-	if v, ok := m["$eq"]; ok {
-		return v
-	}
-	if v, ok := m["$gte"]; ok {
-		return v
-	}
-	if v, ok := m["$gt"]; ok {
-		return v
-	}
-
-	return nil
-}
-
 type OrderedKey struct {
 	m    map[string]any
 	spec *jsondb.IndexSpecification

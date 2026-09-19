@@ -223,7 +223,6 @@ type JoinRightCursor struct {
 	engine    *ScriptEngine
 	currentL  any
 	matched   bool
-	rightIter bool
 
 	// Execution Plan
 	plan      JoinPlan

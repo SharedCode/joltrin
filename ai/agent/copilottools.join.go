@@ -438,9 +438,6 @@ type JoinProcessor struct {
 
 	// Planner State
 	strategy string // "lookup", "merge", "hash_left", "hash_right"
-	minCount int64
-	maxCount int64
-	swapped  bool // If true, Left and Right stores are swapped in execution
 }
 
 type cachedItem struct {
