@@ -418,7 +418,7 @@ func (s *Service) runStepAsk(ctx context.Context, step ai.ScriptStep, scope map[
 				resultAny = json.RawMessage(resp)
 			}
 
-			stepIndex, _ := ctx.Value("step_index").(int)
+			stepIndex, _ := ctx.Value(ctxKeyStepIndex).(int)
 			streamer.Write(StepExecutionResult{
 				Type:      "ask",
 				Prompt:    prompt,
@@ -454,7 +454,7 @@ func (s *Service) runStepCommand(ctx context.Context, step ai.ScriptStep, scope 
 	w, _ := ctx.Value(ai.CtxKeyWriter).(io.Writer)
 
 	// Create a safe writer function
-	sbMu := ctx.Value("sb_mutex")
+	sbMu := ctx.Value(ctxKeySBMutex)
 	var writeMsg func(msg string)
 	if mu, ok := sbMu.(*sync.Mutex); ok && mu != nil {
 		writeMsg = func(msg string) {
@@ -520,7 +520,7 @@ func (s *Service) runStepCommand(ctx context.Context, step ai.ScriptStep, scope 
 		var stepStreamer *StepStreamer
 		preAnnouncedStep := false
 		if streamer, ok := ctx.Value(CtxKeyJSONStreamer).(*JSONStreamer); ok {
-			stepIndex, _ := ctx.Value("step_index").(int)
+			stepIndex, _ := ctx.Value(ctxKeyStepIndex).(int)
 			// Use Name if provided, otherwise Command
 			displayName := commandName
 			if step.Name != "" {
@@ -565,7 +565,7 @@ func (s *Service) runStepCommand(ctx context.Context, step ai.ScriptStep, scope 
 			if commandName != "execute_script" {
 				if streamer, ok := ctx.Value(CtxKeyJSONStreamer).(*JSONStreamer); ok {
 					trimmed := strings.TrimSpace(resp)
-					stepIndex, _ := ctx.Value("step_index").(int)
+					stepIndex, _ := ctx.Value(ctxKeyStepIndex).(int)
 					if trimmed != "" {
 						if strings.HasPrefix(trimmed, "[") {
 							var list []json.RawMessage
@@ -622,7 +622,7 @@ func (s *Service) runStepCommand(ctx context.Context, step ai.ScriptStep, scope 
 			if !isSystemStep {
 				var resultAny any = resp
 
-				stepIndex, _ := ctx.Value("step_index").(int)
+				stepIndex, _ := ctx.Value(ctxKeyStepIndex).(int)
 
 				// Determine Display Name (reused logic)
 				displayName := step.Command
@@ -975,7 +975,7 @@ func (s *Service) runStepScript(ctx context.Context, step ai.ScriptStep, scope m
 	// We want to suppress 'step_start' events from the nested script so they don't clutter the UI.
 	// We emit the PARENT step start (Script Step) here, then create a suppressive streamer for children.
 	if streamer, ok := ctx.Value(CtxKeyJSONStreamer).(*JSONStreamer); ok {
-		stepIndex, _ := ctx.Value("step_index").(int)
+		stepIndex, _ := ctx.Value(ctxKeyStepIndex).(int)
 		isVerbose := isVerboseEnabled(ctx)
 
 		// 1. Emit Parent Step Start (The "Run Script" step)
@@ -1224,7 +1224,7 @@ func injectScriptContextToLegacyContext(ctx context.Context, scriptCtx *ScriptRu
 		ctx = context.WithValue(ctx, CtxKeySuppressInternalStepStart, true)
 	}
 	if scriptCtx.StepIndex > 0 {
-		ctx = context.WithValue(ctx, "step_index", scriptCtx.StepIndex)
+		ctx = context.WithValue(ctx, ctxKeyStepIndex, scriptCtx.StepIndex)
 	}
 	if scriptCtx.UseNDJSON {
 		ctx = context.WithValue(ctx, CtxKeyUseNDJSON, true)
@@ -1233,7 +1233,7 @@ func injectScriptContextToLegacyContext(ctx context.Context, scriptCtx *ScriptRu
 		ctx = context.WithValue(ctx, CtxKeyCurrentScriptCategory, scriptCtx.CurrentScriptCategory)
 	}
 	if scriptCtx.StringBuilderMutex != nil {
-		ctx = context.WithValue(ctx, "sb_mutex", scriptCtx.StringBuilderMutex)
+		ctx = context.WithValue(ctx, ctxKeySBMutex, scriptCtx.StringBuilderMutex)
 	}
 
 	return ctx
@@ -1249,7 +1249,7 @@ func extractScriptContextFromLegacyContext(ctx context.Context) *ScriptRunContex
 	if suppress, ok := ctx.Value(CtxKeySuppressInternalStepStart).(bool); ok {
 		scriptCtx.SuppressInternalStepStart = suppress
 	}
-	if stepIndex, ok := ctx.Value("step_index").(int); ok {
+	if stepIndex, ok := ctx.Value(ctxKeyStepIndex).(int); ok {
 		scriptCtx.StepIndex = stepIndex
 	}
 	if verbose := effectiveVerbose(ctx); verbose {
@@ -1261,7 +1261,7 @@ func extractScriptContextFromLegacyContext(ctx context.Context) *ScriptRunContex
 	if category, ok := ctx.Value(CtxKeyCurrentScriptCategory).(string); ok {
 		scriptCtx.CurrentScriptCategory = category
 	}
-	if sbMu, ok := ctx.Value("sb_mutex").(*sync.Mutex); ok {
+	if sbMu, ok := ctx.Value(ctxKeySBMutex).(*sync.Mutex); ok {
 		scriptCtx.StringBuilderMutex = sbMu
 	}
 
@@ -1308,7 +1308,7 @@ func (s *Service) executeScript(ctx context.Context, script *ai.Script, scope ma
 	if v, ok := ctx.Value("force_compile_mode").(bool); ok {
 		isCompiled = v
 	}
-	ctx = context.WithValue(ctx, "is_compiled", isCompiled)
+	ctx = context.WithValue(ctx, ctxKeyIsCompiled, isCompiled)
 
 	// Set Playback flag
 	// wasPlayback := s.session.Playback
@@ -1325,9 +1325,9 @@ func (s *Service) runSteps(ctx context.Context, steps []ai.ScriptStep, scope map
 	defer cancel()
 
 	// Ensure sb_mutex exists in context for concurrent string builder writing
-	if ctx.Value("sb_mutex") == nil {
+	if ctx.Value(ctxKeySBMutex) == nil {
 		var sbMu sync.Mutex
-		ctx = context.WithValue(ctx, "sb_mutex", &sbMu)
+		ctx = context.WithValue(ctx, ctxKeySBMutex, &sbMu)
 	}
 
 	// Use errgroup for managing concurrency and error propagation
@@ -1362,7 +1362,7 @@ func (s *Service) runSteps(ctx context.Context, steps []ai.ScriptStep, scope map
 		// Prepare Context and DB for this step
 		stepCtx := groupCtx
 		log.Debug("runSteps: Setting step_index", "index", i+1, "command", step.Command)
-		stepCtx = context.WithValue(stepCtx, "step_index", i+1)
+		stepCtx = context.WithValue(stepCtx, ctxKeyStepIndex, i+1)
 		stepDB := db
 
 		// Check for dead transaction (committed or rolled back)

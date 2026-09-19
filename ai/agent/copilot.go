@@ -56,7 +56,11 @@ const (
 	maxProjectedPlaybookEntries   = 4
 )
 
-const ctxKeyDeferImplicitSessionTxClose = "_defer_implicit_session_tx_close"
+// Untyped string constant used as a context.WithValue key risks silently
+// colliding with an unrelated value some other package sets under the
+// identical string (SA1029); only one read/write pair in this file, so
+// retyping is a self-contained fix.
+const ctxKeyDeferImplicitSessionTxClose ai.ContextKey = "ai_defer_implicit_session_tx_close"
 
 const (
 	askOutcomeMRUCategoryHeader          = "ASK_OUTCOME_HEADER"
