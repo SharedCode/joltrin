@@ -94,15 +94,14 @@ func (s *Store) GetResults(ctx context.Context, jobID string) ([]JobResult, erro
 
 	var results []JobResult
 
-	found, err := s.results.Find(ctx, startKey, true)
-	if err != nil {
+	// The found flag isn't checked directly: whether or not Find landed
+	// exactly on startKey, the loop below verifies every candidate item
+	// against the prefix itself and breaks the moment it doesn't match,
+	// which is a correct and sufficient guard on its own (verified in
+	// store_test.go against the real storage engine, including the case
+	// of a jobID that sorts past every key already in the tree).
+	if _, err := s.results.Find(ctx, startKey, true); err != nil {
 		return nil, err
-	}
-	if !found {
-		// Check if we are at a key that starts with the prefix (Find behavior varies)
-		// If not found, we might need to check Next if Find landed before.
-		// For now, let's assume standard SOP behavior: Find(true) positions at >= key.
-		// We just need to check the current item.
 	}
 
 	// Iterate
