@@ -185,11 +185,17 @@ jobs:
       # gap. Verified via GOOS=windows cross-compile + vet (including test
       # files) before adding this, given tonight's pattern of Windows-only
       # surprises in newly-covered packages.
+      #
+      # adapters/nats joined this loop later: another Go module under
+      # go.work, same reasoning as the five above. Its tests start an
+      # in-process NATS server (nats-server/v2's server package) rather
+      # than requiring one listening externally, so they run the same way
+      # here as they do locally, no new service dependency for this job.
       - name: Build, vet, and test the other workspace modules
         shell: bash
         run: |
           set -euo pipefail
-          for m in search jsondb incfs adapters/cassandra adapters/redis; do
+          for m in search jsondb incfs adapters/cassandra adapters/redis adapters/nats; do
             echo "::group::$m"
             (cd "$m" && go build ./... && go vet ./... && go test -timeout 20m ./...)
             echo "::endgroup::"

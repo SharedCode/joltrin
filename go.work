@@ -3,6 +3,7 @@ go 1.26.8
 use (
 	.
 	./adapters/cassandra
+	./adapters/nats
 	./adapters/redis
 	./ai
 	./incfs
