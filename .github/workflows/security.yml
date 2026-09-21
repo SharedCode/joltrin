@@ -181,7 +181,7 @@ jobs:
           limit-severities-for-sarif: 'true'
 
       - name: Upload SARIF (critical/high)
-        if: always()
+        if: always() && hashFiles('trivy-image-critical-high.sarif') != ''
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-image-critical-high.sarif
