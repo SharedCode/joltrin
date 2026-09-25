@@ -12,6 +12,7 @@ WORKDIR /src
 COPY go.work go.work.sum* ./
 COPY go.mod go.sum ./
 COPY adapters/cassandra/go.mod adapters/cassandra/go.sum* ./adapters/cassandra/
+COPY adapters/nats/go.mod adapters/nats/go.sum* ./adapters/nats/
 COPY adapters/redis/go.mod adapters/redis/go.sum* ./adapters/redis/
 COPY ai/go.mod ai/go.sum* ./ai/
 COPY incfs/go.mod incfs/go.sum* ./incfs/
