@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	log "log/slog"
 	"regexp"
 	"strings"
 	"time"
@@ -387,7 +388,8 @@ func (a *CopilotAgent) toolUpdate(ctx context.Context, args map[string]any) (str
 			return "", fmt.Errorf("failed to commit update transaction: %w", err)
 		}
 	} else {
-		fmt.Printf("DEBUG: toolAdd finishing. localTx=false. HasBegun=%v\n", tx.HasBegun())
+		// The caller manages the surrounding transaction; no commit here.
+		log.Debug("toolUpdate: delegating commit to external transaction", "hasBegun", tx.HasBegun())
 	}
 
 	return fmt.Sprintf("Item updated in store '%s'", storeName), nil

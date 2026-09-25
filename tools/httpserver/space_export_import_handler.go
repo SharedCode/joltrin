@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	log "log/slog"
+	"mime"
 	"net/http"
+	"strings"
 
 	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai/database"
@@ -46,12 +48,32 @@ func handleExportSpace(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Content-Disposition", "attachment; filename=\""+spaceName+"_export.json\"")
+	w.Header().Set("Content-Disposition", exportContentDisposition(spaceName))
 	if err := kb.ExportJSON(ctx, w); err != nil {
 		// Cannot change HTTP status code after headers are written, just log
 		log.Error("handleExportSpace ExportJSON failed", "error", err)
 		return
 	}
+}
+
+func exportContentDisposition(spaceName string) string {
+	filename := strings.Map(func(r rune) rune {
+		if r < 0x20 || r == 0x7f {
+			return '_'
+		}
+		return r
+	}, spaceName+"_export.json")
+	if filename == "_export.json" {
+		filename = "export.json"
+	}
+
+	disposition := mime.FormatMediaType("attachment", map[string]string{
+		"filename": filename,
+	})
+	if disposition == "" {
+		return `attachment; filename="export.json"`
+	}
+	return disposition
 }
 
 func handleImportSpace(w http.ResponseWriter, r *http.Request) {
