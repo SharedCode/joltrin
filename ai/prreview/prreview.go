@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -333,6 +334,29 @@ func isRetryableGeminiStatus(status int) bool {
 	}
 }
 
+func retryAfterDelay(headers http.Header, now time.Time) (time.Duration, bool) {
+	value := strings.TrimSpace(headers.Get("Retry-After"))
+	if value == "" {
+		return 0, false
+	}
+
+	if seconds, err := strconv.ParseInt(value, 10, 64); err == nil && seconds >= 0 {
+		maxSeconds := int64((time.Duration(1<<63 - 1)) / time.Second)
+		if seconds <= maxSeconds {
+			return time.Duration(seconds) * time.Second, true
+		}
+	}
+
+	if retryAt, err := http.ParseTime(value); err == nil {
+		if delay := retryAt.Sub(now); delay > 0 {
+			return delay, true
+		}
+		return 0, true
+	}
+
+	return 0, false
+}
+
 // ReviewDiff sends prompt to the Gemini generateContent API and returns the
 // model's response text. Both transient HTTP statuses (429, 500, 502, 503,
 // 504) and transport-level errors (including a single attempt timing out)
@@ -358,7 +382,7 @@ func ReviewDiff(ctx context.Context, apiKey, model, prompt string) (string, erro
 
 	var lastErr error
 	for attempt := 0; attempt < geminiMaxAttempts; attempt++ {
-		status, body, err := doGeminiRequest(ctx, url, jsonBody)
+		status, body, headers, err := doGeminiRequest(ctx, url, jsonBody)
 		if err != nil {
 			// A canceled/expired parent context means the caller gave up;
 			// don't keep retrying into that. Anything else - including this
@@ -381,6 +405,9 @@ func ReviewDiff(ctx context.Context, apiKey, model, prompt string) (string, erro
 		}
 
 		delay := geminiRetryBaseDelay << attempt
+		if retryAfter, ok := retryAfterDelay(headers, time.Now()); ok {
+			delay = retryAfter
+		}
 		jitter := time.Duration(rand.Int63n(int64(delay/2) + 1))
 		timer := time.NewTimer(delay + jitter)
 		select {
@@ -396,28 +423,28 @@ func ReviewDiff(ctx context.Context, apiKey, model, prompt string) (string, erro
 
 // doGeminiRequest performs a single Gemini generateContent call, bounded by
 // GeminiRequestTimeout, and returns its status code and raw response body.
-func doGeminiRequest(ctx context.Context, url string, jsonBody []byte) (int, []byte, error) {
+func doGeminiRequest(ctx context.Context, url string, jsonBody []byte) (int, []byte, http.Header, error) {
 	reqCtx, cancel := context.WithTimeout(ctx, GeminiRequestTimeout)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(reqCtx, http.MethodPost, url, bytes.NewReader(jsonBody))
 	if err != nil {
-		return 0, nil, fmt.Errorf("failed to create gemini request: %w", err)
+		return 0, nil, nil, fmt.Errorf("failed to create gemini request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return 0, nil, fmt.Errorf("gemini api request failed: %w", err)
+		return 0, nil, nil, fmt.Errorf("gemini api request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return 0, nil, fmt.Errorf("failed to read gemini response: %w", err)
+		return 0, nil, resp.Header, fmt.Errorf("failed to read gemini response: %w", err)
 	}
 
-	return resp.StatusCode, body, nil
+	return resp.StatusCode, body, resp.Header, nil
 }
 
 // parseGeminiResponse extracts the model's response text from a successful

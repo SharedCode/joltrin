@@ -159,6 +159,30 @@ func TestReviewDiffMissingAPIKey(t *testing.T) {
 	}
 }
 
+func TestRetryAfterDelay(t *testing.T) {
+	now := time.Date(2026, time.January, 1, 12, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name   string
+		header string
+		want   time.Duration
+		ok     bool
+	}{
+		{"seconds", "3", 3 * time.Second, true},
+		{"http date", now.Add(5 * time.Second).Format(http.TimeFormat), 5 * time.Second, true},
+		{"invalid", "later", 0, false},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got, ok := retryAfterDelay(http.Header{"Retry-After": []string{tc.header}}, now)
+			if ok != tc.ok || got != tc.want {
+				t.Fatalf("retryAfterDelay(%q) = (%s, %t), want (%s, %t)", tc.header, got, ok, tc.want, tc.ok)
+			}
+		})
+	}
+}
+
 func TestReviewDiffParsesResponse(t *testing.T) {
 	withTransport(t, func(req *http.Request) (*http.Response, error) {
 		if !strings.Contains(req.URL.String(), "gemini-2.5-flash") {
