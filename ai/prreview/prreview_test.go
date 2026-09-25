@@ -183,6 +183,26 @@ func TestRetryAfterDelay(t *testing.T) {
 	}
 }
 
+func TestIsRetryableGeminiStatus(t *testing.T) {
+	for _, status := range []int{
+		http.StatusTooManyRequests,
+		http.StatusInternalServerError,
+		http.StatusBadGateway,
+		http.StatusServiceUnavailable,
+		http.StatusGatewayTimeout,
+	} {
+		if !isRetryableGeminiStatus(status) {
+			t.Errorf("isRetryableGeminiStatus(%d) = false, want true", status)
+		}
+	}
+
+	for _, status := range []int{http.StatusOK, http.StatusBadRequest, http.StatusUnauthorized, http.StatusNotFound} {
+		if isRetryableGeminiStatus(status) {
+			t.Errorf("isRetryableGeminiStatus(%d) = true, want false", status)
+		}
+	}
+}
+
 func TestReviewDiffParsesResponse(t *testing.T) {
 	withTransport(t, func(req *http.Request) (*http.Response, error) {
 		if !strings.Contains(req.URL.String(), "gemini-2.5-flash") {
