@@ -1994,6 +1994,11 @@ func (s *Service) ask(ctx context.Context, req AskRequest) (AskResponse, error) 
 		}
 
 		finalText, err := s.RunPipeline(ctx, query, pipelineCfg)
+		if err == nil {
+			if ctxErr := ctx.Err(); ctxErr != nil {
+				return AskResponse{}, fmt.Errorf("request canceled during execution: %w", ctxErr)
+			}
+		}
 		return AskResponse{FinalText: finalText, UpdatedSession: req.Session}, err
 	}
 
@@ -2045,6 +2050,9 @@ func (s *Service) ask(ctx context.Context, req AskRequest) (AskResponse, error) 
 			return AskResponse{}, fmt.Errorf("request canceled during execution: %w", ctx.Err())
 		}
 		return AskResponse{}, err
+	}
+	if ctxErr := ctx.Err(); ctxErr != nil {
+		return AskResponse{}, fmt.Errorf("request canceled during execution: %w", ctxErr)
 	}
 
 	// 11. Persist response outcomes into script/session memory

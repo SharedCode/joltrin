@@ -81,6 +81,30 @@ func TestHandleExportSpace_ContentDisposition_NoQuoteEscape(t *testing.T) {
 	}
 }
 
+func TestHandleExportSpace_ContentDisposition_SanitizesControlCharacters(t *testing.T) {
+	tests := []struct {
+		name     string
+		space    string
+		filename string
+	}{
+		{"control characters", "bad\x00\x1f\x7fname", "bad___name_export.json"},
+		{"empty name", "", "export.json"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			disposition := buildDisposition(tc.space)
+			_, params, err := mime.ParseMediaType(disposition)
+			if err != nil {
+				t.Fatalf("mime.ParseMediaType(%q) = %v, want parseable", disposition, err)
+			}
+			if got := params["filename"]; got != tc.filename {
+				t.Errorf("filename = %q, want %q", got, tc.filename)
+			}
+		})
+	}
+}
+
 // TestHandleExportSpace_MissingQueryParams_Returns400 verifies that incomplete
 // export requests are rejected before database access.
 func TestHandleExportSpace_MissingQueryParams_Returns400(t *testing.T) {
