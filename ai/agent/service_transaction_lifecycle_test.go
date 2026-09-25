@@ -175,34 +175,41 @@ func TestAsk_ContextCancellationEarly(t *testing.T) {
 	}
 }
 
-// TestAsk_ContextCancellationDuringExecution verifies proper error message on mid-execution cancellation.
+// TestAsk_ContextCancellationDuringExecution verifies that cancellation takes
+// precedence over a successful execution result.
 func TestAsk_ContextCancellationDuringExecution(t *testing.T) {
-	// This test verifies the error handling path when context is canceled during executeReasoningEngine
-	// The actual cancellation is tested at the ReAct engine level
-	service := &Service{
-		session:   NewRunnerSession(),
-		pipeline:  []PipelineStep{}, // Empty pipeline to avoid short-circuit
-		domain:    nil,
-		generator: nil,
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Millisecond)
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// Let context expire
-	time.Sleep(2 * time.Millisecond)
+	service := &Service{
+		session:  NewRunnerSession(),
+		pipeline: []PipelineStep{{Agent: PipelineAgent{ID: "canceling"}}},
+		registry: map[string]ai.Agent[map[string]any]{
+			"canceling": &cancelingAgent{cancel: cancel},
+		},
+	}
 
-	// Ask should check context and return appropriate error
 	_, err := service.Ask(ctx, "test query", nil)
 	if err == nil {
 		t.Fatal("Expected error on canceled context")
 	}
-
-	// Should contain "canceled" in error message
-	if err != nil && ctx.Err() != nil {
-		// This is expected - context canceled
-		t.Logf("Got expected context cancellation error: %v", err)
+	if got := err.Error(); got != "request canceled during execution: context canceled" {
+		t.Errorf("Expected context cancellation error, got: %v", err)
 	}
+}
+
+type cancelingAgent struct {
+	cancel context.CancelFunc
+}
+
+func (a *cancelingAgent) Open(context.Context) error  { return nil }
+func (a *cancelingAgent) Close(context.Context) error { return nil }
+func (a *cancelingAgent) Search(context.Context, string, int) ([]ai.Hit[map[string]any], error) {
+	return nil, nil
+}
+func (a *cancelingAgent) Ask(context.Context, string, *ai.ConfigMap) (string, error) {
+	a.cancel()
+	return "successful result that must not be returned", nil
 }
 
 // Mock transaction for testing that tracks rollback/commit calls
