@@ -232,7 +232,7 @@ jobs:
           ./scripts/verify_release.sh release/
 
       - name: Attest Build Provenance (SLSA Level 3)
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@v4
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
           subject-path: 'release/*'
