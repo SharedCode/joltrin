@@ -239,7 +239,7 @@ jobs:
         continue-on-error: true
 
       - name: Attest SBOM
-        uses: actions/attest-sbom@v1
+        uses: actions/attest-sbom@v4
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
           subject-path: 'release/*'
