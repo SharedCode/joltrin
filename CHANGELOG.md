@@ -2,6 +2,9 @@
 
 ## v5.7.0
 
+### Breaking: Module Path
+- The root module is now `github.com/sharedcode/joltrin/v5`. Every tagged release from v2.0.0 through v5.6.0 was not `go get`-able by any external consumer: Go requires a `/vN` path suffix on any v2+ tag when a go.mod is present, and root's go.mod never had one. Confirmed by trying to depend on v5.6.0 from a fresh module outside this repo, `go mod tidy` rejects it outright. If you were consuming joltrin via a git submodule or a local replace directive instead of `go get`, update your import paths to add `/v5` after `joltrin`. The 8 nested modules (`ai`, `incfs`, `infs`, `jsondb`, `search`, `adapters/cassandra`, `adapters/nats`, `adapters/redis`) keep their existing paths, only references to the root module changed. Three internal packages (`inredck`, `logsafe`, `netguard`) that nested modules imported across the old shared-prefix path moved out of `internal/` as a result, since Go's internal-package visibility is scoped by the literal import path, not by directory tree.
+
 ### AI Features
 - Added `ai/ledger`: durable, crash-recoverable execution history for agent runs built on the existing `sop.BlobStore` abstraction. Run creation and completion, append-only events, checkpoints, resume from the latest valid checkpoint after an interruption, and deterministic replay.
 - Added `ai/replay`: records `ai/verify` barrier decisions into a run's ledger and replays a run's recorded decision history against a candidate workflow, flagging any step that would now be newly blocked or newly allowed before a policy change ships.
