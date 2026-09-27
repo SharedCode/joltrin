@@ -8,8 +8,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/sharedcode/joltrin/v5"
 	"github.com/sharedcode/joltrin/search"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 type SearchOptions struct {
