@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 type autoTxExecutorTestExecutor struct {

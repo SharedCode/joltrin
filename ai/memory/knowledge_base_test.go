@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
-	"github.com/sharedcode/joltrin/inmemory"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/inmemory"
 )
 
 // Ensure mocks implement standard ai methods

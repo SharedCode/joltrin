@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/jsondb"
+	"github.com/sharedcode/joltrin/v5"
 	"github.com/stretchr/testify/assert"
 )
 

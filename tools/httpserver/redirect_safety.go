@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/sharedcode/joltrin/internal/netguard"
+	"github.com/sharedcode/joltrin/v5/netguard"
 )
 
 // isSafeRelativeRedirect is a thin alias over internal/netguard, kept so

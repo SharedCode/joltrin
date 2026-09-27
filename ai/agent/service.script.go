@@ -10,9 +10,9 @@ import (
 	"io"
 	"sync"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // PlayScript executes a script by name with provided arguments and streams the output to the writer.

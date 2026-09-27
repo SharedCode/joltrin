@@ -9,10 +9,10 @@ import (
 	"os"
 	"sort"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
-	"github.com/sharedcode/joltrin/btree"
 	"github.com/sharedcode/joltrin/infs"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/btree"
 )
 
 const (

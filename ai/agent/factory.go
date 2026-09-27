@@ -8,7 +8,6 @@ import (
 	log "log/slog"
 	"path/filepath"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/ai/domain"
@@ -16,6 +15,7 @@ import (
 	"github.com/sharedcode/joltrin/ai/generator"
 	"github.com/sharedcode/joltrin/ai/policy"
 	"github.com/sharedcode/joltrin/ai/vector"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // Dependencies holds external dependencies required for agent creation.

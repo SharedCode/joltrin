@@ -15,10 +15,10 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/ai/internal/logsafe"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 type contextKey string

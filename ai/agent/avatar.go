@@ -5,9 +5,9 @@ import (
 	"fmt"
 	log "log/slog"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/internal/logsafe"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 func (a *CopilotAgent) executeAvatarSubAgent(ctx context.Context, avatarName, taskContext string) (string, error) {

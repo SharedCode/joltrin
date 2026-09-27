@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/ai/memory"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 const mintToSpaceArgsSchema = `{"type":"object","properties":{"kb_name":{"type":"string","description":"Exact target knowledge base name. Use the user-requested Space name even when the Space does not exist yet."},"content":{"type":"string","description":"Durable generated or discovered content to persist. Generate the content first, then store it with mint_to_space."},"category":{"type":"string","description":"Optional category label grouping related entries inside the target Space."}},"required":["kb_name","content"]}`

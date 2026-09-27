@@ -12,10 +12,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/adapters/redis"
-	"github.com/sharedcode/joltrin/fs"
 	"github.com/sharedcode/joltrin/infs"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/fs"
 )
 
 // Helpers to simulate IO failures by toggling permissions on registry segment files.

@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/cache"
-	"github.com/sharedcode/joltrin/common/mocks"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/cache"
+	"github.com/sharedcode/joltrin/v5/common/mocks"
 )
 
 // recRemoveTL records Remove calls to validate pre-commit log cleanup in phase1Commit.

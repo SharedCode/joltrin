@@ -37,7 +37,7 @@ import (
 
 	"github.com/google/uuid"
 
-	sop "github.com/sharedcode/joltrin"
+	sop "github.com/sharedcode/joltrin/v5"
 )
 
 // EventType identifies the kind of event recorded in a run's ledger.

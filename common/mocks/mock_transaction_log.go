@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/inmemory"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/inmemory"
 )
 
 type MockTransactionLog struct {

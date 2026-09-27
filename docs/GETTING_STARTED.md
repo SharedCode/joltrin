@@ -78,14 +78,14 @@ Now that your server is running, you can write code to interact with it. SOP is 
 ### Go (Native)
 1.  **Install**:
     ```bash
-    go get github.com/sharedcode/joltrin
+    go get github.com/sharedcode/joltrin/v5
     ```
 2.  **Code**:
     ```go
     import (
         "context"
-        "github.com/sharedcode/joltrin"
-        "github.com/sharedcode/joltrin/database"
+        "github.com/sharedcode/joltrin/v5"
+        "github.com/sharedcode/joltrin/v5/database"
     )
 
     // Open Database (Standalone)

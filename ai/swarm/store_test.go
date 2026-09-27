@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/infs"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 func newTestStore(t *testing.T) (*Store, context.Context) {

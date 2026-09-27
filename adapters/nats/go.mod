@@ -2,7 +2,7 @@ module github.com/sharedcode/joltrin/adapters/nats
 
 go 1.26.8
 
-replace github.com/sharedcode/joltrin => ../../
+replace github.com/sharedcode/joltrin/v5 => ../../
 
 replace github.com/sharedcode/joltrin/ai => ../../ai
 

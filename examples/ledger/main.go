@@ -15,7 +15,7 @@ import (
 	"os"
 
 	"github.com/sharedcode/joltrin/ai/ledger"
-	"github.com/sharedcode/joltrin/fs"
+	"github.com/sharedcode/joltrin/v5/fs"
 )
 
 func must(err error) {

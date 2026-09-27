@@ -10,13 +10,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/ai/domain"
 	"github.com/sharedcode/joltrin/ai/embed"
 	"github.com/sharedcode/joltrin/ai/generator"
 	"github.com/sharedcode/joltrin/ai/memory"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // kbItem matches the structure of medical.json and sop_base_knowledge.json

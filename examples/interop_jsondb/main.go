@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/database"
 	"github.com/sharedcode/joltrin/jsondb"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/database"
 )
 
 // Person is a struct we want to store.

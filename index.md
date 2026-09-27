@@ -24,7 +24,7 @@ go run ./examples/quickstart
 
 | Channel | Command |
 | :--- | :--- |
-| Go | `go get github.com/sharedcode/joltrin` |
+| Go | `go get github.com/sharedcode/joltrin/v5` |
 | Python | `pip install sop4py` |
 | C# | `dotnet add package Sop` |
 | Container demo | `docker run ghcr.io/sharedcode/joltrin-quickstart:stable` |

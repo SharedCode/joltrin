@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/sharedcode/joltrin/governance"
+	"github.com/sharedcode/joltrin/v5/governance"
 )
 
 var (

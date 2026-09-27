@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
-	"github.com/sharedcode/joltrin/governance"
+	"github.com/sharedcode/joltrin/v5/governance"
 )
 
 var (

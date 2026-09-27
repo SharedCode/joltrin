@@ -3,7 +3,7 @@ package inmemory
 import (
 	"context"
 
-	"github.com/sharedcode/joltrin/btree"
+	"github.com/sharedcode/joltrin/v5/btree"
 )
 
 type mt[TK btree.Ordered, TV any] struct{}

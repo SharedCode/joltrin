@@ -1,6 +1,6 @@
 package cache
 
-import "github.com/sharedcode/joltrin"
+import "github.com/sharedcode/joltrin/v5"
 
 // l1_mru manages MRU ordering and eviction for the L1Cache.
 type l1_mru struct {

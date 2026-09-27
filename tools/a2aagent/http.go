@@ -5,7 +5,7 @@ import (
 
 	"github.com/a2aproject/a2a-go/a2asrv"
 
-	"github.com/sharedcode/joltrin/tools/runbookstore"
+	"github.com/sharedcode/joltrin/v5/tools/runbookstore"
 )
 
 // NewMux wires this agent's card and JSON-RPC endpoint onto a fresh

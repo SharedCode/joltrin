@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 type autoTxExecutor struct {

@@ -2,7 +2,7 @@ package btree
 
 // Consolidated from: compare_more_test.go, vacancy_checks_test.go, unlink_test.go
 import (
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 	"testing"
 )
 

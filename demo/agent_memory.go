@@ -13,7 +13,7 @@ import (
 	"syscall/js"
 	"time"
 
-	"github.com/sharedcode/joltrin/inmemory"
+	"github.com/sharedcode/joltrin/v5/inmemory"
 )
 
 // AgentMemoryFrame is one committed reasoning checkpoint for an agent task.

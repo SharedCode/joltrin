@@ -8,12 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
-	sopdb "github.com/sharedcode/joltrin/database"
-	"github.com/sharedcode/joltrin/encoding"
 	"github.com/sharedcode/joltrin/jsondb"
+	"github.com/sharedcode/joltrin/v5"
+	sopdb "github.com/sharedcode/joltrin/v5/database"
+	"github.com/sharedcode/joltrin/v5/encoding"
 )
 
 func TestToolSelect_WithFilter(t *testing.T) {

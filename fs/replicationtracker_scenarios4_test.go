@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	sop "github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/common/mocks"
-	"github.com/sharedcode/joltrin/encoding"
+	sop "github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/common/mocks"
+	"github.com/sharedcode/joltrin/v5/encoding"
 )
 
 // Covers additional branches in handleFailedToReplicate (replicate off; already failed) and readStatusFromHomeFolder (no files).

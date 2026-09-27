@@ -16,18 +16,18 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/agent"
 	aidb "github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/ai/embed"
+	"github.com/sharedcode/joltrin/v5"
 
 	_ "github.com/sharedcode/joltrin/ai/generator"
 	"github.com/sharedcode/joltrin/ai/memory"
 	"github.com/sharedcode/joltrin/ai/obfuscation"
-	"github.com/sharedcode/joltrin/btree"
-	"github.com/sharedcode/joltrin/database"
-	"github.com/sharedcode/joltrin/internal/logsafe"
+	"github.com/sharedcode/joltrin/v5/btree"
+	"github.com/sharedcode/joltrin/v5/database"
+	"github.com/sharedcode/joltrin/v5/logsafe"
 )
 
 // ObfuscationMode defines the global obfuscation policy.

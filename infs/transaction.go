@@ -5,9 +5,9 @@ import (
 	"fmt"
 	log "log/slog"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/common"
-	"github.com/sharedcode/joltrin/fs"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/common"
+	"github.com/sharedcode/joltrin/v5/fs"
 )
 
 // NewTransaction is a convenience function to create an enduser facing transaction object that wraps the two phase commit transaction.

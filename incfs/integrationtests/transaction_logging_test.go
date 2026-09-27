@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin"
 	cas "github.com/sharedcode/joltrin/adapters/cassandra"
 	"github.com/sharedcode/joltrin/incfs"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 func MultipleExpiredTransCleanup(t *testing.T) {

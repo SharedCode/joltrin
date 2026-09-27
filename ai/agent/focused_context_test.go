@@ -6,10 +6,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
-	sopdb "github.com/sharedcode/joltrin/database"
+	"github.com/sharedcode/joltrin/v5"
+	sopdb "github.com/sharedcode/joltrin/v5/database"
 )
 
 func TestBuildSystemPrompt_IncludesFocusedStoreContext(t *testing.T) {

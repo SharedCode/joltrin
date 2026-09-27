@@ -19,7 +19,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/sharedcode/joltrin/inmemory"
+	"github.com/sharedcode/joltrin/v5/inmemory"
 )
 
 // AgentMemoryFrame represents a single reasoning checkpoint for an AI agent.

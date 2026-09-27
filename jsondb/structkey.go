@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/encoding"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/encoding"
 )
 
 // JsonDBStructKey wraps JsonDBMapKey to support Go struct keys with configurable index specifications.

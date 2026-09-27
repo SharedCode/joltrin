@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/common/mocks"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/common/mocks"
 )
 
 // Forces priorityLog.Get to hit ReadFile error by making the target path a directory.

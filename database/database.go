@@ -10,16 +10,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/adapters/redis"
-	"github.com/sharedcode/joltrin/btree"
-	"github.com/sharedcode/joltrin/cache"
-	"github.com/sharedcode/joltrin/common"
-	"github.com/sharedcode/joltrin/fs"
 	"github.com/sharedcode/joltrin/incfs"
 	"github.com/sharedcode/joltrin/infs"
-	"github.com/sharedcode/joltrin/internal/logsafe"
-	"github.com/sharedcode/joltrin/internal/pathsafety"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/btree"
+	"github.com/sharedcode/joltrin/v5/cache"
+	"github.com/sharedcode/joltrin/v5/common"
+	"github.com/sharedcode/joltrin/v5/fs"
+	"github.com/sharedcode/joltrin/v5/internal/pathsafety"
+	"github.com/sharedcode/joltrin/v5/logsafe"
 )
 
 // DatabaseOptions holds the configuration for the database.

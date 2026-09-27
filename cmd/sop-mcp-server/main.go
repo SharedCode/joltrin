@@ -12,8 +12,8 @@ import (
 
 	"github.com/mark3labs/mcp-go/server"
 
-	"github.com/sharedcode/joltrin/tools/mcpserver"
-	"github.com/sharedcode/joltrin/tools/runbookstore"
+	"github.com/sharedcode/joltrin/v5/tools/mcpserver"
+	"github.com/sharedcode/joltrin/v5/tools/runbookstore"
 )
 
 func main() {

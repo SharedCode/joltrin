@@ -2,7 +2,7 @@ module github.com/sharedcode/joltrin/jsondb
 
 go 1.26.8
 
-replace github.com/sharedcode/joltrin => ../
+replace github.com/sharedcode/joltrin/v5 => ../
 
 replace github.com/sharedcode/joltrin/infs => ../infs
 
@@ -12,7 +12,7 @@ replace github.com/sharedcode/joltrin/adapters/cassandra => ../adapters/cassandr
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/sharedcode/joltrin v0.0.0
+	github.com/sharedcode/joltrin/v5 v5.0.0
 )
 
 require (

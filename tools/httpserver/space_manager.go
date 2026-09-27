@@ -14,11 +14,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/ai/memory"
-	"github.com/sharedcode/joltrin/internal/logsafe"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/logsafe"
 )
 
 func autoVectorizeBuiltinSpace(ctx context.Context, db *database.Database, spaceName, preloadPath string, emb ai.Embeddings, llm ai.Generator, onProgress func(progress int, total int, msg string)) error {

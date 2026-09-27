@@ -2,8 +2,8 @@ package database_test
 
 import (
 	"context"
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai/database"
+	"github.com/sharedcode/joltrin/v5"
 	"testing"
 )
 

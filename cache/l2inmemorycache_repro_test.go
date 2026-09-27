@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 func TestL2InMemoryCache_Lock_Duplicates(t *testing.T) {

@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/encoding"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/encoding"
 )
 
 func TestHandleUpdateStoreInfo_AllowsNonStructuralUpdateOnNonEmptyStore(t *testing.T) {

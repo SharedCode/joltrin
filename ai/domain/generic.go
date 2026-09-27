@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/ai/vector"
-	sopdb "github.com/sharedcode/joltrin/database"
 	"github.com/sharedcode/joltrin/search"
+	"github.com/sharedcode/joltrin/v5"
+	sopdb "github.com/sharedcode/joltrin/v5/database"
 )
 
 // Config holds the configuration for a generic domain (Agent).

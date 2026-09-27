@@ -4,7 +4,7 @@ import (
 	"cmp"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // Covers CursorOnOpenedBtree and OpenBtreeCursor, previously untested (0%).

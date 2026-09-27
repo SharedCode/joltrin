@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/cache"
-	_ "github.com/sharedcode/joltrin/cache"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/cache"
+	_ "github.com/sharedcode/joltrin/v5/cache"
 )
 
 func init() {

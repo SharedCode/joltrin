@@ -8,7 +8,7 @@ import (
 
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/embed"
-	"github.com/sharedcode/joltrin/internal/logsafe"
+	"github.com/sharedcode/joltrin/v5/logsafe"
 )
 
 type embedderSettings struct {

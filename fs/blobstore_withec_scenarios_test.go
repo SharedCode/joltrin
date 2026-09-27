@@ -7,7 +7,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // stubECFileIO lets us induce per-shard write failures.

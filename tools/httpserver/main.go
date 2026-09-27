@@ -21,19 +21,19 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	aidb "github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/ai/memory"
-	"github.com/sharedcode/joltrin/btree"
-	"github.com/sharedcode/joltrin/common"
-	"github.com/sharedcode/joltrin/database"
-	"github.com/sharedcode/joltrin/encoding"
-	"github.com/sharedcode/joltrin/fs"
-	"github.com/sharedcode/joltrin/governance"
-	"github.com/sharedcode/joltrin/internal/logsafe"
 	"github.com/sharedcode/joltrin/jsondb"
-	"github.com/sharedcode/joltrin/tools/confighub"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/btree"
+	"github.com/sharedcode/joltrin/v5/common"
+	"github.com/sharedcode/joltrin/v5/database"
+	"github.com/sharedcode/joltrin/v5/encoding"
+	"github.com/sharedcode/joltrin/v5/fs"
+	"github.com/sharedcode/joltrin/v5/governance"
+	"github.com/sharedcode/joltrin/v5/logsafe"
+	"github.com/sharedcode/joltrin/v5/tools/confighub"
 )
 
 // ErasureConfigEntry defines a single EC zone configuration

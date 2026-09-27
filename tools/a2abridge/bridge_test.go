@@ -12,8 +12,8 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 
 	"github.com/sharedcode/joltrin/ai/verify"
-	"github.com/sharedcode/joltrin/tools/a2aagent"
-	"github.com/sharedcode/joltrin/tools/runbookstore"
+	"github.com/sharedcode/joltrin/v5/tools/a2aagent"
+	"github.com/sharedcode/joltrin/v5/tools/runbookstore"
 )
 
 const invokePath = "/a2a/invoke"

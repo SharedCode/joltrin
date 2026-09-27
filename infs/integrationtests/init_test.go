@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/adapters/redis"
-	"github.com/sharedcode/joltrin/fs"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/fs"
 )
 
 // Redis config used by integration tests.

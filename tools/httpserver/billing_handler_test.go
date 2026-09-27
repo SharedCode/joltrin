@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin/governance"
+	"github.com/sharedcode/joltrin/v5/governance"
 )
 
 // TestMain isolates config.DatabasePath to a fresh temp directory before any

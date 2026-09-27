@@ -1,5 +1,36 @@
 # Changelog
 
+## v5.7.0
+
+### AI Features
+- Added `ai/ledger`: durable, crash-recoverable execution history for agent runs built on the existing `sop.BlobStore` abstraction. Run creation and completion, append-only events, checkpoints, resume from the latest valid checkpoint after an interruption, and deterministic replay.
+- Added `ai/replay`: records `ai/verify` barrier decisions into a run's ledger and replays a run's recorded decision history against a candidate workflow, flagging any step that would now be newly blocked or newly allowed before a policy change ships.
+- `adapters/nats`: optional NATS bridge publishing `ai/verify` barrier decisions as a side effect, without altering the barrier's own decision.
+
+### Reliability
+- Bounded the previously unlimited node-lock-acquisition retry loop in `phase1Commit`, the core two-phase-commit transaction path. A transaction starved by concurrent contention now fails fast with a specific error instead of spinning to the full 15-minute transaction timeout. Closes a long-standing intermittent CI failure in `Test_ConcurrentCommitsComplexUpdateConflicts`.
+- Removed a redundant Go module cache step in CI that collided with `actions/setup-go`'s own caching and intermittently broke the integration test job.
+
+### Security
+- Stopped logging raw tool-execution errors that could carry an API key from a provider call. The tool name is sanitized before it reaches a log line, and quoted tool names in error messages use `%q` instead of manually quoted strings a single quote in the input could break out of. Closes 5 CodeQL alerts: clear-text logging, log injection, unsafe quoting.
+
+### Demo Sites
+- Added a mobile navigation menu to all three demo experiences (technical demo, agent verification barrier, arena); the desktop nav had no small-screen fallback.
+- Fixed the Arena topology diagram overlapping on narrow viewports: it now scrolls horizontally at its natural size instead of compressing.
+- Replaced the header icon with the actual Joltrin logo mark across all three sites.
+- Fixed missing Open Graph share images and a footer link pointing at a domain that does not yet resolve.
+- Fixed a missing GitHub icon on the technical demo and agent barrier pages: the latest `lucide` icon bundle dropped that icon entirely.
+
+### Test Coverage
+- Added real coverage for `RunWorkflow`'s step dispatch and validation, `IngestAgent`'s config and dependency resolution, `PrepareDoctorDataset`, and the swarm store's `GetResults`.
+
+### Cleanup
+- Removed 25 dead functions and handlers across `ai/agent` and related packages, all superseded or never wired up.
+
+### Bug Fixes
+- Fixed a bug in export header injection and transaction debug output.
+- Fixed the quickstart and nocov Dockerfiles to copy `adapters/nats/go.mod`.
+
 ## v5.6.0
 
 ### Security

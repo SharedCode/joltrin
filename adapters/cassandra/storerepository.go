@@ -11,8 +11,8 @@ import (
 	"github.com/gocql/gocql"
 	retry "github.com/sethvargo/go-retry"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/internal/logsafe"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/logsafe"
 )
 
 type storeRepository struct {

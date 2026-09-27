@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 func TestPathHelpers(t *testing.T) {

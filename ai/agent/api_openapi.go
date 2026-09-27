@@ -13,7 +13,7 @@ package agent
 // @description - **LLM Integration**: Compatible with function calling and text tools
 //
 // @contact.name SOP Team
-// @contact.url https://github.com/sharedcode/joltrin
+// @contact.url https://github.com/sharedcode/joltrin/v5
 //
 // @license.name MIT
 // @license.url https://opensource.org/licenses/MIT

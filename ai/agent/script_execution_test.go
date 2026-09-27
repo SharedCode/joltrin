@@ -13,10 +13,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
-	core_database "github.com/sharedcode/joltrin/database"
+	"github.com/sharedcode/joltrin/v5"
+	core_database "github.com/sharedcode/joltrin/v5/database"
 )
 
 // skipOnWindowsTranslogLeak skips a test that never explicitly commits or

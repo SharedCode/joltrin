@@ -3,8 +3,8 @@ package agent
 import (
 	"sync"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // RunnerSession holds the state for the current agent execution session,

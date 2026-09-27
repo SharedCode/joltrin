@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/sharedcode/joltrin/common/mocks"
+	"github.com/sharedcode/joltrin/v5/common/mocks"
 )
 
 // Covers happy-path replicate actions: write, createStore, removeStore; and exists/read helpers.

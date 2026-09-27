@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/sharedcode/joltrin/ai/agent"
-	"github.com/sharedcode/joltrin/internal/netguard"
+	"github.com/sharedcode/joltrin/v5/netguard"
 )
 
 // PrepareData downloads a CSV dataset and converts it to the agent DataItem JSON format.

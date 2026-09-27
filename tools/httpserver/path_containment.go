@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/sharedcode/joltrin/internal/logsafe"
-	"github.com/sharedcode/joltrin/internal/pathsafety"
+	"github.com/sharedcode/joltrin/v5/internal/pathsafety"
+	"github.com/sharedcode/joltrin/v5/logsafe"
 )
 
 // safeOpenContained resolves path to an absolute path and verifies that

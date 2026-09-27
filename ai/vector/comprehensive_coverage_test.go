@@ -8,12 +8,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/ai/vector"
-	core_database "github.com/sharedcode/joltrin/database"
 	"github.com/sharedcode/joltrin/infs"
+	"github.com/sharedcode/joltrin/v5"
+	core_database "github.com/sharedcode/joltrin/v5/database"
 )
 
 func TestVectorStoreComprehensiveLifecycle(t *testing.T) {

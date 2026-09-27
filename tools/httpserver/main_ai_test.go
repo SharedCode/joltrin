@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 func TestInitializeRequest_UsesAuthenticatedUserID(t *testing.T) {

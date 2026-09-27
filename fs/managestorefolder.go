@@ -3,7 +3,7 @@ package fs
 import (
 	"context"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 type manageStoreFolder struct {

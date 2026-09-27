@@ -19,16 +19,16 @@ import (
 	"github.com/gocql/gocql"
 	"github.com/google/uuid"
 
-	"github.com/sharedcode/joltrin"
 	cas "github.com/sharedcode/joltrin/adapters/cassandra"
 	"github.com/sharedcode/joltrin/adapters/redis"
 	"github.com/sharedcode/joltrin/ai"
 	database "github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/ai/vector"
-	"github.com/sharedcode/joltrin/common"
-	sopdb "github.com/sharedcode/joltrin/database"
-	"github.com/sharedcode/joltrin/encoding"
 	"github.com/sharedcode/joltrin/jsondb"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/common"
+	sopdb "github.com/sharedcode/joltrin/v5/database"
+	"github.com/sharedcode/joltrin/v5/encoding"
 )
 
 func init() {

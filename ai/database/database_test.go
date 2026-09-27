@@ -5,12 +5,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/ai/memory"
 	"github.com/sharedcode/joltrin/ai/vector"
-	core "github.com/sharedcode/joltrin/database"
+	"github.com/sharedcode/joltrin/v5"
+	core "github.com/sharedcode/joltrin/v5/database"
 )
 
 func TestAIDatabase_RemoveKnowledgeBase_RemovesAllDomainStores(t *testing.T) {

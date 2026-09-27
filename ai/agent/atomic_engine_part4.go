@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/google/cel-go/cel"
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/jsondb"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 func queryFieldPattern(field string) string {

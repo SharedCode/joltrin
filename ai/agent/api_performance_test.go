@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
-	core_database "github.com/sharedcode/joltrin/database"
+	"github.com/sharedcode/joltrin/v5"
+	core_database "github.com/sharedcode/joltrin/v5/database"
 )
 
 // TestJoinPerformance_SmallDataset tests join performance with small dataset

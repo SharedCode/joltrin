@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	sop "github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/database"
+	sop "github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/database"
 )
 
 // BillingStore persists commercial billing state - subscriptions, the

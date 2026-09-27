@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // Distribute fires a script into the swarm.

@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // MockTransaction is a dummy implementation of sop.Transaction for testing.

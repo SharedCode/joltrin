@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sharedcode/joltrin"
 	cas "github.com/sharedcode/joltrin/adapters/cassandra"
-	"github.com/sharedcode/joltrin/fs"
-	"github.com/sharedcode/joltrin/internal/inredck"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/fs"
+	"github.com/sharedcode/joltrin/v5/inredck"
 )
 
 // NewTransaction is a convenience function to create an end-user facing transaction object that wraps the two-phase commit transaction.

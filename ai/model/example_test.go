@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai/database"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // MyModel is a sample struct to demonstrate storage.

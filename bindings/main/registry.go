@@ -3,7 +3,7 @@ package main
 import (
 	"sync"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // registry is a thread-safe generic registry for storing objects by UUID.

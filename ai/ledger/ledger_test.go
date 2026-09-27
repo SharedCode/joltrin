@@ -7,8 +7,8 @@ import (
 	"sync"
 	"testing"
 
-	sop "github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/fs"
+	sop "github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/fs"
 )
 
 // newTestLedger returns a Ledger backed by a real filesystem blob store
