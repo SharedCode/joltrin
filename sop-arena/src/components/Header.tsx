@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { ViewMode } from '../types';
-import { 
-  Database, 
-  Volume2, 
-  VolumeX, 
-  Share2, 
-  Check, 
-  Sparkles, 
-  Flame, 
-  Briefcase, 
+import {
+  Database,
+  Volume2,
+  VolumeX,
+  Share2,
+  Check,
+  Sparkles,
+  Flame,
+  Briefcase,
   GitCompare,
   Building2,
+  Menu,
+  X,
 } from 'lucide-react';
 import { GithubIcon } from './GithubIcon';
 import { sounds } from '../engine/SoundEffects';
@@ -34,6 +36,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isMuted, setIsMuted] = useState(!sounds.isEnabled());
   const [copied, setCopied] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const toggleSound = () => {
     const enabled = sounds.toggle();
@@ -188,19 +191,85 @@ export const Header: React.FC<HeaderProps> = ({
             {copied ? <Check className="w-4 h-4 text-brand-400" /> : <Share2 className="w-4 h-4" />}
           </button>
 
-          {/* GitHub Repo Link */}
+          {/* GitHub Repo Link: hidden below sm, next to Copilot/Sound/Share it
+              was crowding the hamburger button out on narrow phones. Still
+              reachable from the mobile panel below. */}
           <a
             href="https://github.com/sharedcode/joltrin"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-brand-500 hover:bg-brand-400 text-black font-semibold text-xs transition shadow-md shadow-brand-500/20"
+            className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-brand-500 hover:bg-brand-400 text-black font-semibold text-xs transition shadow-md shadow-brand-500/20"
           >
             <GithubIcon className="w-4 h-4 text-black" />
             <span className="hidden sm:inline">GitHub</span>
           </a>
+
+          {/* Mobile Menu Toggle: the nav switcher above is md:flex-only, this is
+              the only way to reach Tech Demo, Barrier, Investor Mode, Compare,
+              or Enterprise below that breakpoint. */}
+          <button
+            onClick={() => setMobileMenuOpen((open) => !open)}
+            className="md:hidden p-2 rounded-lg bg-dark-900 hover:bg-dark-850 text-slate-300 hover:text-white border border-dark-800 transition"
+            aria-label="Toggle navigation menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          </button>
         </div>
 
       </div>
+
+      {/* Mobile Nav Panel: same destinations as the desktop switcher above,
+          stacked for a narrow viewport. */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-dark-800 bg-dark-950 px-4 py-3 space-y-1 text-sm font-mono">
+          <a
+            href="../"
+            className="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-900 transition"
+          >
+            🧠 Tech Demo
+          </a>
+          <button
+            onClick={() => { onSelectMode('arena'); setMobileMenuOpen(false); }}
+            className="block w-full text-left px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-900 transition"
+          >
+            🔥 Arena
+          </button>
+          <button
+            onClick={() => { onSelectMode('investor'); setMobileMenuOpen(false); }}
+            className="block w-full text-left px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-900 transition"
+          >
+            💼 Investor Mode
+          </button>
+          <button
+            onClick={() => { onOpenCompare(); setMobileMenuOpen(false); }}
+            className="block w-full text-left px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-900 transition"
+          >
+            ⚖️ With vs Without
+          </button>
+          <a
+            href="../agents/"
+            className="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-900 transition"
+          >
+            🔌 Barrier
+          </a>
+          <button
+            onClick={() => { onOpenEnterprise('enterprise'); setMobileMenuOpen(false); }}
+            className="block w-full text-left px-3 py-2 rounded-lg text-brand-400 hover:text-brand-300 hover:bg-dark-900 transition"
+          >
+            🏢 Enterprise
+          </button>
+          <a
+            href="https://github.com/sharedcode/joltrin"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center space-x-1.5 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-900 transition border-t border-dark-800 mt-1 pt-3"
+          >
+            <GithubIcon className="w-4 h-4" />
+            <span>GitHub</span>
+          </a>
+        </div>
+      )}
     </header>
   );
 };
