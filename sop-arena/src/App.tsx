@@ -452,7 +452,7 @@ export const App: React.FC = () => {
               Stress-test distributed transactions, swarm compute, and erasure-coded storage in real time with zero external dependencies.
             </p>
             <p className="text-[11px] text-slate-500 font-mono">
-              Canonical custom domain: <a href="https://joltrin.com/arena/" className="text-brand-400 hover:underline">joltrin.com/arena</a> · Open source core under MIT
+              Open source core under MIT
             </p>
           </div>
           <div>
