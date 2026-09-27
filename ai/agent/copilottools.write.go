@@ -9,11 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
-	"github.com/sharedcode/joltrin/common"
 	"github.com/sharedcode/joltrin/jsondb"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/common"
 )
 
 var inferSpaceNamePatterns = []*regexp.Regexp{

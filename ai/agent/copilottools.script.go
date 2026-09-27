@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 const listScriptsArgsSchema = `{"type":"object","properties":{"category":{"type":"string","description":"Optional script category to list. Defaults to the standard script category."}}}`

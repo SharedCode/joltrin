@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // (from findwithid_success_test.go)

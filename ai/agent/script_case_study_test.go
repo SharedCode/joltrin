@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // TestCaseStudy_TwoPathsToAutomation implements the two methodologies described in SCRIPTS.md

@@ -10,8 +10,8 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/encoding"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/encoding"
 )
 
 type client struct {

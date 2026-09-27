@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 
 	retry "github.com/sethvargo/go-retry"
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/internal/pathsafety"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/internal/pathsafety"
 )
 
 // FileIO defines filesystem operations used by this package. The default

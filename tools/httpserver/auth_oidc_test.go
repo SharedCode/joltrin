@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin/governance"
+	"github.com/sharedcode/joltrin/v5/governance"
 )
 
 func makeSignedTestJWT(claims map[string]any, signingKey []byte) string {

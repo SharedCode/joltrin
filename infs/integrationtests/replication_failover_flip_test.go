@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/fs"
 	"github.com/sharedcode/joltrin/infs"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/fs"
 )
 
 // Test_ActiveSide_FailoverFlip_Then_Reinstate_FastForward uses the DirectIO simulator to inject

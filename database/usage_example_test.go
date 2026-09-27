@@ -6,10 +6,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/adapters/redis"
-	"github.com/sharedcode/joltrin/database"
 	"github.com/sharedcode/joltrin/infs"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/database"
 )
 
 // Example_standalone demonstrates how to use the Database in Standalone mode.

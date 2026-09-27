@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // TestTransactionLifecycle_ContextCancellation verifies that transactions are properly rolled back

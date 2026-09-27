@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 

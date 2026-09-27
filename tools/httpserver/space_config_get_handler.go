@@ -7,8 +7,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai/database"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 func handleGetSpaceConfig(w http.ResponseWriter, r *http.Request) {

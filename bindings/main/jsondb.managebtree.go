@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/sharedcode/joltrin/encoding"
+	"github.com/sharedcode/joltrin/v5/encoding"
 	"github.com/sharedcode/joltrin/jsondb"
 )
 

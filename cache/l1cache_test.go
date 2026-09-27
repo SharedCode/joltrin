@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/btree"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/btree"
 )
 
 func TestL1CacheSetNodeToMRU_IgnoresUnsupportedNodeValue(t *testing.T) {

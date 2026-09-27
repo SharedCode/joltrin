@@ -18,11 +18,11 @@ import (
 
 	log "log/slog"
 
-	"github.com/sharedcode/joltrin"
 	aidb "github.com/sharedcode/joltrin/ai/database"
-	"github.com/sharedcode/joltrin/btree"
-	"github.com/sharedcode/joltrin/database"
-	"github.com/sharedcode/joltrin/internal/logsafe"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/btree"
+	"github.com/sharedcode/joltrin/v5/database"
+	"github.com/sharedcode/joltrin/v5/logsafe"
 	"golang.org/x/crypto/bcrypt"
 )
 

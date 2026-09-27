@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // Test btreeWithTransaction.GetCurrentValueNoLock requires begun transaction

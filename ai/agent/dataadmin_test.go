@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 func TestCopilotAgent_Registry(t *testing.T) {

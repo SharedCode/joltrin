@@ -11,8 +11,8 @@ import (
 
 	log "log/slog"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // MemoryUnit encapsulates the cognitive state and boundaries of an Agent instance.

@@ -7,11 +7,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/agent"
 	"github.com/sharedcode/joltrin/ai/vector"
 	"github.com/sharedcode/joltrin/search"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // IngestAgent performs the ETL process for a specific agent configuration.

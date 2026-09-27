@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/jsondb"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // -- Mock Store --

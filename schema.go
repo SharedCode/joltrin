@@ -126,7 +126,7 @@ func reflectTypeToSchemaFlat(t reflect.Type) map[string]string {
 	switch t.Kind() {
 	case reflect.Struct:
 		// Special case for UUID
-		if t.PkgPath() == "github.com/sharedcode/joltrin" && t.Name() == "UUID" {
+		if t.PkgPath() == "github.com/sharedcode/joltrin/v5" && t.Name() == "UUID" {
 			schema["key"] = "uuid"
 			return schema
 		}
@@ -235,7 +235,7 @@ func inferSchemaTypeFromValue(v reflect.Value) string {
 		return "list"
 	case reflect.Struct:
 		// Check for UUID types
-		if v.Type().PkgPath() == "github.com/sharedcode/joltrin" && v.Type().Name() == "UUID" {
+		if v.Type().PkgPath() == "github.com/sharedcode/joltrin/v5" && v.Type().Name() == "UUID" {
 			return "uuid"
 		}
 		if v.Type().PkgPath() == "github.com/google/uuid" && v.Type().Name() == "UUID" {
@@ -270,7 +270,7 @@ func reflectTypeToString(t reflect.Type) string {
 		return "boolean"
 	case reflect.Struct:
 		// Check for UUID types
-		if t.PkgPath() == "github.com/sharedcode/joltrin" && t.Name() == "UUID" {
+		if t.PkgPath() == "github.com/sharedcode/joltrin/v5" && t.Name() == "UUID" {
 			return "uuid"
 		}
 		if t.PkgPath() == "github.com/google/uuid" && t.Name() == "UUID" {

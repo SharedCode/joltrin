@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai/agent"
 	"github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/ai/memory"
-	core "github.com/sharedcode/joltrin/database"
+	"github.com/sharedcode/joltrin/v5"
+	core "github.com/sharedcode/joltrin/v5/database"
 )
 
 // TestCompareSearchVsSearchKnowledgeBase compares direct Search() vs searchKnowledgeBase()

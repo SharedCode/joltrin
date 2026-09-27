@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/jsondb"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // erroringSkipStore simulates a store whose underlying Next call fails

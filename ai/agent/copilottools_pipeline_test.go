@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/jsondb"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 func TestJoinPipeline_ExplicitInto(t *testing.T) {

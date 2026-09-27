@@ -15,8 +15,8 @@ To connect your code to the database you just created, you can load the settings
 package main
 
 import (
-    "github.com/sharedcode/joltrin/database"
-    "github.com/sharedcode/joltrin"
+    "github.com/sharedcode/joltrin/v5/database"
+    "github.com/sharedcode/joltrin/v5"
     "context"
 )
 

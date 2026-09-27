@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 func TestGetLeftRightSibling_Edges(t *testing.T) {

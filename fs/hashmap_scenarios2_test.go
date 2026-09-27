@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/common/mocks"
-	"github.com/sharedcode/joltrin/encoding"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/common/mocks"
+	"github.com/sharedcode/joltrin/v5/encoding"
 )
 
 // lockFailOkFalse is a cache that returns ok=false with no error on Lock to simulate contention.

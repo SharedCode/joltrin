@@ -6,8 +6,8 @@ import (
 
 	log "log/slog"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // MigrateFromVector imports all Centroids and Vectors from a legacy ai.VectorStore

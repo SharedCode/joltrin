@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/sharedcode/joltrin/inmemory"
+	"github.com/sharedcode/joltrin/v5/inmemory"
 )
 
 func TestAgentMemoryWorkflow(t *testing.T) {

@@ -5,7 +5,7 @@ package main
 import (
 	"testing"
 
-	"github.com/sharedcode/joltrin/inmemory"
+	"github.com/sharedcode/joltrin/v5/inmemory"
 )
 
 func newTestEngine() *AgentMemoryEngine {

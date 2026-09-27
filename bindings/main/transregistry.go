@@ -3,7 +3,7 @@ package main
 import (
 	"sync"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // transactionItem holds a transaction and its associated B-trees.

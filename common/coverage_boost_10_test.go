@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/btree"
-	"github.com/sharedcode/joltrin/cache"
-	"github.com/sharedcode/joltrin/common/mocks"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/btree"
+	"github.com/sharedcode/joltrin/v5/cache"
+	"github.com/sharedcode/joltrin/v5/common/mocks"
 )
 
 func Test_Phase1Commit_NoCheck_ReturnsImmediately(t *testing.T) {

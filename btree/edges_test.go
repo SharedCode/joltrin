@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // Ensure Add propagates error from distribute() (e.g., sibling fetch failure) and does not increment Count.

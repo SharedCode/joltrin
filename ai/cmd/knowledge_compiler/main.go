@@ -15,8 +15,8 @@ import (
 	"github.com/yuin/goldmark/text"
 
 	"github.com/google/uuid"
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai/memory"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 type Section struct {

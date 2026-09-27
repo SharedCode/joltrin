@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/sharedcode/joltrin"
 	aidb "github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/ai/memory"
-	"github.com/sharedcode/joltrin/database"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/database"
 )
 
 // chunkSentences limits to a max number of sentences.

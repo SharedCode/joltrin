@@ -16,7 +16,7 @@ import (
 	"syscall/js"
 
 	"github.com/sharedcode/joltrin/ai/verify"
-	"github.com/sharedcode/joltrin/tools/runbookstore"
+	"github.com/sharedcode/joltrin/v5/tools/runbookstore"
 )
 
 var (

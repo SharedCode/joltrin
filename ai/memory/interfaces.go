@@ -3,9 +3,9 @@ package memory
 import (
 	"context"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
-	"github.com/sharedcode/joltrin/btree"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/btree"
 )
 
 // Database is an interface that allows the memory layer to orchestrate its own batched transactions.

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // Covers btreeWithTransaction wrapper methods left untested: UpdateKey,

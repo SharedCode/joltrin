@@ -3,7 +3,7 @@ package btree
 import (
 	"context"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // BtreeInterface defines the public API of the Btree.

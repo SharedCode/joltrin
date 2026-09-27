@@ -3,7 +3,7 @@ package btree
 import (
 	"context"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // Cursor is a Btree cursor, it allows iteration on an underlying Btree and behaves like it is the Btree

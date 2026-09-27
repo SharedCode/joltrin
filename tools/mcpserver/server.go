@@ -25,7 +25,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 
 	"github.com/sharedcode/joltrin/ai/verify"
-	"github.com/sharedcode/joltrin/tools/runbookstore"
+	"github.com/sharedcode/joltrin/v5/tools/runbookstore"
 )
 
 // New builds an MCP server with read_sop, validate_step, and execute_step

@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 func TestCosineSimilarity(t *testing.T) {

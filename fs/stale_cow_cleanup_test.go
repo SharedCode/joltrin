@@ -8,9 +8,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/common/mocks"
-	"github.com/sharedcode/joltrin/encoding"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/common/mocks"
+	"github.com/sharedcode/joltrin/v5/encoding"
 )
 
 func Test_StaleCowCleanup_OnUpdate_RollbackRestoresOriginal(t *testing.T) {

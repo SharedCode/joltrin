@@ -3,7 +3,7 @@ package btree
 import (
 	"testing"
 
-	sop "github.com/sharedcode/joltrin"
+	sop "github.com/sharedcode/joltrin/v5"
 )
 
 // TestGetSlotLength_ClampsPathologicalValues guards against an

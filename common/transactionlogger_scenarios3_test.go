@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/common/mocks"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/common/mocks"
 )
 
 // Covers acquireLocks branch where a different owner holds a lock, returning a failover error.

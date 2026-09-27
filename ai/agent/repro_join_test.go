@@ -7,11 +7,11 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/agent"
 	"github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/jsondb"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // MockGenerator bypasses LLM and returns predefined scripts for specific queries.

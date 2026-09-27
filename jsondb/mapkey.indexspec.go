@@ -1,7 +1,7 @@
 package jsondb
 
 import (
-	"github.com/sharedcode/joltrin/btree"
+	"github.com/sharedcode/joltrin/v5/btree"
 )
 
 // IndexFieldSpecification declares a field and its sort order in the composite index.

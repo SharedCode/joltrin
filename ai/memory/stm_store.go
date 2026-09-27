@@ -8,8 +8,8 @@ import (
 
 	log "log/slog"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/btree"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/btree"
 )
 
 const (

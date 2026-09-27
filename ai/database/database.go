@@ -10,15 +10,15 @@ import (
 
 	log "log/slog"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/model"
 	"github.com/sharedcode/joltrin/ai/vector"
-	"github.com/sharedcode/joltrin/btree"
-	"github.com/sharedcode/joltrin/common"
-	"github.com/sharedcode/joltrin/database"
-	"github.com/sharedcode/joltrin/fs"
 	"github.com/sharedcode/joltrin/search"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/btree"
+	"github.com/sharedcode/joltrin/v5/common"
+	"github.com/sharedcode/joltrin/v5/database"
+	"github.com/sharedcode/joltrin/v5/fs"
 )
 
 // Database extends the core sop.Database with AI capabilities.

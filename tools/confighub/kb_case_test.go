@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/ai/memory"
-	core "github.com/sharedcode/joltrin/database"
+	"github.com/sharedcode/joltrin/v5"
+	core "github.com/sharedcode/joltrin/v5/database"
 )
 
 // TestCaseSensitivityInSearch tests if Search() is case-sensitive for CategoryPath

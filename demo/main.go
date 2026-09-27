@@ -13,7 +13,7 @@ import (
 	"syscall/js"
 	"time"
 
-	"github.com/sharedcode/joltrin/inmemory"
+	"github.com/sharedcode/joltrin/v5/inmemory"
 )
 
 // Global database state running entirely in-browser memory.

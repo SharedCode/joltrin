@@ -3,9 +3,9 @@ package common
 import (
 	"testing"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/cache"
-	"github.com/sharedcode/joltrin/common/mocks"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/cache"
+	"github.com/sharedcode/joltrin/v5/common/mocks"
 )
 
 func init() {

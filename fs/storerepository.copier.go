@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/sharedcode/joltrin/encoding"
+	"github.com/sharedcode/joltrin/v5/encoding"
 )
 
 // CopyToPassiveFolders copies store metadata (store list and per-store info) and registry

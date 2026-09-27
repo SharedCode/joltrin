@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // helper for building a small tree with known structure for deletion/rotation tests

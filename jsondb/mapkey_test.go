@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/database"
-	"github.com/sharedcode/joltrin/encoding"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/database"
+	"github.com/sharedcode/joltrin/v5/encoding"
 )
 
 func TestJsonDBMapKey_IndexSpecAndOpen(t *testing.T) {

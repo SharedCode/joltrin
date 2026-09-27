@@ -10,10 +10,10 @@ import (
 	log "log/slog"
 	"time"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/embed"
 	"github.com/sharedcode/joltrin/ai/internal/logsafe"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // TODO: refactor Vectorize & VectorizeCategories so they can share common Category/Batched Items'

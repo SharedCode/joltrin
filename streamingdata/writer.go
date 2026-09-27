@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sharedcode/joltrin/btree"
+	"github.com/sharedcode/joltrin/v5/btree"
 )
 
 type writer[TK btree.Ordered] struct {

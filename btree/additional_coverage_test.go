@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // iatGetErr returns error on Get to drive GetCurrentItem error branch.

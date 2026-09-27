@@ -3,7 +3,7 @@ package jsondb
 import (
 	"testing"
 
-	"github.com/sharedcode/joltrin/cel"
+	"github.com/sharedcode/joltrin/v5/cel"
 )
 
 func TestCELPrecedenceOverIndexSpec(t *testing.T) {

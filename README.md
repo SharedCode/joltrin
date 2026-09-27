@@ -17,7 +17,7 @@
 [![Go Tests](https://github.com/SharedCode/joltrin/actions/workflows/go.yml/badge.svg?event=push&branch=master)](https://github.com/SharedCode/joltrin/actions/workflows/go.yml)
 [![Release](https://img.shields.io/github/v/release/SharedCode/joltrin)](https://github.com/SharedCode/joltrin/releases)
 [![codecov](https://codecov.io/gh/SharedCode/joltrin/branch/master/graph/badge.svg)](https://app.codecov.io/github/SharedCode/joltrin)
-[![Go Reference](https://pkg.go.dev/badge/github.com/sharedcode/joltrin.svg)](https://pkg.go.dev/github.com/sharedcode/joltrin)
+[![Go Reference](https://pkg.go.dev/badge/github.com/sharedcode/joltrin/v5.svg)](https://pkg.go.dev/github.com/sharedcode/joltrin/v5)
 [![Go version](https://img.shields.io/github/go-mod/go-version/SharedCode/joltrin)](go.mod)
 [![License](https://img.shields.io/github/license/SharedCode/joltrin)](LICENSE)
 [![Live Demos](https://img.shields.io/badge/Live_Demos-GitHub_Pages-10B981?logo=github)](https://sharedcode.github.io/joltrin/arena/)
@@ -530,7 +530,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/sharedcode/joltrin/inmemory"
+	"github.com/sharedcode/joltrin/v5/inmemory"
 )
 
 func main() {
@@ -625,7 +625,7 @@ If you are building distributed systems, cloud infrastructure, or AI data platfo
 
 | Language | Installation | Description |
 | :--- | :--- | :--- |
-| **Go** | `go get github.com/sharedcode/joltrin` | Native high-performance core engine. |
+| **Go** | `go get github.com/sharedcode/joltrin/v5` | Native high-performance core engine. |
 | **Python** | `pip install sop4py` | Python bindings with Data Manager and AI scripts. |
 | **C#** | `dotnet add package Sop` | Complete .NET Core integration. |
 | **WebAssembly** | `GOOS=js GOARCH=wasm go build` | Browser-sandboxed zero-server execution. |
@@ -639,14 +639,14 @@ When integrating Joltrin into your stack, choose between official versioned rele
 
 | Dimension | Official Tagged Releases (Recommended for Production) | In-Repo Source / Submodule (Active Prototyping & Contribution) |
 | :--- | :--- | :--- |
-| **Artifacts** | `go get github.com/sharedcode/joltrin@vX.Y.Z`<br>PyPI: `pip install sop4py`<br>NuGet: `dotnet add package Sop` | Git clone or submodule linked directly to `HEAD` or a feature branch |
+| **Artifacts** | `go get github.com/sharedcode/joltrin/v5@vX.Y.Z`<br>PyPI: `pip install sop4py`<br>NuGet: `dotnet add package Sop` | Git clone or submodule linked directly to `HEAD` or a feature branch |
 | **Best For** | Production services, reproducible CI/CD builds, audited dependencies | Modifying engine internals, local benchmarking, custom protocol servers |
 | **Stability** | Semantic versioning, tagged releases, audited dependency graph | Bleeding-edge features, experimental branches, unreleased protocol bridges |
 | **Maintenance** | Handled by standard language package managers | Requires manual git fetch/rebase and local workspace management |
 
 #### 1. Official Tagged Releases (Recommended for Production)
 For production deployments, pin your dependency to a tagged release. This guarantees reproducible builds, backward-compatible API guarantees, and security-scanned transitive dependencies:
-- **Go**: `go get github.com/sharedcode/joltrin@v5.4.0` (see [tags](https://github.com/sharedcode/joltrin/tags) for the latest)
+- **Go**: `go get github.com/sharedcode/joltrin/v5@v5.4.0` (see [tags](https://github.com/sharedcode/joltrin/tags) for the latest)
 - **Python**: `pip install sop4py==0.1.0`
 - **C# / .NET**: `dotnet add package Sop --version 0.1.0`
 
@@ -677,7 +677,7 @@ git add -A && git commit -m "chore: bump version to 5.4.0"
 # 4. Verify checksums, archive integrity, and SBOM before publishing
 ./scripts/verify_release.sh release
 
-# 5. Tag and push. This is what makes `go get github.com/sharedcode/joltrin@v5.4.0` resolve.
+# 5. Tag and push. This is what makes `go get github.com/sharedcode/joltrin/v5@v5.4.0` resolve.
 git tag v5.4.0
 git push origin master v5.4.0
 

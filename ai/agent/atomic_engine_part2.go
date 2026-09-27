@@ -8,9 +8,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/jsondb"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 func (e *ScriptEngine) Execute(ctx context.Context, script []ScriptInstruction) error {

@@ -3,8 +3,8 @@ package agent
 import (
 	"time"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai/memory"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // Space Lifecycle Types

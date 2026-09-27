@@ -49,7 +49,7 @@ SOP implements a **Transactional Lookup B-Tree**.
 You need Go (1.24+) and the SOP library.
 
 ```bash
-go get github.com/sharedcode/joltrin
+go get github.com/sharedcode/joltrin/v5
 ```
 
 (Optional) For the "Nurse" LLM, install [Ollama](https://ollama.com/) and pull a model:
@@ -394,7 +394,7 @@ The `sop/ai` module is a modular kit. You can use the high-level `agent` package
 If you just want a high-performance, local vector store without the agent logic, use the `vector` package directly.
 
 ```go
-import "github.com/sharedcode/joltrin/database"
+import "github.com/sharedcode/joltrin/v5/database"
 
 // Create a persistent store
 db := database.NewDatabase(sop.DatabaseOptions{

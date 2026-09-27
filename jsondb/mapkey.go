@@ -4,10 +4,10 @@ import (
 	"context"
 	"sort"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/btree"
-	"github.com/sharedcode/joltrin/cel"
-	"github.com/sharedcode/joltrin/encoding"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/btree"
+	"github.com/sharedcode/joltrin/v5/cel"
+	"github.com/sharedcode/joltrin/v5/encoding"
 )
 
 // JsonDBMapKey wraps JsonDBAnyKey to support map[string]any keys with configurable index specifications.

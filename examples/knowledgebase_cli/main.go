@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/ai/embed"
 	"github.com/sharedcode/joltrin/ai/memory"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 func main() {

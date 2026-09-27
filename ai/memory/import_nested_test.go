@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/inmemory"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/inmemory"
 )
 
 func TestImportJSON_NestedCategories(t *testing.T) {

@@ -5,9 +5,9 @@ import (
 	log "log/slog"
 	"strings"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/embed"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // ============================================================================

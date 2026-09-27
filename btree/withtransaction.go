@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // btreeWithTransaction wraps a B-tree with a TwoPhaseCommitTransaction and enforces:

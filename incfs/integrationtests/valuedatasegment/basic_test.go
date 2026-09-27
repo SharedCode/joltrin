@@ -9,10 +9,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/adapters/cassandra"
 	"github.com/sharedcode/joltrin/adapters/redis"
 	"github.com/sharedcode/joltrin/incfs"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 var cassConfig = cassandra.Config{

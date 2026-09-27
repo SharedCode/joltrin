@@ -2,7 +2,7 @@ module github.com/sharedcode/joltrin/ai
 
 go 1.26.8
 
-replace github.com/sharedcode/joltrin => ../
+replace github.com/sharedcode/joltrin/v5 => ../
 
 replace github.com/sharedcode/joltrin/infs => ../infs
 
@@ -15,7 +15,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/kelindar/search v0.4.1
 	github.com/sethvargo/go-retry v0.3.0
-	github.com/sharedcode/joltrin v0.0.0
+	github.com/sharedcode/joltrin/v5 v5.0.0
 	github.com/sharedcode/joltrin/infs v0.0.0
 	github.com/sharedcode/joltrin/jsondb v0.0.0
 	github.com/sharedcode/joltrin/search v0.0.0

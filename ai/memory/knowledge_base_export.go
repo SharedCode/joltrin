@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // ExportData	defines	the	structure	of	the	KnowledgeBase	JSON	payload.

@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sharedcode/joltrin"
 	aidb "github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/ai/embed"
 	"github.com/sharedcode/joltrin/ai/memory"
-	"github.com/sharedcode/joltrin/database"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/database"
 )
 
 func generateDeterministicID(catID sop.UUID, dataStr string) sop.UUID {

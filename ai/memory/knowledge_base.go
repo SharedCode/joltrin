@@ -13,9 +13,9 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/embed"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // KnowledgeBase provides a clean, unified API for developers.

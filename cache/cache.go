@@ -2,7 +2,7 @@
 // It offers a generic Cache interface and concrete MRU- and L1-based caches.
 package cache
 
-import "github.com/sharedcode/joltrin"
+import "github.com/sharedcode/joltrin/v5"
 
 // Cache is a generic MRU cache interface used for in-memory caching scenarios.
 // Implementations should maintain recency and support bulk operations.

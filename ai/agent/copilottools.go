@@ -11,11 +11,11 @@ import (
 
 	log "log/slog"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
 	"github.com/sharedcode/joltrin/ai/memory"
 	"github.com/sharedcode/joltrin/jsondb"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 const (

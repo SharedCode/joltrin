@@ -30,8 +30,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/database"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/database"
 )
 
 type UserProfile struct {
@@ -129,7 +129,7 @@ func TransferFunds(ctx context.Context, db *database.Database, fromID, toID stri
 For objects larger than 1MB (e.g., videos, high-res images), use the `streamingdata` package.
 
 ```go
-import "github.com/sharedcode/joltrin/streamingdata"
+import "github.com/sharedcode/joltrin/v5/streamingdata"
 
 func UploadVideo(ctx context.Context, videoID string, data []byte) error {
 	// Create a streaming store
@@ -199,7 +199,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 	"github.com/sharedcode/joltrin/ai/database"
 )
 
@@ -354,8 +354,8 @@ package main
 
 import (
 	"context"
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/database"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/database"
 )
 
 func main() {
@@ -429,8 +429,8 @@ package main
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/database"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/database"
 )
 
 // 1. Define Types

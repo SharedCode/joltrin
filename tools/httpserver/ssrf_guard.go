@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/sharedcode/joltrin/internal/netguard"
+	"github.com/sharedcode/joltrin/v5/netguard"
 )
 
 // validateImportURL and ssrfSafeHTTPClient are thin aliases over

@@ -79,7 +79,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sharedcode/joltrin/fs"
+	"github.com/sharedcode/joltrin/v5/fs"
 	"github.com/sharedcode/joltrin/infs"
 )
 
@@ -348,9 +348,9 @@ Another sample code, edited for brevity and to show the important parts.
 
 ```
 import (
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 	"github.com/sharedcode/joltrin/infs"
-	"github.com/sharedcode/joltrin/redis"
+	"github.com/sharedcode/joltrin/v5/redis"
 )
 
 var redisConfig = redis.Options{
@@ -487,7 +487,7 @@ But yeah, V2 is showing very good results. ACID, two phase commit transaction, a
 As discussed above, the third usability scenario of SOP is support for very large data. Sample code to use this ```StreamingDataStore```:
 ```
 import (
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 	"github.com/sharedcode/joltrin/infs"
 )
 
@@ -873,7 +873,7 @@ SOP in-memory was created in order to model the structural bits of SOP and allow
 SOP in-memory is a full implementation and you can use it if it fits the needs, i.e. - no persistence, map + sorted "range" queries/updates.
 
 Sample Basic Usage:
-  * Import the sop/inmemory, e.g. `import sop "github.com/sharedcode/joltrin/inmemory"`
+  * Import the sop/inmemory, e.g. `import sop "github.com/sharedcode/joltrin/v5/inmemory"`
   * Instantiate the b-tree manager, e.g. - `sop.NewBtree[int, string](false)`. The single parameter specifies whether you would want to manage unique keys.
   * Populate the b-tree, e.g. - `b3.Add(<key>, <value>)`
   * Do a range query, e.g. `b3.FindOne(<key>, true),... b3.Next(), b3.GetCurrentKey or b3.GetCurrentValue` will return either the key or the value currently selected by the built-in "cursor".
@@ -888,7 +888,7 @@ import (
 	"fmt"
 	"testing"
 
-	sop "github.com/sharedcode/joltrin/inmemory"
+	sop "github.com/sharedcode/joltrin/v5/inmemory"
 )
 
 func TestBtree_HelloWorld(t *testing.T) {

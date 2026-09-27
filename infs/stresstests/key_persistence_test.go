@@ -8,9 +8,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
-	"github.com/sharedcode/joltrin/fs"
 	"github.com/sharedcode/joltrin/infs"
+	"github.com/sharedcode/joltrin/v5"
+	"github.com/sharedcode/joltrin/v5/fs"
 )
 
 type KeyStruct struct {

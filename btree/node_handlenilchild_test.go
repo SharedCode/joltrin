@@ -3,7 +3,7 @@ package btree
 import (
 	"testing"
 
-	"github.com/sharedcode/joltrin"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 // Covers removeItemOnNodeWithNilChild branch where Count becomes 0 on root with a non-nil single child,

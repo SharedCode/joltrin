@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/sharedcode/joltrin"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
-	core_database "github.com/sharedcode/joltrin/database"
 	"github.com/sharedcode/joltrin/jsondb"
+	"github.com/sharedcode/joltrin/v5"
+	core_database "github.com/sharedcode/joltrin/v5/database"
 )
 
 // TestExecuteScript_JoinCountIsolation validates that join operations produce the correct number of results
