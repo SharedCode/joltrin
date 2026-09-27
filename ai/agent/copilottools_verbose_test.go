@@ -105,3 +105,22 @@ func TestCopilotAgentExecute_UsesRunnerSessionVerboseForToolRuntime(t *testing.T
 		t.Fatalf("expected runtime tool execution to see verbose=true, got %q", out)
 	}
 }
+
+func TestHandleSlashCommandUnknownToolEscapesQuotesInMessage(t *testing.T) {
+	ag := NewCopilotAgent(Config{}, nil, nil)
+	ctx := context.Background()
+
+	// No generator, so an unknown tool falls straight to the "no AI Copilot
+	// available" branch instead of an LLM fallback. The tool name embeds a
+	// single quote to prove it can't break out of the message's quoting.
+	handled, msg, err := ag.handleSlashCommand(ctx, `/weird'tool arg1`, nil)
+	if err == nil {
+		t.Fatal("expected an error for an unknown tool")
+	}
+	if !handled {
+		t.Fatal("expected the unknown tool to be handled locally (no generator to fall back to)")
+	}
+	if !strings.Contains(msg, `"weird'tool"`) {
+		t.Fatalf("expected the tool name to be safely quoted with escaping intact, got %q", msg)
+	}
+}
