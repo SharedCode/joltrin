@@ -358,6 +358,10 @@ func (t *Transaction) phase1Commit(ctx context.Context) error {
 		if !ok {
 			// Unlock in case there are those that got locked.
 			t.l2Cache.Unlock(ctx, t.nodesKeys)
+			retryCount++
+			if retryCount >= phase1CommitMaxRetryCount {
+				return fmt.Errorf("phase 1 commit failed to acquire node locks after %d retries", phase1CommitMaxRetryCount)
+			}
 			sop.RandomSleep(ctx)
 			needsRefetchAndMerge = true
 			continue
@@ -369,6 +373,10 @@ func (t *Transaction) phase1Commit(ctx context.Context) error {
 				return err
 			}
 			log.Debug(fmt.Sprintf("cache.IsLocked didn't confirm nodesKeys are locked, tid: %v", t.GetID()))
+			retryCount++
+			if retryCount >= phase1CommitMaxRetryCount {
+				return fmt.Errorf("phase 1 commit failed to confirm node locks after %d retries", phase1CommitMaxRetryCount)
+			}
 			sop.RandomSleep(ctx)
 			continue
 		}
@@ -393,6 +401,10 @@ func (t *Transaction) phase1Commit(ctx context.Context) error {
 			if ok, _, err := t.l2Cache.DualLock(ctx, t.maxTime, t.nodesKeys); !ok || err != nil {
 				// Unlock in case there are those that got locked.
 				t.l2Cache.Unlock(ctx, t.nodesKeys)
+				retryCount++
+				if retryCount >= phase1CommitMaxRetryCount {
+					return fmt.Errorf("phase 1 commit failed to acquire node locks (dual lock) after %d retries", phase1CommitMaxRetryCount)
+				}
 				sop.RandomSleep(ctx)
 				needsRefetchAndMerge = true
 				continue
