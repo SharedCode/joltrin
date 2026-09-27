@@ -118,22 +118,26 @@ test.describe('Visual, Animation & Layout Stability Suite', () => {
     await page.goto('/arena/', { waitUntil: 'networkidle' });
 
     // Open Compare Modal
-    const compareBtn = page.getByRole('button', { name: /without joltrin vs with joltrin/i });
+    // Label is the full "Without Joltrin vs With Joltrin" on wider viewports,
+    // shortened to "Compare" below sm so it doesn't crowd the header on mobile.
+    const compareBtn = page.getByRole('button', { name: /without joltrin vs with joltrin|^compare$/i });
     await expect(compareBtn).toBeVisible();
     await compareBtn.click();
 
     // Verify modal overlay and dialog container appear
-    const modalHeading = page.getByRole('heading', { name: /architecture comparison/i });
+    const modal = page.getByTestId('compare-modal');
+    const modalHeading = modal.getByRole('heading', { name: /architecture comparison/i });
     await expect(modalHeading).toBeVisible();
 
-    // Verify comparison panels render
-    const withoutPanel = page.locator('text=WITHOUT JOLTRIN').first();
-    const withPanel = page.locator('text=WITH JOLTRIN').first();
+    // Verify comparison panels render, scoped to the modal so this can't
+    // accidentally match the trigger button's own (possibly hidden) label.
+    const withoutPanel = modal.locator('text=WITHOUT JOLTRIN').first();
+    const withPanel = modal.locator('text=WITH JOLTRIN').first();
     await expect(withoutPanel).toBeVisible();
     await expect(withPanel).toBeVisible();
 
     // Dismiss modal via Close X button
-    const closeBtn = page.locator('div.fixed button:has(svg.lucide-x)').first();
+    const closeBtn = modal.locator('button:has(svg.lucide-x)').first();
     await expect(closeBtn).toBeVisible();
     await closeBtn.click();
 

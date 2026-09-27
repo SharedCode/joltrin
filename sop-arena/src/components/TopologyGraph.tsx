@@ -147,8 +147,9 @@ export const TopologyGraph: React.FC<TopologyGraphProps> = ({
   };
 
   return (
-    <div className="relative w-full h-[480px] bg-dark-900 border border-dark-800 rounded-2xl overflow-hidden shadow-2xl">
-      
+    <div className="w-full overflow-x-auto rounded-2xl border border-dark-800 shadow-2xl">
+    <div className="relative h-[480px] min-w-[960px] bg-dark-900 overflow-hidden">
+
       {/* Background Subtle Grid */}
       <div 
         className="absolute inset-0 opacity-20 pointer-events-none"
@@ -275,6 +276,7 @@ export const TopologyGraph: React.FC<TopologyGraphProps> = ({
         <span className="flex items-center space-x-1"><span className="w-2 h-2 rounded-full bg-accent-cyan inline-block"></span><span>Erasure Rebuild</span></span>
       </div>
 
+    </div>
     </div>
   );
 };
