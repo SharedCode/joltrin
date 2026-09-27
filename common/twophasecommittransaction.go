@@ -15,6 +15,17 @@ import (
 
 const phase1CommitMaxRetryCount = 30
 
+// phase1LockAcquireMaxRetryCount bounds the cheap lock-check-and-sleep loop
+// (Lock/IsLocked/DualLock), not the expensive commit-then-rollback loop
+// phase1CommitMaxRetryCount guards. Each attempt here is just a lock call
+// plus a 20-80ms sop.RandomSleep, so it needs far more iterations than the
+// expensive path to cover a realistic contention window: at 30 retries this
+// gives up in ~1s, nowhere near enough for two other transactions to finish
+// their own multi-step conflict resolution first. 300 retries gives roughly
+// 15s of real wall-clock room for that, still small next to the transaction's
+// own maxTime ceiling, before failing with a clear, specific error.
+const phase1LockAcquireMaxRetryCount = 300
+
 type btreeBackend struct {
 	btree          any
 	nodeRepository *nodeRepositoryBackend
@@ -340,6 +351,7 @@ func (t *Transaction) phase1Commit(ctx context.Context) error {
 	successful := false
 	needsRefetchAndMerge := false
 	retryCount := 0
+	lockRetryCount := 0
 
 	for !successful {
 
@@ -358,9 +370,9 @@ func (t *Transaction) phase1Commit(ctx context.Context) error {
 		if !ok {
 			// Unlock in case there are those that got locked.
 			t.l2Cache.Unlock(ctx, t.nodesKeys)
-			retryCount++
-			if retryCount >= phase1CommitMaxRetryCount {
-				return fmt.Errorf("phase 1 commit failed to acquire node locks after %d retries", phase1CommitMaxRetryCount)
+			lockRetryCount++
+			if lockRetryCount >= phase1LockAcquireMaxRetryCount {
+				return fmt.Errorf("phase 1 commit failed to acquire node locks after %d retries", phase1LockAcquireMaxRetryCount)
 			}
 			sop.RandomSleep(ctx)
 			needsRefetchAndMerge = true
@@ -373,9 +385,9 @@ func (t *Transaction) phase1Commit(ctx context.Context) error {
 				return err
 			}
 			log.Debug(fmt.Sprintf("cache.IsLocked didn't confirm nodesKeys are locked, tid: %v", t.GetID()))
-			retryCount++
-			if retryCount >= phase1CommitMaxRetryCount {
-				return fmt.Errorf("phase 1 commit failed to confirm node locks after %d retries", phase1CommitMaxRetryCount)
+			lockRetryCount++
+			if lockRetryCount >= phase1LockAcquireMaxRetryCount {
+				return fmt.Errorf("phase 1 commit failed to confirm node locks after %d retries", phase1LockAcquireMaxRetryCount)
 			}
 			sop.RandomSleep(ctx)
 			continue
@@ -401,9 +413,9 @@ func (t *Transaction) phase1Commit(ctx context.Context) error {
 			if ok, _, err := t.l2Cache.DualLock(ctx, t.maxTime, t.nodesKeys); !ok || err != nil {
 				// Unlock in case there are those that got locked.
 				t.l2Cache.Unlock(ctx, t.nodesKeys)
-				retryCount++
-				if retryCount >= phase1CommitMaxRetryCount {
-					return fmt.Errorf("phase 1 commit failed to acquire node locks (dual lock) after %d retries", phase1CommitMaxRetryCount)
+				lockRetryCount++
+				if lockRetryCount >= phase1LockAcquireMaxRetryCount {
+					return fmt.Errorf("phase 1 commit failed to acquire node locks (dual lock) after %d retries", phase1LockAcquireMaxRetryCount)
 				}
 				sop.RandomSleep(ctx)
 				needsRefetchAndMerge = true
