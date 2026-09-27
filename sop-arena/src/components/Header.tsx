@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { ViewMode } from '../types';
 import {
-  Database,
   Volume2,
   VolumeX,
   Share2,
@@ -58,18 +57,7 @@ export const Header: React.FC<HeaderProps> = ({
         
         {/* Brand Logo & Title */}
         <div className="flex items-center space-x-3 flex-shrink-0">
-          <div className="w-9 h-9 rounded-xl bg-[#0b0f19] border border-cyan-400/40 flex items-center justify-center shadow-lg shadow-cyan-500/20 flex-shrink-0">
-            <svg width="22" height="22" viewBox="0 0 100 100">
-              <defs>
-                <linearGradient id="headerJGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#00f2fe" />
-                  <stop offset="45%" stopColor="#4facfe" />
-                  <stop offset="100%" stopColor="#7f00ff" />
-                </linearGradient>
-              </defs>
-              <path d="M 63,27 L 73,27 L 73,73 L 27,73 L 27,63 L 63,63 Z" fill="url(#headerJGrad)"/>
-            </svg>
-          </div>
+          <img src="./logo-mark.png" alt="Joltrin" className="w-9 h-9 object-contain flex-shrink-0" width={36} height={36} />
           <div className="flex-shrink-0">
             <div className="flex items-center space-x-2">
               <span className="font-extrabold tracking-tight text-white text-base sm:text-lg whitespace-nowrap leading-none">JOLTRIN ARENA</span>

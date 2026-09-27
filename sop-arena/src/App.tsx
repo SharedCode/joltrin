@@ -200,12 +200,12 @@ export const App: React.FC = () => {
 
             {/* Live Distributed Topology Canvas */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between px-1">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-1">
                 <div className="flex items-center space-x-2 text-xs font-bold text-white uppercase tracking-wider font-mono">
                   <Layers className="w-4 h-4 text-brand-400" />
                   <span>Live Distributed Systems Topology</span>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <button
                     onClick={() => setIsDataInspectorOpen(true)}
                     className="text-xs px-3 py-1 rounded-lg bg-dark-900 hover:bg-dark-850 text-accent-violet border border-accent-violet/30 font-mono flex items-center space-x-1.5 transition"
@@ -218,7 +218,8 @@ export const App: React.FC = () => {
                     className="text-xs px-3 py-1 rounded-lg bg-dark-900 hover:bg-dark-850 text-brand-400 border border-brand-500/30 font-mono flex items-center space-x-1.5 transition"
                   >
                     <GitCompare className="w-3.5 h-3.5" />
-                    <span>Without Joltrin vs With Joltrin</span>
+                    <span className="hidden sm:inline">Without Joltrin vs With Joltrin</span>
+                    <span className="sm:hidden">Compare</span>
                   </button>
                 </div>
               </div>
@@ -229,6 +230,7 @@ export const App: React.FC = () => {
                 selectedNodeId={selectedNodeId}
                 onSelectNode={(node) => setSelectedNodeId(node.id)}
               />
+              <p className="sm:hidden text-[10px] text-slate-500 font-mono px-1">← scroll to see the full topology →</p>
             </div>
 
             {/* Control Panel & Real-time Event Stream (2 Columns) */}
