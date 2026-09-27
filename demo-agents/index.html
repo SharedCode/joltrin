@@ -155,8 +155,25 @@
           <i data-lucide="github" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">GitHub</span>
         </a>
+
+        <!-- Mobile Menu Toggle: the Funnel Navigation Links above are md:flex-only,
+             this is the only way to reach Overview, Arena, Docs, Pricing, or Enterprise below that breakpoint. -->
+        <button onclick="toggleMobileMenu()" aria-label="Toggle navigation menu" aria-expanded="false" id="mobile-menu-btn"
+                class="md:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-slate-300 transition">
+          <span id="mobile-menu-icon" class="text-lg leading-none">☰</span>
+        </button>
       </div>
     </div>
+
+    <!-- Mobile Nav Panel: same destinations as the Funnel Navigation Links above, stacked for a narrow viewport. -->
+    <nav id="mobile-menu-panel" class="hidden md:hidden border-t border-dark-800 bg-dark-900 px-4 py-3 space-y-1 text-sm font-mono">
+      <a href="../" class="block px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition">🧠 Overview</a>
+      <a href="../arena/" class="block px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition">🎮 Arena</a>
+      <span class="block px-3 py-2 rounded-lg bg-accent-violet/20 text-accent-violet font-semibold">🔌 Agents</span>
+      <a href="https://github.com/SharedCode/joltrin#readme" target="_blank" rel="noopener noreferrer" class="block px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition">Docs</a>
+      <a href="../#pricing" class="block px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition">Pricing</a>
+      <a href="#enterprise-form" onclick="closeMobileMenu()" class="block px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition">Enterprise</a>
+    </nav>
   </header>
 
   <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-10">
@@ -723,6 +740,22 @@ curl localhost:8087/.well-known/agent-card.json</pre>
       const res = JSON.parse(sopAgentsReset());
       document.getElementById('exec-log').innerHTML = '<div class="text-slate-500">// trace reset</div>';
       renderSteps(res.trace);
+    }
+
+    function toggleMobileMenu() {
+      const panel = document.getElementById('mobile-menu-panel');
+      const btn = document.getElementById('mobile-menu-btn');
+      const icon = document.getElementById('mobile-menu-icon');
+      const isOpen = !panel.classList.contains('hidden');
+      panel.classList.toggle('hidden');
+      btn.setAttribute('aria-expanded', String(!isOpen));
+      icon.textContent = isOpen ? '☰' : '✕';
+    }
+
+    function closeMobileMenu() {
+      const panel = document.getElementById('mobile-menu-panel');
+      if (panel.classList.contains('hidden')) return;
+      toggleMobileMenu();
     }
 
     function updateOPFSBadge() {

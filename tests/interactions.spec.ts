@@ -49,6 +49,47 @@ test.describe('Critical Interactive Features Suite', () => {
     guard.assertPurity('Cross-Portal Navigation');
   });
 
+  test('Mobile Nav Menu: hamburger reveals real, clickable cross-portal links', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, 'the hamburger menu only exists below the desktop nav breakpoint');
+
+    // Technical Demo (/): funnel nav is lg:flex-only, the hamburger is the
+    // only way to reach Arena/Agents without scrolling to the footer.
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await waitForWasmReady(page);
+    const homeToggle = page.locator('#mobile-menu-btn');
+    await expect(homeToggle).toBeVisible();
+    const homePanel = page.locator('#mobile-menu-panel');
+    await expect(homePanel).toBeHidden();
+    await homeToggle.click();
+    await expect(homePanel).toBeVisible();
+    await expect(homeToggle).toHaveAttribute('aria-expanded', 'true');
+    await homePanel.locator('a[href*="arena"]').click();
+    await expect(page).toHaveURL(/.*\/arena\/?/);
+
+    // Arena: the entire nav switcher (Tech Demo, Barrier, Enterprise, etc.)
+    // is md:flex-only with no other header fallback.
+    await waitForCanvasRendered(page);
+    const arenaToggle = page.locator('header button[aria-label="Toggle navigation menu"]');
+    await expect(arenaToggle).toBeVisible();
+    await arenaToggle.click();
+    const arenaBarrierLink = page.locator('a[href*="agents"]:visible').first();
+    await expect(arenaBarrierLink).toBeVisible();
+    await arenaBarrierLink.click();
+
+    // Agent Verification Barrier (/agents/): same md:flex-only nav gap.
+    await expect(page).toHaveURL(/.*\/agents\/?/);
+    await waitForWasmReady(page);
+    const agentsToggle = page.locator('#mobile-menu-btn');
+    await expect(agentsToggle).toBeVisible();
+    await agentsToggle.click();
+    const agentsPanel = page.locator('#mobile-menu-panel');
+    await expect(agentsPanel).toBeVisible();
+    await expect(agentsPanel.locator('a[href*="arena"]')).toBeVisible();
+  });
+
   test('Technical Demo: Tab Switching & Live Client-Side ACID Transactions', async ({
     page,
   }) => {
