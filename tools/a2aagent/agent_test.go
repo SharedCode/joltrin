@@ -277,3 +277,19 @@ func Test_A2A_MCP_ShareTrace(t *testing.T) {
 		t.Fatalf("expected drop_prod_db to complete: the shared trace already has a validated backup, got %q", task.Status.State)
 	}
 }
+
+// Test_AgentCard_SetsProtocolVersion guards against ProtocolVersion silently
+// going unset again: it is a plain struct field with no compiler-enforced
+// requirement, and every other field on this card is populated deliberately.
+// An empty protocolVersion in the served agent card is exactly the kind of
+// thing a first-time evaluator would screenshot next to MCP's populated one
+// and ask whether this project is actually finished.
+func Test_AgentCard_SetsProtocolVersion(t *testing.T) {
+	card := AgentCard("http://127.0.0.1:8099/a2a/invoke")
+	if card.ProtocolVersion == "" {
+		t.Fatal("AgentCard().ProtocolVersion is empty, want the SDK's a2a.Version")
+	}
+	if card.ProtocolVersion != string(a2a.Version) {
+		t.Fatalf("AgentCard().ProtocolVersion = %q, want %q (a2a.Version)", card.ProtocolVersion, a2a.Version)
+	}
+}
