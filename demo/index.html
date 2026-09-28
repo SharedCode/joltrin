@@ -159,6 +159,91 @@
       if (panel.classList.contains('hidden')) return;
       toggleMobileMenu();
     }
+
+    const CMDK_COMMANDS = [
+      { label: '🛡️ Verification Barrier', hint: 'section', action: () => location.hash = '#verification-barrier' },
+      { label: '🧠 Durable Memory', hint: 'section', action: () => location.hash = '#durable-memory' },
+      { label: '⚙️ Under the Hood', hint: 'section', action: () => location.hash = '#under-the-hood' },
+      { label: '💳 Pricing', hint: 'section', action: () => location.hash = '#pricing' },
+      { label: '🏢 Enterprise', hint: 'section', action: () => location.hash = '#enterprise' },
+      { label: '🎮 Joltrin Arena', hint: 'go to', action: () => location.href = './arena/' },
+      { label: '🔌 Agent Verification Barrier', hint: 'go to', action: () => location.href = './agents/' },
+      { label: 'GitHub Repository', hint: 'external', action: () => window.open('https://github.com/SharedCode/joltrin', '_blank', 'noopener') },
+    ];
+    let cmdkFiltered = CMDK_COMMANDS;
+    let cmdkSelected = 0;
+
+    function openCommandPalette() {
+      const overlay = document.getElementById('cmdk-overlay');
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+      const input = document.getElementById('cmdk-input');
+      input.value = '';
+      cmdkFilter('');
+      setTimeout(() => input.focus(), 0);
+    }
+
+    function closeCommandPalette() {
+      const overlay = document.getElementById('cmdk-overlay');
+      overlay.classList.add('hidden');
+      overlay.classList.remove('flex');
+    }
+
+    function cmdkFilter(query) {
+      const q = query.trim().toLowerCase();
+      cmdkFiltered = q === '' ? CMDK_COMMANDS : CMDK_COMMANDS.filter((c) => c.label.toLowerCase().includes(q));
+      cmdkSelected = 0;
+      cmdkRender();
+    }
+
+    function cmdkRender() {
+      const list = document.getElementById('cmdk-list');
+      list.innerHTML = '';
+      if (cmdkFiltered.length === 0) {
+        list.innerHTML = '<div class="px-4 py-6 text-center text-sm text-slate-500 font-mono">No matches</div>';
+        return;
+      }
+      cmdkFiltered.forEach((cmd, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between gap-3 text-sm transition ' +
+          (i === cmdkSelected ? 'bg-brand-500/20 text-brand-300' : 'text-slate-300 hover:bg-dark-800');
+        btn.innerHTML = '<span>' + cmd.label + '</span><span class="text-[10px] text-slate-500 font-mono uppercase">' + cmd.hint + '</span>';
+        btn.onmouseenter = () => { cmdkSelected = i; cmdkRender(); };
+        btn.onclick = () => { cmd.action(); closeCommandPalette(); };
+        list.appendChild(btn);
+      });
+    }
+
+    function cmdkKeydown(event) {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        cmdkSelected = Math.min(cmdkSelected + 1, cmdkFiltered.length - 1);
+        cmdkRender();
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        cmdkSelected = Math.max(cmdkSelected - 1, 0);
+        cmdkRender();
+      } else if (event.key === 'Enter') {
+        event.preventDefault();
+        const cmd = cmdkFiltered[cmdkSelected];
+        if (cmd) { cmd.action(); closeCommandPalette(); }
+      } else if (event.key === 'Escape') {
+        closeCommandPalette();
+      }
+    }
+
+    document.addEventListener('keydown', (event) => {
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const modifierHeld = isMac ? event.metaKey : event.ctrlKey;
+      if (modifierHeld && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        const overlay = document.getElementById('cmdk-overlay');
+        overlay.classList.contains('hidden') ? openCommandPalette() : closeCommandPalette();
+      } else if (event.key === 'Escape') {
+        closeCommandPalette();
+      }
+    });
   </script>
 
   <style>
@@ -278,6 +363,12 @@
           </button>
         </div>
 
+        <button onclick="openCommandPalette()" aria-label="Open command palette"
+                class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-xs text-slate-400 hover:text-slate-200 transition">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <span class="font-mono">⌘K</span>
+        </button>
+
         <a href="https://github.com/SharedCode/joltrin" target="_blank" rel="noopener noreferrer"
            class="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-xs font-medium text-slate-200 transition">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
@@ -295,6 +386,7 @@
 
     <!-- Mobile Nav Panel: same destinations as the Funnel Navigation Links above, stacked for a narrow viewport. -->
     <nav id="mobile-menu-panel" class="hidden lg:hidden border-t border-dark-800 bg-dark-900 px-4 py-3 space-y-1 text-sm font-mono">
+      <button onclick="closeMobileMenu(); openCommandPalette();" class="block w-full text-left px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-800 transition">🔍 Search</button>
       <a href="#verification-barrier" onclick="closeMobileMenu()" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-800 transition">🛡️ Barrier</a>
       <a href="#durable-memory" onclick="closeMobileMenu()" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-800 transition">🧠 Memory</a>
       <a href="#under-the-hood" onclick="closeMobileMenu()" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-800 transition">⚙️ Engine</a>
@@ -304,6 +396,23 @@
       <a href="#enterprise" onclick="closeMobileMenu()" class="block px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition">Enterprise</a>
     </nav>
   </header>
+
+  <!-- Command Palette: Cmd/Ctrl+K from anywhere on the page, or the search
+       button / mobile menu entry above. Pure keyboard-and-click nav, no
+       fuzzy-search library, the command list here is short enough that a
+       plain substring filter is the right amount of complexity. -->
+  <div id="cmdk-overlay" class="hidden fixed inset-0 z-50 bg-dark-950/80 backdrop-blur-sm items-start justify-center pt-24 px-4" onclick="if (event.target === this) closeCommandPalette();">
+    <div class="w-full max-w-lg bg-dark-900 border border-dark-700 rounded-2xl shadow-2xl overflow-hidden">
+      <div class="flex items-center px-4 border-b border-dark-800">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-slate-500 shrink-0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="cmdk-input" type="text" placeholder="Jump to a section or page..."
+               class="w-full bg-transparent px-3 py-3.5 text-sm text-white placeholder-slate-500 focus:outline-none font-mono"
+               oninput="cmdkFilter(this.value)" onkeydown="cmdkKeydown(event)" autocomplete="off" />
+        <kbd class="text-[10px] text-slate-500 border border-dark-700 rounded px-1.5 py-0.5 font-mono shrink-0">ESC</kbd>
+      </div>
+      <div id="cmdk-list" class="max-h-80 overflow-y-auto p-2"></div>
+    </div>
+  </div>
 
   <!-- WASM Loading Overlay -->
   <div id="wasm-loader-overlay" class="fixed inset-0 bg-dark-950/90 backdrop-blur-md z-50 flex flex-col items-center justify-center p-4 transition-opacity duration-500">
