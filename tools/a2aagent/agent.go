@@ -38,6 +38,7 @@ func AgentCard(baseURL string) *a2a.AgentCard {
 		Description:        "Executes SOP runbook steps, gated by a safety and reachability barrier certificate (ai/verify) so a step can never run out of order or into an unrecoverable state.",
 		URL:                baseURL,
 		Version:            "0.1.0",
+		ProtocolVersion:    string(a2a.Version),
 		PreferredTransport: a2a.TransportProtocolJSONRPC,
 		Capabilities:       a2a.AgentCapabilities{},
 		DefaultInputModes:  []string{"application/json"},
