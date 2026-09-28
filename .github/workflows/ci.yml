@@ -208,6 +208,33 @@ jobs:
             echo "::endgroup::"
           done
 
+  # Confirms the root module is actually consumable the way an external
+  # project consumes it: `go get` with no version pinned, from a scratch
+  # module outside this repo. v2.0.0 through v5.6.0 were not go-gettable at
+  # all (Go requires a v2+ tag to have a matching /vN path suffix when a
+  # go.mod is present, root's had none), and nothing in the rest of this
+  # suite would have caught that, it only surfaces from outside the repo.
+  # See scripts/verify_gomodule.sh for what this actually checks. Runs once,
+  # not per sanity OS leg: this is about module resolution, not platform.
+  gomodule-gettable:
+    name: Verify Go module is go-gettable at latest
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # need full tag history, not just the latest commit
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Verify go get with no version resolves to the latest tag
+        shell: bash
+        run: ./scripts/verify_gomodule.sh
+
   # Heavier validation that needs Redis and Cassandra as GitHub Actions
   # `services:` containers. That keyword only runs a Docker daemon on
   # Linux-hosted runners (macos-latest has no Docker daemon at all, and
