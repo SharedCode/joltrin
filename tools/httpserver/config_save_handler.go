@@ -12,7 +12,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/model"
@@ -532,17 +531,7 @@ func setupUserDBs(ctx context.Context, req *SaveConfigRequest) ([]DatabaseConfig
 
 			// Init/Demo
 			if udb.PopulateDemo {
-				var wg sync.WaitGroup
-				var errDemo error
-
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					if e := PopulateDemoData(ctx, uOpts); e != nil {
-						errDemo = e
-					}
-				}()
-				wg.Wait()
+				errDemo := PopulateDemoData(ctx, uOpts)
 
 				if errDemo != nil {
 					log.Error(logsafe.V(fmt.Sprintf("Failed to populate demo data for User DB '%s': %v", udb.Name, errDemo)))

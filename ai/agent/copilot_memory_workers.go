@@ -110,7 +110,10 @@ func (a *CopilotAgent) StartSleepCycle(ctx context.Context, hourlyInterval int, 
 			}
 		}
 
-		tx.Commit(ctx)
+		if err := tx.Commit(ctx); err != nil {
+			log.Warn("CopilotAgent: Sleep Cycle commit failed, memory consolidation not persisted", "agent_id", a.Memory.AgentID, "error", err)
+			return
+		}
 		a.Memory.CloseShortTermMemory()
 		log.Debug("CopilotAgent: Sleep Cycle completed successfully.", "agent_id", a.Memory.AgentID)
 	}
@@ -154,10 +157,17 @@ func (a *CopilotAgent) StartSleepCycle(ctx context.Context, hourlyInterval int, 
 	go func() {
 		log.Info("CopilotAgent: Initiating Deep Sleep Scheduler", "agent_id", a.Memory.AgentID, "hourly_interval", hourlyInterval)
 
-		// 1. Align to the precise top of the next hour
+		// 1. Align to the precise top of the next hour, but stay responsive to
+		// cancellation instead of blocking this goroutine for up to an hour.
 		now := nowFn()
 		nextHour := now.Truncate(time.Hour).Add(time.Hour)
-		time.Sleep(nextHour.Sub(now))
+		alignTimer := time.NewTimer(nextHour.Sub(now))
+		select {
+		case <-ctx.Done():
+			alignTimer.Stop()
+			return
+		case <-alignTimer.C:
+		}
 
 		// 2. Ticking perfectly on the hour
 		ticker := time.NewTicker(1 * time.Hour)
