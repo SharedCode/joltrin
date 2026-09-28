@@ -124,7 +124,14 @@ jobs:
             # rather than attempted blind. It's still tested on
             # ubuntu-latest and macos-latest above, and separately via
             # go.yml on ubuntu-latest.
-            exclude="$exclude|/bindings/main$|^github.com/sharedcode/joltrin/fs$"
+            #
+            # fs used to be excluded by a full ^...$ path match, which broke
+            # silently the moment the root module gained a /v5 suffix: the
+            # exact string stopped matching go list's output and this whole
+            # exclusion went dead, letting the same Windows-only failures
+            # back in. Matching on the /fs suffix instead survives a module
+            # path change the same way /bindings/main$ already does.
+            exclude="$exclude|/bindings/main$|/fs$"
           fi
           go test -timeout 20m $(go list ./... 2>/dev/null | grep -Ev "$exclude")
 
