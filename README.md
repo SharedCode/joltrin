@@ -646,7 +646,7 @@ When integrating Joltrin into your stack, choose between official versioned rele
 
 #### 1. Official Tagged Releases (Recommended for Production)
 For production deployments, pin your dependency to a tagged release. This guarantees reproducible builds, backward-compatible API guarantees, and security-scanned transitive dependencies:
-- **Go**: `go get github.com/sharedcode/joltrin/v5@v5.4.0` (see [tags](https://github.com/sharedcode/joltrin/tags) for the latest)
+- **Go**: `go get github.com/sharedcode/joltrin/v5@v5.7.0` (see [tags](https://github.com/sharedcode/joltrin/tags) for the latest)
 - **Python**: `pip install sop4py==0.1.0`
 - **C# / .NET**: `dotnet add package Sop --version 0.1.0`
 
@@ -677,15 +677,15 @@ git add -A && git commit -m "chore: bump version to 5.4.0"
 # 4. Verify checksums, archive integrity, and SBOM before publishing
 ./scripts/verify_release.sh release
 
-# 5. Tag and push. This is what makes `go get github.com/sharedcode/joltrin/v5@v5.4.0` resolve.
-git tag v5.4.0
-git push origin master v5.4.0
+# 5. Tag and push. This is what makes `go get github.com/sharedcode/joltrin/v5@v5.7.0` resolve.
+git tag v5.7.0
+git push origin master v5.7.0
 
 # 6. Create the GitHub Release from the tag (attaches release notes + artifacts)
-gh release create v5.4.0 --generate-notes
+gh release create v5.7.0 --generate-notes
 ```
 
-Go's package proxy needs no separate publish step: once the tag is pushed, `go get ...@v5.4.0` works immediately. Python, C#, and Java bindings still require the explicit `twine upload` / `dotnet nuget push` / `mvn deploy` steps in `RELEASE_PROCESS.md`.
+Go's package proxy needs no separate publish step: once the tag is pushed, `go get ...@v5.7.0` works immediately. Python, C#, and Java bindings still require the explicit `twine upload` / `dotnet nuget push` / `mvn deploy` steps in `RELEASE_PROCESS.md`.
 
 ## 📚 Technical Reference Guides
 

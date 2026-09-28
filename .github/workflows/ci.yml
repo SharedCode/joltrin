@@ -285,11 +285,20 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "Waiting for Cassandra..."
+          echo "Waiting for Cassandra to accept CQL queries..."
+          # Cassandra opens port 9042 well before it can actually serve CQL
+          # queries, so a bare TCP check here passes while the node still
+          # rejects real connections. Use cqlsh itself (same image already
+          # pulled for the service container) instead of just probing the port.
           for i in {1..60}; do
-            (echo > /dev/tcp/127.0.0.1/9042) && break || sleep 2
+            if docker run --rm --network host cassandra:4 cqlsh 127.0.0.1 9042 -e "describe cluster" >/dev/null 2>&1; then
+              echo "Cassandra reachable and serving CQL."
+              exit 0
+            fi
+            sleep 2
           done
-          echo "Cassandra reachable."
+          echo "Cassandra did not become query-ready in time" >&2
+          exit 1
 
       - name: Prepare datapath
         shell: bash

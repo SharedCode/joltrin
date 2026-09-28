@@ -705,11 +705,13 @@ func handleIngestSpace(w http.ResponseWriter, r *http.Request) {
 	task := RegisterTask("SpaceIngest", 100)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,
 		"task_id": task.TaskID,
 		"message": fmt.Sprintf("Preloading and Ingesting %s started in background", req.SpaceName),
-	})
+	}); err != nil {
+		log.Warn("failed to write ingest-started response", "task_id", task.TaskID, "space", logsafe.V(req.SpaceName), "error", err)
+	}
 
 	go func(taskId string, request IngestSpaceRequest, emb ai.Embeddings, llm ai.Generator) {
 		defer func() {
@@ -766,11 +768,13 @@ func handleIngestImportSpace(w http.ResponseWriter, r *http.Request) {
 	task := RegisterTask("SpaceIngestImport", 100)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,
 		"task_id": task.TaskID,
 		"message": fmt.Sprintf("Ingest/Importing %s started in background", req.SpaceName),
-	})
+	}); err != nil {
+		log.Warn("failed to write ingest-import-started response", "task_id", task.TaskID, "space", logsafe.V(req.SpaceName), "error", err)
+	}
 
 	go func(taskId string, request IngestSpaceRequest, emb ai.Embeddings, llm ai.Generator) {
 		defer func() {
