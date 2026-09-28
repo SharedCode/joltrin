@@ -20,6 +20,7 @@ import { CopilotDrawer } from './components/CopilotDrawer';
 import { MissionSuccessModal } from './components/MissionSuccessModal';
 import { DataInspectorModal } from './components/DataInspectorModal';
 import { EnterpriseInterestModal } from './components/EnterpriseInterestModal';
+import { CommandPalette } from './components/CommandPalette';
 import { 
   Database, 
   GitCompare, 
@@ -71,6 +72,7 @@ export const App: React.FC = () => {
   // Modals & Drawers
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const [isCompareOpen, setIsCompareOpen] = useState(false);
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const [isDataInspectorOpen, setIsDataInspectorOpen] = useState(false);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -147,7 +149,21 @@ export const App: React.FC = () => {
           setSelectedTier(tier || 'enterprise');
           setIsEnterpriseOpen(true);
         }}
+        onOpenPalette={() => setIsPaletteOpen(true)}
         reliabilityScore={metrics.reliabilityScore}
+      />
+
+      <CommandPalette
+        isOpen={isPaletteOpen}
+        onOpen={() => setIsPaletteOpen(true)}
+        onClose={() => setIsPaletteOpen(false)}
+        onSelectMode={(mode) => setViewMode(mode)}
+        onOpenCompare={() => setIsCompareOpen(true)}
+        onOpenCopilot={() => setIsCopilotOpen(true)}
+        onOpenEnterprise={(tier) => {
+          setSelectedTier(tier || 'enterprise');
+          setIsEnterpriseOpen(true);
+        }}
       />
 
       {/* Main Content Area */}

@@ -268,6 +268,58 @@ test.describe('Critical Interactive Features Suite', () => {
     guard.assertPurity('Agent Barrier Verification Flow');
   });
 
+  test('Command Palette: Cmd/Ctrl+K search and navigation across all three portals', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, 'the ⌘K trigger and shortcut are desktop-only, mobile uses the 🔍 Search menu entry instead');
+
+    // Technical Demo (/). Filter down to a single match and commit with
+    // Enter rather than clicking: the result list re-renders on every
+    // hover/keystroke, so a mouse click races the re-render and flakes.
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await waitForWasmReady(page);
+    const homeOverlay = page.locator('#cmdk-overlay');
+    await expect(homeOverlay).toBeHidden();
+    await page.getByRole('button', { name: /open command palette/i }).click();
+    await expect(homeOverlay).toBeVisible();
+    const homeInput = page.locator('#cmdk-input');
+    await homeInput.fill('pricing');
+    await expect(page.getByRole('button', { name: /pricing/i })).toBeVisible();
+    await homeInput.press('Enter');
+    await expect(homeOverlay).toBeHidden();
+    await expect(page).toHaveURL(/#pricing$/);
+
+    // Keyboard shortcut also toggles it open and Escape closes it
+    await page.keyboard.press('ControlOrMeta+k');
+    await expect(homeOverlay).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(homeOverlay).toBeHidden();
+
+    // Agent Verification Barrier (/agents/)
+    await page.goto('/agents/', { waitUntil: 'domcontentloaded' });
+    await waitForWasmReady(page);
+    const agentsOverlay = page.locator('#cmdk-overlay');
+    await page.getByRole('button', { name: /open command palette/i }).click();
+    await expect(agentsOverlay).toBeVisible();
+    const agentsInput = page.locator('#cmdk-input');
+    await agentsInput.fill('arena');
+    await expect(page.getByRole('button', { name: /joltrin arena/i })).toBeVisible();
+    await agentsInput.press('Enter');
+    await expect(page).toHaveURL(/.*\/arena\/?/);
+
+    // Joltrin Arena (React): same shortcut opens the React CommandPalette
+    await waitForCanvasRendered(page);
+    const arenaInput = page.getByRole('textbox', { name: /jump to a mode or action/i });
+    await page.keyboard.press('ControlOrMeta+k');
+    await expect(arenaInput).toBeVisible();
+    await arenaInput.fill('investor');
+    await expect(page.getByRole('button', { name: /💼 investor mode/i })).toBeVisible();
+    await arenaInput.press('Enter');
+    await expect(arenaInput).toBeHidden();
+    await expect(page.getByText(/investor/i).first()).toBeVisible();
+  });
+
   test('Code Blocks & Readout Inspection: Proper syntax and terminal display across portals', async ({
     page,
   }) => {

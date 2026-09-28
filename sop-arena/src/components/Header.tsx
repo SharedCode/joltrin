@@ -12,6 +12,7 @@ import {
   Building2,
   Menu,
   X,
+  Search,
 } from 'lucide-react';
 import { GithubIcon } from './GithubIcon';
 import { sounds } from '../engine/SoundEffects';
@@ -22,6 +23,7 @@ interface HeaderProps {
   onOpenCopilot: () => void;
   onOpenCompare: () => void;
   onOpenEnterprise: (tier?: 'pro' | 'enterprise') => void;
+  onOpenPalette: () => void;
   reliabilityScore: number;
 }
 
@@ -31,6 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenCopilot,
   onOpenCompare,
   onOpenEnterprise,
+  onOpenPalette,
   reliabilityScore,
 }) => {
   const [isMuted, setIsMuted] = useState(!sounds.isEnabled());
@@ -132,7 +135,17 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Action Controls & External Links */}
         <div className="flex items-center space-x-2.5">
-          
+
+          {/* Command Palette Trigger */}
+          <button
+            onClick={onOpenPalette}
+            className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-dark-900 hover:bg-dark-850 text-slate-400 hover:text-white border border-dark-800 text-xs font-mono transition"
+            title="Open command palette"
+          >
+            <Search className="w-3.5 h-3.5" />
+            <span>⌘K</span>
+          </button>
+
           {/* Enterprise Inquiry Trigger */}
           <button
             onClick={() => onOpenEnterprise('enterprise')}
@@ -211,6 +224,12 @@ export const Header: React.FC<HeaderProps> = ({
           stacked for a narrow viewport. */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-dark-800 bg-dark-950 px-4 py-3 space-y-1 text-sm font-mono">
+          <button
+            onClick={() => { onOpenPalette(); setMobileMenuOpen(false); }}
+            className="block w-full text-left px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-900 transition"
+          >
+            🔍 Search
+          </button>
           <a
             href="../"
             className="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-900 transition"

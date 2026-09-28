@@ -30,6 +30,7 @@ export class SimulationBackend implements SopBackendInterface {
   private targetTps: number = 15000;
   private particleIdCounter = 0;
   private logIdCounter = 0;
+  private instanceId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
   constructor() {
     this.resetTopology();
@@ -446,7 +447,7 @@ export class SimulationBackend implements SopBackendInterface {
     const now = new Date();
     const timeStr = now.toTimeString().split(' ')[0] + '.' + String(now.getMilliseconds()).padStart(3, '0');
     const entry: LogEntry = {
-      id: `log-${this.logIdCounter}`,
+      id: `log-${this.instanceId}-${this.logIdCounter}`,
       timestamp: timeStr,
       level,
       category,
