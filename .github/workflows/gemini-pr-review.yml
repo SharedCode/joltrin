@@ -1,8 +1,16 @@
 name: Gemini PR Review
 
+# Sets the "Gemini Review" commit status on the PR head commit. Branch
+# protection requires that status, so a PR cannot merge until Gemini has
+# passed the exact commit being merged.
+#
+# pull_request_target runs this file from the base branch and never checks
+# out or executes pull request code, which keeps GEMINI_API_KEY away from
+# fork code. The PR diff is fetched through the API and sent to Gemini as
+# data only.
 on:
-  pull_request:
-    types: [opened, synchronize]
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches: [ "master" ]
   issue_comment:
     types: [created]
@@ -20,25 +28,28 @@ permissions:
   contents: read
   pull-requests: write
   issues: write
+  statuses: write
 
 concurrency:
   group: gemini-pr-review-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
   cancel-in-progress: true
 
 jobs:
-  review:
-    # pull_request: skip drafts. issue_comment: only PR comments (issue_comment
-    # fires for both issues and PRs) containing the trigger phrase.
-    # workflow_dispatch: always allowed, it's an explicit manual request.
+  gemini-review-run:
+    # Drafts are skipped and stay without a status, so they cannot merge.
+    # issue_comment: PR comments from the owner, members, or collaborators
+    # containing the trigger phrase, so outside users cannot spend the quota.
     if: >
-      (github.event_name == 'pull_request' && github.event.pull_request.draft == false) ||
+      (github.event_name == 'pull_request_target' && github.event.pull_request.draft == false) ||
       (github.event_name == 'issue_comment' && github.event.issue.pull_request != null &&
+       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association) &&
        (contains(github.event.comment.body, '/gemini review') || contains(github.event.comment.body, '@gemini review'))) ||
       github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Checkout repo
+      # Base branch only. Do not add a ref: here.
+      - name: Checkout base branch
         uses: actions/checkout@v4
 
       - name: Set up Go
@@ -46,16 +57,9 @@ jobs:
         with:
           go-version-file: ai/go.mod
 
-      # `secrets` isn't a valid context in a job/step `if:`, so this
-      # produces a step output instead. That way the job skips cleanly
-      # (still a passing status) instead of failing every PR until
-      # GEMINI_API_KEY is actually configured.
-      - name: Check for Gemini API key
-        id: check-key
-        run: echo "present=${{ secrets.GEMINI_API_KEY != '' }}" >> "$GITHUB_OUTPUT"
-
-      - name: Run Gemini PR review
-        if: steps.check-key.outputs.present == 'true'
+      # A missing key is not skipped: the reviewer sets a failing Gemini
+      # Review status and exits non-zero, so the PR stays blocked.
+      - name: Run Gemini PR review gate
         working-directory: ai
         timeout-minutes: 12
         env:
@@ -64,3 +68,21 @@ jobs:
           GEMINI_MODEL: ${{ github.event.inputs.model || 'gemini-2.5-flash' }}
           GEMINI_TIMEOUT: 90s
         run: go run ./cmd/pr-reviewer
+
+  # A job that is cancelled, times out, or dies before the reviewer can write
+  # a status leaves the commit with a stale pending or missing status. Mark
+  # it failed so the block is explicit rather than an indefinite wait.
+  gemini-review-failsafe:
+    needs: gemini-review-run
+    if: ${{ always() && needs.gemini-review-run.result != 'success' && needs.gemini-review-run.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark Gemini Review failed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
+        run: |
+          sha=$(gh api "repos/$REPO/pulls/$PR" --jq .head.sha)
+          gh api "repos/$REPO/statuses/$sha" -f state=failure -f context="Gemini Review" \
+            -f description="Gemini review did not complete"

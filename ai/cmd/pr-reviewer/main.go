@@ -1,6 +1,7 @@
-// Command pr-reviewer fetches the diff for the pull request described by
-// GITHUB_EVENT_PATH, asks Gemini to review it, and posts the result as a PR
-// comment. It's meant to run as a GitHub Actions step; see
+// Command pr-reviewer reviews the pull request described by GITHUB_EVENT_PATH
+// with Gemini, posts the findings as a PR comment, and records the result as
+// the "Gemini Review" commit status that branch protection requires. It is
+// meant to run as a GitHub Actions step; see
 // .github/workflows/gemini-pr-review.yml.
 package main
 
@@ -22,16 +23,9 @@ func main() {
 }
 
 func run() error {
-	apiKey := os.Getenv("GEMINI_API_KEY")
-	if apiKey == "" {
-		fmt.Fprintln(os.Stderr, "::warning::GEMINI_API_KEY is not set, skipping Gemini PR review")
-		return nil
-	}
-
 	token := os.Getenv("GITHUB_TOKEN")
 	if token == "" {
-		fmt.Fprintln(os.Stderr, "::warning::GITHUB_TOKEN is not set, skipping Gemini PR review")
-		return nil
+		return fmt.Errorf("GITHUB_TOKEN is not set")
 	}
 
 	eventPath := os.Getenv("GITHUB_EVENT_PATH")
@@ -68,32 +62,15 @@ func run() error {
 		}
 	}
 
-	ctx := context.Background()
-
-	diff, err := prreview.FetchDiff(ctx, token, owner, repo, prNumber)
-	if err != nil {
-		return err
-	}
-
-	if diff == "" {
-		fmt.Fprintln(os.Stderr, "::warning::pull request diff is empty, skipping Gemini PR review")
-		return nil
-	}
-
-	truncatedDiff, wasTruncated := prreview.TruncateDiff(diff, maxDiffBytes)
-	prompt := prreview.BuildPrompt(truncatedDiff)
-
-	review, err := prreview.ReviewDiff(ctx, apiKey, model, prompt)
-	if err != nil {
-		return err
-	}
-
-	comment := prreview.FormatComment(review, wasTruncated)
-
-	if err := prreview.PostComment(ctx, token, owner, repo, prNumber, comment); err != nil {
-		return err
-	}
-
-	fmt.Printf("Posted Gemini review comment on %s/%s#%d\n", owner, repo, prNumber)
-	return nil
+	// RunGate fails closed: any problem sets a failing Gemini Review status
+	// and returns an error, which fails this job.
+	return prreview.RunGate(context.Background(), prreview.GateConfig{
+		Token:        token,
+		APIKey:       os.Getenv("GEMINI_API_KEY"),
+		Model:        model,
+		Owner:        owner,
+		Repo:         repo,
+		PRNumber:     prNumber,
+		MaxDiffBytes: maxDiffBytes,
+	})
 }
