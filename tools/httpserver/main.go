@@ -44,7 +44,7 @@ type ErasureConfigEntry struct {
 	BasePaths    []string `json:"base_paths"`
 }
 
-// DatabaseConfig holds configuration for a single SOP database
+// DatabaseConfig holds configuration for a single Joltrin database
 type DatabaseConfig struct {
 	Name          string   `json:"name"`
 	Path          string   `json:"path"`
@@ -210,8 +210,8 @@ func main() {
 	flag.BoolVar(&openBrowserFlag, "open-browser", true, "Open browser on startup")
 	flag.StringVar(&logLevelFlag, "log-level", "info", "Set log level (debug, info, warn, error). Default is info.")
 	flag.IntVar(&config.Port, "port", 8080, "Port to run the server on")
-	flag.StringVar(&config.DatabasePath, "database", "/tmp/sop_data", "Path to the SOP database/data directory")
-	flag.StringVar(&config.Mode, "mode", "standalone", "SOP mode: 'standalone' or 'clustered'")
+	flag.StringVar(&config.DatabasePath, "database", "/tmp/sop_data", "Path to the Joltrin database/data directory")
+	flag.StringVar(&config.Mode, "mode", "standalone", "Joltrin mode: 'standalone' or 'clustered'")
 	flag.StringVar(&config.ConfigFile, "config", "", "Path to configuration file (optional)")
 	flag.StringVar(&config.RedisURL, "redis", "localhost:6379", "Redis URL for clustered mode (e.g. localhost:6379)")
 	flag.IntVar(&config.PageSize, "pageSize", 40, "Number of items to display per page")
@@ -251,7 +251,7 @@ func main() {
 	log.SetDefault(l) // configures log package to print with specified level
 
 	if showVersion {
-		fmt.Printf("SOP Data Manager v%s\n", sop.Version)
+		fmt.Printf("Joltrin Data Manager v%s\n", sop.Version)
 		os.Exit(0)
 	}
 
@@ -454,7 +454,7 @@ func main() {
 
 	// Start Server
 	addr := fmt.Sprintf(":%d", config.Port)
-	log.Info(logsafe.V(fmt.Sprintf("SOP Data Manager v%s running at http://localhost%s", sop.Version, addr)))
+	log.Info(logsafe.V(fmt.Sprintf("Joltrin Data Manager v%s running at http://localhost%s", sop.Version, addr)))
 	for _, db := range config.Databases {
 		log.Debug(logsafe.V(fmt.Sprintf("Database '%s': %s (%s)", db.Name, db.Path, db.Mode)))
 	}

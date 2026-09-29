@@ -97,7 +97,7 @@ npm run build
 
 ## 🌐 GitHub Pages Deployment
 
-Joltrin Arena is not a standalone repository. It is built and deployed from inside the main `sharedcode/sop` repository by `.github/workflows/deploy-demo.yml`, which builds this app (`npm run build`) alongside the Go WASM technical demo and publishes both into one GitHub Pages site:
+Joltrin Arena is not a standalone repository. It is built and deployed from inside the main `sharedcode/joltrin` repository by `.github/workflows/deploy-demo.yml`, which builds this app (`npm run build`) alongside the Go WASM technical demo and publishes both into one GitHub Pages site:
 
 - Technical demo (WASM ACID transactions, vector search, agent memory): `https://sharedcode.github.io/joltrin/`
 - Joltrin Arena (this app): `https://sharedcode.github.io/joltrin/arena/`
