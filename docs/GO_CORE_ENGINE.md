@@ -12,7 +12,7 @@ By leveraging **direct I/O** rather than delegating to third-party database engi
 
 > Terminology: In this document, “B-tree” refers to the balanced M-ary (multiway) search tree (per Bayer & McCreight). A trie (prefix tree) is a different structure; SOP uses a B-tree, not a trie.
 
-Code coverage: https://app.codecov.io/github/sharedcode/joltrin
+Code coverage: https://app.codecov.io/github/sharedcode/sop
 
 ## Table of contents
 
