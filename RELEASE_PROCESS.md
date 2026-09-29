@@ -1,6 +1,6 @@
 # SOP Unified Release Process
 
-This document outlines the build and release lifecycle for the Scalable Objects Persistence (SOP) ecosystem.
+This document outlines the build and release lifecycle for the Joltrin (formerly SOP) ecosystem.
 
 ## 1. Core Architecture
 
