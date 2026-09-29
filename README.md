@@ -5,6 +5,10 @@
 ### From milliseconds to microseconds: durable memory and verification infrastructure for AI agents.
 
 <p align="center">
+  <a href="https://joltrinhq.com/"><strong>🌐 joltrinhq.com</strong></a>
+</p>
+
+<p align="center">
   <a href="#-performance-benchmarks"><strong>⚡ Verified by benchmark: &lt;0.3ms latency &amp; ~6.8µs B-Tree operations →</strong></a>
 </p>
 
