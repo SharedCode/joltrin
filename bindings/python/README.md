@@ -547,7 +547,7 @@ SOP uses a split architecture:
 
 ## Project Links
 
-*   **Source Code**: [GitHub - sharedcode/sop](https://github.com/sharedcode/joltrin)
+*   **Source Code**: [GitHub - sharedcode/joltrin](https://github.com/sharedcode/joltrin)
 *   **PyPI**: [sop4py](https://pypi.org/project/sop4py)
 
 ## Contributing

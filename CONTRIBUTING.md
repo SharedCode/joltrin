@@ -1,6 +1,6 @@
 # Contributing to SOP
 
-Thank you for your interest in contributing to Scalable Objects Persistence (SOP)! We welcome contributions from the community.
+Thank you for your interest in contributing to Joltrin (formerly SOP, Scalable Objects Persistence)! We welcome contributions from the community.
 
 ## Getting Started
 
