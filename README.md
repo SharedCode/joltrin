@@ -20,7 +20,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/sharedcode/joltrin/v5.svg)](https://pkg.go.dev/github.com/sharedcode/joltrin/v5)
 [![Go version](https://img.shields.io/github/go-mod/go-version/SharedCode/joltrin)](go.mod)
 [![License](https://img.shields.io/github/license/SharedCode/joltrin)](LICENSE)
-[![Live Demos](https://img.shields.io/badge/Live_Demos-GitHub_Pages-10B981?logo=github)](https://sharedcode.github.io/joltrin/arena/)
+[![Live Demos](https://img.shields.io/badge/Live_Demos-GitHub_Pages-10B981?logo=github)](https://joltrinhq.com/arena/)
 [![MCP](https://img.shields.io/badge/MCP-tools%2Fmcpserver-4A4A4A)](docs/MCP_A2A_AND_VERIFICATION_ENGINE.md)
 [![A2A](https://img.shields.io/badge/A2A-tools%2Fa2aagent-4A4A4A)](docs/MCP_A2A_AND_VERIFICATION_ENGINE.md)
 
@@ -31,23 +31,23 @@
 Instead of managing separate vector databases, message brokers, caching tiers, distributed lock managers, and fragile external checkpoint stores, Joltrin lets your AI agents maintain crash-resilient memory and enforce operational invariants directly within the execution boundary.
 
 > **Why "from milliseconds to microseconds"?** Traditional multi-tier architectures incur an estimated 15-50ms network round-trip penalty across external services (Redis, message queues, relational databases). Joltrin runs embedded in-process, shifting latency from milliseconds to microseconds: empirical benchmarks measure **<0.3ms** end-to-end in-process execution, **~6.87µs** per B-Tree write (>145,000 ops/sec), and **~6.95µs** per read (>143,000 ops/sec) with full ACID consistency.  
-> 🔗 **Proof & Benchmark Reference:** [View Detailed Benchmarks & Microsecond Breakdown →](#-performance-benchmarks) · Benchmark suite: [`tools/benchmark`](tools/benchmark) · Live client-side run: [Technical WASM Demo](https://sharedcode.github.io/joltrin/)
+> 🔗 **Proof & Benchmark Reference:** [View Detailed Benchmarks & Microsecond Breakdown →](#-performance-benchmarks) · Benchmark suite: [`tools/benchmark`](tools/benchmark) · Live client-side run: [Technical WASM Demo](https://joltrinhq.com/)
 
 <p align="center">
   <img src="docs/assets/joltrin-demo.gif" alt="Live Joltrin demo: in-process ACID transactions, distributed Arena simulation, and deterministic AI agent verification barrier" width="760" />
 </p>
 
 <p align="center">
-  <a href="https://sharedcode.github.io/joltrin/"><strong>🧠 Launch Technical Demo →</strong></a> &nbsp;&nbsp;|&nbsp;&nbsp;
-  <a href="https://sharedcode.github.io/joltrin/arena/"><strong>🎮 Play Joltrin Arena →</strong></a> &nbsp;&nbsp;|&nbsp;&nbsp;
-  <a href="https://sharedcode.github.io/joltrin/agents/"><strong>🔌 Launch Agent Barrier →</strong></a>
+  <a href="https://joltrinhq.com/"><strong>🧠 Launch Technical Demo →</strong></a> &nbsp;&nbsp;|&nbsp;&nbsp;
+  <a href="https://joltrinhq.com/arena/"><strong>🎮 Play Joltrin Arena →</strong></a> &nbsp;&nbsp;|&nbsp;&nbsp;
+  <a href="https://joltrinhq.com/agents/"><strong>🔌 Launch Agent Barrier →</strong></a>
 </p>
 
 | Experience | Description | Live Interactive Link |
 | :--- | :--- | :--- |
-| 🧠 **Joltrin Technical Demo** | **Client-Side Zero-Server WebAssembly Engine**<br>Execute live ACID transactions, 128-dimensional vector cosine searches, microsecond benchmarks, and durable AI agent memory checkpoints (kill the agent mid-task, watch a successor resume from the B-Tree) running 100% in your browser with **0 runtime HTTP network calls after initial load**. | [**Launch Technical Demo →**](https://sharedcode.github.io/joltrin/) |
-| 🎮 **Joltrin Arena** | **Distributed Systems Survival Simulation**<br>Command a live digital cluster. Scale worker swarms, crash storage nodes, trigger transaction storms, and watch Joltrin automatically redistribute tasks and rebuild parity in real-time. | [**Play Joltrin Arena →**](https://sharedcode.github.io/joltrin/arena/) |
-| 🔌 **Joltrin Agent Verification Barrier** | **The MCP/A2A Safety Check, Clickable**<br>The same `ai/verify` barrier gating `tools/mcpserver` and `tools/a2aagent`, compiled to WASM. Try dropping a database before validating a backup and watch it get blocked, in your browser, with the trace persisted to OPFS. | [**Launch Agent Barrier →**](https://sharedcode.github.io/joltrin/agents/) |
+| 🧠 **Joltrin Technical Demo** | **Client-Side Zero-Server WebAssembly Engine**<br>Execute live ACID transactions, 128-dimensional vector cosine searches, microsecond benchmarks, and durable AI agent memory checkpoints (kill the agent mid-task, watch a successor resume from the B-Tree) running 100% in your browser with **0 runtime HTTP network calls after initial load**. | [**Launch Technical Demo →**](https://joltrinhq.com/) |
+| 🎮 **Joltrin Arena** | **Distributed Systems Survival Simulation**<br>Command a live digital cluster. Scale worker swarms, crash storage nodes, trigger transaction storms, and watch Joltrin automatically redistribute tasks and rebuild parity in real-time. | [**Play Joltrin Arena →**](https://joltrinhq.com/arena/) |
+| 🔌 **Joltrin Agent Verification Barrier** | **The MCP/A2A Safety Check, Clickable**<br>The same `ai/verify` barrier gating `tools/mcpserver` and `tools/a2aagent`, compiled to WASM. Try dropping a database before validating a backup and watch it get blocked, in your browser, with the trace persisted to OPFS. | [**Launch Agent Barrier →**](https://joltrinhq.com/agents/) |
 
 ---
 
@@ -100,7 +100,7 @@ No revenue or customer numbers exist yet for this project (see [For Investors](#
 | **Stateful services to operate, patch, and page on** | Redis + Kafka/RabbitMQ + Postgres/Cassandra + ZooKeeper (4+) | 1 embedded library |
 | **Language surfaces shipped** | N/A | Go (native), Python (`sop4py` on PyPI), C# (`Sop` on NuGet); Java and Rust bindings exist in-repo with tests, not yet published |
 | **CI rigor on every change** | N/A | `govulncheck` clean on every push; race detector on the core engine packages (`btree`, `common`, `fs`, `inmemory`); 3-OS build and test matrix (Linux, macOS, Windows) |
-| **Deployment footprint of the technical demo** | A server-backed demo stack | WASM build running ACID transactions, vector search, and agent-memory checkpointing 100% client-side, 0 runtime HTTP calls after page load ([live](https://sharedcode.github.io/joltrin/)) |
+| **Deployment footprint of the technical demo** | A server-backed demo stack | WASM build running ACID transactions, vector search, and agent-memory checkpointing 100% client-side, 0 runtime HTTP calls after page load ([live](https://joltrinhq.com/)) |
 
 Every row above is something you can run yourself, not a projection. See [Performance Benchmarks](#-performance-benchmarks) for the throughput numbers behind the latency claim, and [What Has Not Yet Been Proven](#-for-investors) for what this table deliberately leaves out.
 
@@ -108,7 +108,7 @@ Every row above is something you can run yourself, not a projection. See [Perfor
 
 ## 🚀 Experience Joltrin
 
-You can test Joltrin directly in your browser without installing anything via the live interactive experiences above ([Technical Demo](https://sharedcode.github.io/joltrin/), [Joltrin Arena](https://sharedcode.github.io/joltrin/arena/), and [Agent Verification Barrier](https://sharedcode.github.io/joltrin/agents/)). The technical demo demonstrates the engine's core power directly: safe, ACID-transactional storage running on web storage itself (OPFS), with zero server and zero network calls after the initial page loads the WASM binary. Everything else on this page, including the agent verification barrier below, is built on top of that same engine, a reference implementation showing one concrete use case.
+You can test Joltrin directly in your browser without installing anything via the live interactive experiences above ([Technical Demo](https://joltrinhq.com/), [Joltrin Arena](https://joltrinhq.com/arena/), and [Agent Verification Barrier](https://joltrinhq.com/agents/)). The technical demo demonstrates the engine's core power directly: safe, ACID-transactional storage running on web storage itself (OPFS), with zero server and zero network calls after the initial page loads the WASM binary. Everything else on this page, including the agent verification barrier below, is built on top of that same engine, a reference implementation showing one concrete use case.
 
 The technical demo persists across reloads now, to Origin Private File System, via the browser's async File System Access API. The diagram below is the real tradeoff behind that choice, not a benchmark; no throughput numbers are shown because none have been measured for either path in this repo.
 
@@ -128,7 +128,7 @@ Joltrin runbooks are reachable from two agent protocols, [Model Context Protocol
   <img src="docs/assets/mcp-a2a-architecture.svg" alt="An MCP client and an A2A orchestrator each reach a separate protocol server, both backed by the same tools/runbookstore.Store and gated by the same ai/verify safety check before a step commits" width="900" />
 </p>
 
-**Try the barrier yourself, live: [sharedcode.github.io/joltrin/agents](https://sharedcode.github.io/joltrin/agents/).** GitHub Pages can't run a real MCP or A2A network server (no backend), so this page runs the actual `ai/verify` check compiled to WASM, wired to buttons instead of protocol calls, the same logic those servers call before committing a step. Click "Drop Prod DB" first and watch it block; the trace persists to OPFS, so a reload picks up where you left off. This is a real recording of that page, not a mockup:
+**Try the barrier yourself, live: [joltrinhq.com/agents](https://joltrinhq.com/agents/).** GitHub Pages can't run a real MCP or A2A network server (no backend), so this page runs the actual `ai/verify` check compiled to WASM, wired to buttons instead of protocol calls, the same logic those servers call before committing a step. Click "Drop Prod DB" first and watch it block; the trace persists to OPFS, so a reload picks up where you left off. This is a real recording of that page, not a mockup:
 
 <p align="center">
   <img src="docs/assets/agent-barrier-demo.gif" alt="Real browser recording of the live agent verification barrier demo: dropping the database is blocked until backup and validation steps actually commit, then the same drop is allowed" width="900" />
@@ -364,7 +364,7 @@ To be completely clear on architectural boundaries:
 
 ## 🎮 See Joltrin in Action (Joltrin Arena Simulation)
 
-In **[Joltrin Arena](https://sharedcode.github.io/joltrin/arena/)**, every control maps directly to a real distributed systems concept:
+In **[Joltrin Arena](https://joltrinhq.com/arena/)**, every control maps directly to a real distributed systems concept:
 
 | Simulation Control | Distributed Systems Concept | Joltrin Technical Mechanism |
 | :--- | :--- | :--- |
@@ -407,7 +407,7 @@ The project is MIT-licensed with no commercial product today. The open-core prog
 
 **What Has Been Proven**
 - A working Go engine with ACID transactions (WAL plus two-phase commit), a custom B-Tree, and Reed-Solomon erasure coding, each with passing automated tests (18 packages carry tests in the core Go module; run them with `go test ./...`, while the two WASM-only packages build under `GOOS=js GOARCH=wasm`, see [Performance Benchmarks](#-performance-benchmarks) below for the throughput numbers).
-- A real WebAssembly build of the engine running ACID transactions, vector search, and agent-memory checkpointing entirely in-browser with zero runtime network calls after initial page load ([live demo](https://sharedcode.github.io/joltrin/)).
+- A real WebAssembly build of the engine running ACID transactions, vector search, and agent-memory checkpointing entirely in-browser with zero runtime network calls after initial page load ([live demo](https://joltrinhq.com/)).
 - Working language bindings for Go (native), Python (`sop4py`, published to PyPI), and C# (`Sop`, published to NuGet), plus Java and Rust bindings that exist in-repo with tests but are not yet published to their package registries.
 - CI that runs the race detector and `govulncheck` on every change, and a changelog showing multiple rounds of real dependency and CVE remediation.
 
@@ -448,7 +448,7 @@ Concretely, that means: fewer network hops in your hot path (sub-millisecond, in
 
 ### 🧠 For AI Infrastructure Teams
 
-**What Joltrin already provides.** Durable, transactional checkpointing for agent reasoning state: each step an agent commits is a separate, durable B-Tree write, so a killed agent process loses nothing already committed, and a successor process can resume from the last checkpoint. This is not a diagram, it runs today in the [browser demo](https://sharedcode.github.io/joltrin/) (the "AI Agent Memory" tab) and as a Go example (`go run ./examples/agent_memory`). Joltrin also provides vector similarity search over embeddings stored in the same B-Tree as structured data (`ai/memory`, `ai/vector`), and a real swarm/worker package (`ai/swarm`) with job and result stores.
+**What Joltrin already provides.** Durable, transactional checkpointing for agent reasoning state: each step an agent commits is a separate, durable B-Tree write, so a killed agent process loses nothing already committed, and a successor process can resume from the last checkpoint. This is not a diagram, it runs today in the [browser demo](https://joltrinhq.com/) (the "AI Agent Memory" tab) and as a Go example (`go run ./examples/agent_memory`). Joltrin also provides vector similarity search over embeddings stored in the same B-Tree as structured data (`ai/memory`, `ai/vector`), and a real swarm/worker package (`ai/swarm`) with job and result stores.
 
 **What could be built on Joltrin, but is not shipped today.** A production multi-agent orchestration framework, a hosted durable-memory-as-a-service for agent frameworks like LangGraph or AutoGen, and distributed MapReduce-style helpers across a live agent swarm are all described as design proposals in [`ai/SWARM_DESIGN.md`](ai/SWARM_DESIGN.md) (explicitly marked "Proposal / Vision" in that file) but are not implemented and tested the way the checkpointing and vector search primitives are. Treat anything not demonstrated in the linked demo or example as a direction, not a delivered feature.
 

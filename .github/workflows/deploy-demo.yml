@@ -107,13 +107,13 @@ jobs:
           set -euo pipefail
           rm -rf _site
           mkdir -p _site/arena _site/agents
-          # Technical demo (WASM) lives at the site root: sharedcode.github.io/joltrin/
+          # Technical demo (WASM) lives at the site root: joltrinhq.com/
           cp demo/index.html demo/sop.wasm demo/wasm_exec.js demo/404.html demo/favicon.svg demo/favicon.ico demo/og-image.png demo/logo-mark.png _site/
-          # SOP Arena lives at a subpath of the same site: sharedcode.github.io/joltrin/arena/
+          # SOP Arena lives at a subpath of the same site: joltrinhq.com/arena/
           cp -r sop-arena/dist/. _site/arena/
-          # Agent verification barrier (ai/verify in WASM) lives at sharedcode.github.io/joltrin/agents/
+          # Agent verification barrier (ai/verify in WASM) lives at joltrinhq.com/agents/
           cp demo-agents/index.html demo-agents/sop-agents.wasm demo-agents/wasm_exec.js demo-agents/favicon.svg demo-agents/favicon.ico demo-agents/og-image.png demo-agents/logo-mark.png _site/agents/
-          # Preserve custom domain (e.g. joltrin.com) if CNAME exists
+          # Preserve custom domain (e.g. joltrinhq.com) if CNAME exists
           if [ -f "CNAME" ]; then
             cp CNAME _site/CNAME
           elif [ -f "demo/CNAME" ]; then
