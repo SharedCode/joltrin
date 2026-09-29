@@ -1,12 +1,12 @@
 # Joltrin Arena - Distributed Systems Survival Simulation & Architecture Demo
 
-[![Deploy to GitHub Pages](https://github.com/sharedcode/joltrin/actions/workflows/deploy-demo.yml/badge.svg)](https://sharedcode.github.io/joltrin/arena/)
+[![Deploy to GitHub Pages](https://github.com/sharedcode/joltrin/actions/workflows/deploy-demo.yml/badge.svg)](https://joltrinhq.com/arena/)
 [![Go Version](https://img.shields.io/badge/Engine-Go_/_WASM-00ADD8?logo=go)](https://github.com/sharedcode/joltrin)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](../LICENSE)
 
 > **"Break the system. Watch Joltrin recover. Experience one engine for data and compute."**
 
-[**Live Interactive Experience: sharedcode.github.io/joltrin/arena**](https://sharedcode.github.io/joltrin/arena/)
+[**Live Interactive Experience: joltrinhq.com/arena**](https://joltrinhq.com/arena/)
 
 ---
 
@@ -99,8 +99,8 @@ npm run build
 
 Joltrin Arena is not a standalone repository. It is built and deployed from inside the main `sharedcode/joltrin` repository by `.github/workflows/deploy-demo.yml`, which builds this app (`npm run build`) alongside the Go WASM technical demo and publishes both into one GitHub Pages site:
 
-- Technical demo (WASM ACID transactions, vector search, agent memory): `https://sharedcode.github.io/joltrin/`
-- Joltrin Arena (this app): `https://sharedcode.github.io/joltrin/arena/`
+- Technical demo (WASM ACID transactions, vector search, agent memory): `https://joltrinhq.com/`
+- Joltrin Arena (this app): `https://joltrinhq.com/arena/`
 
 That workflow is the only thing in the repository that deploys to GitHub Pages; `base: './'` in `vite.config.ts` is what lets this app's built assets resolve correctly from that `/arena/` subpath.
 

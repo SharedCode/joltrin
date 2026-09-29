@@ -23,7 +23,7 @@ export const MissionSuccessModal: React.FC<MissionSuccessModalProps> = ({
   if (!isOpen) return null;
 
   const handleCopyShare = () => {
-    const text = `I just survived the Joltrin Distributed Systems Disaster with a ${metrics.reliabilityScore.toFixed(1)}% reliability score and 0 dropped writes! Try it: https://sharedcode.github.io/joltrin/arena/`;
+    const text = `I just survived the Joltrin Distributed Systems Disaster with a ${metrics.reliabilityScore.toFixed(1)}% reliability score and 0 dropped writes! Try it: https://joltrinhq.com/arena/`;
     navigator.clipboard.writeText(text).then(() => {
       alert('Challenge link copied to clipboard!');
     });
