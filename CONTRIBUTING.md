@@ -46,6 +46,44 @@ Thank you for your interest in contributing to Joltrin (formerly SOP, Scalable O
 
 *   **Style**: Follow standard Go idioms and formatting (`gofmt`).
 
+## Gemini review gate
+
+Every pull request to `master` needs a passing `Gemini Review` status on its latest commit.
+
+- The `Gemini PR Review` workflow reviews the diff when a PR is opened, updated, or marked ready, and posts the findings as a PR comment. The comment records the reviewed commit and the verdict.
+- The status is per commit. Pushing a new commit clears it, so an earlier pass never covers newer code.
+- Any of these leave the status failing and the PR blocked: actionable findings, no `GEMINI_API_KEY`, a Gemini error or timeout, a response without a `VERDICT: PASS` or `VERDICT: FAIL` final line, an empty diff, or a diff larger than the review limit.
+- Draft PRs get no status and cannot merge until they are marked ready.
+- To get a fresh review after pushing a fix, an owner, member, or collaborator comments `/gemini review`. Outside contributors ask a maintainer to do this.
+- Dependabot PRs need `GEMINI_API_KEY` added under Dependabot secrets as well as Actions secrets, or the status fails.
+
+### Disputing a finding
+
+If a finding is wrong or not applicable, do not merge around it. Comment `/gemini dispute` on the PR with:
+
+1. The exact finding, quoted.
+2. The file, symbol, and line or behavior it refers to.
+3. Whether the claim is Observed, Inferred, or unsupported.
+4. Repository evidence showing why it is wrong or does not apply.
+5. Links to official docs, release notes, standards, or advisories.
+6. Reachability and exploitability analysis.
+7. Tests, reproduction steps, or code references.
+8. Any compensating control.
+9. The resolution you are asking for.
+
+Then comment `/gemini review`. Disputes from owners, members, and collaborators are passed to Gemini as claims to check against the diff, not as facts. The finding is resolved only if the new review on the current commit returns `VERDICT: PASS`. This repository has no maintainer override. If Gemini keeps a finding after a well-supported dispute, fix the code or change the review prompt in a PR.
+
+### Branch protection
+
+The check must be listed as required, which a workflow cannot do for itself. A repository admin runs this once:
+
+```
+gh api -X POST repos/SharedCode/joltrin/branches/master/protection/required_status_checks/contexts \
+  --input - <<< '["Gemini Review"]'
+```
+
+Until then the status is informational only. Auto-merge, including the Dependabot workflow, only completes after every required check passes, which then includes this one.
+
 ## Questions?
 
 Don't be shy to ask questions in the [Discussions](https://github.com/SharedCode/joltrin/discussions) tab. We are happy to help!
