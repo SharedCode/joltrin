@@ -2,6 +2,10 @@
 
 Runs the same `tools/httpserver` image that `infra/azure` ships to Container Apps, but on AKS with Argo CD. Production stays on Container Apps. This is a short-lived environment for demos and recordings.
 
+![joltrin on AKS: Argo CD deploy, data surviving a pod delete, self-heal](../../docs/assets/aks-gitops-demo.gif)
+
+The recording above is a real run: apply one Application, first-run setup, write a record, delete the pod, read the record back from the same volume, then break the StatefulSet and the Service by hand and watch Argo CD put them back.
+
 Git holds the desired state:
 
 - `k8s/base` and `k8s/overlays/demo`: a one-replica StatefulSet on a 1Gi volume, a Service, and the image tag.
