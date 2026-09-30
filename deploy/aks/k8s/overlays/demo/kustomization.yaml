@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: joltrin-demo
+resources:
+  - ../../base
+# Changed by a pull request after publish-image builds a new tag.
+images:
+  - name: ghcr.io/sharedcode/joltrin
+    newTag: "sha-0000000"
