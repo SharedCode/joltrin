@@ -462,6 +462,8 @@ Concretely, that means: fewer network hops in your hot path (sub-millisecond, in
 
 Joltrin Engine is a library, not a server: there is no separate database process to provision, patch, or fail over for the embedded case. The optional `tools/httpserver` Data Manager is a standalone service with its own `/metrics` endpoint (tested in `tools/httpserver/metrics_test.go`) if you do want a network-accessible console. Failure recovery is handled by Reed-Solomon erasure coding across storage shards (`fs/erasure`, 12 passing tests at the time of writing) rather than full N-way replication, which trades some recovery latency for lower disk overhead. A prebuilt quickstart container is published to `ghcr.io/sharedcode/joltrin-quickstart`. Multi-node swarm clustering exists and is tested (`examples/swarm_clustered`, `examples/swarm_standalone`), but has not been documented or proven at production scale.
 
+**Kubernetes and GitOps:** [`deploy/aks`](deploy/aks/README.md) runs the Data Manager on AKS with Argo CD syncing from this repo, one replica on a persistent volume, with a recorded run covering deploy, data surviving a pod delete, and self-heal. Production stays on Azure Container Apps.
+
 **Supply-Chain Security & Release Provenance:** Release builds are secured by an automated pre-publish quality gate ([`scripts/verify_release.sh`](scripts/verify_release.sh)), cryptographic SHA-256 manifests (`SHA256SUMS`), SPDX Software Bill of Materials (SBOM), and cryptographically signed build provenance attestations via GitHub Actions OIDC (`actions/attest-build-provenance`, SLSA Level 3 compliance). Consumers can independently verify any downloaded artifact using the standalone verification script.
 
 ### 🧪 For Researchers & Distributed Systems Engineers
