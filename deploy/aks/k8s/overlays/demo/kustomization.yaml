@@ -6,4 +6,4 @@ resources:
 # Changed by a pull request after publish-image builds a new tag.
 images:
   - name: ghcr.io/sharedcode/joltrin
-    newTag: "sha-0000000"
+    newTag: "sha-11096097cb1eac9a5c335f511646d77b525668ef"
