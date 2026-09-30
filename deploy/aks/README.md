@@ -12,7 +12,7 @@ The cluster and Argo CD come from [gitops-aks-demo](https://github.com/gerardrec
 
 ## Run it
 
-1. Run the `publish-image` workflow and make the GHCR package public once.
+1. Run the `publish-image` workflow. The repository is public and the image holds only binaries built from it, with no secrets, so the GHCR package can be made public once, which lets the cluster pull without a pull secret.
 2. Put the new tag in `k8s/overlays/demo/kustomization.yaml` through a pull request.
 3. From gitops-aks-demo, `make up`, then apply the Application:
 
