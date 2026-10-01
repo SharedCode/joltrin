@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/sharedcode/joltrin/v5/governance"
 )
@@ -67,27 +69,61 @@ func checkBillingRateLimit(w http.ResponseWriter, r *http.Request) bool {
 	return true
 }
 
+// loadStripeConfig reads Stripe settings through getenv so tests can supply
+// their own environment. Each setting also accepts a JOLTRIN_STRIPE_* form.
+//
+// The Azure deployment stores the literal "unset" in Key Vault for a Stripe
+// secret that has not been provided yet (Key Vault rejects empty values).
+// That placeholder is treated as empty, so an unconfigured deployment stays in
+// simulation mode instead of trying to use "unset" as a key.
+func loadStripeConfig(getenv func(string) string) governance.StripeConfig {
+	getenv = ignoreUnset(getenv)
+	secretKey := firstNonEmpty(getenv("STRIPE_SECRET_KEY"), getenv("JOLTRIN_STRIPE_SECRET_KEY"))
+	webhookSecret := firstNonEmpty(getenv("STRIPE_WEBHOOK_SECRET"), getenv("JOLTRIN_STRIPE_WEBHOOK_SECRET"))
+	publishableKey := firstNonEmpty(getenv("STRIPE_PUBLISHABLE_KEY"), getenv("JOLTRIN_STRIPE_PUBLISHABLE_KEY"))
+	proPriceID := firstNonEmpty(getenv("STRIPE_PRO_PRICE_ID"), getenv("JOLTRIN_STRIPE_PRO_PRICE_ID"))
+	entPriceID := firstNonEmpty(getenv("STRIPE_ENTERPRISE_PRICE_ID"), getenv("JOLTRIN_STRIPE_ENTERPRISE_PRICE_ID"))
+	simulateStr := strings.ToLower(getenv("STRIPE_SIMULATE"))
+	simulate := simulateStr == "true" || simulateStr == "1" || secretKey == ""
+
+	// Stripe requires absolute return URLs. JOLTRIN_PUBLIC_URL (the
+	// site's public origin, no trailing slash) builds them; without it
+	// the relative defaults only work in simulation mode and billing
+	// readiness reports the URL variables as missing.
+	successDefault, cancelDefault := "/app?checkout=success", "/app?checkout=canceled"
+	if base := strings.TrimRight(getenv("JOLTRIN_PUBLIC_URL"), "/"); base != "" {
+		successDefault = base + "/app?checkout=success&session_id={CHECKOUT_SESSION_ID}"
+		cancelDefault = base + "/app?checkout=canceled"
+	}
+
+	return governance.StripeConfig{
+		SecretKey:         secretKey,
+		WebhookSecret:     webhookSecret,
+		PublishableKey:    publishableKey,
+		ProPriceID:        proPriceID,
+		EnterprisePriceID: entPriceID,
+		SuccessURL:        firstNonEmpty(getenv("STRIPE_SUCCESS_URL"), successDefault),
+		CancelURL:         firstNonEmpty(getenv("STRIPE_CANCEL_URL"), cancelDefault),
+		Simulate:          simulate,
+	}
+}
+
+func ignoreUnset(getenv func(string) string) func(string) string {
+	return func(k string) string {
+		if v := getenv(k); v != "unset" {
+			return v
+		}
+		return ""
+	}
+}
+
 func getBillingService() governance.BillingService {
 	billingServiceOnce.Do(func() {
 		gate := getServerFeatureGate()
 
-		secretKey := firstNonEmpty(os.Getenv("STRIPE_SECRET_KEY"), os.Getenv("JOLTRIN_STRIPE_SECRET_KEY"))
-		webhookSecret := firstNonEmpty(os.Getenv("STRIPE_WEBHOOK_SECRET"), os.Getenv("JOLTRIN_STRIPE_WEBHOOK_SECRET"))
-		publishableKey := firstNonEmpty(os.Getenv("STRIPE_PUBLISHABLE_KEY"), os.Getenv("JOLTRIN_STRIPE_PUBLISHABLE_KEY"))
-		proPriceID := firstNonEmpty(os.Getenv("STRIPE_PRO_PRICE_ID"), os.Getenv("JOLTRIN_STRIPE_PRO_PRICE_ID"))
-		entPriceID := firstNonEmpty(os.Getenv("STRIPE_ENTERPRISE_PRICE_ID"), os.Getenv("JOLTRIN_STRIPE_ENTERPRISE_PRICE_ID"))
-		simulateStr := strings.ToLower(os.Getenv("STRIPE_SIMULATE"))
-		simulate := simulateStr == "true" || simulateStr == "1" || secretKey == ""
-
-		cfg := governance.StripeConfig{
-			SecretKey:         secretKey,
-			WebhookSecret:     webhookSecret,
-			PublishableKey:    publishableKey,
-			ProPriceID:        proPriceID,
-			EnterprisePriceID: entPriceID,
-			SuccessURL:        firstNonEmpty(os.Getenv("STRIPE_SUCCESS_URL"), "/app?checkout=success"),
-			CancelURL:         firstNonEmpty(os.Getenv("STRIPE_CANCEL_URL"), "/app?checkout=canceled"),
-			Simulate:          simulate,
+		cfg := loadStripeConfig(os.Getenv)
+		if ready := governance.AssessBilling(cfg); ready.Mode == "live" && !ready.Pro.Available {
+			fmt.Fprintf(os.Stderr, "billing: live Stripe key set but Pro checkout is off, missing: %s\n", strings.Join(ready.Pro.Missing, ", "))
 		}
 
 		// Subscriptions, webhook idempotency keys, and enterprise inquiries are
@@ -134,6 +170,7 @@ func handleGetPlan(w http.ResponseWriter, r *http.Request) {
 		"stripe_configured": cfg.SecretKey != "" && !cfg.Simulate,
 		"publishable_key":   cfg.PublishableKey,
 		"simulate_mode":     cfg.Simulate,
+		"checkout":          governance.AssessBilling(cfg),
 	})
 }
 
@@ -171,6 +208,14 @@ func handleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sess, err := getBillingService().CreateCheckoutSession(r.Context(), tenantID, req.Email, targetTier)
+	if errors.Is(err, governance.ErrEnterpriseContactSales) {
+		writeJSONError(w, http.StatusConflict, "Enterprise is contact-sales only. Use the enterprise contact form.")
+		return
+	}
+	if errors.Is(err, governance.ErrBillingNotConfigured) {
+		writeJSONError(w, http.StatusServiceUnavailable, "checkout is not available yet: billing is not fully configured")
+		return
+	}
 	if err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "failed to create checkout session: "+err.Error())
 		return
@@ -244,9 +289,21 @@ func handleSimulateCheckout(w http.ResponseWriter, r *http.Request) {
 		tier = governance.TierPro
 	}
 
+	// Only meaningful in simulation mode. With live Stripe keys this route
+	// would otherwise be an unauthenticated way to grant a paid tier.
+	cfg := getBillingService().Config()
+	if !cfg.Simulate {
+		http.NotFound(w, r)
+		return
+	}
+
 	// Deliver simulated webhook internally to trigger authoritative state update
 	payload := governance.ConstructSimulatedWebhookPayload("checkout.session.completed", sessionID, tenantID, tier)
-	_, err := getBillingService().HandleWebhook(r.Context(), payload, "")
+	sig := ""
+	if cfg.WebhookSecret != "" {
+		sig = governance.GenerateStripeSignatureHeader(payload, cfg.WebhookSecret, time.Now())
+	}
+	_, err := getBillingService().HandleWebhook(r.Context(), payload, sig)
 	if err != nil && !strings.Contains(err.Error(), "duplicate") {
 		writeJSONError(w, http.StatusInternalServerError, "failed to simulate checkout activation: "+err.Error())
 		return
@@ -295,6 +352,14 @@ func handleSubmitEnterpriseInquiry(w http.ResponseWriter, r *http.Request) {
 func handleBillingWebhook(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// This endpoint is public. With no signing secret there is no way to
+	// tell a real Stripe event from a forged one, so refuse instead of
+	// accepting unsigned events.
+	if getBillingService().Config().WebhookSecret == "" {
+		writeJSONError(w, http.StatusServiceUnavailable, "webhook signing secret is not configured")
 		return
 	}
 

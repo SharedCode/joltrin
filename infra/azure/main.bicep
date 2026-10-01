@@ -36,14 +36,23 @@ param monthlyBudgetUsd int = 25
 
 @secure()
 @description('Stripe secret key. Stored in Key Vault, never in source control or plain env vars.')
-param stripeSecretKey string
+param stripeSecretKey string = ''
 
 @secure()
 @description('Stripe webhook signing secret.')
-param stripeWebhookSecret string
+param stripeWebhookSecret string = ''
 
 @description('Stripe publishable key (not secret, but kept alongside the others for consistency).')
 param stripePublishableKey string = ''
+
+@description('Stripe Price ID for the Pro plan (price_...). Not secret. Leave empty until the product exists in Stripe; Pro checkout stays off while it is empty.')
+param stripeProPriceId string = ''
+
+@description('Stripe Price ID for the Enterprise plan. Leave empty to keep Enterprise contact-sales.')
+param stripeEnterprisePriceId string = ''
+
+@description('Public origin of the deployed app, e.g. https://app.example.com (no trailing slash). Used to build the absolute Stripe success and cancel URLs.')
+param publicBaseUrl string = ''
 
 var resourceToken = uniqueString(resourceGroup().id, appName)
 var logAnalyticsName = '${appName}-logs-${resourceToken}'
@@ -113,6 +122,9 @@ module containerApp 'modules/container-app.bicep' = {
     userAssignedIdentityId: identity.outputs.id
     userAssignedIdentityClientId: identity.outputs.clientId
     keyVaultUri: keyVault.outputs.uri
+    stripeProPriceId: stripeProPriceId
+    stripeEnterprisePriceId: stripeEnterprisePriceId
+    publicBaseUrl: publicBaseUrl
   }
 }
 

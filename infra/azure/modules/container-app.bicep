@@ -14,6 +14,34 @@ param userAssignedIdentityId string
 param userAssignedIdentityClientId string
 param keyVaultUri string
 
+@description('Stripe Price IDs are identifiers, not secrets, so they are plain env vars. Empty means the plan is not purchasable through checkout.')
+param stripeProPriceId string = ''
+param stripeEnterprisePriceId string = ''
+
+@description('Public origin of the app (no trailing slash), used for absolute Stripe return URLs.')
+param publicBaseUrl string = ''
+
+var optionalEnv = concat(
+  empty(stripeProPriceId) ? [] : [
+    {
+      name: 'STRIPE_PRO_PRICE_ID'
+      value: stripeProPriceId
+    }
+  ],
+  empty(stripeEnterprisePriceId) ? [] : [
+    {
+      name: 'STRIPE_ENTERPRISE_PRICE_ID'
+      value: stripeEnterprisePriceId
+    }
+  ],
+  empty(publicBaseUrl) ? [] : [
+    {
+      name: 'JOLTRIN_PUBLIC_URL'
+      value: publicBaseUrl
+    }
+  ]
+)
+
 // Pinned to 1 replica: joltrin's embedded B-Tree engine has no documented
 // multi-process write-safety guarantee, and this deployment optimizes for
 // lowest cost over horizontal scale. CPU/memory/concurrency limits below
@@ -84,7 +112,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-11-02-preview' = {
             '8080'
             '-open-browser=false'
           ]
-          env: [
+          env: concat([
             {
               name: 'STRIPE_SECRET_KEY'
               secretRef: 'stripe-secret-key'
@@ -101,7 +129,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-11-02-preview' = {
               name: 'AZURE_CLIENT_ID'
               value: userAssignedIdentityClientId
             }
-          ]
+          ], optionalEnv)
           // 0.5 vCPU / 1.0 GiB: matches the requested cost-containment
           // sizing. Combined GB-CPU pairing is one of ACA's valid
           // combinations (0.5 vCPU pairs with 1Gi).

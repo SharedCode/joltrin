@@ -19,6 +19,15 @@
     },
     "stripePublishableKey": {
       "value": ""
+    },
+    "stripeProPriceId": {
+      "value": ""
+    },
+    "stripeEnterprisePriceId": {
+      "value": ""
+    },
+    "publicBaseUrl": {
+      "value": ""
     }
   }
 }

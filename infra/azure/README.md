@@ -48,6 +48,31 @@ az deployment group create \
   -p stripeWebhookSecret=<same>
 ```
 
+Stripe values, and which ones are secret:
+
+| Value | Where it goes | Secret |
+| :--- | :--- | :--- |
+| `stripeSecretKey`, `stripeWebhookSecret` | Key Vault, injected as secret references | Yes |
+| `stripePublishableKey` | Key Vault | No |
+| `stripeProPriceId`, `stripeEnterprisePriceId` | Plain env vars (`STRIPE_PRO_PRICE_ID`, `STRIPE_ENTERPRISE_PRICE_ID`) | No |
+| `publicBaseUrl` | Plain env var (`JOLTRIN_PUBLIC_URL`), builds the absolute success and cancel URLs | No |
+
+Every Stripe value defaults to empty. An empty secret is stored in Key Vault as the
+literal `unset` (Key Vault rejects empty values) and the server treats it as empty,
+so an unconfigured deployment stays in simulation mode. Pro checkout turns on only
+when the secret key, webhook secret, Pro price ID, and public URL are all present.
+Enterprise stays contact-sales until `stripeEnterprisePriceId` is a real price.
+
+`GET /api/billing/plan` returns a `checkout` block that names any missing variable
+(names only, never values), so you can see why checkout is off without reading logs.
+
+`deploy-azure.yml` passes these from repository secrets (`STRIPE_SECRET_KEY`,
+`STRIPE_WEBHOOK_SECRET`) and repository variables (`STRIPE_PUBLISHABLE_KEY`,
+`STRIPE_PRO_PRICE_ID`, `STRIPE_ENTERPRISE_PRICE_ID`, `JOLTRIN_PUBLIC_URL`). Set the
+secrets in GitHub rather than writing them to Key Vault by hand: every deploy
+re-applies the Key Vault secrets from the workflow inputs and would overwrite a
+value set manually.
+
 The first deploy provisions the ACR before an image exists in it; build and
 push the image, then re-run `az deployment group create` with the resulting
 `containerImage` value (this is exactly what `deploy-azure.yml` automates).

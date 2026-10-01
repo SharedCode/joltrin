@@ -14,6 +14,11 @@
 #   AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID
 # And these as repository secrets:
 #   STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, ALERT_EMAIL
+# Optional repository variables (identifiers, not secrets). While a value is
+# empty the matching feature stays off: no Pro price means no Pro checkout,
+# no Enterprise price means Enterprise stays contact-sales.
+#   STRIPE_PUBLISHABLE_KEY, STRIPE_PRO_PRICE_ID, STRIPE_ENTERPRISE_PRICE_ID,
+#   JOLTRIN_PUBLIC_URL
 #
 # Flow: deploy the Bicep stack first (it has a public placeholder default for
 # containerImage, so it stands up the ACR/Key Vault/environment/Container App
@@ -75,6 +80,10 @@ jobs:
             -p alertEmail="${{ secrets.ALERT_EMAIL }}" \
             -p stripeSecretKey="${{ secrets.STRIPE_SECRET_KEY }}" \
             -p stripeWebhookSecret="${{ secrets.STRIPE_WEBHOOK_SECRET }}" \
+            -p stripePublishableKey="${{ vars.STRIPE_PUBLISHABLE_KEY }}" \
+            -p stripeProPriceId="${{ vars.STRIPE_PRO_PRICE_ID }}" \
+            -p stripeEnterprisePriceId="${{ vars.STRIPE_ENTERPRISE_PRICE_ID }}" \
+            -p publicBaseUrl="${{ vars.JOLTRIN_PUBLIC_URL }}" \
             -o json > deploy-output.json
           acr_login_server=$(jq -r '.properties.outputs.acrLoginServer.value' deploy-output.json)
           echo "acrLoginServer=${acr_login_server}" >> "$GITHUB_OUTPUT"

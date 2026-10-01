@@ -34,11 +34,26 @@ To maintain clean separation between the open-source storage engine and commerci
   - Constant-time signature comparison protects against timing side-channel attacks.
 - **Idempotent Webhook Processing (`HandleWebhook`)**:
   - Automatically deduplicates re-delivered Stripe events using a thread-safe event cache.
-  - Handles `checkout.session.completed`, `customer.subscription.created/updated`, and `customer.subscription.deleted`.
+  - Handles `checkout.session.completed`, `customer.subscription.created/updated`, `customer.subscription.deleted`, `invoice.payment_succeeded`, and `invoice.payment_failed`.
+  - A live deployment (Stripe secret key set) refuses every webhook until `STRIPE_WEBHOOK_SECRET` is configured, so an unsigned event can never change the tier.
   - Automatically upgrades or downgrades the server's `FeatureGate` tier based on authoritative subscription state.
 - **Zero-Credential Simulation Mode**:
   - When `STRIPE_SECRET_KEY` is omitted, the engine automatically operates in deterministic simulation mode.
   - Enables local testing of the complete upgrade/checkout lifecycle without third-party network dependencies.
+
+#### Stripe configuration
+
+| Variable | Secret | Purpose |
+| :--- | :--- | :--- |
+| `STRIPE_SECRET_KEY` | Yes | Enables live mode. Unset means simulation mode. |
+| `STRIPE_WEBHOOK_SECRET` | Yes | Verifies `Stripe-Signature`. Required in live mode. |
+| `STRIPE_PUBLISHABLE_KEY` | No | Returned by the plan endpoint for client use. |
+| `STRIPE_PRO_PRICE_ID` | No | Pro price (`price_...`). Pro checkout is off in live mode without it. |
+| `STRIPE_ENTERPRISE_PRICE_ID` | No | Optional. Without a real value Enterprise stays contact-sales. |
+| `JOLTRIN_PUBLIC_URL` | No | Public origin, builds absolute success and cancel URLs. `STRIPE_SUCCESS_URL` and `STRIPE_CANCEL_URL` override them. |
+| `STRIPE_SIMULATE` | No | Forces simulation mode even when a key is present. |
+
+Each variable also accepts a `JOLTRIN_STRIPE_` prefixed form. The Azure wiring is described in [`infra/azure/README.md`](../infra/azure/README.md).
 
 ### 3. Tamper-Evident Audit Logging ([`governance/audit.go`](../governance/audit.go))
 - **`AuditEvent`**: Canonical audit records capturing Actor, Action, Resource, Decision (`allow`, `deny`, `violation`), and Predecessor Hash.
@@ -77,10 +92,10 @@ The standalone HTTP management server provides integrated plan, billing, and ent
 
 | Endpoint | Method | Auth | Description |
 | :--- | :--- | :--- | :--- |
-| `/api/billing/plan` | GET | `withAuth` | Returns active tier, capability matrix, subscription object, and Stripe status. |
+| `/api/billing/plan` | GET | `withAuth` | Returns active tier, capability matrix, subscription object, Stripe status, and a `checkout` block showing which tiers can be bought and which environment variables are missing (names only). |
 | `/api/billing/checkout` | POST | `withAuth` | Creates a Stripe Checkout session (or simulation URL in dev mode). |
 | `/api/billing/portal` | POST | `withAuth` | Generates a Stripe Customer Portal link to manage cards or subscriptions. |
-| `/api/billing/checkout/simulate` | GET | Public | Dev/sandbox callback simulating successful Stripe checkout completion. |
+| `/api/billing/checkout/simulate` | GET | Public | Simulation-mode callback that completes a fake checkout. Returns 404 when live Stripe keys are configured. |
 | `/api/billing/enterprise-contact` | POST | Public | Captures enterprise inquiries (Name, Email, Company, Team Size, Use Cases). |
 | `/api/billing/webhook` | POST | Public | Ingests Stripe webhook events with HMAC-SHA256 signature verification. |
 
