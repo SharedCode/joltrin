@@ -14,6 +14,9 @@ param userAssignedIdentityId string
 param userAssignedIdentityClientId string
 param keyVaultUri string
 
+@description('True when real Stripe secrets were supplied to the deploy. While false the app gets no Key Vault secret references and runs in simulation mode.')
+param stripeEnabled bool = false
+
 // Pinned to 1 replica: joltrin's embedded B-Tree engine has no documented
 // multi-process write-safety guarantee, and this deployment optimizes for
 // lowest cost over horizontal scale. CPU/memory/concurrency limits below
@@ -43,7 +46,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-11-02-preview' = {
           identity: userAssignedIdentityId
         }
       ]
-      secrets: [
+      secrets: stripeEnabled ? [
         {
           name: 'stripe-secret-key'
           keyVaultUrl: '${keyVaultUri}secrets/stripe-secret-key'
@@ -59,7 +62,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-11-02-preview' = {
           keyVaultUrl: '${keyVaultUri}secrets/stripe-publishable-key'
           identity: userAssignedIdentityId
         }
-      ]
+      ] : []
       ingress: {
         external: true
         targetPort: 8080
@@ -84,7 +87,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-11-02-preview' = {
             '8080'
             '-open-browser=false'
           ]
-          env: [
+          env: concat(stripeEnabled ? [
             {
               name: 'STRIPE_SECRET_KEY'
               secretRef: 'stripe-secret-key'
@@ -97,11 +100,12 @@ resource containerApp 'Microsoft.App/containerApps@2023-11-02-preview' = {
               name: 'STRIPE_PUBLISHABLE_KEY'
               secretRef: 'stripe-publishable-key'
             }
+          ] : [], [
             {
               name: 'AZURE_CLIENT_ID'
               value: userAssignedIdentityClientId
             }
-          ]
+          ])
           // 0.5 vCPU / 1.0 GiB: matches the requested cost-containment
           // sizing. Combined GB-CPU pairing is one of ACA's valid
           // combinations (0.5 vCPU pairs with 1Gi).
