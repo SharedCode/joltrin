@@ -125,6 +125,7 @@ module containerApp 'modules/container-app.bicep' = {
     stripeProPriceId: stripeProPriceId
     stripeEnterprisePriceId: stripeEnterprisePriceId
     publicBaseUrl: publicBaseUrl
+    stripeEnabled: !empty(stripeSecretKey) && !empty(stripeWebhookSecret)
   }
 }
 

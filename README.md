@@ -101,6 +101,10 @@ Tier details and the Stripe setup are in [docs/MONETIZATION_AND_TIERS.md](docs/M
 
 Run `go test ./...` and `gofmt` before opening a pull request, and include tests with your change. See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md). Questions and ideas go to [GitHub Discussions](https://github.com/SharedCode/joltrin/discussions).
 
+## Kubernetes and GitOps
+
+[`deploy/aks`](deploy/aks/README.md) runs the Data Manager on AKS with Argo CD syncing from this repo, one replica on a persistent volume, with a recorded run covering deploy, data surviving a pod delete, and self-heal. Production stays on Azure Container Apps.
+
 ## Releases
 
 See the [changelog](CHANGELOG.md) and the [releases page](https://github.com/SharedCode/joltrin/releases). Maintainers cut releases with [RELEASE_PROCESS.md](RELEASE_PROCESS.md) and the short version in [docs/PACKAGES.md](docs/PACKAGES.md).
