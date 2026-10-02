@@ -15,6 +15,8 @@ Commercial tiers are focused entirely on **enterprise governance, compliance, po
 | **Enterprise Governance** | **Custom** / Annual Contract | Self-Hosted Enterprise | Commercial | • Enterprise SSO: **Okta** & **Microsoft Entra ID**<br>• Multi-tenant RBAC & tenant isolation boundaries<br>• Real-time audit streaming (SIEM / Kafka)<br>• Custom safety invariant enforcement engine<br>• Fine-grained barrier verification rules<br>• Dedicated enterprise compliance & SLA guarantees | **Foundation Implemented** (`governance/`) |
 | **Hosted Cloud** | *Usage-based* | Managed Cloud SaaS | Commercial | • Managed Joltrin instances (zero-ops)<br>• Cloud-hosted MCP hub & multi-agent routing<br>• Multi-region database replication<br>• Managed agent coordination network<br>• Automated off-site snapshots & backup verification | **Planned / In Development** |
 
+Pro is sold through a Stripe Payment Link on the homepage and fulfilled by hand: after payment, setup and license details are emailed within one business day. The webhook and checkout code in `governance/` still switch the hosted server's own tier, but nothing issues a license key to a self-hosted install yet, so the hosted app is not used to sell Pro.
+
 ---
 
 ## 2. Architectural Boundary: The `governance/` Package

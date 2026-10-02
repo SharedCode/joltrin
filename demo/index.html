@@ -2043,6 +2043,12 @@
       }
     });
 
+    // Stripe Payment Link for Pro. Empty keeps the email-only fallback below.
+    // Set this to the live-mode link (https://buy.stripe.com/...) once Pro is
+    // sold through Stripe; a test-mode link must never ship here. Pro is
+    // fulfilled by hand after payment, there is no license automation yet.
+    window.JOLTRIN_PRO_PAYMENT_LINK = '';
+
     async function initiateProCheckout(e) {
       e.preventDefault();
       const form = e.target;
@@ -2092,6 +2098,11 @@
 
       if (redirectUrl) {
         window.location.href = redirectUrl;
+        return;
+      }
+
+      if (window.JOLTRIN_PRO_PAYMENT_LINK) {
+        window.location.href = `${window.JOLTRIN_PRO_PAYMENT_LINK}?prefilled_email=${encodeURIComponent(email)}`;
         return;
       }
 

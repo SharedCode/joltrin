@@ -51,6 +51,20 @@ test.describe('Homepage', () => {
     await expect(page.locator('#pro-checkout-status a[href^="mailto:"]')).toBeVisible();
   });
 
+  test('requesting Pro goes to the Stripe payment link with the email prefilled once one is set', async ({ page }) => {
+    await page.route('https://buy.stripe.com/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'text/html', body: '<title>stripe stub</title>' }));
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await waitForWasmReady(page);
+    await page.evaluate(() => { (window as any).JOLTRIN_PRO_PAYMENT_LINK = 'https://buy.stripe.com/live_example'; });
+    await page.locator('#pricing').getByRole('button', { name: /request pro/i }).click();
+    const modal = page.locator('#pro-checkout-modal');
+    await page.fill('#pro-team-name', 'example-team');
+    await page.fill('#pro-admin-email', 'admin@example.test');
+    await modal.getByRole('button', { name: /^request pro$/i }).click();
+    await page.waitForURL('https://buy.stripe.com/live_example?prefilled_email=admin%40example.test', { timeout: 10_000 });
+  });
+
   test('canonical and social metadata point at joltrinhq.com on all three pages', async ({ request }) => {
     for (const [path, expected] of [
       ['/', 'https://joltrinhq.com/'],
