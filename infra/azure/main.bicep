@@ -62,6 +62,7 @@ var envName = '${appName}-env-${resourceToken}'
 var containerAppName = '${appName}-app'
 var uamiName = '${appName}-acr-pull-identity'
 var actionGroupName = '${appName}-alerts'
+var storageAccountName = take(replace('${appName}data${resourceToken}', '-', ''), 24)
 
 module logAnalytics 'modules/log-analytics.bicep' = {
   name: 'logAnalytics'
@@ -101,6 +102,14 @@ module keyVault 'modules/key-vault.bicep' = {
   }
 }
 
+module storage 'modules/storage.bicep' = {
+  name: 'dataStorage'
+  params: {
+    name: storageAccountName
+    location: location
+  }
+}
+
 module containerAppsEnv 'modules/container-apps-environment.bicep' = {
   name: 'containerAppsEnvironment'
   params: {
@@ -108,6 +117,8 @@ module containerAppsEnv 'modules/container-apps-environment.bicep' = {
     location: location
     logAnalyticsCustomerId: logAnalytics.outputs.customerId
     logAnalyticsSharedKey: logAnalytics.outputs.primarySharedKey
+    storageAccountName: storage.outputs.accountName
+    fileShareName: storage.outputs.shareName
   }
 }
 
@@ -117,6 +128,7 @@ module containerApp 'modules/container-app.bicep' = {
     name: containerAppName
     location: location
     environmentId: containerAppsEnv.outputs.id
+    dataStorageName: containerAppsEnv.outputs.dataStorageName
     containerImage: containerImage
     acrLoginServer: acr.outputs.loginServer
     userAssignedIdentityId: identity.outputs.id

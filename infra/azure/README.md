@@ -73,6 +73,13 @@ secrets in GitHub rather than writing them to Key Vault by hand: every deploy
 re-applies the Key Vault secrets from the workflow inputs and would overwrite a
 value set manually.
 
+The data directory `/var/lib/sop` (config.json, stores, billing state) is an Azure
+Files share mounted into the container, so it survives restarts and new revisions.
+The app stays at one replica because there must only ever be one writer. The mount
+uses `nobrl` because Azure Files does not honor SMB byte-range locks for this
+access pattern. Standard LRS files bill on used capacity, so an empty share is
+close to free.
+
 The first deploy provisions the ACR before an image exists in it; build and
 push the image, then re-run `az deployment group create` with the resulting
 `containerImage` value (this is exactly what `deploy-azure.yml` automates).
