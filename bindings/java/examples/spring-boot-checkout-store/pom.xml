@@ -17,12 +17,17 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.4</version>
+        <version>3.5.16</version>
         <relativePath/>
     </parent>
 
     <properties>
         <java.version>21</java.version>
+        <!-- Boot 3.5.16 still manages Tomcat 10.1.55 and Jackson 2.21.4, which
+             have open advisories fixed in these versions. Drop these once the
+             parent catches up. -->
+        <tomcat.version>10.1.60</tomcat.version>
+        <jackson-bom.version>2.21.7</jackson-bom.version>
     </properties>
 
     <dependencies>
