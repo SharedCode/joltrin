@@ -45,6 +45,9 @@ var optionalEnv = concat(
 @description('True when real Stripe secrets were supplied to the deploy. While false the app gets no Key Vault secret references and runs in simulation mode.')
 param stripeEnabled bool = false
 
+@description('Name of the managed environment storage (Azure Files share) mounted as the app data directory.')
+param dataStorageName string
+
 // Pinned to 1 replica: joltrin's embedded B-Tree engine has no documented
 // multi-process write-safety guarantee, and this deployment optimizes for
 // lowest cost over horizontal scale. CPU/memory/concurrency limits below
@@ -137,6 +140,18 @@ resource containerApp 'Microsoft.App/containerApps@2023-11-02-preview' = {
           // 0.5 vCPU / 1.0 GiB: matches the requested cost-containment
           // sizing. Combined GB-CPU pairing is one of ACA's valid
           // combinations (0.5 vCPU pairs with 1Gi).
+          // The data directory (config.json, stores, billing state) lives on
+          // the Azure Files share so it survives restarts and new revisions.
+          // uid/gid 65532 is the image's nonroot user. nobrl skips SMB
+          // byte-range locks, which Azure Files does not honor for this
+          // access pattern; the app is pinned to one replica, so there is
+          // only ever one writer.
+          volumeMounts: [
+            {
+              volumeName: 'data'
+              mountPath: '/var/lib/sop'
+            }
+          ]
           resources: {
             cpu: json('0.5')
             memory: '1Gi'
@@ -173,6 +188,14 @@ resource containerApp 'Microsoft.App/containerApps@2023-11-02-preview' = {
               failureThreshold: 10
             }
           ]
+        }
+      ]
+      volumes: [
+        {
+          name: 'data'
+          storageType: 'AzureFile'
+          storageName: dataStorageName
+          mountOptions: 'uid=65532,gid=65532,dir_mode=0770,file_mode=0660,nobrl'
         }
       ]
       scale: {
