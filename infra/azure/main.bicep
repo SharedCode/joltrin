@@ -113,6 +113,7 @@ module containerApp 'modules/container-app.bicep' = {
     userAssignedIdentityId: identity.outputs.id
     userAssignedIdentityClientId: identity.outputs.clientId
     keyVaultUri: keyVault.outputs.uri
+    stripeEnabled: !empty(stripeSecretKey) && !empty(stripeWebhookSecret)
   }
 }
 
