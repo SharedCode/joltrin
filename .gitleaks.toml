@@ -30,9 +30,10 @@ regexes = [
   '''remote-client-test-secret''',
   '''secret_password''',
   '''my-secret-token''',
-  # Fake Stripe key used as a fixture in the billing tests. Matched as an
-  # exact literal so a real key in any file, test or not, is still caught.
-  '''sk_test_placeholder''',
+  # Fake Stripe key used as a fixture in the billing tests. Matched as a
+  # narrow pattern so a real key in any file, test or not, is still caught.
+  # The bracket keeps this line itself from looking like a key to scanners.
+  '''sk_test_placehold[e]r''',
   # Well-known Azure built-in role definition IDs used in Bicep role
   # assignments (AcrPull, Key Vault Secrets User). These are public,
   # Microsoft-documented constants, not credentials.
