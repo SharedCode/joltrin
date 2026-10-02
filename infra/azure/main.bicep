@@ -45,6 +45,9 @@ param stripeWebhookSecret string
 @description('Stripe publishable key (not secret, but kept alongside the others for consistency).')
 param stripePublishableKey string = ''
 
+@description('Stripe price ID for the Pro plan (price_...). Not secret. Empty leaves checkout for Pro unconfigured.')
+param stripeProPriceId string = ''
+
 var resourceToken = uniqueString(resourceGroup().id, appName)
 var logAnalyticsName = '${appName}-logs-${resourceToken}'
 var acrName = replace('${appName}acr${resourceToken}', '-', '')
@@ -114,6 +117,7 @@ module containerApp 'modules/container-app.bicep' = {
     userAssignedIdentityClientId: identity.outputs.clientId
     keyVaultUri: keyVault.outputs.uri
     stripeEnabled: !empty(stripeSecretKey) && !empty(stripeWebhookSecret)
+    stripeProPriceId: stripeProPriceId
   }
 }
 
