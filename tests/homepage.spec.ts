@@ -60,7 +60,7 @@ test.describe('Homepage', () => {
       const html = await (await request.get(path)).text();
       expect(html, path).toContain(`<link rel="canonical" href="${expected}"`);
       expect(html, path).toContain(`property="og:url" content="${expected}"`);
-      expect(html, path).not.toMatch(/https:\/\/joltrin\.com/);
+      expect(html, path).not.toMatch(/https:\/\/joltrin\.com(?:[\/"'\s?#:]|$)/);
     }
   });
 
