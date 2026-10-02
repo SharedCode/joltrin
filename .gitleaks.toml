@@ -6,7 +6,7 @@ useDefault = true
 [allowlist]
 description = "Baseline exceptions for known-safe test fixtures and generated artifacts"
 paths = [
-  '''(^|/)_test\.go$''',
+  '''_test\.go$''',
   '''(^|/)node_modules/''',
   '''(^|/)_site/''',
   '''(^|/)test-results/''',
