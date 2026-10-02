@@ -17,6 +17,9 @@ param keyVaultUri string
 @description('True when real Stripe secrets were supplied to the deploy. While false the app gets no Key Vault secret references and runs in simulation mode.')
 param stripeEnabled bool = false
 
+@description('Stripe price ID for the Pro plan. Plain env var, the ID is not a secret. Omitted from the container when empty.')
+param stripeProPriceId string = ''
+
 // Pinned to 1 replica: joltrin's embedded B-Tree engine has no documented
 // multi-process write-safety guarantee, and this deployment optimizes for
 // lowest cost over horizontal scale. CPU/memory/concurrency limits below
@@ -99,6 +102,11 @@ resource containerApp 'Microsoft.App/containerApps@2023-11-02-preview' = {
             {
               name: 'STRIPE_PUBLISHABLE_KEY'
               secretRef: 'stripe-publishable-key'
+            }
+          ] : [], !empty(stripeProPriceId) ? [
+            {
+              name: 'STRIPE_PRO_PRICE_ID'
+              value: stripeProPriceId
             }
           ] : [], [
             {

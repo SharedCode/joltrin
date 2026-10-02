@@ -19,6 +19,9 @@
     },
     "stripePublishableKey": {
       "value": ""
+    },
+    "stripeProPriceId": {
+      "value": ""
     }
   }
 }

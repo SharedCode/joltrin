@@ -11,7 +11,8 @@
 # subscription/resource group. No client secret is stored anywhere - this is
 # exactly what azure/login's OIDC mode is for. Once created, set these as
 # repository variables (not secrets, they aren't sensitive on their own):
-#   AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID
+#   AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID,
+#   STRIPE_PUBLISHABLE_KEY, STRIPE_PRO_PRICE_ID
 # And these as repository secrets:
 #   STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, ALERT_EMAIL
 #
@@ -75,6 +76,8 @@ jobs:
             -p alertEmail="${{ secrets.ALERT_EMAIL }}" \
             -p stripeSecretKey="${{ secrets.STRIPE_SECRET_KEY }}" \
             -p stripeWebhookSecret="${{ secrets.STRIPE_WEBHOOK_SECRET }}" \
+            -p stripePublishableKey="${{ vars.STRIPE_PUBLISHABLE_KEY }}" \
+            -p stripeProPriceId="${{ vars.STRIPE_PRO_PRICE_ID }}" \
             -o json > deploy-output.json
           acr_login_server=$(jq -r '.properties.outputs.acrLoginServer.value' deploy-output.json)
           echo "acrLoginServer=${acr_login_server}" >> "$GITHUB_OUTPUT"
