@@ -6,7 +6,7 @@ useDefault = true
 [allowlist]
 description = "Baseline exceptions for known-safe test fixtures and generated artifacts"
 paths = [
-  '''_test\.go$''',
+  '''(^|/)_test\.go$''',
   '''(^|/)node_modules/''',
   '''(^|/)_site/''',
   '''(^|/)test-results/''',
@@ -30,6 +30,9 @@ regexes = [
   '''remote-client-test-secret''',
   '''secret_password''',
   '''my-secret-token''',
+  # Fake Stripe key used as a fixture in the billing tests. Matched as an
+  # exact literal so a real key in any file, test or not, is still caught.
+  '''sk_test_placeholder''',
   # Well-known Azure built-in role definition IDs used in Bicep role
   # assignments (AcrPull, Key Vault Secrets User). These are public,
   # Microsoft-documented constants, not credentials.
