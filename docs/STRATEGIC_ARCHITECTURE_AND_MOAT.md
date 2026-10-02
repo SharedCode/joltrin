@@ -2,7 +2,7 @@
 
 A candid technical and business assessment of what it would take to move SOP from a working embedded storage engine toward a local-first, enterprise-defensible platform. This document is a **proposal and feasibility review**, not a status report: it says explicitly, section by section, what already exists in this repository today versus what is unbuilt and why.
 
-If you are looking for what SOP has actually proven so far, read [For Investors](../README.md#-for-investors) in the main README first. This document does not repeat that honesty discipline, it extends it into speculative territory, and marks the line between the two clearly throughout.
+If you are looking for what SOP has actually proven so far, read [the investor notes](INVESTORS.md) first. This document does not repeat that honesty discipline, it extends it into speculative territory, and marks the line between the two clearly throughout.
 
 ---
 
@@ -73,7 +73,7 @@ This is a bounded, well-understood piece of engineering (the Web Crypto API is s
 
 The real mechanical claim: if indexing, embedding computation, and query execution happen in the client's browser via Wasm instead of on a server SOP operates, then SOP's marginal infrastructure cost per active user drops, because the expensive part (compute and storage I/O) is no longer something SOP pays for per-user. That's a real, sound argument for *why* gross margins would structurally improve versus a conventional server-side SaaS doing the same work.
 
-**What this document will not do**: state a specific target margin percentage (e.g., "85-90%"), a specific NRR figure, or a specific sales-cycle compression number (e.g., "9 months to weeks"). SOP has no paying customers, no measured COGS, and no sales pipeline today (see the README's own [What Has Not Yet Been Proven](../README.md#-for-investors) section). Any specific percentage in a pitch deck without underlying usage data to support it is a number a diligent investor will ask to see the model behind, and there isn't one yet. The mechanism is real and worth pitching; the number attached to it should come from an actual pilot deployment's actual measured infrastructure spend, not a projection with no data behind it.
+**What this document will not do**: state a specific target margin percentage (e.g., "85-90%"), a specific NRR figure, or a specific sales-cycle compression number (e.g., "9 months to weeks"). SOP has no paying customers, no measured COGS, and no sales pipeline today (see the README's own [What Has Not Yet Been Proven](INVESTORS.md) section). Any specific percentage in a pitch deck without underlying usage data to support it is a number a diligent investor will ask to see the model behind, and there isn't one yet. The mechanism is real and worth pitching; the number attached to it should come from an actual pilot deployment's actual measured infrastructure spend, not a projection with no data behind it.
 
 ### 3.2 "Why Now"
 

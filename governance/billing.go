@@ -27,6 +27,16 @@ var (
 	ErrDuplicateWebhookEvent   = errors.New("governance/billing: duplicate webhook event already processed")
 	ErrInvalidPriceOrTier      = errors.New("governance/billing: unrecognized pricing plan or target tier")
 	ErrBillingNotConfigured    = errors.New("governance/billing: Stripe credentials not configured")
+	ErrEnterpriseContactSales  = errors.New("governance/billing: Enterprise is contact-sales only, no Enterprise price is configured")
+	ErrWebhookNotConfigured    = errors.New("governance/billing: webhook signing secret is not configured")
+)
+
+// Placeholder price IDs the service falls back to when none is configured.
+// They are never valid Stripe prices, so a live deployment that still holds
+// one must not offer checkout for that tier.
+const (
+	placeholderProPriceID        = "price_joltrin_pro_monthly"
+	placeholderEnterprisePriceID = "price_joltrin_enterprise_annual"
 )
 
 // SubscriptionStatus represents the lifecycle state of a commercial license subscription.
@@ -96,6 +106,88 @@ type StripeConfig struct {
 	SuccessURL        string `json:"success_url"`
 	CancelURL         string `json:"cancel_url"`
 	Simulate          bool   `json:"simulate"`
+}
+
+// TierCheckout describes whether a tier can be bought through checkout.
+// Mode is one of "stripe", "simulated", "contact_sales", or "unavailable".
+// Missing lists environment variable names only, never values.
+type TierCheckout struct {
+	Available bool     `json:"available"`
+	Mode      string   `json:"mode"`
+	Missing   []string `json:"missing,omitempty"`
+}
+
+// BillingReadiness is a secret-free summary of what the current Stripe
+// configuration can actually do, so an operator can see why checkout is off
+// without reading logs or the Key Vault.
+type BillingReadiness struct {
+	Mode       string       `json:"mode"` // "live" or "simulated"
+	Pro        TierCheckout `json:"pro"`
+	Enterprise TierCheckout `json:"enterprise"`
+}
+
+func isAbsoluteURL(u string) bool {
+	return strings.HasPrefix(u, "https://") || strings.HasPrefix(u, "http://")
+}
+
+// AssessBilling reports which tiers can complete checkout with cfg. Live
+// checkout needs a real price, a webhook signing secret (otherwise a paid
+// customer would never be upgraded), and absolute return URLs. Enterprise
+// stays contact-sales until a real Enterprise price ID is configured.
+func AssessBilling(cfg StripeConfig) BillingReadiness {
+	live := cfg.SecretKey != "" && !cfg.Simulate
+
+	hasPro := cfg.ProPriceID != "" && cfg.ProPriceID != placeholderProPriceID
+	hasEnt := cfg.EnterprisePriceID != "" && cfg.EnterprisePriceID != placeholderEnterprisePriceID
+
+	r := BillingReadiness{Mode: "simulated"}
+	if live {
+		r.Mode = "live"
+	}
+
+	switch {
+	case !live:
+		r.Pro = TierCheckout{Available: true, Mode: "simulated"}
+	default:
+		var missing []string
+		if !hasPro {
+			missing = append(missing, "STRIPE_PRO_PRICE_ID")
+		}
+		if cfg.WebhookSecret == "" {
+			missing = append(missing, "STRIPE_WEBHOOK_SECRET")
+		}
+		if !isAbsoluteURL(cfg.SuccessURL) {
+			missing = append(missing, "STRIPE_SUCCESS_URL")
+		}
+		if !isAbsoluteURL(cfg.CancelURL) {
+			missing = append(missing, "STRIPE_CANCEL_URL")
+		}
+		if len(missing) == 0 {
+			r.Pro = TierCheckout{Available: true, Mode: "stripe"}
+		} else {
+			r.Pro = TierCheckout{Mode: "unavailable", Missing: missing}
+		}
+	}
+
+	if !hasEnt {
+		r.Enterprise = TierCheckout{Mode: "contact_sales"}
+	} else if !live {
+		r.Enterprise = TierCheckout{Available: true, Mode: "simulated"}
+	} else {
+		r.Enterprise = r.Pro
+		r.Enterprise.Missing = nil
+		for _, m := range r.Pro.Missing {
+			if m != "STRIPE_PRO_PRICE_ID" {
+				r.Enterprise.Missing = append(r.Enterprise.Missing, m)
+			}
+		}
+		if len(r.Enterprise.Missing) == 0 {
+			r.Enterprise.Available, r.Enterprise.Mode = true, "stripe"
+		} else {
+			r.Enterprise.Available, r.Enterprise.Mode = false, "unavailable"
+		}
+	}
+	return r
 }
 
 // VerifyStripeSignature cryptographically verifies a Stripe-Signature header using HMAC-SHA256.
@@ -216,10 +308,10 @@ type DefaultBillingService struct {
 // in-memory-only behavior.
 func NewDefaultBillingService(cfg StripeConfig, gate *FeatureGate, store ...BillingStore) *DefaultBillingService {
 	if cfg.ProPriceID == "" {
-		cfg.ProPriceID = "price_joltrin_pro_monthly"
+		cfg.ProPriceID = placeholderProPriceID
 	}
 	if cfg.EnterprisePriceID == "" {
-		cfg.EnterprisePriceID = "price_joltrin_enterprise_annual"
+		cfg.EnterprisePriceID = placeholderEnterprisePriceID
 	}
 	if cfg.SecretKey == "" {
 		cfg.Simulate = true
@@ -339,9 +431,23 @@ func (s *DefaultBillingService) CreateCheckoutSession(ctx context.Context, tenan
 	case TierPro:
 		priceID = s.cfg.ProPriceID
 	case TierEnterprise:
+		if s.cfg.EnterprisePriceID == placeholderEnterprisePriceID {
+			return nil, ErrEnterpriseContactSales
+		}
 		priceID = s.cfg.EnterprisePriceID
 	default:
 		return nil, fmt.Errorf("%w: %s", ErrInvalidPriceOrTier, tier)
+	}
+
+	if !s.cfg.Simulate && s.cfg.SecretKey != "" {
+		readiness := AssessBilling(s.cfg)
+		tc := readiness.Pro
+		if tier == TierEnterprise {
+			tc = readiness.Enterprise
+		}
+		if !tc.Available {
+			return nil, fmt.Errorf("%w: missing %s", ErrBillingNotConfigured, strings.Join(tc.Missing, ", "))
+		}
 	}
 
 	// Simulation mode when no live Stripe secret key is present
@@ -379,11 +485,11 @@ func (s *DefaultBillingService) CreateCheckoutSession(ctx context.Context, tenan
 
 	successURL := s.cfg.SuccessURL
 	if successURL == "" {
-		successURL = "https://joltrin.com/app?checkout=success&session_id={CHECKOUT_SESSION_ID}"
+		successURL = "https://joltrinhq.com/app?checkout=success&session_id={CHECKOUT_SESSION_ID}"
 	}
 	cancelURL := s.cfg.CancelURL
 	if cancelURL == "" {
-		cancelURL = "https://joltrin.com/app?checkout=canceled"
+		cancelURL = "https://joltrinhq.com/app?checkout=canceled"
 	}
 	data.Set("success_url", successURL)
 	data.Set("cancel_url", cancelURL)
@@ -451,7 +557,12 @@ func (s *DefaultBillingService) CreatePortalSession(ctx context.Context, custome
 
 // HandleWebhook processes incoming Stripe webhook events idempotently and verifies HMAC signatures.
 func (s *DefaultBillingService) HandleWebhook(ctx context.Context, payload []byte, sigHeader string) (*StripeWebhookEvent, error) {
-	// 1. Signature Verification
+	// 1. Signature Verification. A live deployment must never accept an
+	// unsigned event: without a signing secret anyone could post a forged
+	// checkout.session.completed and upgrade the server's tier.
+	if s.cfg.WebhookSecret == "" && !s.cfg.Simulate && s.cfg.SecretKey != "" {
+		return nil, ErrWebhookNotConfigured
+	}
 	if s.cfg.WebhookSecret != "" {
 		if err := VerifyStripeSignature(payload, sigHeader, s.cfg.WebhookSecret, 300*time.Second); err != nil {
 			return nil, err

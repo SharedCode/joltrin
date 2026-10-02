@@ -46,7 +46,7 @@ resource secretStripeKey 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   parent: vault
   name: 'stripe-secret-key'
   properties: {
-    value: stripeSecretKey
+    value: empty(stripeSecretKey) ? 'unset' : stripeSecretKey
   }
 }
 
@@ -54,7 +54,7 @@ resource secretWebhookSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   parent: vault
   name: 'stripe-webhook-secret'
   properties: {
-    value: stripeWebhookSecret
+    value: empty(stripeWebhookSecret) ? 'unset' : stripeWebhookSecret
   }
 }
 

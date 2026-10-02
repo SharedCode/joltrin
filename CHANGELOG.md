@@ -1,5 +1,42 @@
 # Changelog
 
+## v5.8.0
+
+### Billing
+- `GET /api/billing/plan` now returns a `checkout` block that says whether Pro and Enterprise can be bought and which environment variables are missing. It lists variable names only, never values, so an operator can see why checkout is off without reading logs. The same check is available as `governance.AssessBilling`.
+- Live mode (a Stripe secret key is set) now refuses every webhook until `STRIPE_WEBHOOK_SECRET` is configured. Before, a live server with no signing secret skipped signature verification and would accept a forged `checkout.session.completed`. The public webhook route also returns 503 when no signing secret exists at all.
+- `/api/billing/checkout/simulate` returns 404 unless the server is in simulation mode. With live keys it was an unauthenticated way to grant a paid tier.
+- Pro checkout is refused in live mode until a real Pro price ID, a webhook secret, and absolute success and cancel URLs are all present, instead of failing at Stripe with a placeholder price.
+- Enterprise stays contact-sales unless a real `STRIPE_ENTERPRISE_PRICE_ID` is configured. The checkout endpoint answers 409 for it.
+- Added `JOLTRIN_PUBLIC_URL` to build the absolute Stripe return URLs. The fallback return URLs now use `joltrinhq.com` instead of `joltrin.com`.
+- Tests added for missing configuration, simulation mode, invalid and missing webhook signatures, duplicate events (including after a restart), and the payment failed, recovered, canceled, and deleted subscription lifecycle.
+
+### Azure
+- The Bicep stack takes `stripeProPriceId`, `stripeEnterprisePriceId`, and `publicBaseUrl` and passes them to the Container App as plain environment variables. Secrets still go through Key Vault references. All Stripe values default to empty, and an empty secret is stored as `unset` and treated as empty by the server, so an unconfigured deployment stays in simulation mode.
+- `deploy-azure.yml` passes the new values from repository variables. Set the two Stripe secrets in GitHub rather than directly in Key Vault, because each deploy re-applies them from the workflow inputs.
+
+### Docs and README
+- The README is now a single screen of positioning, one quickstart, the strongest verified numbers, install commands, and links. The longer material moved to `docs/`: `BENCHMARKS.md`, `LIVE_DEMOS.md`, `AGENT_PROTOCOLS.md`, `WHY_JOLTRIN.md`, `WHO_IS_IT_FOR.md`, `INVESTORS.md`, `ROADMAP.md`, `EXAMPLES.md`, and `PACKAGES.md`.
+- `docs/MONETIZATION_AND_TIERS.md` documents the Stripe environment variables and the new readiness block. `infra/azure/README.md` documents which Stripe values are secret.
+
+### Website
+- Shortened the homepage: a plain hero with one primary action, the three live experiences right below it, and a single open-core pricing section. Removed the investor-style business model, why-now, personas, value stack, and enterprise essay sections.
+- Pro is now "Request Pro" with an email fallback on the static site. Removed the Apple Pay, Google Pay, instant provisioning, registry access, and annual price claims that the site could not back up.
+- Canonical, Open Graph, and Twitter URLs, and `demo/CNAME`, now use `joltrinhq.com`.
+- Hid the engine status pill below very wide screens so the header no longer wraps, and removed the stale "v1.0" badge.
+- Added `tests/homepage.spec.ts` covering the hero, the live experience links, pricing wording, the Pro request fallback, metadata, and horizontal overflow.
+
+### Maintenance since v5.7.0
+- Fixed the deep sleep scheduler goroutine leak and a discarded `tx.Commit` error in the sleep cycle (#407).
+- The A2A agent card now sets its protocol version (#408).
+- Added a CI check that `go get` with no version resolves to the latest tag (#405) and fixed the Windows `fs` exclusion after the `/v5` rename (#404).
+- Added the Cmd+K command palette to all three demo sites (#406).
+- Bumped `jackson-databind` to 2.21.7 and gated merges on a per-commit Gemini Review status (#409).
+- Fixed the codecov badge and stale SOP-era names in the README (#410).
+
+### Versioning
+- All bindings (Python, Rust, Java, C#) and the server `VERSION` are aligned at 5.8.0 through `scripts/update_version.sh`. They had stayed at 5.6.0 through the v5.7.0 tag.
+
 ## v5.7.0
 
 ### Breaking: Module Path

@@ -44,7 +44,7 @@ echo "Copying Documentation and Assets..."
 cp -r docs/. _site/docs/
 cp -r docs/assets/. _site/assets/
 
-# Preserve custom domain (e.g. joltrin.com) if CNAME exists
+# Preserve custom domain (e.g. joltrinhq.com) if CNAME exists
 if [ -f "CNAME" ]; then
   cp CNAME _site/CNAME
 elif [ -f "demo/CNAME" ]; then

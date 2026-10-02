@@ -22,6 +22,12 @@
     },
     "stripeProPriceId": {
       "value": ""
+    },
+    "stripeEnterprisePriceId": {
+      "value": ""
+    },
+    "publicBaseUrl": {
+      "value": ""
     }
   }
 }

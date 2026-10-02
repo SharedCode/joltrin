@@ -360,3 +360,131 @@ func TestHandleBillingWebhook_DuplicateIgnoredGracefully(t *testing.T) {
 		t.Errorf("expected status 'ignored_duplicate', got %v", resp["status"])
 	}
 }
+
+func envFrom(m map[string]string) func(string) string {
+	return func(k string) string { return m[k] }
+}
+
+func TestLoadStripeConfig_NoKeysMeansSimulation(t *testing.T) {
+	cfg := loadStripeConfig(envFrom(nil))
+	if !cfg.Simulate || cfg.SecretKey != "" {
+		t.Fatalf("expected simulation with no keys, got %+v", cfg)
+	}
+	if r := governance.AssessBilling(cfg); r.Mode != "simulated" || r.Enterprise.Mode != "contact_sales" {
+		t.Fatalf("unexpected readiness %+v", r)
+	}
+}
+
+func TestLoadStripeConfig_LiveKeyWithoutPriceOrURLsIsNotReady(t *testing.T) {
+	cfg := loadStripeConfig(envFrom(map[string]string{"STRIPE_SECRET_KEY": "sk_test_placeholder"}))
+	r := governance.AssessBilling(cfg)
+	if r.Mode != "live" || r.Pro.Available {
+		t.Fatalf("live key alone must not enable checkout: %+v", r)
+	}
+}
+
+func TestLoadStripeConfig_PublicURLBuildsAbsoluteReturnURLs(t *testing.T) {
+	cfg := loadStripeConfig(envFrom(map[string]string{
+		"STRIPE_SECRET_KEY":     "sk_test_placeholder",
+		"STRIPE_WEBHOOK_SECRET": "whsec_placeholder",
+		"STRIPE_PRO_PRICE_ID":   "price_pro_real",
+		"JOLTRIN_PUBLIC_URL":    "https://app.example.test/",
+	}))
+	if cfg.SuccessURL != "https://app.example.test/app?checkout=success&session_id={CHECKOUT_SESSION_ID}" {
+		t.Errorf("unexpected success URL %q", cfg.SuccessURL)
+	}
+	if r := governance.AssessBilling(cfg); !r.Pro.Available || r.Enterprise.Mode != "contact_sales" {
+		t.Fatalf("expected Pro ready and Enterprise contact-sales, got %+v", r)
+	}
+}
+
+func withBillingService(t *testing.T, cfg governance.StripeConfig) {
+	t.Helper()
+	old := billingService
+	billingService = governance.NewDefaultBillingService(cfg, getServerFeatureGate())
+	t.Cleanup(func() { billingService = old })
+}
+
+func TestHandleGetPlan_ReportsCheckoutReadiness(t *testing.T) {
+	withBillingService(t, governance.StripeConfig{SecretKey: "sk_test_placeholder"})
+
+	w := httptest.NewRecorder()
+	handleGetPlan(w, httptest.NewRequest(http.MethodGet, "/api/billing/plan", nil))
+
+	var resp struct {
+		Checkout governance.BillingReadiness `json:"checkout"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatal(err)
+	}
+	if resp.Checkout.Mode != "live" || resp.Checkout.Pro.Available || len(resp.Checkout.Pro.Missing) == 0 {
+		t.Fatalf("expected live but not ready, got %+v", resp.Checkout)
+	}
+	if bytes.Contains(w.Body.Bytes(), []byte("sk_test_placeholder")) {
+		t.Fatal("plan response leaked the secret key")
+	}
+}
+
+func TestHandleCreateCheckoutSession_EnterpriseIsContactSales(t *testing.T) {
+	withBillingService(t, governance.StripeConfig{Simulate: true})
+
+	body, _ := json.Marshal(map[string]any{"tier": "enterprise", "email": "a@example.com"})
+	w := httptest.NewRecorder()
+	handleCreateCheckoutSession(w, httptest.NewRequest(http.MethodPost, "/api/billing/checkout", bytes.NewReader(body)))
+	if w.Code != http.StatusConflict {
+		t.Fatalf("expected 409, got %d: %s", w.Code, w.Body.String())
+	}
+}
+
+func TestHandleCreateCheckoutSession_LiveNotConfiguredIs503(t *testing.T) {
+	withBillingService(t, governance.StripeConfig{SecretKey: "sk_test_placeholder"})
+
+	body, _ := json.Marshal(map[string]any{"tier": "pro", "email": "a@example.com"})
+	w := httptest.NewRecorder()
+	handleCreateCheckoutSession(w, httptest.NewRequest(http.MethodPost, "/api/billing/checkout", bytes.NewReader(body)))
+	if w.Code != http.StatusServiceUnavailable {
+		t.Fatalf("expected 503, got %d: %s", w.Code, w.Body.String())
+	}
+}
+
+func TestHandleSimulateCheckout_NotFoundInLiveMode(t *testing.T) {
+	gate := getServerFeatureGate()
+	gate.SetTier(governance.TierCore)
+	withBillingService(t, governance.StripeConfig{SecretKey: "sk_test_placeholder", WebhookSecret: "whsec_placeholder"})
+
+	w := httptest.NewRecorder()
+	handleSimulateCheckout(w, httptest.NewRequest(http.MethodGet, "/api/billing/checkout/simulate?tier=pro", nil))
+	if w.Code != http.StatusNotFound {
+		t.Fatalf("expected 404, got %d", w.Code)
+	}
+	if gate.Tier() != governance.TierCore {
+		t.Fatalf("simulate route must not change the tier in live mode, got %s", gate.Tier())
+	}
+}
+
+func TestHandleBillingWebhook_RefusedWithoutSigningSecret(t *testing.T) {
+	gate := getServerFeatureGate()
+	gate.SetTier(governance.TierCore)
+	withBillingService(t, governance.StripeConfig{SecretKey: "sk_test_placeholder"})
+
+	payload := governance.ConstructSimulatedWebhookPayload("checkout.session.completed", "evt_no_secret_handler", "tenant-x", governance.TierPro)
+	w := httptest.NewRecorder()
+	handleBillingWebhook(w, httptest.NewRequest(http.MethodPost, "/api/billing/webhook", bytes.NewReader(payload)))
+	if w.Code != http.StatusServiceUnavailable {
+		t.Fatalf("expected 503, got %d", w.Code)
+	}
+	if gate.Tier() != governance.TierCore {
+		t.Fatalf("unsigned event must not change the tier, got %s", gate.Tier())
+	}
+}
+
+func TestLoadStripeConfig_UnsetPlaceholderStaysInSimulation(t *testing.T) {
+	cfg := loadStripeConfig(envFrom(map[string]string{
+		"STRIPE_SECRET_KEY":      "unset",
+		"STRIPE_WEBHOOK_SECRET":  "unset",
+		"STRIPE_PUBLISHABLE_KEY": "unset",
+	}))
+	if !cfg.Simulate || cfg.SecretKey != "" || cfg.WebhookSecret != "" || cfg.PublishableKey != "" {
+		t.Fatalf("the Key Vault placeholder must be treated as empty, got %+v", cfg)
+	}
+}

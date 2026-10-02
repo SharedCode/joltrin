@@ -6,21 +6,21 @@
   <title>Joltrin | Verification Barrier &amp; Durable Memory for AI Agents | Embedded ACID Engine</title>
   <meta name="description" content="Open-source infrastructure for AI agents with durable memory, recovery, and a verification barrier before they take action." />
   <meta name="keywords" content="AI agent verification barrier, AI agent safety layer, durable AI agent memory, AI agent governance, autonomous AI safety, AI DevOps, MCP infrastructure, agent policy enforcement, ACID B-Tree, Go, WebAssembly" />
-  <link rel="canonical" href="https://joltrin.com/" />
+  <link rel="canonical" href="https://joltrinhq.com/" />
 
   <!-- Open Graph / Facebook / LinkedIn -->
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://joltrin.com/" />
+  <meta property="og:url" content="https://joltrinhq.com/" />
   <meta property="og:title" content="Joltrin | Verification Barrier &amp; Durable Memory for AI Agents" />
   <meta property="og:description" content="Open-source infrastructure for AI agents with durable memory, recovery, and a verification barrier before they take action." />
-  <meta property="og:image" content="https://joltrin.com/og-image.png" />
+  <meta property="og:image" content="https://joltrinhq.com/og-image.png" />
 
   <!-- Twitter / X -->
   <meta property="twitter:card" content="summary_large_image" />
-  <meta property="twitter:url" content="https://joltrin.com/" />
+  <meta property="twitter:url" content="https://joltrinhq.com/" />
   <meta property="twitter:title" content="Joltrin | Verification Barrier &amp; Durable Memory for AI Agents" />
   <meta property="twitter:description" content="Open-source infrastructure for AI agents with durable memory, recovery, and a verification barrier before they take action." />
-  <meta property="twitter:image" content="https://joltrin.com/og-image.png" />
+  <meta property="twitter:image" content="https://joltrinhq.com/og-image.png" />
 
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
   <link rel="alternate icon" href="./favicon.ico" />
@@ -312,9 +312,9 @@
         <div>
           <div class="flex items-center space-x-2">
             <a href="./" class="font-extrabold tracking-tight text-white text-lg hover:text-brand-400 transition">Joltrin</a>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 font-mono font-medium">v1.0 WASM</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 font-mono font-medium">WASM demo</span>
           </div>
-          <p class="text-[10px] text-slate-400 font-mono hidden sm:block">Durable AI Agent Memory &amp; Verification Barrier</p>
+          <p class="text-[10px] text-slate-400 font-mono hidden sm:block">Memory and verification for AI agents</p>
         </div>
       </div>
 
@@ -345,7 +345,7 @@
 
       <!-- Live Engine Telemetry Pill & GitHub CTA -->
       <div class="flex items-center space-x-4">
-        <div class="hidden md:flex items-center space-x-3 bg-dark-850 px-3 py-1.5 rounded-full border border-dark-700 text-xs font-mono">
+        <div class="hidden 2xl:flex items-center space-x-3 bg-dark-850 px-3 py-1.5 rounded-full border border-dark-700 text-xs font-mono">
           <div class="flex items-center space-x-1.5">
             <span id="wasm-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
             <span id="wasm-status-text" class="text-amber-300 font-medium">Instantiating WASM VM...</span>
@@ -372,7 +372,7 @@
         <a href="https://github.com/SharedCode/joltrin" target="_blank" rel="noopener noreferrer"
            class="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-xs font-medium text-slate-200 transition">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
-          <span class="hidden sm:inline">GitHub Repository</span>
+          <span class="hidden sm:inline">GitHub</span>
         </a>
 
         <!-- Mobile Menu Toggle: the Funnel Navigation Links above are lg:flex-only,
@@ -433,88 +433,103 @@
   <!-- Main Container -->
   <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- Hero / Commercial Positioning: Verification Barrier First -->
-    <section class="relative rounded-2xl bg-gradient-to-b from-dark-850 to-dark-900 border border-dark-700/80 p-6 sm:p-10 mb-10 overflow-hidden bg-grid glow-emerald">
+    <!-- Hero -->
+    <section class="relative rounded-2xl bg-gradient-to-b from-dark-850 to-dark-900 border border-dark-700/80 p-6 sm:p-10 mb-8 overflow-hidden bg-grid glow-emerald">
       <div class="absolute top-0 right-0 -mt-8 -mr-8 w-72 h-72 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div class="absolute bottom-0 left-1/3 -mb-8 w-72 h-72 bg-accent-cyan/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="relative z-10 max-w-3xl">
+        <p class="text-xs font-mono font-semibold uppercase tracking-wider text-brand-400 mb-4">Open-source infrastructure for AI agents</p>
 
-      <div class="relative z-10 max-w-4xl">
-        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-mono font-semibold uppercase tracking-wider mb-4">
-          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-          <span>The Safety Layer for AI Agents That Take Action</span>
-        </div>
-        
         <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight mb-4">
-          Give AI Agents a Verification Barrier <br class="hidden sm:inline" />
-          <span class="bg-gradient-to-r from-brand-400 via-accent-cyan to-accent-violet bg-clip-text text-transparent">Before They Take Consequential Action.</span>
+          Durable memory and a
+          <span class="bg-gradient-to-r from-brand-400 via-accent-cyan to-accent-violet bg-clip-text text-transparent">verification barrier</span>
+          for AI agents.
         </h1>
-        
-        <p class="text-slate-300 text-base sm:text-lg leading-relaxed mb-4">
-          AI agents used to just generate text. Now they call tools, change infrastructure, work with APIs, and carry out multi-step tasks on their own.
+
+        <p class="text-slate-300 text-base sm:text-lg leading-relaxed mb-6">
+          Joltrin is an embedded Go library. Your agents keep state that survives a crash, and risky actions are checked against explicit rules before they run. No separate database or queue to operate.
         </p>
 
-        <!-- The Commercial Hook Question -->
-        <div class="p-4 rounded-xl bg-dark-950/90 border border-accent-cyan/30 mb-6">
-          <p class="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">The real question:</p>
-          <p class="text-sm sm:text-base text-white font-medium leading-relaxed">
-            It's not just <span class="text-slate-300 italic">"Can the agent make the right decision?"</span> anymore.<br class="hidden sm:inline" />
-            It's <strong class="text-brand-400 font-bold">"How do we know it's allowed to take this action before it happens?"</strong>
-          </p>
-        </div>
-
-        <!-- The Core Metaphor Callout -->
-        <div class="p-4 rounded-xl bg-dark-950/80 border border-brand-500/30 mb-6 flex items-start space-x-3">
-          <i data-lucide="shield-alert" class="w-5 h-5 text-brand-400 shrink-0 mt-0.5"></i>
-          <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
-            <strong class="text-white font-bold block mb-1">Memory + recovery + verification for AI agents.</strong>
-            Joltrin gives developers a place to keep an agent's state, recover from failures, and check important actions against explicit rules before they happen.
-          </p>
-        </div>
-
-        <!-- 4 Purpose-Driven CTAs -->
-        <div class="flex flex-wrap items-center gap-3 mb-6">
-          <a href="https://github.com/SharedCode/joltrin" target="_blank" rel="noopener noreferrer"
-             class="px-5 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 font-bold text-xs text-black shadow-lg shadow-brand-500/20 flex items-center space-x-2 transition transform active:scale-95">
+        <div class="flex flex-wrap items-center gap-3 mb-8">
+          <a href="https://github.com/SharedCode/joltrin#try-it-in-five-minutes" target="_blank" rel="noopener noreferrer"
+             class="px-5 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 font-bold text-sm text-black shadow-lg shadow-brand-500/20 flex items-center space-x-2 transition transform active:scale-95">
             <i data-lucide="terminal" class="w-4 h-4"></i>
-            <span>Start Building (MIT Core)</span>
+            <span>Start building (MIT core)</span>
           </a>
-          <button onclick="openProCheckoutModal()"
-             class="px-5 py-3 rounded-xl bg-dark-800 hover:bg-dark-750 border border-brand-500/40 text-brand-400 hover:text-brand-300 font-bold text-xs flex items-center space-x-2 transition cursor-pointer">
-            <i data-lucide="zap" class="w-4 h-4"></i>
-            <span>Start Pro ($49/mo)</span>
-          </button>
-          <a href="#verification-barrier"
-             class="px-4 py-3 rounded-xl bg-dark-900 hover:bg-dark-850 border border-accent-cyan/30 text-accent-cyan hover:text-white font-semibold text-xs flex items-center space-x-2 transition font-mono">
-            <i data-lucide="shield-check" class="w-4 h-4"></i>
-            <span>Explore Verification Barrier ↓</span>
+          <a href="./agents/"
+             class="px-5 py-3 rounded-xl bg-dark-900 hover:bg-dark-850 border border-dark-700 text-slate-200 hover:text-white font-semibold text-sm flex items-center space-x-2 transition">
+            <i data-lucide="shield-check" class="w-4 h-4 text-brand-400"></i>
+            <span>Try the live barrier</span>
           </a>
-          <a href="./arena/"
-             class="px-4 py-3 rounded-xl bg-dark-900 hover:bg-dark-850 border border-dark-700 text-slate-300 hover:text-white font-semibold text-xs flex items-center space-x-2 transition font-mono">
-            <i data-lucide="gamepad-2" class="w-4 h-4 text-brand-400"></i>
-            <span>Try Joltrin Arena (100k TPS Sim) →</span>
-          </a>
+          <a href="#pricing" class="px-2 py-3 text-sm text-slate-400 hover:text-white underline underline-offset-4 transition">Pricing</a>
         </div>
 
-        <!-- Proof Pill Badges -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-dark-800">
+        <dl class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-dark-800">
           <div class="bg-dark-950/80 border border-dark-700/80 rounded-xl p-3">
-            <span class="text-[11px] text-slate-400 font-mono block">Pre-Action Policy Gate</span>
-            <span class="text-lg sm:text-xl font-bold text-brand-400 font-mono">Deterministic</span>
+            <dt class="text-[11px] text-slate-400 font-mono">Pre-action checks</dt>
+            <dd class="text-base sm:text-lg font-bold text-brand-400 font-mono">Deterministic</dd>
           </div>
           <div class="bg-dark-950/80 border border-dark-700/80 rounded-xl p-3">
-            <span class="text-[11px] text-slate-400 font-mono block">Rollback Guarantees</span>
-            <span class="text-lg sm:text-xl font-bold text-white font-mono">Strict ACID</span>
+            <dt class="text-[11px] text-slate-400 font-mono">Transactions</dt>
+            <dd class="text-base sm:text-lg font-bold text-white font-mono">ACID</dd>
           </div>
           <div class="bg-dark-950/80 border border-dark-700/80 rounded-xl p-3">
-            <span class="text-[11px] text-slate-400 font-mono block">Runtime Network Tax</span>
-            <span class="text-lg sm:text-xl font-bold text-accent-cyan font-mono">0 ms (WASM/Go)</span>
+            <dt class="text-[11px] text-slate-400 font-mono">Demo network calls</dt>
+            <dd class="text-base sm:text-lg font-bold text-accent-cyan font-mono">0 after load</dd>
           </div>
           <div class="bg-dark-950/80 border border-dark-700/80 rounded-xl p-3">
-            <span class="text-[11px] text-slate-400 font-mono block">Core Engine License</span>
-            <span class="text-lg sm:text-xl font-bold text-accent-violet font-mono">MIT Open Source</span>
+            <dt class="text-[11px] text-slate-400 font-mono">Core license</dt>
+            <dd class="text-base sm:text-lg font-bold text-accent-violet font-mono">MIT</dd>
           </div>
-        </div>
+        </dl>
       </div>
+    </section>
+
+    <!-- Three live experiences, right after the hero -->
+    <section id="live-experiences" aria-label="Live experiences" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
+      <a href="#under-the-hood" class="p-5 rounded-2xl bg-dark-900 hover:bg-dark-850 border border-brand-500/40 hover:border-brand-500/70 transition flex flex-col justify-between group">
+        <div>
+          <div class="flex items-center space-x-2 text-brand-400 font-bold text-sm mb-1.5">
+            <i data-lucide="cpu" class="w-4 h-4"></i>
+            <span>Technical demo</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            The engine compiled to WebAssembly. Run ACID transactions, vector search, a benchmark, and an agent checkpoint resume, all in your browser.
+          </p>
+        </div>
+        <div class="pt-3 text-[11px] text-brand-400 font-mono font-medium">Runs on this page ↓</div>
+      </a>
+
+      <a href="./arena/" class="p-5 rounded-2xl bg-dark-900 hover:bg-dark-850 border border-dark-700 hover:border-accent-cyan/50 transition flex flex-col justify-between group">
+        <div>
+          <div class="flex items-center justify-between text-white group-hover:text-accent-cyan font-bold text-sm mb-1.5">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="gamepad-2" class="w-4 h-4 text-accent-cyan"></i>
+              <span>Joltrin Arena</span>
+            </div>
+            <span class="text-xs text-slate-500 group-hover:text-accent-cyan font-mono">Open →</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            A cluster simulation. Add workers, crash storage nodes, and spike load to see the concepts behind the engine. It illustrates the design, it is not a live cluster.
+          </p>
+        </div>
+        <div class="pt-3 text-[11px] text-slate-500 group-hover:text-accent-cyan font-mono">Open the simulation →</div>
+      </a>
+
+      <a href="./agents/" class="p-5 rounded-2xl bg-dark-900 hover:bg-dark-850 border border-dark-700 hover:border-accent-violet/50 transition flex flex-col justify-between group">
+        <div>
+          <div class="flex items-center justify-between text-white group-hover:text-accent-violet font-bold text-sm mb-1.5">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="shield-check" class="w-4 h-4 text-accent-violet"></i>
+              <span>Agent verification barrier</span>
+            </div>
+            <span class="text-xs text-slate-500 group-hover:text-accent-violet font-mono">Open →</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            The same ai/verify barrier that gates the MCP and A2A servers. Try to drop a database before the backup is validated and watch it refuse.
+          </p>
+        </div>
+        <div class="pt-3 text-[11px] text-slate-500 group-hover:text-accent-violet font-mono">Open the barrier →</div>
+      </a>
     </section>
 
     <!-- SECTION 1: THE AGENT VERIFICATION BARRIER (THE STAR DIFFERENTIATOR) -->
@@ -654,70 +669,6 @@
       </div>
     </section>
 
-    <!-- SECTION 2: SELL THE BUSINESS PROBLEM (WHY THIS MATTERS) -->
-    <section class="mb-12 p-6 sm:p-10 rounded-2xl bg-dark-900 border border-dark-800">
-      <div class="max-w-3xl mb-8">
-        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-accent-cyan/10 border border-accent-cyan/30 text-accent-cyan text-xs font-mono font-semibold uppercase tracking-wider mb-3">
-          <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
-          <span>Executive &amp; Operational Value</span>
-        </div>
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
-          Why This Matters
-        </h2>
-        <p class="text-slate-400 text-sm sm:text-base mt-2 leading-relaxed">
-          If an agent can deploy infrastructure, modify data, or call production APIs, a mistake gets expensive fast. Joltrin gives those agents durable state and a policy checkpoint before anything important happens, so your team isn't building that safety net from scratch.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div class="p-6 rounded-2xl bg-dark-950 border border-dark-800 space-y-2">
-          <div class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/30 flex items-center justify-center mb-2">
-            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-          </div>
-          <h3 class="text-base font-bold text-white">Fewer expensive mistakes</h3>
-          <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-            Stop an agent from wiping a database, leaking data across tenants, or breaking a security rule before it happens, not after you notice the damage.
-          </p>
-        </div>
-
-        <div class="p-6 rounded-2xl bg-dark-950 border border-dark-800 space-y-2">
-          <div class="w-8 h-8 rounded-lg bg-brand-500/10 text-brand-400 border border-brand-500/30 flex items-center justify-center mb-2">
-            <i data-lucide="shield-check" class="w-4 h-4"></i>
-          </div>
-          <h3 class="text-base font-bold text-white">More confidence deploying agents</h3>
-          <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-            Give security, DevOps, and compliance a real policy layer around autonomous agents, so going from proof-of-concept to production doesn't require a leap of faith.
-          </p>
-        </div>
-
-        <div class="p-6 rounded-2xl bg-dark-950 border border-dark-800 space-y-2">
-          <div class="w-8 h-8 rounded-lg bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/30 flex items-center justify-center mb-2">
-            <i data-lucide="cpu" class="w-4 h-4"></i>
-          </div>
-          <h3 class="text-base font-bold text-white">Less infrastructure to build yourself</h3>
-          <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-            Skip hand-rolling checkpointing, rollback logic, and locking for every new agent project. Use one open-source foundation instead.
-          </p>
-        </div>
-
-        <div class="p-6 rounded-2xl bg-dark-950 border border-dark-800 space-y-2">
-          <div class="w-8 h-8 rounded-lg bg-accent-violet/10 text-accent-violet border border-accent-violet/30 flex items-center justify-center mb-2">
-            <i data-lucide="lock" class="w-4 h-4"></i>
-          </div>
-          <h3 class="text-base font-bold text-white">A clearer path to governance</h3>
-          <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-            Tie every agent action back to a real identity (Okta or Entra ID), role-based access, and an audit log: the same controls compliance already expects from people.
-          </p>
-        </div>
-      </div>
-
-      <!-- Economic Bottom Line -->
-      <div class="p-4 rounded-xl bg-dark-950 border border-dark-800 text-slate-300 text-xs sm:text-sm leading-relaxed">
-        <strong class="text-white">The bottom line:</strong>
-        Joltrin exists to cut the operational risk and engineering cost of running autonomous agents.
-      </div>
-    </section>
-
     <!-- SECTION 3: SECOND DIFFERENTIATOR: DURABLE AGENT MEMORY -->
     <section id="durable-memory" class="mb-12 p-6 sm:p-10 rounded-2xl bg-dark-900 border border-dark-800">
       <div class="max-w-3xl mb-8">
@@ -780,239 +731,6 @@
         <span class="text-brand-400 font-bold">Recurring Philosophy:</span> "Memory + Recovery + Verification for AI agents."
       </div>
     </section>
-
-    <!-- SECTION 4: "WHY NOW?" -->
-    <section class="mb-12 p-6 sm:p-10 rounded-2xl bg-dark-900 border border-dark-800">
-      <div class="max-w-3xl mb-8">
-        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-accent-amber/10 border border-accent-amber/30 text-amber-400 text-xs font-mono font-semibold uppercase tracking-wider mb-3">
-          <i data-lucide="zap" class="w-3.5 h-3.5"></i>
-          <span>The Market Shift</span>
-        </div>
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
-          Why Now? AI is Moving From Answers to Actions.
-        </h2>
-        <p class="text-slate-400 text-sm sm:text-base mt-2 leading-relaxed">
-          Software used to just answer questions. Now it can act on them.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-
-        <div class="p-6 rounded-2xl bg-dark-950 border border-dark-800 space-y-3">
-          <span class="text-xs font-mono text-slate-400 uppercase tracking-wider block">Yesterday</span>
-          <h3 class="text-lg font-bold text-slate-300">Traditional AI: Prompt → Response</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            The model generates text or code in a chat window. If the output has errors, a person edits it. Nothing happens on its own.
-          </p>
-          <div class="p-3 rounded-lg bg-dark-900 border border-dark-800 text-[11px] font-mono text-slate-500">
-            [User Prompt] ──▶ [LLM Inference] ──▶ [Markdown Response]
-          </div>
-        </div>
-
-        <div class="p-6 rounded-2xl bg-dark-950 border border-brand-500/40 space-y-3 shadow-lg shadow-brand-500/5">
-          <span class="text-xs font-mono text-brand-400 uppercase tracking-wider block">Today</span>
-          <h3 class="text-lg font-bold text-white">Agentic AI: Goal → Reason → Tool → Action</h3>
-          <p class="text-xs text-slate-300 leading-relaxed">
-            The agent calls tools on its own, changes data, commits code, and provisions infrastructure. If it gets something wrong, that mistake can hit production.
-          </p>
-          <div class="p-3 rounded-lg bg-dark-900 border border-brand-500/30 text-[11px] font-mono text-brand-300">
-            [Goal] ──▶ [Reason] ──▶ [Tool Call] ──▶ [Action on Prod]
-          </div>
-        </div>
-
-      </div>
-
-      <div class="p-5 rounded-2xl bg-gradient-to-r from-brand-950/40 via-dark-950 to-dark-950 border border-brand-500/30 space-y-2">
-        <h4 class="text-sm font-bold text-white">Joltrin is infrastructure for that shift.</h4>
-        <p class="text-xs text-slate-300 leading-relaxed">
-          Once agents take real actions, companies need durable state, authorization, verification, policy, and a way to recover when something goes wrong. Joltrin provides that foundation.
-        </p>
-      </div>
-    </section>
-
-    <!-- SECTION 5: "WHO IS JOLTRIN FOR?" (PERSONAS) -->
-    <section class="mb-12 p-6 sm:p-10 rounded-2xl bg-dark-900 border border-dark-800">
-      <div class="max-w-3xl mb-8">
-        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-mono font-semibold uppercase tracking-wider mb-3">
-          <i data-lucide="users" class="w-3.5 h-3.5"></i>
-          <span>Target Audience</span>
-        </div>
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
-          Who is Joltrin For?
-        </h2>
-        <p class="text-slate-400 text-sm sm:text-base mt-2 leading-relaxed">
-          Engineered for teams building and deploying consequential autonomous AI systems.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        
-        <div class="p-5 rounded-2xl bg-dark-950 border border-dark-800 space-y-2">
-          <div class="w-8 h-8 rounded-lg bg-brand-500/10 text-brand-400 border border-brand-500/30 flex items-center justify-center mb-2">
-            <i data-lucide="code" class="w-4 h-4"></i>
-          </div>
-          <h3 class="font-bold text-white text-sm">AI Engineering Teams</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Build reliable, long-running agent workflows with durable memory checkpoints and deterministic recovery across LLM calls.
-          </p>
-        </div>
-
-        <div class="p-5 rounded-2xl bg-dark-950 border border-dark-800 space-y-2">
-          <div class="w-8 h-8 rounded-lg bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/30 flex items-center justify-center mb-2">
-            <i data-lucide="terminal" class="w-4 h-4"></i>
-          </div>
-          <h3 class="font-bold text-white text-sm">DevOps &amp; SRE Teams</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Deploy autonomous agents that safely interact with production infrastructure, Kubernetes clusters, and cloud APIs without unverified actions.
-          </p>
-        </div>
-
-        <div class="p-5 rounded-2xl bg-dark-950 border border-dark-800 space-y-2">
-          <div class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/30 flex items-center justify-center mb-2">
-            <i data-lucide="shield-alert" class="w-4 h-4"></i>
-          </div>
-          <h3 class="font-bold text-white text-sm">Security &amp; SecOps</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Enforce mandatory policy guardrails and retain immutable, tamper-evident audit trails before agents execute high-privilege commands.
-          </p>
-        </div>
-
-        <div class="p-5 rounded-2xl bg-dark-950 border border-dark-800 space-y-2">
-          <div class="w-8 h-8 rounded-lg bg-accent-violet/10 text-accent-violet border border-accent-violet/30 flex items-center justify-center mb-2">
-            <i data-lucide="building" class="w-4 h-4"></i>
-          </div>
-          <h3 class="font-bold text-white text-sm">Enterprise Platform Teams</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Provide standardized, governable agent memory, tenant isolation, and Okta / Entra ID identity binding across engineering groups.
-          </p>
-        </div>
-
-        <div class="p-5 rounded-2xl bg-dark-950 border border-dark-800 space-y-2 sm:col-span-2 lg:col-span-2">
-          <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center justify-center mb-2">
-            <i data-lucide="rocket" class="w-4 h-4"></i>
-          </div>
-          <h3 class="font-bold text-white text-sm">AI Startups &amp; Product Builders</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Ship production-grade agent products immediately without reinventing persistence, rollback logs, vector lookups, and security barriers from scratch.
-          </p>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- SECTION 6: THE COMPLETE VALUE STACK (5 ARCHITECTURAL LAYERS) -->
-    <section class="mb-12 p-6 sm:p-10 rounded-2xl bg-dark-900 border border-dark-800">
-      <div class="max-w-3xl mb-8">
-        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-accent-cyan/10 border border-accent-cyan/30 text-accent-cyan text-xs font-mono font-semibold uppercase tracking-wider mb-3">
-          <i data-lucide="layers" class="w-3.5 h-3.5"></i>
-          <span>Architectural Hierarchy</span>
-        </div>
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
-          The Complete Joltrin Value Stack
-        </h2>
-        <p class="text-slate-400 text-sm sm:text-base mt-2 leading-relaxed">
-          From single-agent verification to multi-workspace governance and managed cloud coordination.
-        </p>
-      </div>
-
-      <div class="space-y-3 font-mono text-xs">
-        
-        <div class="p-4 rounded-xl bg-dark-950 border border-brand-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div class="flex items-center space-x-3">
-            <span class="px-2 py-0.5 rounded bg-brand-500/20 text-brand-400 font-bold">1. VERIFY</span>
-            <span class="text-white font-bold">Safety &amp; Policy Checkpoint</span>
-          </div>
-          <span class="text-slate-400">Pre-action invariant barrier, precondition gates, CEL rules</span>
-          <span class="text-brand-400 font-bold shrink-0">Available Today (MIT Core)</span>
-        </div>
-
-        <div class="p-4 rounded-xl bg-dark-950 border border-dark-750 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div class="flex items-center space-x-3">
-            <span class="px-2 py-0.5 rounded bg-accent-cyan/20 text-accent-cyan font-bold">2. REMEMBER</span>
-            <span class="text-white font-bold">Durable Memory &amp; Vectors</span>
-          </div>
-          <span class="text-slate-400">B-Tree persistence, 128-d cosine vector index, OPFS browser storage</span>
-          <span class="text-brand-400 font-bold shrink-0">Available Today (MIT Core)</span>
-        </div>
-
-        <div class="p-4 rounded-xl bg-dark-950 border border-dark-750 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div class="flex items-center space-x-3">
-            <span class="px-2 py-0.5 rounded bg-accent-violet/20 text-accent-violet font-bold">3. RECOVER</span>
-            <span class="text-white font-bold">Crash &amp; Failure Resilience</span>
-          </div>
-          <span class="text-slate-400">Strict 2PC ACID transactions, WAL checkpoints, atomic rollback</span>
-          <span class="text-brand-400 font-bold shrink-0">Available Today (MIT Core)</span>
-        </div>
-
-        <div class="p-4 rounded-xl bg-dark-950 border border-dark-750 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div class="flex items-center space-x-3">
-            <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">4. GOVERN</span>
-            <span class="text-white font-bold">Enterprise Access &amp; Compliance</span>
-          </div>
-          <span class="text-slate-400">Okta / Entra ID SSO, cryptographic audit export, tenant RBAC</span>
-          <span class="text-accent-cyan font-bold shrink-0">Available (Pro &amp; Enterprise)</span>
-        </div>
-
-        <div class="p-4 rounded-xl bg-dark-950 border border-dark-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div class="flex items-center space-x-3">
-            <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-bold">5. SCALE</span>
-            <span class="text-white font-bold">Managed Cloud Coordination</span>
-          </div>
-          <span class="text-slate-400">Multi-region serverless cluster orchestration, hosted agent state</span>
-          <span class="text-amber-400 font-bold shrink-0">Planned / Waitlist</span>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- SECTION 7: PROOF POINTS & CROSS-DEMO EXPERIENCES -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
-      <div class="p-5 rounded-2xl bg-dark-900 border-2 border-brand-500/50 shadow-lg shadow-brand-500/10 flex flex-col justify-between">
-        <div>
-          <div class="flex items-center space-x-2 text-brand-400 font-bold text-sm mb-1.5">
-            <i data-lucide="cpu" class="w-4 h-4"></i>
-            <span>🧠 Technical Engine Lab</span>
-            <span class="text-[10px] px-1.5 py-0.5 rounded bg-brand-500/20 text-brand-300 font-mono">BELOW</span>
-          </div>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Client-side zero-server WebAssembly engine. Strict ACID transactions, vector cosine search, microsecond benchmarks, and durable agent memory.
-          </p>
-        </div>
-        <div class="pt-3 text-[11px] text-brand-400 font-mono font-medium">✓ Real WASM Kernel Running Below</div>
-      </div>
-
-      <a href="./arena/" class="p-5 rounded-2xl bg-dark-900 hover:bg-dark-850 border border-dark-700 hover:border-accent-cyan/50 transition flex flex-col justify-between group">
-        <div>
-          <div class="flex items-center justify-between text-white group-hover:text-accent-cyan font-bold text-sm mb-1.5">
-            <div class="flex items-center space-x-2">
-              <i data-lucide="gamepad-2" class="w-4 h-4 text-accent-cyan"></i>
-              <span>🎮 Joltrin Arena</span>
-            </div>
-            <span class="text-xs text-slate-500 group-hover:text-accent-cyan font-mono">Play →</span>
-          </div>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Distributed Systems Survival Simulation. Scale worker swarms, crash storage nodes, trigger transaction storms, and watch self-healing in real time.
-          </p>
-        </div>
-        <div class="pt-3 text-[11px] text-slate-500 group-hover:text-accent-cyan font-mono">Launch Survival Sim →</div>
-      </a>
-
-      <a href="./agents/" class="p-5 rounded-2xl bg-dark-900 hover:bg-dark-850 border border-dark-700 hover:border-accent-violet/50 transition flex flex-col justify-between group">
-        <div>
-          <div class="flex items-center justify-between text-white group-hover:text-accent-violet font-bold text-sm mb-1.5">
-            <div class="flex items-center space-x-2">
-              <i data-lucide="shield-check" class="w-4 h-4 text-accent-violet"></i>
-              <span>🔌 Agent Safety Barrier</span>
-            </div>
-            <span class="text-xs text-slate-500 group-hover:text-accent-violet font-mono">Test →</span>
-          </div>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            The MCP/A2A Safety Check, Clickable. The exact ai/verify barrier gating tools/mcpserver. Test blocking an agent before it drops a production database.
-          </p>
-        </div>
-        <div class="pt-3 text-[11px] text-slate-500 group-hover:text-accent-violet font-mono">Test Verification Gate →</div>
-      </a>
-    </div>
 
     <!-- SECTION 8: UNDER THE HOOD (DATABASE & STORAGE ENGINEERING CREDIBILITY) -->
     <section id="under-the-hood" class="mb-12">
@@ -1402,383 +1120,75 @@
     </div>
     </section> <!-- /#under-the-hood -->
 
-    <!-- SECTION 9: INVESTOR STORY & BUSINESS MODEL -->
-    <section id="business-model" class="mt-14 mb-12 pt-8 border-t border-dark-800">
-      <div class="max-w-4xl mx-auto text-center mb-10">
-        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-accent-cyan/10 border border-accent-cyan/30 text-accent-cyan text-xs font-mono font-semibold uppercase tracking-wider mb-3">
-          <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
-          <span>How Joltrin Makes Money</span>
-        </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-          Open Core. Enterprise Governance. Managed Infrastructure.
-        </h2>
-        <p class="text-slate-400 text-sm sm:text-base mt-3 leading-relaxed">
-          The database and core agent infrastructure stay open and free to use. Teams and enterprises pay for governance, collaboration, and, eventually, managed infrastructure.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <!-- Pillar 1: Bottom-up Open Source Adoption -->
-        <div class="p-6 rounded-2xl bg-dark-900 border border-dark-800 flex flex-col justify-between hover:border-dark-700 transition">
-          <div>
-            <div class="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-center justify-center text-brand-400 mb-4">
-              <i data-lucide="code-2" class="w-5 h-5"></i>
-            </div>
-            <h3 class="text-base font-bold text-white mb-2">1. Bottom-Up Adoption</h3>
-            <p class="text-xs text-slate-400 leading-relaxed mb-4">
-              Free, MIT-licensed embedded storage and verification engine. Zero-dependency Go library and WebAssembly binary that any AI engineer can embed in minutes.
-            </p>
-            <ul class="space-y-1.5 text-[11px] text-slate-300 font-mono">
-              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-400"></i><span>Zero server overhead</span></li>
-              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-400"></i><span>Embed in any agent runtime</span></li>
-              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-400"></i><span>Client-side OPFS persistence</span></li>
-            </ul>
-          </div>
-          <div class="mt-6 pt-3 border-t border-dark-800 text-[11px] font-mono text-brand-400 font-semibold">
-            Free Core · Open Source
-          </div>
-        </div>
-
-        <!-- Pillar 2: Team Governance -->
-        <div class="p-6 rounded-2xl bg-dark-900 border border-brand-500/30 flex flex-col justify-between hover:border-brand-500/60 transition relative">
-          <div class="absolute -top-3 right-4 px-2.5 py-0.5 rounded-full bg-brand-500 text-black font-mono font-bold text-[10px] uppercase tracking-wider">
-            Self-Serve
-          </div>
-          <div>
-            <div class="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-center justify-center text-brand-400 mb-4">
-              <i data-lucide="users" class="w-5 h-5"></i>
-            </div>
-            <h3 class="text-base font-bold text-white mb-2">2. Team Governance ($49/mo)</h3>
-            <p class="text-xs text-slate-400 leading-relaxed mb-4">
-              Multi-tenant workspace controls, audit logging, and rate limiting. Pay with a card through Stripe and you're set up in minutes.
-            </p>
-            <ul class="space-y-1.5 text-[11px] text-slate-300 font-mono">
-              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-400"></i><span>Automated Stripe billing</span></li>
-              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-400"></i><span>Multi-tenant workspace isolation</span></li>
-              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-400"></i><span>Team audit logs &amp; telemetry</span></li>
-            </ul>
-          </div>
-          <div class="mt-6 pt-3 border-t border-dark-800 text-[11px] font-mono text-brand-400 font-semibold">
-            Self-Serve · Cancel Anytime
-          </div>
-        </div>
-
-        <!-- Pillar 3: Enterprise & Hosted Cloud -->
-        <div class="p-6 rounded-2xl bg-dark-900 border border-accent-violet/30 flex flex-col justify-between hover:border-accent-violet/60 transition relative">
-          <div class="absolute -top-3 right-4 px-2.5 py-0.5 rounded-full bg-accent-violet text-white font-mono font-bold text-[10px] uppercase tracking-wider">
-            Enterprise
-          </div>
-          <div>
-            <div class="w-10 h-10 rounded-xl bg-accent-violet/10 border border-accent-violet/30 flex items-center justify-center text-accent-violet mb-4">
-              <i data-lucide="shield-alert" class="w-5 h-5"></i>
-            </div>
-            <h3 class="text-base font-bold text-white mb-2">3. Enterprise &amp; Cloud (Custom)</h3>
-            <p class="text-xs text-slate-400 leading-relaxed mb-4">
-              Okta &amp; Entra ID SSO, compliance exports, custom CEL policy rules, and dedicated support.
-            </p>
-            <ul class="space-y-1.5 text-[11px] text-slate-300 font-mono">
-              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-accent-violet"></i><span>Enterprise SSO (Okta/Entra)</span></li>
-              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-accent-violet"></i><span>SOC 2/HIPAA compliance exports</span></li>
-              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5 text-accent-violet"></i><span>Direct engineering support</span></li>
-            </ul>
-          </div>
-          <div class="mt-6 pt-3 border-t border-dark-800 text-[11px] font-mono text-accent-violet font-semibold">
-            Custom Pricing · Direct Support
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION 10: EDITIONS & PRICING -->
+    <!-- Open core and plans -->
     <section id="pricing" class="mt-14 mb-12 pt-8 border-t border-dark-800">
-      <div class="text-center max-w-3xl mx-auto mb-10">
-        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-mono font-semibold uppercase tracking-wider mb-3">
-          <i data-lucide="tag" class="w-3.5 h-3.5"></i>
-          <span>Transparent Open-Core Model</span>
-        </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-          Pricing
-        </h2>
+      <div class="text-center max-w-2xl mx-auto mb-8">
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Open core, paid governance</h2>
         <p class="text-slate-400 text-sm sm:text-base mt-3 leading-relaxed">
-          The core engine is free and open source forever under the MIT license. Commercial tiers provide team governance, enterprise identity, compliance logging, and dedicated support.
+          The engine, vector search, agent memory, and the verification barrier are MIT licensed and stay free. Paid plans add team governance on top.
         </p>
-
-        <!-- Open Core Philosophy Explicit Callout -->
-        <div class="mt-4 p-4 rounded-xl bg-dark-900 border border-dark-800 text-xs sm:text-sm text-slate-300">
-          <span class="text-brand-400 font-bold">Open-Core Philosophy:</span>
-          "The Joltrin core remains free and open source. Paid tiers add governance, collaboration, enterprise identity, compliance, and managed capabilities."
-        </div>
       </div>
 
-      <!-- Pricing Cards Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-
-        <!-- Tier 1: Free / Open Source -->
-        <div class="bg-dark-900 border border-dark-800 rounded-2xl p-6 flex flex-col justify-between hover:border-dark-700 transition">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="bg-dark-900 border border-dark-800 rounded-2xl p-6 flex flex-col justify-between">
           <div>
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">Free / Open Source</span>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/30">Available Today</span>
-            </div>
-            <div class="mb-4">
-              <span class="text-3xl font-extrabold text-white font-mono">$0</span>
-              <span class="text-xs text-slate-500 font-mono"> / forever (MIT License)</span>
-            </div>
-            <p class="text-xs text-slate-400 mb-6 leading-relaxed">
-              For developers, researchers, and open-source projects embedding transactional agent state locally.
-            </p>
-            <ul class="space-y-2.5 text-xs text-slate-300 font-mono mb-6">
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
-                <span>Embedded B-Tree storage engine</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
-                <span>Strict serializable ACID transactions</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
-                <span>High-dimensional vector similarity index</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
-                <span>Client-side OPFS browser persistence</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
-                <span>WASM &amp; native Go library</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
-                <span>Zero server or cloud dependencies</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
-                <span>GitHub community support</span>
-              </li>
+            <h3 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400 mb-3">Open source</h3>
+            <div class="mb-4"><span class="text-3xl font-extrabold text-white font-mono">$0</span> <span class="text-xs text-slate-500 font-mono">MIT license</span></div>
+            <ul class="space-y-2 text-xs text-slate-300 mb-6">
+              <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span>Embedded ACID B-Tree engine</span></li>
+              <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span>Durable agent memory and vector search</span></li>
+              <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span>Verification barrier, MCP and A2A servers</span></li>
+              <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span>Community support on GitHub</span></li>
             </ul>
           </div>
           <a href="https://github.com/SharedCode/joltrin" target="_blank" rel="noopener noreferrer"
-             class="w-full py-2.5 px-4 rounded-xl bg-dark-800 hover:bg-dark-750 border border-dark-700 text-slate-200 font-semibold text-xs flex items-center justify-center space-x-2 transition">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
-            <span>Start Building (GitHub)</span>
+             class="w-full py-2.5 px-4 rounded-xl bg-dark-800 hover:bg-dark-750 border border-dark-700 text-slate-200 font-semibold text-xs flex items-center justify-center transition">
+            Get it on GitHub
           </a>
         </div>
 
-        <!-- Tier 2: Pro -->
-        <div class="bg-dark-900 border-2 border-brand-500/60 rounded-2xl p-6 flex flex-col justify-between shadow-xl shadow-brand-500/10 relative">
-          <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-brand-500 text-black font-mono font-bold text-[10px] uppercase tracking-wider">
-            Most Popular for Teams
-          </div>
+        <div class="bg-dark-900 border border-brand-500/40 rounded-2xl p-6 flex flex-col justify-between">
           <div>
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-mono font-semibold uppercase tracking-wider text-brand-400">Pro</span>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/30">Available / Foundation</span>
-            </div>
-            <div class="mb-2">
-              <span class="text-3xl font-extrabold text-white font-mono">$49</span>
-              <span class="text-xs text-slate-500 font-mono"> / mo / team workspace</span>
-            </div>
-            <div class="flex items-center space-x-1.5 text-[10px] text-slate-400 font-mono mb-4">
-              <span class="px-1.5 py-0.5 rounded bg-dark-950 border border-dark-800">Cards</span>
-              <span class="px-1.5 py-0.5 rounded bg-dark-950 border border-dark-800">Apple Pay</span>
-              <span class="px-1.5 py-0.5 rounded bg-dark-950 border border-dark-800">Google Pay</span>
-              <span class="text-brand-400 font-semibold">via Stripe</span>
-            </div>
-            <p class="text-xs text-slate-400 mb-6 leading-relaxed">
-              For engineering teams deploying reliable agentic workflows that require policy controls and governance.
-            </p>
-            <ul class="space-y-2.5 text-xs text-slate-300 font-mono mb-6">
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
-                <span class="text-white font-semibold">Everything in Open Source, plus:</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
-                <span>Multi-tenant workspace management</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
-                <span>Automated Stripe subscription billing</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
-                <span>Customer self-service billing portal</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
-                <span>Team audit logging &amp; telemetry</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
-                <span>Rate limiting &amp; policy verification gates</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
-                <span>Standard email &amp; priority issue support</span>
-              </li>
+            <h3 class="text-xs font-mono font-semibold uppercase tracking-wider text-brand-400 mb-3">Pro</h3>
+            <div class="mb-4"><span class="text-3xl font-extrabold text-white font-mono">$49</span> <span class="text-xs text-slate-500 font-mono">per month, per team</span></div>
+            <ul class="space-y-2 text-xs text-slate-300 mb-6">
+              <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span>Everything in open source</span></li>
+              <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span>Policy-as-code for the barrier</span></li>
+              <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span>Tamper-evident audit lineage</span></li>
+              <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span>Team workspaces and quotas</span></li>
             </ul>
           </div>
           <div>
             <button onclick="openProCheckoutModal()"
-               class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-black font-bold text-xs shadow-lg shadow-brand-500/20 flex items-center justify-center space-x-2 transition transform active:scale-95 cursor-pointer">
-              <i data-lucide="zap" class="w-4 h-4"></i>
-              <span>Start Pro ($49/mo)</span>
+                    class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-black font-bold text-xs shadow-lg shadow-brand-500/20 flex items-center justify-center transition cursor-pointer">
+              Request Pro
             </button>
-            <div class="mt-2 text-center text-[11px] text-slate-500 font-mono">
-              Instant workspace setup · Cancel anytime
-            </div>
+            <p class="text-[11px] text-slate-500 mt-2 text-center">We confirm by email. Self-serve checkout opens when billing is switched on for this site.</p>
           </div>
         </div>
 
-        <!-- Tier 3: Enterprise -->
-        <div class="bg-dark-900 border border-dark-800 rounded-2xl p-6 flex flex-col justify-between hover:border-accent-violet/40 transition">
+        <div class="bg-dark-900 border border-accent-violet/30 rounded-2xl p-6 flex flex-col justify-between">
           <div>
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-mono font-semibold uppercase tracking-wider text-accent-violet">Enterprise</span>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-accent-violet/10 text-accent-violet border border-accent-violet/30">Foundation / Preview</span>
-            </div>
-            <div class="mb-4">
-              <span class="text-3xl font-extrabold text-white font-mono">Custom</span>
-              <span class="text-xs text-slate-500 font-mono"> / annual deployment</span>
-            </div>
-            <p class="text-xs text-slate-400 mb-6 leading-relaxed">
-              For organizations deploying agents into environments with real compliance requirements: SSO, audit trails, and dedicated support.
-            </p>
-            <ul class="space-y-2.5 text-xs text-slate-300 font-mono mb-6">
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0 mt-0.5"></i>
-                <span class="text-white font-semibold">Everything in Pro, plus:</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0 mt-0.5"></i>
-                <span>Okta &amp; Microsoft Entra ID (OIDC) SSO</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0 mt-0.5"></i>
-                <span>Advanced hierarchical RBAC &amp; space isolation</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0 mt-0.5"></i>
-                <span>Custom CEL policy invariants &amp; gates</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0 mt-0.5"></i>
-                <span>Immutable audit trails &amp; compliance exports</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0 mt-0.5"></i>
-                <span>Direct architecture reviews with our team</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0 mt-0.5"></i>
-                <span>Priority incident support</span>
-              </li>
+            <h3 class="text-xs font-mono font-semibold uppercase tracking-wider text-accent-violet mb-3">Enterprise</h3>
+            <div class="mb-4"><span class="text-3xl font-extrabold text-white font-mono">Contact us</span></div>
+            <ul class="space-y-2 text-xs text-slate-300 mb-6">
+              <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0"></i><span>Everything in Pro</span></li>
+              <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0"></i><span>Okta and Microsoft Entra ID sign-in</span></li>
+              <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0"></i><span>Custom CEL policy rules</span></li>
+              <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0"></i><span>Compliance audit exports</span></li>
             </ul>
           </div>
           <button onclick="selectTierAndScroll('enterprise')"
-             class="w-full py-2.5 px-4 rounded-xl bg-dark-800 hover:bg-dark-750 border border-dark-700 hover:border-accent-violet/50 text-slate-200 hover:text-white font-semibold text-xs flex items-center justify-center space-x-2 transition cursor-pointer">
-            <i data-lucide="building" class="w-4 h-4 text-accent-violet"></i>
-            <span>Talk to Enterprise</span>
+                  class="w-full py-2.5 px-4 rounded-xl bg-dark-800 hover:bg-dark-750 border border-dark-700 hover:border-accent-violet/50 text-slate-200 hover:text-white font-semibold text-xs flex items-center justify-center transition cursor-pointer">
+            Talk to us
           </button>
         </div>
-
       </div>
 
-      <!-- Hosted Cloud Clarification -->
-      <div class="p-4 rounded-xl bg-dark-950/80 border border-dark-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-400">
-        <div class="flex items-center space-x-2 font-mono">
-          <span class="px-2 py-0.5 rounded bg-accent-amber/10 border border-accent-amber/30 text-amber-300 font-bold text-[10px]">COMING SOON / PLANNED</span>
-          <span><strong>Hosted Joltrin Cloud:</strong> Fully managed multi-region control plane and hosted agent memory clusters are on the roadmap.</span>
-        </div>
-        <button onclick="selectTierAndScroll('hosted')" class="text-accent-cyan hover:underline font-mono shrink-0 cursor-pointer">
-          Join Hosted Cloud Waitlist →
-        </button>
-      </div>
-    </section>
-
-    <!-- SECTION 11: ENTERPRISE VALUE PROPOSITION -->
-    <section id="enterprise-value" class="mt-14 mb-12 pt-8 border-t border-dark-800">
-      <div class="max-w-3xl mx-auto text-center mb-10">
-        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-accent-violet/10 border border-accent-violet/30 text-accent-violet text-xs font-mono font-semibold uppercase tracking-wider mb-3">
-          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-          <span>Enterprise Architecture</span>
-        </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-          Deploy Autonomous AI Agents Without Giving Up Control
-        </h2>
-        <p class="text-slate-400 text-sm sm:text-base mt-3 leading-relaxed">
-          Here's what that actually means in practice.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <!-- 1. Identity -->
-        <div class="p-6 rounded-2xl bg-dark-900 border border-dark-800 hover:border-dark-700 transition">
-          <div class="w-10 h-10 rounded-xl bg-accent-violet/10 border border-accent-violet/30 flex items-center justify-center text-accent-violet mb-4">
-            <i data-lucide="key" class="w-5 h-5"></i>
-          </div>
-          <h3 class="text-base font-bold text-white mb-2">Cryptographic Agent Identity</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Every agent is assigned a distinct cryptographic identity and token bound to your enterprise IdP (Okta or Entra ID). No anonymous, untracked tool executions.
-          </p>
-        </div>
-
-        <!-- 2. Policy -->
-        <div class="p-6 rounded-2xl bg-dark-900 border border-dark-800 hover:border-dark-700 transition">
-          <div class="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-center justify-center text-brand-400 mb-4">
-            <i data-lucide="file-check" class="w-5 h-5"></i>
-          </div>
-          <h3 class="text-base font-bold text-white mb-2">Declarative CEL Policy Engine</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Define organizational boundaries in Common Expression Language (CEL). Enforce rate ceilings, tool permission scopes, and forbidden parameter patterns before runtime.
-          </p>
-        </div>
-
-        <!-- 3. Verification -->
-        <div class="p-6 rounded-2xl bg-dark-900 border border-dark-800 hover:border-dark-700 transition">
-          <div class="w-10 h-10 rounded-xl bg-accent-cyan/10 border border-accent-cyan/30 flex items-center justify-center text-accent-cyan mb-4">
-            <i data-lucide="shield-alert" class="w-5 h-5"></i>
-          </div>
-          <h3 class="text-base font-bold text-white mb-2">Pre-Action Verification Barrier</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Every tool invocation passes through a deterministic barrier. Destructive operations (DROP TABLE, mass transfer, credential reads) are intercepted before touching real targets.
-          </p>
-        </div>
-
-        <!-- 4. Audit -->
-        <div class="p-6 rounded-2xl bg-dark-900 border border-dark-800 hover:border-dark-700 transition">
-          <div class="w-10 h-10 rounded-xl bg-accent-amber/10 border border-accent-amber/30 flex items-center justify-center text-amber-300 mb-4">
-            <i data-lucide="scroll-text" class="w-5 h-5"></i>
-          </div>
-          <h3 class="text-base font-bold text-white mb-2">Tamper-Evident Audit Ledger</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Append-only, cryptographically signed ledger capturing every reasoning step, tool invocation, and state transition for forensic accountability and incident review.
-          </p>
-        </div>
-
-        <!-- 5. Isolation -->
-        <div class="p-6 rounded-2xl bg-dark-900 border border-dark-800 hover:border-dark-700 transition">
-          <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 mb-4">
-            <i data-lucide="boxes" class="w-5 h-5"></i>
-          </div>
-          <h3 class="text-base font-bold text-white mb-2">Multi-Tenant Space Isolation</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Strict workspace and memory namespace boundaries guarantee that proprietary data, credentials, and conversation memories are strictly separated between teams and tenants.
-          </p>
-        </div>
-
-        <!-- 6. Compliance -->
-        <div class="p-6 rounded-2xl bg-dark-900 border border-dark-800 hover:border-dark-700 transition">
-          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-4">
-            <i data-lucide="award" class="w-5 h-5"></i>
-          </div>
-          <h3 class="text-base font-bold text-white mb-2">Continuous Compliance Readiness</h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Export structured compliance audit bundles formatted for SOC 2 Type II, HIPAA, and GDPR audit workflows. Stream lineage events directly to your SIEM or Datadog.
-          </p>
-        </div>
-      </div>
+      <p class="text-xs text-slate-500 text-center">
+        Hosted Joltrin Cloud is planned and not available yet.
+        <button onclick="selectTierAndScroll('hosted')" class="text-accent-cyan hover:underline cursor-pointer">Join the waitlist</button>.
+      </p>
     </section>
 
     <!-- SECTION 12: CUSTOMER INTEREST / ENTERPRISE INQUIRY FORM -->
@@ -1967,40 +1377,6 @@
       </div>
     </section>
 
-    <!-- SECTION 13: FINAL BOTTOM CALL TO ACTION -->
-    <section class="mt-12 mb-16 p-8 sm:p-12 rounded-3xl bg-gradient-to-b from-dark-900 to-dark-950 border border-dark-750 text-center relative overflow-hidden">
-      <div class="absolute inset-0 bg-radial-gradient from-brand-500/5 via-transparent to-transparent pointer-events-none"></div>
-      <div class="max-w-3xl mx-auto relative z-10">
-        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-mono font-semibold uppercase tracking-wider mb-4">
-          <i data-lucide="zap" class="w-3.5 h-3.5"></i>
-          <span>Deploy With Confidence</span>
-        </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">
-          Ready to Make Your AI Agents Safe, Durable, and Governable?
-        </h2>
-        <p class="text-slate-300 text-sm sm:text-base leading-relaxed mb-8 max-w-2xl mx-auto">
-          Whether you're embedding a transactional database in a single agent or governing a whole fleet of them, Joltrin gives you the reliability and verification layer underneath.
-        </p>
-        <div class="flex flex-wrap items-center justify-center gap-4">
-          <button onclick="openProCheckoutModal()"
-             class="px-6 py-3.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-black font-bold text-sm shadow-xl shadow-brand-500/20 flex items-center space-x-2 transition transform active:scale-95 cursor-pointer">
-            <i data-lucide="zap" class="w-4 h-4"></i>
-            <span>Start Pro ($49/mo)</span>
-          </button>
-          <a href="https://github.com/SharedCode/joltrin" target="_blank" rel="noopener noreferrer"
-             class="px-6 py-3.5 rounded-xl bg-dark-800 hover:bg-dark-750 border border-dark-700 text-white font-semibold text-sm flex items-center space-x-2 transition font-mono">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
-            <span>Explore GitHub (MIT Core)</span>
-          </a>
-          <button onclick="selectTierAndScroll('enterprise')"
-             class="px-6 py-3.5 rounded-xl bg-dark-800 hover:bg-dark-750 border border-accent-violet/40 text-accent-violet hover:text-white font-semibold text-sm flex items-center space-x-2 transition font-mono cursor-pointer">
-            <i data-lucide="building" class="w-4 h-4"></i>
-            <span>Contact Enterprise Team →</span>
-          </button>
-        </div>
-      </div>
-    </section>
-
     <!-- Pro Checkout & Onboarding Modal -->
     <div id="pro-checkout-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
       <div class="bg-dark-900 border border-brand-500/40 rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
@@ -2014,43 +1390,18 @@
         <div class="mb-6">
           <div class="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-[11px] font-mono font-semibold uppercase tracking-wider mb-2">
             <i data-lucide="zap" class="w-3.5 h-3.5"></i>
-            <span>Joltrin Pro Onboarding</span>
+            <span>Joltrin Pro</span>
           </div>
-          <h3 class="text-xl font-bold text-white">Initialize Pro Workspace</h3>
+          <h3 class="text-xl font-bold text-white">Request Pro</h3>
           <p class="text-xs text-slate-400 mt-1">
-            $49/month per team workspace · Full governance, policy barriers &amp; audit logging.
+            $49 per month, per team. Policy-as-code, audit lineage, and team workspaces.
           </p>
-        </div>
-
-        <!-- Payment Methods Badge -->
-        <div class="p-3 bg-dark-950 rounded-xl border border-dark-800 mb-5 flex items-center justify-between text-xs">
-          <span class="text-slate-400 font-mono text-[11px]">Supported Payments:</span>
-          <div class="flex items-center space-x-1.5 font-mono text-[10px] text-slate-300">
-            <span class="px-2 py-0.5 rounded bg-dark-850 border border-dark-700">Cards</span>
-            <span class="px-2 py-0.5 rounded bg-dark-850 border border-dark-700">Apple Pay</span>
-            <span class="px-2 py-0.5 rounded bg-dark-850 border border-dark-700">Google Pay</span>
-          </div>
         </div>
 
         <!-- What Happens Immediately -->
         <div class="mb-5 space-y-2 text-xs text-slate-300 bg-dark-950/60 p-4 rounded-xl border border-dark-800">
-          <div class="font-semibold text-white font-mono text-[11px] uppercase tracking-wider mb-1">Included with Pro:</div>
-          <div class="flex items-start space-x-2">
-            <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
-            <span>Instant workspace provisioning with multi-tenant isolation</span>
-          </div>
-          <div class="flex items-start space-x-2">
-            <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
-            <span>Private Docker/Helm registry access &amp; Pro license key</span>
-          </div>
-          <div class="flex items-start space-x-2">
-            <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
-            <span>Pre-action verification barriers &amp; CEL invariant templates</span>
-          </div>
-          <div class="flex items-start space-x-2">
-            <i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0 mt-0.5"></i>
-            <span>Direct engineering support channel &amp; priority updates</span>
-          </div>
+          <div class="font-semibold text-white font-mono text-[11px] uppercase tracking-wider mb-1">What happens next</div>
+          <p class="leading-relaxed">Send your team name and work email. We reply to confirm the plan and set up your workspace. When Stripe billing is switched on for this site, this form goes straight to checkout.</p>
         </div>
 
         <!-- Pro Checkout Form -->
@@ -2069,27 +1420,18 @@
             <input id="pro-admin-email" name="email" type="email" required placeholder="admin@company.com"
                    class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-brand-500 focus:outline-none" />
           </div>
-          <div>
-            <label for="pro-billing-cycle" class="block text-xs font-mono text-slate-300 mb-1">
-              Billing Frequency
-            </label>
-            <select id="pro-billing-cycle" name="billing_cycle"
-                    class="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:border-brand-500 focus:outline-none">
-              <option value="monthly" selected>Monthly ($49 / month)</option>
-              <option value="annual">Annual ($490/year, 2 months free)</option>
-            </select>
-          </div>
+          <input type="hidden" name="billing_cycle" value="monthly" />
 
           <div id="pro-checkout-status" class="hidden p-3 rounded-xl text-xs"></div>
 
           <button id="pro-submit-btn" type="submit"
                   class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-black font-bold text-xs shadow-lg shadow-brand-500/20 flex items-center justify-center space-x-2 transition transform active:scale-95 cursor-pointer">
             <i data-lucide="credit-card" class="w-4 h-4"></i>
-            <span id="pro-btn-text">Proceed to Secure Stripe Checkout →</span>
+            <span id="pro-btn-text">Request Pro</span>
           </button>
 
           <p class="text-[11px] text-slate-500 text-center font-mono">
-            🔒 Payments processed via Stripe. Zero payment credentials stored in client code.
+            Payments, when enabled, are processed by Stripe. This page never sees card details.
           </p>
         </form>
       </div>
@@ -2106,24 +1448,24 @@
           <span class="text-[10px] px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/30 font-mono">MIT Open Source Core</span>
         </div>
         <p class="text-xs text-slate-400 max-w-md leading-relaxed">
-          Durable memory, recovery, and safety checkpoint infrastructure for autonomous AI agents. Built in Go, compiled to native binaries and WebAssembly with zero server dependencies.
+          Durable memory and a verification barrier for AI agents. Built in Go, compiled to native binaries and WebAssembly.
         </p>
       </div>
       <div>
         <h4 class="font-mono text-xs uppercase font-bold text-white mb-3">Product Funnel</h4>
         <ul class="space-y-2 text-xs font-mono">
-          <li><a href="./" class="hover:text-white transition text-brand-400">🧠 Technical Demo &amp; Engine</a></li>
-          <li><a href="./arena/" class="hover:text-white transition">🎮 Joltrin Arena (Simulation)</a></li>
-          <li><a href="./agents/" class="hover:text-white transition">🔌 Joltrin Agents (Safety Barrier)</a></li>
-          <li><a href="#pricing" class="hover:text-white transition">💳 Editions &amp; Pricing</a></li>
-          <li><a href="#enterprise" class="hover:text-white transition">🏢 Enterprise Access</a></li>
+          <li><a href="./" class="hover:text-white transition text-brand-400">Technical demo</a></li>
+          <li><a href="./arena/" class="hover:text-white transition">Arena (simulation)</a></li>
+          <li><a href="./agents/" class="hover:text-white transition">Agent verification barrier</a></li>
+          <li><a href="#pricing" class="hover:text-white transition">Pricing</a></li>
+          <li><a href="#enterprise" class="hover:text-white transition">Enterprise contact</a></li>
         </ul>
       </div>
       <div>
         <h4 class="font-mono text-xs uppercase font-bold text-white mb-3">Open Source &amp; Community</h4>
         <ul class="space-y-2 text-xs font-mono">
           <li><a href="https://github.com/SharedCode/joltrin" target="_blank" rel="noopener noreferrer" class="hover:text-white transition flex items-center space-x-1.5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg><span>GitHub (SharedCode/joltrin)</span></a></li>
-          <li><a href="https://github.com/SharedCode/joltrin#readme" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">Documentation</a></li>
+          <li><a href="https://github.com/SharedCode/joltrin/tree/master/docs" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">Documentation</a></li>
           <li><a href="https://github.com/SharedCode/joltrin/blob/master/LICENSE" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">MIT License</a></li>
           <li><a href="https://github.com/SharedCode/joltrin/blob/master/SECURITY.md" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">Security Policy</a></li>
         </ul>
@@ -2132,9 +1474,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 border-t border-dark-850 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500 font-mono">
       <div>© 2026 Joltrin Authors &amp; SharedCode. Open source core under MIT license.</div>
       <div class="flex items-center space-x-4">
-        <span>Sub-millisecond ACID Latency</span>
-        <span>•</span>
-        <span>Zero Unverified Actions</span>
+        <span>Docs on GitHub</span>
       </div>
     </div>
   </footer>
@@ -2759,11 +2099,11 @@
       // GitHub Pages deployment, which serves static files only). Be honest
       // about that instead of faking a checkout session.
       btn.disabled = false;
-      btnText.innerText = 'Proceed to Secure Stripe Checkout →';
+      btnText.innerText = 'Request Pro';
 
       const mailtoSubject = encodeURIComponent(`Joltrin Pro signup: ${workspace}`);
       const mailtoBody = encodeURIComponent(
-        `Workspace: ${workspace}\nEmail: ${email}\nBilling cycle: ${cycle === 'annual' ? 'Annual ($490/year)' : 'Monthly ($49/month)'}`
+        `Workspace: ${workspace}\nEmail: ${email}\nPlan: Pro ($49/month)`
       );
       const mailtoLink = `mailto:gerardrecinto@gmail.com?subject=${mailtoSubject}&body=${mailtoBody}`;
 
@@ -2772,10 +2112,10 @@
         statusBox.innerHTML = `
           <div class="flex items-center space-x-2 text-amber-400 font-bold">
             <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-            <span>Checkout isn't live on this static site yet</span>
+            <span>Online checkout isn't available on this site yet</span>
           </div>
           <p class="text-slate-300 leading-relaxed">
-            This demo is hosted on GitHub Pages, which can't run the billing backend. Email us your workspace name and we'll set up <strong class="text-white font-mono">${workspace}</strong> on the ${cycle === 'annual' ? '$490/year' : '$49/month'} plan directly.
+            This site is hosted on GitHub Pages, which can't run the billing backend. Email us your workspace name and we'll set up <strong class="text-white font-mono">${workspace}</strong> on the $49/month plan directly.
           </p>
           <div class="pt-1 flex items-center justify-between">
             <a href="${mailtoLink}" class="px-3 py-1.5 rounded-lg bg-brand-500 text-black font-bold text-[11px] flex items-center space-x-1.5">
