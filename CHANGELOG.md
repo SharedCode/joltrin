@@ -1,5 +1,11 @@
 # Changelog
 
+## v5.8.1
+
+- `go get github.com/sharedcode/joltrin/v5` followed by importing `v5/database` or `v5/governance` now works from outside the repo. These packages import the Redis adapter, `incfs` and `infs`, which had no published versions and were not declared in the root go.mod, so the build failed with "no required module provides package". Those modules are now tagged (`adapters/redis`, `adapters/cassandra`, `infs`, `incfs` at v0.1.0) and required by the root module.
+- Fixed the native build image used by the release workflow. It did not copy `adapters/nats/go.mod`, so the v5.8.0 release build failed in `go mod download`.
+- Packages that still need the unpublished `ai` and `jsondb` modules (`tools/httpserver`, some examples) only build inside the repo workspace.
+
 ## v5.8.0
 
 ### Verify

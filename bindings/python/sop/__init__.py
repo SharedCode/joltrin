@@ -1,6 +1,6 @@
 
 
-__version__="5.8.0"
+__version__="5.8.1"
 
 from . import ai
 from .transaction import Transaction, TransactionOptions, TransactionMode
