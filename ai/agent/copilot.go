@@ -2141,11 +2141,11 @@ func (a *CopilotAgent) handleSlashCommand(ctx context.Context, query string, gen
 		if execErr != nil {
 			if strings.Contains(execErr.Error(), "unknown tool") {
 				if gen != nil {
-					// Logs only the tool name (sanitized), not the underlying
-					// error: execErr can originate from a provider call and
-					// carry an API key in its message, which must never reach
-					// a log sink.
-					log.Warn("Slash command failed locally (unknown tool), falling back to LLM", "tool", logsafe.S(toolName))
+					// Logs neither the underlying error nor the command text:
+					// execErr can originate from a provider call and carry an
+					// API key in its message, and the command line is
+					// user-typed, so neither may reach a log sink.
+					log.Warn("Slash command failed locally (unknown tool), falling back to LLM")
 					return false, "", nil // Handled by LLM
 				}
 				return true, fmt.Sprintf("Error executing command %q (and no AI Copilot available to interpret it): %v", toolName, execErr), fmt.Errorf("tool fallback failed")
