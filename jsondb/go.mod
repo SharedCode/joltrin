@@ -22,7 +22,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/ncw/directio v1.0.5 // indirect
 	github.com/redis/go-redis/v9 v9.8.0 // indirect
-	github.com/sethvargo/go-retry v0.3.0 // indirect
+	github.com/sethvargo/go-retry v0.4.0 // indirect
 	github.com/sharedcode/joltrin/adapters/cassandra v0.1.0 // indirect
 	github.com/sharedcode/joltrin/adapters/redis v0.1.0 // indirect
 	github.com/sharedcode/joltrin/incfs v0.1.0 // indirect
