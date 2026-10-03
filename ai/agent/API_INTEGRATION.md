@@ -402,5 +402,5 @@ Result: ✅ Added 2 users successfully in 15ms (133 items/sec)
 
 ## Next Steps
 
-See [API_ARCHITECTURE.md](./API_ARCHITECTURE.md) for complete API reference.
-See [README_API.md](./README_API.md) for quick start guide.
+See [API_ARCHITECTURE.md](API_ARCHITECTURE.md) for complete API reference.
+See [README_API.md](README_API.md) for quick start guide.

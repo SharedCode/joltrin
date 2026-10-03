@@ -21,7 +21,7 @@
 			"args": [
 				"build",
 				"-f",
-				"Dockerfile.nocov",
+				"docker/Dockerfile.nocov",
 				"-t",
 				"mydi-nocov",
 				"."

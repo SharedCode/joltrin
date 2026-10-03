@@ -43,7 +43,7 @@ See [ai/README.md](../../ai/README.md) for a deep dive into the AI capabilities.
 ## Documentation
 
 *   **[API Cookbook](COOKBOOK.md)**: Common recipes and patterns (Key-Value, Transactions, AI).
-*   **[Examples](sop/examples/)**: Complete runnable scripts.
+*   **[Examples](sop/examples)**: Complete runnable scripts.
 
 ## Installation
 

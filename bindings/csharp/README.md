@@ -5,7 +5,7 @@
 ## Documentation
 
 *   **[API Cookbook](../../docs/COOKBOOK.md)**: Common recipes and patterns (Key-Value, Transactions, AI).
-*   **[Examples](Sop.CLI/)**: Complete runnable examples.
+*   **[Examples](Sop.CLI)**: Complete runnable examples.
 
 ## Installation
 
