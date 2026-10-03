@@ -112,10 +112,11 @@ Initialize a local, file-backed vector database.
 package main
 
 import (
-	"fmt"
 	"context"
-	"github.com/sharedcode/joltrin/ai"
+	"fmt"
 	"github.com/sharedcode/joltrin/ai/database"
+	"github.com/sharedcode/joltrin/ai/vector"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 func main() {
@@ -125,7 +126,7 @@ func main() {
 		Type:          sop.Standalone,
 		StoresFolders: []string{"./my_vector_db"},
 	})
-	
+
 	// 2. Configure Storage Path
 	// db.SetStoragePath("./my_vector_db") // Done in NewDatabase
 
@@ -133,10 +134,10 @@ func main() {
 	// This creates/opens a specific "table" or "collection" named "documents"
 	ctx := context.Background()
 	trans, _ := db.BeginTransaction(ctx, sop.ForWriting)
-	idx, _ := db.OpenVectorStore(ctx, "documents", trans, vector.Config{})
-	
+	_, _ = db.OpenVectorStore(ctx, "documents", trans, vector.Config{})
+
 	fmt.Println("Vector Store opened successfully!")
-	
+
 	// Don't forget to commit if you made changes (though Open just initializes)
 	trans.Commit(ctx)
 }

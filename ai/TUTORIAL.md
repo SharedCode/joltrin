@@ -65,9 +65,12 @@ First, we need to teach our Doctor. We will ingest "medical knowledge" (text chu
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/sharedcode/joltrin/ai"
 	"github.com/sharedcode/joltrin/ai/database"
+	"github.com/sharedcode/joltrin/ai/vector"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 func main() {
@@ -88,14 +91,14 @@ func main() {
 	// 4. Create some knowledge (In reality, you'd load this from PDFs/Textbooks)
 	knowledge := []ai.Item[map[string]any]{
 		{
-			ID:     "doc-101",
-			Vector: []float32{0.1, 0.2, 0.9}, // Simplified vector
-			Payload:   map[string]any{"text": "Appendicitis presents with pain in the lower right abdomen."},
+			ID:      "doc-101",
+			Vector:  []float32{0.1, 0.2, 0.9}, // Simplified vector
+			Payload: map[string]any{"text": "Appendicitis presents with pain in the lower right abdomen."},
 		},
 		{
-			ID:     "doc-102",
-			Vector: []float32{0.8, 0.1, 0.1},
-			Payload:   map[string]any{"text": "Migraines are often accompanied by sensitivity to light."},
+			ID:      "doc-102",
+			Vector:  []float32{0.8, 0.1, 0.1},
+			Payload: map[string]any{"text": "Migraines are often accompanied by sensitivity to light."},
 		},
 	}
 
@@ -104,7 +107,7 @@ func main() {
 	if err := doctor.UpsertBatch(ctx, knowledge); err != nil {
 		panic(err)
 	}
-	
+
 	// 6. Commit
 	trans.Commit(ctx)
 
