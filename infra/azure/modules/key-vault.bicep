@@ -14,6 +14,10 @@ param stripeWebhookSecret string
 
 param stripePublishableKey string = ''
 
+@secure()
+@description('Root admin password for the first-run bootstrap. Stored in Key Vault; \'unset\' when empty.')
+param rootPassword string = ''
+
 var secretsUserRoleId = '4633458b-17de-408a-b874-0445c86b69e6' // built-in Key Vault Secrets User role
 
 resource vault 'Microsoft.KeyVault/vaults@2023-07-01' = {
@@ -63,6 +67,14 @@ resource secretPublishableKey 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   name: 'stripe-publishable-key'
   properties: {
     value: empty(stripePublishableKey) ? 'unset' : stripePublishableKey
+  }
+}
+
+resource secretRootPassword 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: vault
+  name: 'joltrin-root-password'
+  properties: {
+    value: empty(rootPassword) ? 'unset' : rootPassword
   }
 }
 

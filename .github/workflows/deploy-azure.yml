@@ -13,7 +13,8 @@
 # repository variables (not secrets, they aren't sensitive on their own):
 #   AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID
 # And these as repository secrets:
-#   STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, ALERT_EMAIL
+#   STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, ALERT_EMAIL, JOLTRIN_ROOT_PASSWORD
+#   (optional: creates the root admin on a fresh data volume, at least 16 chars)
 # Optional repository variables (identifiers, not secrets). While a value is
 # empty the matching feature stays off: no Pro price means no Pro checkout,
 # no Enterprise price means Enterprise stays contact-sales.
@@ -81,6 +82,7 @@ jobs:
             -p alertEmail="${{ secrets.ALERT_EMAIL }}" \
             -p stripeSecretKey="${{ secrets.STRIPE_SECRET_KEY }}" \
             -p stripeWebhookSecret="${{ secrets.STRIPE_WEBHOOK_SECRET }}" \
+            -p rootPassword="${{ secrets.JOLTRIN_ROOT_PASSWORD }}" \
             -p stripePublishableKey="${{ vars.STRIPE_PUBLISHABLE_KEY }}" \
             -p stripeProPriceId="${{ vars.STRIPE_PRO_PRICE_ID }}" \
             -p stripeEnterprisePriceId="${{ vars.STRIPE_ENTERPRISE_PRICE_ID }}" \

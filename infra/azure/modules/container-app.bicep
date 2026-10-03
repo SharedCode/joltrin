@@ -54,6 +54,9 @@ var optionalEnv = concat(
 @description('True when real Stripe secrets were supplied to the deploy. While false the app gets no Key Vault secret references and runs in simulation mode.')
 param stripeEnabled bool = false
 
+@description('True when a root bootstrap password was supplied to the deploy. Adds the JOLTRIN_ROOT_PASSWORD secret reference.')
+param rootPasswordEnabled bool = false
+
 @description('Name of the managed environment storage (Azure Files share) mounted as the app data directory.')
 param dataStorageName string
 
@@ -86,7 +89,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-11-02-preview' = {
           identity: userAssignedIdentityId
         }
       ]
-      secrets: stripeEnabled ? [
+      secrets: concat(stripeEnabled ? [
         {
           name: 'stripe-secret-key'
           keyVaultUrl: '${keyVaultUri}secrets/stripe-secret-key'
@@ -102,7 +105,13 @@ resource containerApp 'Microsoft.App/containerApps@2023-11-02-preview' = {
           keyVaultUrl: '${keyVaultUri}secrets/stripe-publishable-key'
           identity: userAssignedIdentityId
         }
-      ] : []
+      ] : [], rootPasswordEnabled ? [
+        {
+          name: 'joltrin-root-password'
+          keyVaultUrl: '${keyVaultUri}secrets/joltrin-root-password'
+          identity: userAssignedIdentityId
+        }
+      ] : [])
       ingress: {
         external: true
         targetPort: 8080
@@ -139,6 +148,11 @@ resource containerApp 'Microsoft.App/containerApps@2023-11-02-preview' = {
             {
               name: 'STRIPE_PUBLISHABLE_KEY'
               secretRef: 'stripe-publishable-key'
+            }
+          ] : [], rootPasswordEnabled ? [
+            {
+              name: 'JOLTRIN_ROOT_PASSWORD'
+              secretRef: 'joltrin-root-password'
             }
           ] : [], [
             {
