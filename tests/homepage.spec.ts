@@ -24,6 +24,13 @@ test.describe('Homepage', () => {
     expect(frameY).toBeGreaterThan(heroY);
   });
 
+  test('explains how to test the barrier with your own AI agent', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const section = page.locator('#test-your-agent');
+    await expect(section).toContainText('sop-mcp-server');
+    await expect(section).toContainText('claude mcp add');
+  });
+
   test('three live experiences are linked right after the hero', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const strip = page.locator('#live-experiences');

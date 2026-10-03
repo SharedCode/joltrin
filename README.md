@@ -44,6 +44,17 @@ Or skip the install. These run entirely in your browser with no backend:
 | [Agent barrier](https://joltrinhq.com/agents/) | Try to drop a database before the backup is validated and watch the barrier refuse. |
 | [Arena](https://joltrinhq.com/arena/) | Crash storage nodes and spike load in a cluster simulation. It illustrates the concepts, it is not a live cluster. |
 
+## Test it with your own AI agent
+
+Any agent that supports MCP can use the barrier. Three steps:
+
+```bash
+go install github.com/sharedcode/joltrin/v5/cmd/sop-mcp-server@latest
+claude mcp add joltrin -- sop-mcp-server    # Claude Code. Other agents: add an MCP server that runs `sop-mcp-server`
+```
+
+Then tell your agent: "Use the joltrin tools to run `drop_prod_db` on workflow `db-maintenance` with trace id `t1`." The server refuses until `take_backup` and `validate_backup` have run in that trace, whatever the agent claims. Make sure `$(go env GOPATH)/bin` is on your `PATH`. A recorded run with real agents, and what it does not prove, is in [docs/AGENT_BARRIER_TESTS.md](docs/AGENT_BARRIER_TESTS.md).
+
 ## What is verified
 
 - **Latency.** About 6.9 microseconds per B-Tree write or read, over 140,000 ops/sec with WAL logging, from the repo's own harness on a 2015 dual-core MacBook Pro. Reproduce it with `go run ./tools/benchmark`. Details and limits are in [docs/BENCHMARKS.md](docs/BENCHMARKS.md).
