@@ -2,8 +2,11 @@ package governance
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -190,5 +193,62 @@ func TestStripeRequest_SendsAPIVersionHeader(t *testing.T) {
 	}
 	if got != managedPaymentsAPIVersion {
 		t.Fatalf("Stripe-Version = %q, want %q", got, managedPaymentsAPIVersion)
+	}
+}
+
+type captureTransport struct {
+	body    string
+	version string
+}
+
+func (c *captureTransport) RoundTrip(r *http.Request) (*http.Response, error) {
+	b, _ := io.ReadAll(r.Body)
+	c.body = string(b)
+	c.version = r.Header.Get("Stripe-Version")
+	return &http.Response{
+		StatusCode: http.StatusOK,
+		Header:     http.Header{"Content-Type": []string{"application/json"}},
+		Body:       io.NopCloser(strings.NewReader(`{"id":"cs_test_1","url":"https://checkout.stripe.com/c/pay/cs_test_1"}`)),
+		Request:    r,
+	}, nil
+}
+
+func checkoutForm(t *testing.T, managed bool) (form url.Values, version string) {
+	t.Helper()
+	cfg := liveConfig()
+	cfg.ManagedPayments = managed
+	svc := NewDefaultBillingService(cfg, NewFeatureGate(TierCore))
+	cap := &captureTransport{}
+	svc.httpClient = &http.Client{Transport: cap}
+	if _, err := svc.CreateCheckoutSession(context.Background(), "t1", "a@example.com", TierPro); err != nil {
+		t.Fatalf("CreateCheckoutSession: %v", err)
+	}
+	form, err := url.ParseQuery(cap.body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return form, cap.version
+}
+
+func TestCheckoutSession_ManagedPaymentsOmitsPaymentMethodTypes(t *testing.T) {
+	form, version := checkoutForm(t, true)
+	if form.Get("managed_payments[enabled]") != "true" {
+		t.Fatalf("managed_payments[enabled] missing: %v", form)
+	}
+	if _, present := form["payment_method_types[0]"]; present {
+		t.Fatal("Stripe rejects payment_method_types on a Managed Payments session")
+	}
+	if version != managedPaymentsAPIVersion {
+		t.Fatalf("Stripe-Version = %q, want %q", version, managedPaymentsAPIVersion)
+	}
+}
+
+func TestCheckoutSession_WithoutManagedPaymentsStillRestrictsToCards(t *testing.T) {
+	form, version := checkoutForm(t, false)
+	if form.Get("payment_method_types[0]") != "card" {
+		t.Fatalf("expected card payment method, got %v", form)
+	}
+	if form.Has("managed_payments[enabled]") || version != "" {
+		t.Fatalf("managed payments leaked into a normal session: %v version=%q", form, version)
 	}
 }
