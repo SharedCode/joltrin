@@ -10,7 +10,7 @@ require (
 	github.com/goccy/go-json v0.9.11 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/sethvargo/go-retry v0.3.0 // indirect
-	golang.org/x/sync v0.22.0 // indirect
+	golang.org/x/sync v0.23.0 // indirect
 )
 
 require github.com/sharedcode/joltrin/v5 v5.8.0
