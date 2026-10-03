@@ -24,7 +24,9 @@ Joltrin (formerly SOP) is an ACID-compliant B-Tree storage engine that runs insi
 **Why it matters.** An agent that can call tools needs more than a good prompt. It needs state that survives a failure and a check that runs before the action, not after. Joltrin puts both in the same process and the same transaction boundary, so there is no network hop and no separate service to operate.
 
 <p align="center">
-  <img src="docs/assets/joltrin-demo.gif" alt="Joltrin demo: in-process ACID transactions, the Arena simulation, and the agent verification barrier" width="760" />
+  <a href="https://youtu.be/F0jYkBHJluI">
+    <img src="docs/assets/joltrin-demo.gif" alt="Joltrin demo. Click to watch the video." width="760" />
+  </a>
 </p>
 
 ## Try it in five minutes
