@@ -218,7 +218,7 @@ for i in range(12):
     draw.rounded_rectangle([(60, 65), (315, 92)], radius=8, fill=(12, 32, 36), outline=BRAND_CYAN, width=1)
     draw.text((74, 71), "DEMO 3: AGENT VERIFICATION BARRIER", fill=BRAND_CYAN, font=font_mono)
     
-    draw.text((60, 105), "ai/verify Barrier Gating Real Runbooks in WASM", fill=TEXT_WHITE, font=font_title)
+    draw.text((60, 105), "verify Barrier Gating Real Runbooks in WASM", fill=TEXT_WHITE, font=font_title)
     
     draw.rounded_rectangle([(60, 145), (740, 385)], radius=10, fill=(5, 8, 14), outline=BORDER_COLOR, width=1)
     

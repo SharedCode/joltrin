@@ -1,4 +1,4 @@
-// Package main demonstrates ai/verify's barrier certificate blocking an
+// Package main demonstrates verify's barrier certificate blocking an
 // out-of-order operational step in real time, the exact scenario described
 // in docs/MCP_A2A_AND_VERIFICATION_ENGINE.md: an agent must not be allowed
 // to drop the production database before a backup has been taken and

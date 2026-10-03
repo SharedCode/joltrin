@@ -1,4 +1,4 @@
-// Command demo-agents is a WASM build of ai/verify's barrier certificate,
+// Command demo-agents is a WASM build of verify's barrier certificate,
 // the same engine backing tools/mcpserver and tools/a2aagent, running
 // entirely client-side. This is not a mockup of the MCP/A2A servers (those
 // are real network protocols and cannot run inside a static GitHub Pages

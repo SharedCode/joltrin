@@ -17,7 +17,7 @@ func newTestLedger(t *testing.T) *ledger.Ledger {
 }
 
 // releaseWorkflow mirrors a small, realistic release pipeline: a backup must
-// be validated before prod can be dropped, matching the scenario ai/verify's
+// be validated before prod can be dropped, matching the scenario verify's
 // own tests use.
 func releaseWorkflow(t *testing.T, safety []verify.SafetyRule) *verify.Workflow {
 	t.Helper()

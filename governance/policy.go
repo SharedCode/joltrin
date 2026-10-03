@@ -62,7 +62,7 @@ type EvaluationResult struct {
 	Violation *verify.Violation `json:"violation,omitempty"`
 }
 
-// CompilePolicy compiles a declarative PolicyManifest into an executable ai/verify.Workflow.
+// CompilePolicy compiles a declarative PolicyManifest into an executable verify.Workflow.
 // If the manifest specifies a MinTier, the provided FeatureGate is checked.
 func CompilePolicy(manifest *PolicyManifest, gate *FeatureGate) (*CompiledPolicy, error) {
 	if manifest == nil {
@@ -161,7 +161,7 @@ func (cp *CompiledPolicy) Evaluate(ctx context.Context, trace *verify.Trace, ste
 		}
 	}
 
-	// 2. Check ai/verify Barrier Certificate
+	// 2. Check verify Barrier Certificate
 	if err := cp.Workflow.CheckSafety(trace, stepID); err != nil {
 		var v *verify.Violation
 		if errors.As(err, &v) {

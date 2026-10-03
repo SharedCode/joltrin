@@ -18,7 +18,7 @@ import (
 
 const invokePath = "/a2a/invoke"
 
-// dbMaintenanceWorkflow mirrors the fixture used throughout ai/verify,
+// dbMaintenanceWorkflow mirrors the fixture used throughout verify,
 // tools/mcpserver, and tools/a2aagent's own tests, so all four packages
 // demonstrably verify the same property against the same workflow shape.
 func dbMaintenanceWorkflow(t *testing.T) *verify.Workflow {
@@ -182,7 +182,7 @@ func Test_Bridge_FullSequence(t *testing.T) {
 // bridge twice with the same idempotency_key, the bridge forwards it to
 // the remote A2A agent unchanged, and the retry comes back marked
 // replayed, with the remote trace left at one entry, proving the key
-// actually reached ai/verify.Trace.CheckAndCommitIdempotent through both
+// actually reached verify.Trace.CheckAndCommitIdempotent through both
 // protocol hops, not just locally on the bridge.
 func Test_Bridge_IdempotencyKey_ForwardedToRemoteAgent(t *testing.T) {
 	agent := newTestAgent(t)

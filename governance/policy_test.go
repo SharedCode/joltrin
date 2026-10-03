@@ -62,7 +62,7 @@ func TestPolicyCompilationAndEvaluation(t *testing.T) {
 		t.Errorf("expected RBAC deny, got allowed=%v decision=%s", eval.Allowed, eval.Decision)
 	}
 
-	// 2. Admin tries to drop prod db directly without backup -> Gated by ai/verify barrier (precedence rule violation)
+	// 2. Admin tries to drop prod db directly without backup -> Gated by verify barrier (precedence rule violation)
 	eval, err = compiled.Evaluate(ctx, trace, "drop_prod_db", []string{"Admin"})
 	if err != nil {
 		t.Fatalf("unexpected error during eval: %v", err)

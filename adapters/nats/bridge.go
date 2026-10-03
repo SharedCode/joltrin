@@ -59,7 +59,7 @@ func SubjectFor(workflow string) string {
 
 // VerifyBridge wraps a *verify.Workflow and publishes a BarrierDecision
 // event to NATS after every barrier check it runs. It does not change
-// ai/verify's behavior: CheckSafety, CheckAndCommit, and
+// verify's behavior: CheckSafety, CheckAndCommit, and
 // CheckAndCommitIdempotent each call straight through to the identically
 // named *verify.Workflow method and return its exact result unchanged; the
 // NATS publish is a side effect on the way out. A publish failure is never
@@ -67,7 +67,7 @@ func SubjectFor(workflow string) string {
 // below.
 //
 // A VerifyBridge is only ever a decorator a caller opts into at its own
-// call sites. Nothing in ai/verify, tools/mcpserver, or tools/a2aagent
+// call sites. Nothing in verify, tools/mcpserver, or tools/a2aagent
 // constructs or requires one.
 type VerifyBridge struct {
 	wf       *verify.Workflow

@@ -35,7 +35,7 @@ import (
 func AgentCard(baseURL string) *a2a.AgentCard {
 	return &a2a.AgentCard{
 		Name:               "sop-runbook-agent",
-		Description:        "Executes SOP runbook steps, gated by a safety and reachability barrier certificate (ai/verify) so a step can never run out of order or into an unrecoverable state.",
+		Description:        "Executes SOP runbook steps, gated by a safety and reachability barrier certificate (verify) so a step can never run out of order or into an unrecoverable state.",
 		URL:                baseURL,
 		Version:            "0.1.0",
 		ProtocolVersion:    string(a2a.Version),
@@ -70,7 +70,7 @@ type stepRequest struct {
 }
 
 // Executor implements a2asrv.AgentExecutor, delegating the actual safety
-// check and commit to the same ai/verify.Workflow logic tools/mcpserver
+// check and commit to the same verify.Workflow logic tools/mcpserver
 // uses, against the same shared runbookstore.Store.
 type Executor struct {
 	Store *runbookstore.Store

@@ -1,4 +1,4 @@
-// Package replay closes the loop between ai/ledger and ai/verify: it records
+// Package replay closes the loop between ai/ledger and verify: it records
 // verification-barrier decisions into a run's ledger in a canonical shape,
 // and replays a run's recorded decision history against a candidate
 // verify.Workflow to catch behavioral drift before a workflow definition

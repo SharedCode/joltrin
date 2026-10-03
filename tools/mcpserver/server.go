@@ -1,7 +1,7 @@
 // Package mcpserver exposes SOP runbooks to MCP clients (an LLM agent, an
 // orchestration framework, another service) as three tools: read_sop,
 // validate_step, and execute_step. execute_step is gated by
-// ai/verify's barrier certificate: a step only actually executes if the
+// verify's barrier certificate: a step only actually executes if the
 // safety check passes first, an agent cannot skip a precondition by
 // asserting it did, the check is enforced server-side against the trace
 // this server holds, not against whatever the agent claims.

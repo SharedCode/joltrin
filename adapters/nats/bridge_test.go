@@ -158,7 +158,7 @@ func collectDecisions(t *testing.T, nc *nats.Conn, subject string, n int) func()
 }
 
 // TestVerifyBridge_PublishesRealBarrierOutcomes runs the exact blocked-then-
-// allowed sequence examples/verify_barrier demonstrates against ai/verify
+// allowed sequence examples/verify_barrier demonstrates against verify
 // directly, through a VerifyBridge instead, and checks the published events
 // match what the barrier actually decided.
 func TestVerifyBridge_PublishesRealBarrierOutcomes(t *testing.T) {
@@ -200,7 +200,7 @@ func TestVerifyBridge_PublishesRealBarrierOutcomes(t *testing.T) {
 	}
 	// drop_prod_db itself Requires backup_validated, so an empty trace
 	// blocks on that precondition before the safety rule is even reached;
-	// see ai/verify.Workflow.checkSafetyLocked's ordering.
+	// see verify.Workflow.checkSafetyLocked's ordering.
 	if events[0].Rule != "precondition" {
 		t.Errorf("event 0: Rule = %q, want %q", events[0].Rule, "precondition")
 	}
