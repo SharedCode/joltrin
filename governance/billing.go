@@ -113,8 +113,9 @@ type StripeConfig struct {
 }
 
 // managedPaymentsAPIVersion is the Stripe API version required to create
-// Checkout Sessions with managed_payments enabled.
-const managedPaymentsAPIVersion = "2026-02-25.preview"
+// Checkout Sessions with managed_payments enabled. Stripe documents
+// 2025-03-31.basil as the minimum.
+const managedPaymentsAPIVersion = "2025-03-31.basil"
 
 // TierCheckout describes whether a tier can be bought through checkout.
 // Mode is one of "stripe", "simulated", "contact_sales", or "unavailable".
@@ -483,7 +484,11 @@ func (s *DefaultBillingService) CreateCheckoutSession(ctx context.Context, tenan
 	// Production Stripe API call
 	data := url.Values{}
 	data.Set("mode", "subscription")
-	data.Set("payment_method_types[0]", "card")
+	// Stripe rejects payment_method_types on a Managed Payments session
+	// ("Managed Payments handles this parameter for you").
+	if !s.cfg.ManagedPayments {
+		data.Set("payment_method_types[0]", "card")
+	}
 	data.Set("line_items[0][price]", priceID)
 	data.Set("line_items[0][quantity]", "1")
 	data.Set("client_reference_id", tenantID)
