@@ -233,6 +233,30 @@ func handleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// publicCheckoutOrigins may call the checkout endpoint from a browser. The
+// marketing site is static, so its Pro form reaches this server cross-origin.
+var publicCheckoutOrigins = map[string]bool{
+	"https://joltrinhq.com":     true,
+	"https://www.joltrinhq.com": true,
+}
+
+// handlePublicCheckout lets the static site start a Checkout Session without a
+// login. It only creates a Stripe session (rate limited, Pro or Enterprise as
+// handleCreateCheckoutSession decides); plans are granted by the signed webhook.
+func handlePublicCheckout(w http.ResponseWriter, r *http.Request) {
+	if origin := r.Header.Get("Origin"); publicCheckoutOrigins[origin] {
+		w.Header().Set("Access-Control-Allow-Origin", origin)
+		w.Header().Set("Vary", "Origin")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	}
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	handleCreateCheckoutSession(w, r)
+}
+
 func handleCreatePortalSession(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
