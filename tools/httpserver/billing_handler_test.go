@@ -115,6 +115,36 @@ func TestHandleCreateCheckoutSession(t *testing.T) {
 	}
 }
 
+func TestHandlePublicCheckout_CORS(t *testing.T) {
+	pre := httptest.NewRequest(http.MethodOptions, "/api/billing/public-checkout", nil)
+	pre.Header.Set("Origin", "https://joltrinhq.com")
+	w := httptest.NewRecorder()
+	handlePublicCheckout(w, pre)
+	if w.Code != http.StatusNoContent {
+		t.Fatalf("preflight: expected 204, got %d", w.Code)
+	}
+	if got := w.Header().Get("Access-Control-Allow-Origin"); got != "https://joltrinhq.com" {
+		t.Errorf("expected joltrinhq.com allowed, got %q", got)
+	}
+
+	other := httptest.NewRequest(http.MethodOptions, "/api/billing/public-checkout", nil)
+	other.Header.Set("Origin", "https://evil.example")
+	w = httptest.NewRecorder()
+	handlePublicCheckout(w, other)
+	if got := w.Header().Get("Access-Control-Allow-Origin"); got != "" {
+		t.Errorf("unexpected CORS header for foreign origin: %q", got)
+	}
+
+	body, _ := json.Marshal(map[string]any{"tier": "pro", "email": "a@example.com"})
+	post := httptest.NewRequest(http.MethodPost, "/api/billing/public-checkout", bytes.NewReader(body))
+	post.Header.Set("Origin", "https://joltrinhq.com")
+	w = httptest.NewRecorder()
+	handlePublicCheckout(w, post)
+	if w.Code != http.StatusOK {
+		t.Fatalf("post: expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+}
+
 func TestHandleSimulateCheckout(t *testing.T) {
 	gate := getServerFeatureGate()
 	gate.SetTier(governance.TierCore)
