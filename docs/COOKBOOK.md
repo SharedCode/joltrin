@@ -73,9 +73,9 @@ func main() {
 		if i%1000 == 0 {
 			trans.Commit(ctx)
 			// Start new transaction
-			trans, _ = db.BeginTransaction(ctx, sop.ForWriting)
+			trans, _ = database.BeginTransaction(ctx, dbOpts, sop.ForWriting)
 			// Re-open store in new transaction
-			store, _ = database.OpenBtree[string, UserProfile](ctx, db, "users", trans, nil)
+			store, _ = database.OpenBtree[string, UserProfile](ctx, dbOpts, "users", trans, nil)
 		}
 	}
 	
