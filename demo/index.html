@@ -690,6 +690,215 @@ claude mcp add joltrin -- sop-mcp-server</pre>
       </div>
     </section>
 
+    <section id="agent-team" class="mb-12 p-6 sm:p-10 rounded-2xl bg-dark-900 border border-dark-800">
+      <div class="max-w-3xl mb-6">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">Agents hand off work. The barrier checks every call.</h2>
+        <p class="text-slate-400 text-sm sm:text-base mt-2 leading-relaxed">
+          Jira, Grafana, AWS, and PagerDuty agents pass work to each other. Before any call runs, three checks: is the tool on that agent's allowlist and within its limits, does the claim match evidence a tool returned, and have the steps it depends on committed. Each run includes a skipped step, a made-up number, and an agent reaching past its scope.
+        </p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2 mb-3" role="tablist" aria-label="Agent scenario">
+        <button type="button" role="tab" data-team-scenario="0" aria-selected="true" class="team-tab px-3 py-1.5 rounded-lg border border-brand-500/60 text-brand-400 font-mono text-xs">Latency alert</button>
+        <button type="button" role="tab" data-team-scenario="1" aria-selected="false" class="team-tab px-3 py-1.5 rounded-lg border border-dark-700 text-slate-400 font-mono text-xs">PagerDuty incident</button>
+        <button id="team-run" type="button" class="ml-auto px-4 py-2 rounded-lg bg-brand-500 hover:bg-brand-400 text-dark-950 font-mono font-semibold text-sm transition">Run the agents</button>
+      </div>
+      <pre id="team-log" aria-live="polite" class="p-4 rounded-xl bg-dark-950 border border-dark-750 text-xs font-mono text-slate-300 overflow-x-auto min-h-[16rem] whitespace-pre-wrap"></pre>
+      <p class="text-xs text-slate-500 mt-3">Replays the output of <code>go run ./examples/agent_team</code>. The tools are stubs, the checks are real (<code>ai/verify</code> plus an allowlist and an evidence check).</p>
+    </section>
+    <script>
+      (function () {
+        var scenarios = [
+          [
+            [
+              "task: checkout p99 alert. Scale the service only if the data supports it.",
+              "text-white"
+            ],
+            [
+              "jira-agent      -> jira.get_ticket",
+              ""
+            ],
+            [
+              "  ok: OPS-412 checkout p99 latency above 2s",
+              "text-brand-400"
+            ],
+            [
+              "aws-agent       -> aws.scale_up",
+              ""
+            ],
+            [
+              "  BLOCKED order: step \"aws.scale_up\" requires state \"evidence_confirmed\", which has not been established in this trace",
+              "text-rose-400"
+            ],
+            [
+              "grafana-agent   -> grafana.query",
+              ""
+            ],
+            [
+              "  ok: E1 p99_ms=2400 cpu_pct=91",
+              "text-brand-400"
+            ],
+            [
+              "aws-agent       -> aws.scale_up",
+              ""
+            ],
+            [
+              "  BLOCKED grounding: claimed cpu_pct=97, evidence E1 says cpu_pct=91",
+              "text-rose-400"
+            ],
+            [
+              "aws-agent       -> aws.scale_up",
+              ""
+            ],
+            [
+              "  BLOCKED scope: to=20 exceeds the approved limit of 6",
+              "text-rose-400"
+            ],
+            [
+              "aws-agent       -> aws.terminate_instances",
+              ""
+            ],
+            [
+              "  BLOCKED scope: aws.terminate_instances is not on aws-agent's allowlist",
+              "text-rose-400"
+            ],
+            [
+              "aws-agent       -> aws.scale_up",
+              ""
+            ],
+            [
+              "  ok: checkout-asg scaled 4 -> 6",
+              "text-brand-400"
+            ],
+            [
+              "trace: [jira.get_ticket grafana.query aws.scale_up]",
+              "text-accent-cyan"
+            ]
+          ],
+          [
+            [
+              "task: PagerDuty PD-77. Roll back only with evidence, resolve only after recovery is confirmed.",
+              "text-white"
+            ],
+            [
+              "pagerduty-agent -> pagerduty.get_incident",
+              ""
+            ],
+            [
+              "  ok: PD-77 checkout 5xx started right after deploy 214",
+              "text-brand-400"
+            ],
+            [
+              "pagerduty-agent -> pagerduty.resolve",
+              ""
+            ],
+            [
+              "  BLOCKED order: step \"pagerduty.resolve\" requires state \"recovery_confirmed\", which has not been established in this trace",
+              "text-rose-400"
+            ],
+            [
+              "aws-agent       -> aws.rollback_deploy",
+              ""
+            ],
+            [
+              "  BLOCKED order: step \"aws.rollback_deploy\" requires state \"evidence_confirmed\", which has not been established in this trace",
+              "text-rose-400"
+            ],
+            [
+              "grafana-agent   -> grafana.query",
+              ""
+            ],
+            [
+              "  ok: E1 error_rate_pct=14 deploy=214",
+              "text-brand-400"
+            ],
+            [
+              "aws-agent       -> aws.rollback_deploy",
+              ""
+            ],
+            [
+              "  BLOCKED grounding: claimed error_rate_pct=40, evidence E1 says error_rate_pct=14",
+              "text-rose-400"
+            ],
+            [
+              "aws-agent       -> aws.rollback_deploy",
+              ""
+            ],
+            [
+              "  BLOCKED scope: services=3 exceeds the approved limit of 1",
+              "text-rose-400"
+            ],
+            [
+              "pagerduty-agent -> aws.rollback_deploy",
+              ""
+            ],
+            [
+              "  BLOCKED scope: aws.rollback_deploy is not on pagerduty-agent's allowlist",
+              "text-rose-400"
+            ],
+            [
+              "aws-agent       -> aws.rollback_deploy",
+              ""
+            ],
+            [
+              "  ok: checkout rolled back 214 -> 213",
+              "text-brand-400"
+            ],
+            [
+              "grafana-agent   -> grafana.recheck",
+              ""
+            ],
+            [
+              "  ok: E2 error_rate_pct=1",
+              "text-brand-400"
+            ],
+            [
+              "pagerduty-agent -> pagerduty.resolve",
+              ""
+            ],
+            [
+              "  ok: PD-77 resolved",
+              "text-brand-400"
+            ],
+            [
+              "trace: [pagerduty.get_incident grafana.query aws.rollback_deploy grafana.recheck pagerduty.resolve]",
+              "text-accent-cyan"
+            ]
+          ]
+        ];
+        var current = 0;
+        var timer = null;
+        var log = document.getElementById('team-log');
+        var tabs = document.querySelectorAll('.team-tab');
+        function select(i) {
+          current = i;
+          clearTimeout(timer);
+          log.textContent = '';
+          tabs.forEach(function (t) {
+            var on = Number(t.getAttribute('data-team-scenario')) === i;
+            t.setAttribute('aria-selected', on ? 'true' : 'false');
+            t.className = 'team-tab px-3 py-1.5 rounded-lg border font-mono text-xs ' + (on ? 'border-brand-500/60 text-brand-400' : 'border-dark-700 text-slate-400');
+          });
+        }
+        tabs.forEach(function (t) {
+          t.addEventListener('click', function () { select(Number(t.getAttribute('data-team-scenario'))); });
+        });
+        document.getElementById('team-run').addEventListener('click', function () {
+          select(current);
+          var lines = scenarios[current];
+          var i = 0;
+          (function next() {
+            if (i >= lines.length) return;
+            var row = document.createElement('div');
+            row.className = lines[i][1];
+            row.textContent = lines[i][0];
+            log.appendChild(row);
+            i++;
+            timer = setTimeout(next, 500);
+          })();
+        });
+      })();
+    </script>
+
     <!-- SECTION 3: SECOND DIFFERENTIATOR: DURABLE AGENT MEMORY -->
     <section id="durable-memory" class="mb-12 p-6 sm:p-10 rounded-2xl bg-dark-900 border border-dark-800">
       <div class="max-w-3xl mb-8">
