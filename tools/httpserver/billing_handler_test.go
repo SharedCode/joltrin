@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -135,13 +136,39 @@ func TestHandlePublicCheckout_CORS(t *testing.T) {
 		t.Errorf("unexpected CORS header for foreign origin: %q", got)
 	}
 
-	body, _ := json.Marshal(map[string]any{"tier": "pro", "email": "a@example.com"})
-	post := httptest.NewRequest(http.MethodPost, "/api/billing/public-checkout", bytes.NewReader(body))
-	post.Header.Set("Origin", "https://joltrinhq.com")
-	w = httptest.NewRecorder()
-	handlePublicCheckout(w, post)
-	if w.Code != http.StatusOK {
-		t.Fatalf("post: expected 200, got %d: %s", w.Code, w.Body.String())
+}
+
+func TestHandlePublicCheckout_Requests(t *testing.T) {
+	post := func(body string) *httptest.ResponseRecorder {
+		req := httptest.NewRequest(http.MethodPost, "/api/billing/public-checkout", strings.NewReader(body))
+		req.Header.Set("Origin", "https://joltrinhq.com")
+		w := httptest.NewRecorder()
+		handlePublicCheckout(w, req)
+		return w
+	}
+
+	if w := post(`{"email":"not-an-email"}`); w.Code != http.StatusBadRequest {
+		t.Errorf("bad email: expected 400, got %d", w.Code)
+	}
+	if w := post(`{`); w.Code != http.StatusBadRequest {
+		t.Errorf("bad json: expected 400, got %d", w.Code)
+	}
+
+	get := httptest.NewRecorder()
+	handlePublicCheckout(get, httptest.NewRequest(http.MethodGet, "/api/billing/public-checkout", nil))
+	if get.Code != http.StatusMethodNotAllowed {
+		t.Errorf("GET: expected 405, got %d", get.Code)
+	}
+
+	// Tests run with no Stripe keys, so billing is simulated. The public
+	// route must refuse rather than hand out a simulated session URL that
+	// grants a plan without payment, and a caller cannot pick tier or tenant.
+	w := post(`{"email":"a@example.com","tier":"enterprise","tenant_id":"victim"}`)
+	if w.Code != http.StatusServiceUnavailable {
+		t.Fatalf("simulation mode: expected 503, got %d: %s", w.Code, w.Body.String())
+	}
+	if strings.Contains(w.Body.String(), "checkout_url") {
+		t.Errorf("simulated checkout URL leaked: %s", w.Body.String())
 	}
 }
 
