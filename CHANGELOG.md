@@ -1,5 +1,10 @@
 # Changelog
 
+## v5.8.2
+
+- The whole root module now builds and vets from outside the repo with no go.work. The root go.mod requires the published `ai`, `jsondb`, `search` and `adapters/nats` modules (all v0.1.0), so `tools/httpserver`, the remaining examples and the `confighub` tests resolve, and `go mod tidy` completes. `github.com/sharedcode/joltrin/ai` is now installable on its own.
+- Added docs/AGENT_BARRIER_TESTS.md, a recorded run of the MCP barrier with a real agent, including what it does not show.
+
 ## v5.8.1
 
 - `go get github.com/sharedcode/joltrin/v5` followed by importing `v5/database` or `v5/governance` now works from outside the repo. These packages import the Redis adapter, `incfs` and `infs`, which had no published versions and were not declared in the root go.mod, so the build failed with "no required module provides package". Those modules are now tagged (`adapters/redis`, `adapters/cassandra`, `infs`, `incfs` at v0.1.0) and required by the root module.
