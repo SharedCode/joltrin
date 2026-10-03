@@ -250,64 +250,66 @@ This keeps the human-facing management and authoring experience in the UI, while
 package main
 
 import (
-    "context"
-    "fmt"
-    "github.com/sharedcode/joltrin/ai"
-    "github.com/sharedcode/joltrin/database"
-    "github.com/sharedcode/joltrin/ai/embed"
+	"context"
+	"fmt"
+	"github.com/sharedcode/joltrin/ai"
+	"github.com/sharedcode/joltrin/ai/database"
+	"github.com/sharedcode/joltrin/ai/embed"
+	"github.com/sharedcode/joltrin/ai/vector"
+	"github.com/sharedcode/joltrin/v5"
 )
 
 func main() {
-    // 1. Initialize the Vector Database
-    db := database.NewDatabase(sop.DatabaseOptions{
-        Type:          sop.Standalone,
-        StoresFolders: []string{"./my_knowledge_base"},
-    })
-    
-    // 2. Start a Transaction
-    ctx := context.Background()
-    trans, _ := db.BeginTransaction(ctx, sop.ForWriting)
-    defer trans.Rollback(ctx) // Safety rollback
+	// 1. Initialize the Vector Database
+	db := database.NewDatabase(sop.DatabaseOptions{
+		Type:          sop.Standalone,
+		StoresFolders: []string{"./my_knowledge_base"},
+	})
 
-    // 3. Open an index for a specific domain (e.g., "documents")
-    idx, _ := db.OpenVectorStore(ctx, "documents", trans, vector.Config{})
+	// 2. Start a Transaction
+	ctx := context.Background()
+	trans, _ := db.BeginTransaction(ctx, sop.ForWriting)
+	defer trans.Rollback(ctx) // Safety rollback
 
-    // 4. Initialize an Embedder
-    // (In production, use a real embedding model. Here we use the simple keyword hasher)
-    emb := embed.NewSimple("simple-embedder", 64, nil)
+	// 3. Open an index for a specific domain (e.g., "documents")
+	idx, _ := db.OpenVectorStore(ctx, "documents", trans, vector.Config{})
 
-    // 5. Add Data (Upsert)
-    item := ai.Item[map[string]any]{
-        ID: "doc-1",
-        Vector: nil, // Will be filled below
-        Payload: map[string]any{
-            "text": "SOP is a high-performance Go library for storage.",
-            "category": "tech",
-        },
-    }
-    // Generate vector
-    vecs, _ := emb.EmbedTexts(ctx, []string{item.Payload["text"].(string)})
-    item.Vector = vecs[0]
+	// 4. Initialize an Embedder
+	// (In production, use a real embedding model. Here we use the simple keyword hasher)
+	emb := embed.NewSimple("simple-embedder", 64, nil)
 
-    // Save to DB
-    idx.UpsertBatch(ctx, []ai.Item[map[string]any]{item})
-    
-    // Commit the transaction
-    trans.Commit(ctx)
+	// 5. Add Data (Upsert)
+	item := ai.Item[map[string]any]{
+		ID:     "doc-1",
+		Vector: nil, // Will be filled below
+		Payload: map[string]any{
+			"text":     "SOP is a high-performance Go library for storage.",
+			"category": "tech",
+		},
+	}
+	// Generate vector
+	vecs, _ := emb.EmbedTexts(ctx, []string{item.Payload["text"].(string)})
+	item.Vector = vecs[0]
 
-    // 6. Search (Retrieve) - New Read Transaction
-    trans, _ = db.BeginTransaction(ctx, sop.ForReading)
-    idx, _ = db.OpenVectorStore(ctx, "documents", trans, vector.Config{})
-    
-    query := "storage library"
-    queryVecs, _ := emb.EmbedTexts(ctx, []string{query})
-    
-    hits, _ := idx.Query(ctx, queryVecs[0], 5, nil)
-    
-    for _, hit := range hits {
-        fmt.Printf("Found: %s (Score: %.2f)\n", hit.Payload["text"], hit.Score)
-    }
-    trans.Commit(ctx)
+	// Save to DB
+	idx.UpsertBatch(ctx, []ai.Item[map[string]any]{item})
+
+	// Commit the transaction
+	trans.Commit(ctx)
+
+	// 6. Search (Retrieve) - New Read Transaction
+	trans, _ = db.BeginTransaction(ctx, sop.ForReading)
+	idx, _ = db.OpenVectorStore(ctx, "documents", trans, vector.Config{})
+
+	query := "storage library"
+	queryVecs, _ := emb.EmbedTexts(ctx, []string{query})
+
+	hits, _ := idx.Query(ctx, queryVecs[0], 5, nil)
+
+	for _, hit := range hits {
+		fmt.Printf("Found: %s (Score: %.2f)\n", hit.Payload["text"], hit.Score)
+	}
+	trans.Commit(ctx)
 }
 ```
 
