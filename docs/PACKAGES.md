@@ -27,7 +27,7 @@ When integrating Joltrin into your stack, choose between official versioned rele
 
 #### 1. Official Tagged Releases (Recommended for Production)
 For production deployments, pin your dependency to a tagged release. This guarantees reproducible builds, backward-compatible API guarantees, and security-scanned transitive dependencies:
-- **Go**: `go get github.com/sharedcode/joltrin/v5@v5.7.0` (see [tags](https://github.com/sharedcode/joltrin/tags) for the latest)
+- **Go**: `go get github.com/sharedcode/joltrin/v5@v5.8.1` (see [tags](https://github.com/sharedcode/joltrin/tags) for the latest)
 - **Python**: `pip install sop4py==2.3.3`
 - **C# / .NET**: `dotnet add package Sop --version 4.5.0`
 
