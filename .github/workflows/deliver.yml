@@ -54,7 +54,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - run: |
-          docker build -f Dockerfile.quickstart -t $IMAGE:${{ github.sha }} .
+          docker build -f docker/Dockerfile.quickstart -t $IMAGE:${{ github.sha }} .
           docker push $IMAGE:${{ github.sha }}
 
   staging:

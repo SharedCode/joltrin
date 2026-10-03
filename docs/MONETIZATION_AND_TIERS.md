@@ -19,7 +19,7 @@ Commercial tiers are focused entirely on **enterprise governance, compliance, po
 
 ## 2. Architectural Boundary: The `governance/` Package
 
-To maintain clean separation between the open-source storage engine and commercial extensions, Joltrin isolates all licensing, billing, and enterprise controls inside the decoupled [`governance/`](../governance/) package:
+To maintain clean separation between the open-source storage engine and commercial extensions, Joltrin isolates all licensing, billing, and enterprise controls inside the decoupled [`governance/`](../governance) package:
 
 ### 1. Capability & Tier Abstractions ([`governance/tier.go`](../governance/tier.go))
 - **`Tier`**: Identifies deployment tiers (`TierCore`, `TierPro`, `TierEnterprise`, `TierHosted`).
@@ -113,4 +113,4 @@ Inside `/app`, users can open the **Plan & Governance** modal via the sidebar fo
 
 1. **No Artificial Capacity Paywalls**: The open-source core will never cap database size, transaction frequency, memory buffer capacity, or local MCP/A2A concurrency.
 2. **Permanent MIT Licensing**: All core storage engines, file systems, vector indexes, and the local `verify` verification barrier remain perpetually licensed under the MIT license.
-3. **Decoupled Architecture**: Commercial and governance modules interact via clean, decoupled Go interfaces ([`governance/`](../governance/)) rather than invasive runtime licensing locks.
+3. **Decoupled Architecture**: Commercial and governance modules interact via clean, decoupled Go interfaces ([`governance/`](../governance)) rather than invasive runtime licensing locks.

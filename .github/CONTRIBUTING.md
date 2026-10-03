@@ -5,8 +5,8 @@ Thank you for your interest in contributing to Joltrin (formerly SOP, Scalable O
 ## Getting Started
 
 1.  **Read the Documentation**:
-    *   **[README.md](README.md)**: High-level overview and quick start.
-    *   **[ARCHITECTURE.md](docs/ARCHITECTURE.md)**: Understanding the codebase structure, specifically the Public vs. Internal package split.
+    *   **[README.md](../README.md)**: High-level overview and quick start.
+    *   **[ARCHITECTURE.md](../docs/ARCHITECTURE.md)**: Understanding the codebase structure, specifically the Public vs. Internal package split.
 
 2.  **Explore the Code**:
     *   SOP V2 is written in Go. We prioritize simplicity and readability.
@@ -42,7 +42,7 @@ Thank you for your interest in contributing to Joltrin (formerly SOP, Scalable O
     *   **Primary Public Packages**: `infs` (In File System), `jsondb` (JSON Document Store), `database` (Helpers) & `tools/httpserver` Data Manager RESTful web service & SPA WebUI. These represent the core user-facing APIs & Tools.
     *   **Secondary**: `incfs` (In Cassandra & File System) is now considered secondary.
     *   **Internal Packages**: Packages under `internal/` (e.g., `internal/inredck`) contain implementation details that should not be exposed.
-    *   See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for more details on the architecture.
+    *   See [ARCHITECTURE.md](../docs/ARCHITECTURE.md) for more details on the architecture.
 
 *   **Style**: Follow standard Go idioms and formatting (`gofmt`).
 

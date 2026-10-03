@@ -2,7 +2,7 @@
 
 Simple, copy-pasteable examples for common SOP scenarios.
 
-> **Note**: This cookbook focuses on the Go API. For Python examples, see the [Python Cookbook](../bindings/python/COOKBOOK.md). For Java examples, see the [Java Examples](../bindings/java/README.md#examples). For C# examples, see the [C# Examples](../bindings/csharp/Sop.CLI/). For Rust examples, see the [Rust Examples](../bindings/rust/examples/).
+> **Note**: This cookbook focuses on the Go API. For Python examples, see the [Python Cookbook](../bindings/python/COOKBOOK.md). For Java examples, see the [Java Examples](../bindings/java/README.md#examples). For C# examples, see the [C# Examples](../bindings/csharp/Sop.CLI). For Rust examples, see the [Rust Examples](../bindings/rust/examples).
 
 ## Interoperability Note: Go vs. Other Languages
 

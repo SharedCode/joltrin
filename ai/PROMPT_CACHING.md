@@ -309,13 +309,13 @@ Tests verify:
 
 **Anthropic Claude:**
 - [Anthropic Prompt Caching Docs](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching)
-- Implementation: [ai/generator/anthropic.go](./generator/anthropic.go)
-- Tests: [ai/generator/anthropic_caching_test.go](./generator/anthropic_caching_test.go)
+- Implementation: [ai/generator/anthropic.go](generator/anthropic.go)
+- Tests: [ai/generator/anthropic_caching_test.go](generator/anthropic_caching_test.go)
 
 **OpenAI GPT:**
 - [OpenAI Prompt Caching Docs](https://platform.openai.com/docs/guides/prompt-caching)
-- Implementation: [ai/generator/chatgpt.go](./generator/chatgpt.go) + [chatgpt_types.go](./generator/chatgpt_types.go)
-- Tests: [ai/generator/chatgpt_caching_test.go](./generator/chatgpt_caching_test.go)
+- Implementation: [ai/generator/chatgpt.go](generator/chatgpt.go) + [chatgpt_types.go](generator/chatgpt_types.go)
+- Tests: [ai/generator/chatgpt_caching_test.go](generator/chatgpt_caching_test.go)
 
 ## Version History
 
