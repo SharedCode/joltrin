@@ -71,6 +71,11 @@ run_agent_memory_demo() {
   echo -e "${GREEN}✓ Agent memory checkpoint and failover verified successfully.${NC}"
 }
 
+run_agent_team_demo() {
+  print_header "Agent Team Demo: Jira, Grafana, AWS, and PagerDuty agents behind the barrier"
+  go run ./examples/agent_team
+}
+
 run_test_suite() {
   print_header "Option 3: Fast Engine Test Suite & Sanity Check"
   echo -e "${YELLOW}Running package tests across core storage, filesystem, and server...${NC}"
@@ -156,6 +161,7 @@ show_usage() {
   echo "  -2, --memory     Run Option 2: AI Agent memory checkpoint & failover demo"
   echo "  -3, --test       Run Option 3: Core engine and server unit test suites"
   echo "  -4, --protocol   Run Option 4: Local MCP JSON-RPC and A2A agent probe"
+  echo "      --team       Run the Jira, Grafana, AWS, and PagerDuty agent team demo"
   echo "  -a, --all        Run all options sequentially (1 through 4)"
   echo "  -h, --help       Display this usage message"
   echo ""
@@ -215,6 +221,9 @@ else
       ;;
     -2|--memory)
       run_agent_memory_demo
+      ;;
+    --team)
+      run_agent_team_demo
       ;;
     -3|--test)
       run_test_suite

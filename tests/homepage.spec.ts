@@ -40,6 +40,20 @@ test.describe('Homepage', () => {
     await expect(strip.locator('a[href="./agents/"]')).toBeVisible();
   });
 
+  test('agent team demo replays blocked and allowed calls for both scenarios', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const log = page.locator('#team-log');
+    await page.locator('#team-run').click();
+    await expect(log).toContainText('BLOCKED grounding: claimed cpu_pct=97', { timeout: 10000 });
+    await expect(log).toContainText('BLOCKED scope: aws.terminate_instances');
+    await expect(log).toContainText('checkout-asg scaled 4 -> 6', { timeout: 10000 });
+    await page.getByRole('tab', { name: 'PagerDuty incident' }).click();
+    await expect(log).toBeEmpty();
+    await page.locator('#team-run').click();
+    await expect(log).toContainText('BLOCKED grounding: claimed error_rate_pct=40', { timeout: 10000 });
+    await expect(log).toContainText('PD-77 resolved', { timeout: 10000 });
+  });
+
   test('pricing shows open source, Pro, and Enterprise contact without live-checkout claims', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const pricing = page.locator('#pricing');

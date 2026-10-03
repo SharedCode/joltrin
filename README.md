@@ -34,6 +34,7 @@ git clone https://github.com/sharedcode/joltrin.git && cd joltrin
 go run ./examples/quickstart      # ordered B-Tree with point, range, and descending scans
 ./scripts/demo.sh --barrier       # the barrier blocks a database drop until a backup is validated
 ./scripts/demo.sh --memory        # an agent crashes mid-task and a peer resumes from the B-Tree
+./scripts/demo.sh --team          # Jira, Grafana, AWS, and PagerDuty agents finish tasks behind the barrier
 ```
 
 Or skip the install. These run entirely in your browser with no backend:
@@ -54,6 +55,46 @@ claude mcp add joltrin -- sop-mcp-server    # Claude Code. Other agents: add an 
 ```
 
 Then tell your agent: "Use the joltrin tools to run `drop_prod_db` on workflow `db-maintenance` with trace id `t1`." The server refuses until `take_backup` and `validate_backup` have run in that trace, whatever the agent claims. Make sure `$(go env GOPATH)/bin` is on your `PATH`. A recorded run with real agents, and what it does not prove, is in [docs/AGENT_BARRIER_TESTS.md](docs/AGENT_BARRIER_TESTS.md).
+
+## Agents that hand off work
+
+Jira, Grafana, AWS, and PagerDuty agents pass work to each other. Every call passes three checks first: the tool is on that agent's allowlist and within its limits, any claim matches evidence a tool actually returned, and the steps it depends on have committed (`ai/verify`). Each run includes a skipped step, a made-up number, and an agent reaching past its scope.
+
+<p align="center">
+  <img src="docs/assets/agent-team-pagerduty.gif" alt="Terminal recording: PagerDuty, Grafana, and AWS agents resolve an incident while the barrier blocks a skipped step, a made-up number, and out-of-scope calls" width="900" />
+</p>
+
+<p align="center">
+  <img src="docs/assets/agent-team-latency.gif" alt="Terminal recording: Jira, Grafana, and AWS agents answer a latency alert while the barrier blocks a skipped step, a made-up number, and out-of-scope calls" width="900" />
+</p>
+
+The PagerDuty run as text, from `go run ./examples/agent_team`:
+
+```
+pagerduty-agent -> pagerduty.get_incident
+  ok: PD-77 checkout 5xx started right after deploy 214
+pagerduty-agent -> pagerduty.resolve
+  BLOCKED order: step "pagerduty.resolve" requires state "recovery_confirmed", which has not been established in this trace
+aws-agent       -> aws.rollback_deploy
+  BLOCKED order: step "aws.rollback_deploy" requires state "evidence_confirmed", which has not been established in this trace
+grafana-agent   -> grafana.query
+  ok: E1 error_rate_pct=14 deploy=214
+aws-agent       -> aws.rollback_deploy
+  BLOCKED grounding: claimed error_rate_pct=40, evidence E1 says error_rate_pct=14
+aws-agent       -> aws.rollback_deploy
+  BLOCKED scope: services=3 exceeds the approved limit of 1
+pagerduty-agent -> aws.rollback_deploy
+  BLOCKED scope: aws.rollback_deploy is not on pagerduty-agent's allowlist
+aws-agent       -> aws.rollback_deploy
+  ok: checkout rolled back 214 -> 213
+grafana-agent   -> grafana.recheck
+  ok: E2 error_rate_pct=1
+pagerduty-agent -> pagerduty.resolve
+  ok: PD-77 resolved
+trace: [pagerduty.get_incident grafana.query aws.rollback_deploy grafana.recheck pagerduty.resolve]
+```
+
+The same command also runs a latency-alert example (Jira, Grafana, AWS). Watch both replay on [joltrinhq.com](https://joltrinhq.com/#agent-team). The tools are stubs, the checks are real. Source: [examples/agent_team](examples/agent_team/main.go).
 
 ## What is verified
 
