@@ -15,13 +15,13 @@ test.describe('Homepage', () => {
     await expect(page.getByRole('link', { name: /try the live barrier/i })).toHaveAttribute('href', /agents/);
   });
 
-  test('intro video sits above the hero and autoplays muted', async ({ page }) => {
+  test('intro video sits below the hero and autoplays muted', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const frame = page.locator('iframe[title="Joltrin intro video"]');
     await expect(frame).toHaveAttribute('src', /youtube-nocookie\.com\/embed\/wzhd4e3G4MY\?.*autoplay=1.*mute=1/);
     const frameY = (await frame.boundingBox())!.y;
     const heroY = (await page.getByRole('heading', { level: 1 }).boundingBox())!.y;
-    expect(frameY).toBeLessThan(heroY);
+    expect(frameY).toBeGreaterThan(heroY);
   });
 
   test('three live experiences are linked right after the hero', async ({ page }) => {
