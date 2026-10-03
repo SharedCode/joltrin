@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- `sop-server` can create its root admin user on first start from the `JOLTRIN_ROOT_PASSWORD` environment variable (at least 16 characters). It only runs when no config file exists, so it can never replace an existing root password, and the password is hashed before it is written. The first-run wizard accepts only loopback callers, which a hosted container on a distroless image cannot satisfy, so the Azure deployment could never get past "server is not configured yet". The Azure Bicep and deploy workflow now pass the secret from Key Vault when the `JOLTRIN_ROOT_PASSWORD` repository secret is set.
+
 ## v5.8.2
 
 - The whole root module now builds and vets from outside the repo with no go.work. The root go.mod requires the published `ai`, `jsondb`, `search` and `adapters/nats` modules (all v0.1.0), so `tools/httpserver`, the remaining examples and the `confighub` tests resolve, and `go mod tidy` completes. `github.com/sharedcode/joltrin/ai` is now installable on its own.

@@ -290,6 +290,15 @@ func main() {
 		log.Error(fmt.Sprintf("Failed to load model catalog: %v", err))
 	}
 
+	// Hosted deployments cannot run the first-run wizard (loopback only, no
+	// shell in the image), so a root password supplied through the environment
+	// seeds the first config. No-op once a config file exists.
+	if created, err := bootstrapRootFromEnv(os.Getenv, targetConfigPath); err != nil {
+		log.Error(fmt.Sprintf("Root bootstrap skipped: %v", err))
+	} else if created {
+		log.Info(logsafe.V(fmt.Sprintf("Created root user and %s from JOLTRIN_ROOT_PASSWORD", targetConfigPath)))
+	}
+
 	if !wasProductionFlagPassed {
 		config.ProductionMode = true
 	}

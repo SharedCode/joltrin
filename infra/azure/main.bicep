@@ -42,6 +42,10 @@ param stripeSecretKey string = ''
 @description('Stripe webhook signing secret.')
 param stripeWebhookSecret string = ''
 
+@secure()
+@description('Root admin password used to create the first config on a fresh data volume. Optional; while empty the server waits for the first-run wizard, which a hosted container cannot complete.')
+param rootPassword string = ''
+
 @description('Stripe publishable key (not secret, but kept alongside the others for consistency).')
 param stripePublishableKey string = ''
 
@@ -101,6 +105,7 @@ module keyVault 'modules/key-vault.bicep' = {
     principalIdForAccess: identity.outputs.principalId
     stripeSecretKey: stripeSecretKey
     stripeWebhookSecret: stripeWebhookSecret
+    rootPassword: rootPassword
     stripePublishableKey: stripePublishableKey
   }
 }
@@ -142,6 +147,7 @@ module containerApp 'modules/container-app.bicep' = {
     publicBaseUrl: publicBaseUrl
     stripeManagedPayments: stripeManagedPayments
     stripeEnabled: !empty(stripeSecretKey) && !empty(stripeWebhookSecret)
+    rootPasswordEnabled: !empty(rootPassword)
   }
 }
 
