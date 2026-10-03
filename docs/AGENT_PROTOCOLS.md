@@ -1,6 +1,6 @@
 # Agent protocols: MCP, A2A, and the verification barrier
 
-Joltrin runbooks are reachable from two agent protocols, [Model Context Protocol](https://modelcontextprotocol.io/) and [Agent2Agent](https://a2a-protocol.org/), both gated by the same safety-and-reachability check before a step is allowed to commit. Real, tested code (`verify`, `tools/mcpserver`, `tools/a2aagent`), not a diagram of an idea; see [MCP, A2A, and the Verification Engine](MCP_A2A_AND_VERIFICATION_ENGINE.md) for the full audit and design writeup.
+Joltrin runbooks are reachable from two agent protocols, [Model Context Protocol](https://modelcontextprotocol.io/) and [Agent2Agent](https://a2a-protocol.org/), both gated by the same safety-and-reachability check before a step is allowed to commit. Real, tested code (`verify`, `tools/mcpserver`, `tools/a2aagent`; a run with a real agent is recorded in [AGENT_BARRIER_TESTS.md](AGENT_BARRIER_TESTS.md)), not a diagram of an idea; see [MCP, A2A, and the Verification Engine](MCP_A2A_AND_VERIFICATION_ENGINE.md) for the full audit and design writeup.
 
 <p align="center">
   <img src="assets/mcp-a2a-architecture.svg" alt="An MCP client and an A2A orchestrator each reach a separate protocol server, both backed by the same tools/runbookstore.Store and gated by the same verify safety check before a step commits" width="900" />
