@@ -71,7 +71,7 @@ apply UX/accessibility checks to Go packages, they do not have a UX.
   does things (error handling, naming, table-driven tests alongside the code, not in a
   separate tree)? Any exported function or type added without a doc comment? Any new
   parallel implementation of something an existing package (`sop.BlobStore`,
-  `sop.TransactionLog`, `ai/verify`, `ai/ledger`) already provides?
+  `sop.TransactionLog`, `verify`, `ai/ledger`) already provides?
 - **QA engineer:** Do new or changed exported functions have tests, and do those tests
   cover more than the happy path, invalid input, not-found, concurrent access,
   corrupted or partial state, matching how `ai/ledger` and `ai/replay` are tested? Was

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"syscall/js"
 
-	"github.com/sharedcode/joltrin/ai/verify"
+	"github.com/sharedcode/joltrin/v5/verify"
 )
 
 // agentsStateFile is the OPFS snapshot for this demo's trace, same pattern

@@ -6,7 +6,7 @@ Three browser experiences run from the same engine. None of them need a backend.
 | :--- | :--- | :--- |
 | **Joltrin Technical Demo** | **Client-Side Zero-Server WebAssembly Engine**<br>Execute live ACID transactions, 128-dimensional vector cosine searches, microsecond benchmarks, and durable AI agent memory checkpoints (kill the agent mid-task, watch a successor resume from the B-Tree) running 100% in your browser with **0 runtime HTTP network calls after initial load**. | [**Launch Technical Demo →**](https://joltrinhq.com/) |
 | **Joltrin Arena** | **Distributed Systems Survival Simulation**<br>Command a live digital cluster. Scale worker swarms, crash storage nodes, trigger transaction storms, and watch Joltrin automatically redistribute tasks and rebuild parity in real-time. | [**Play Joltrin Arena →**](https://joltrinhq.com/arena/) |
-| **Joltrin Agent Verification Barrier** | **The MCP/A2A Safety Check, Clickable**<br>The same `ai/verify` barrier gating `tools/mcpserver` and `tools/a2aagent`, compiled to WASM. Try dropping a database before validating a backup and watch it get blocked, in your browser, with the trace persisted to OPFS. | [**Launch Agent Barrier →**](https://joltrinhq.com/agents/) |
+| **Joltrin Agent Verification Barrier** | **The MCP/A2A Safety Check, Clickable**<br>The same `verify` barrier gating `tools/mcpserver` and `tools/a2aagent`, compiled to WASM. Try dropping a database before validating a backup and watch it get blocked, in your browser, with the trace persisted to OPFS. | [**Launch Agent Barrier →**](https://joltrinhq.com/agents/) |
 
 ## Experience Joltrin
 

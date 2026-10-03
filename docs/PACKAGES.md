@@ -32,7 +32,7 @@ For production deployments, pin your dependency to a tagged release. This guaran
 - **C# / .NET**: `dotnet add package Sop --version 4.5.0`
 
 #### 2. In-Repo Source / Submodule (Prototyping & Contribution)
-If you are extending storage engine internals (`btree/`, `fs/`), modifying protocol servers (`ai/verify`, `cmd/sop-mcp-server`, `cmd/sop-a2a-agent`), or benchmarking performance enhancements, consuming from source is recommended:
+If you are extending storage engine internals (`btree/`, `fs/`), modifying protocol servers (`verify`, `cmd/sop-mcp-server`, `cmd/sop-a2a-agent`), or benchmarking performance enhancements, consuming from source is recommended:
 ```bash
 # Add as a git submodule in your project
 git submodule add https://github.com/sharedcode/joltrin.git vendor/joltrin

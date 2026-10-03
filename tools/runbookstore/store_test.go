@@ -5,7 +5,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/sharedcode/joltrin/ai/verify"
+	"github.com/sharedcode/joltrin/v5/verify"
 )
 
 func Test_WorkflowNames_SortedAndEmptyWhenNoneRegistered(t *testing.T) {

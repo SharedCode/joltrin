@@ -15,8 +15,8 @@ import (
 
 	"github.com/sharedcode/joltrin/ai/ledger"
 	"github.com/sharedcode/joltrin/ai/replay"
-	"github.com/sharedcode/joltrin/ai/verify"
 	"github.com/sharedcode/joltrin/v5/fs"
+	"github.com/sharedcode/joltrin/v5/verify"
 )
 
 func must(err error) {

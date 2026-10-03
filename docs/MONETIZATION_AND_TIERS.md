@@ -10,7 +10,7 @@ Commercial tiers are focused entirely on **enterprise governance, compliance, po
 
 | Tier / Edition | Pricing | Distribution | Licensing | Key Capabilities | Implementation Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Free / Open-Source Core** | **$0** (Forever) | Embedded Library & CLI | **MIT License** | • Embedded copy-on-write B-Tree storage engine<br>• WAL + 2PC strict ACID transactions<br>• Reed-Solomon erasure coding and bitrot healing<br>• Durable AI agent memory & checkpointed buffers<br>• In-memory 128-d cosine vector similarity<br>• Embedded MCP server (`cmd/sop-mcp-server`)<br>• Embedded A2A agent runtime (`cmd/sop-a2a-agent`)<br>• Local runbook verification barrier (`ai/verify`)<br>• Developer GitHub OIDC authentication | **Available Today** |
+| **Free / Open-Source Core** | **$0** (Forever) | Embedded Library & CLI | **MIT License** | • Embedded copy-on-write B-Tree storage engine<br>• WAL + 2PC strict ACID transactions<br>• Reed-Solomon erasure coding and bitrot healing<br>• Durable AI agent memory & checkpointed buffers<br>• In-memory 128-d cosine vector similarity<br>• Embedded MCP server (`cmd/sop-mcp-server`)<br>• Embedded A2A agent runtime (`cmd/sop-a2a-agent`)<br>• Local runbook verification barrier (`verify`)<br>• Developer GitHub OIDC authentication | **Available Today** |
 | **Pro Governance** | **$49** / team / mo | Self-Hosted Add-on | Commercial | • Declarative Policy-as-Code compilation<br>• Tamper-evident SHA-256 audit lineage<br>• Signed cryptographic audit export<br>• Team-level workspaces and quota controls<br>• Priority MCP gateways and traffic shaping<br>• Automated Stripe Checkout & Customer Portal | **Available Today** (`governance/`) |
 | **Enterprise Governance** | **Custom** / Annual Contract | Self-Hosted Enterprise | Commercial | • Enterprise SSO: **Okta** & **Microsoft Entra ID**<br>• Multi-tenant RBAC & tenant isolation boundaries<br>• Real-time audit streaming (SIEM / Kafka)<br>• Custom safety invariant enforcement engine<br>• Fine-grained barrier verification rules<br>• Dedicated enterprise compliance & SLA guarantees | **Foundation Implemented** (`governance/`) |
 | **Hosted Cloud** | *Usage-based* | Managed Cloud SaaS | Commercial | • Managed Joltrin instances (zero-ops)<br>• Cloud-hosted MCP hub & multi-agent routing<br>• Multi-region database replication<br>• Managed agent coordination network<br>• Automated off-site snapshots & backup verification | **Planned / In Development** |
@@ -63,7 +63,7 @@ Each variable also accepts a `JOLTRIN_STRIPE_` prefixed form. The Azure wiring i
 
 ### 4. Policy-as-Code & Barrier Extension ([`governance/policy.go`](../governance/policy.go))
 - **`PolicyManifest`**: Declarative JSON/YAML specification defining operational runbook steps, roles, and precedence invariants.
-- **`CompilePolicy()`**: Compiles declarative manifests into an executable formal verification graph ([`ai/verify.Workflow`](../ai/verify/verify.go)).
+- **`CompilePolicy()`**: Compiles declarative manifests into an executable formal verification graph ([`verify.Workflow`](../verify/verify.go)).
 - **Safety Gating & Auditing**: Atomically checks preconditions and safety invariants before advancing execution traces, seamlessly recording decisions to the audit ledger.
 
 ### 5. Multi-Tenant Workspaces ([`governance/workspace.go`](../governance/workspace.go))
@@ -112,5 +112,5 @@ Inside `/app`, users can open the **Plan & Governance** modal via the sidebar fo
 ## 4. Guarantees for Open-Source Users
 
 1. **No Artificial Capacity Paywalls**: The open-source core will never cap database size, transaction frequency, memory buffer capacity, or local MCP/A2A concurrency.
-2. **Permanent MIT Licensing**: All core storage engines, file systems, vector indexes, and the local `ai/verify` verification barrier remain perpetually licensed under the MIT license.
+2. **Permanent MIT Licensing**: All core storage engines, file systems, vector indexes, and the local `verify` verification barrier remain perpetually licensed under the MIT license.
 3. **Decoupled Architecture**: Commercial and governance modules interact via clean, decoupled Go interfaces ([`governance/`](../governance/)) rather than invasive runtime licensing locks.
