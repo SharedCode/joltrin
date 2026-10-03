@@ -21,6 +21,9 @@ param stripeEnterprisePriceId string = ''
 @description('Public origin of the app (no trailing slash), used for absolute Stripe return URLs.')
 param publicBaseUrl string = ''
 
+@description('Sets STRIPE_MANAGED_PAYMENTS so checkout sessions use Stripe Managed Payments.')
+param stripeManagedPayments bool = false
+
 var optionalEnv = concat(
   empty(stripeProPriceId) ? [] : [
     {
@@ -38,6 +41,12 @@ var optionalEnv = concat(
     {
       name: 'JOLTRIN_PUBLIC_URL'
       value: publicBaseUrl
+    }
+  ],
+  !stripeManagedPayments ? [] : [
+    {
+      name: 'STRIPE_MANAGED_PAYMENTS'
+      value: 'true'
     }
   ]
 )

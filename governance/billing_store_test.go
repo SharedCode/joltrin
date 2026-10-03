@@ -24,7 +24,7 @@ func TestStripeRequest_RetriesOn500ThenSucceeds(t *testing.T) {
 
 	svc := NewDefaultBillingService(StripeConfig{SecretKey: "sk_test"}, nil)
 
-	resp, body, err := svc.stripeRequest(context.Background(), http.MethodPost, srv.URL, "")
+	resp, body, err := svc.stripeRequest(context.Background(), http.MethodPost, srv.URL, "", "")
 	if err != nil {
 		t.Fatalf("expected eventual success after retries, got err: %v", err)
 	}
@@ -46,7 +46,7 @@ func TestStripeRequest_NoRetryOn400(t *testing.T) {
 	defer srv.Close()
 
 	svc := NewDefaultBillingService(StripeConfig{SecretKey: "sk_test"}, nil)
-	resp, _, err := svc.stripeRequest(context.Background(), http.MethodPost, srv.URL, "")
+	resp, _, err := svc.stripeRequest(context.Background(), http.MethodPost, srv.URL, "", "")
 	if err != nil {
 		t.Fatalf("expected the 400 to be returned rather than treated as a transport error: %v", err)
 	}
@@ -173,5 +173,22 @@ func TestDefaultBillingService_SurvivesRestart(t *testing.T) {
 	}
 	if got.PlanTier != TierEnterprise || got.Status != SubStatusActive {
 		t.Fatalf("subscription did not survive restart, got %+v", got)
+	}
+}
+
+func TestStripeRequest_SendsAPIVersionHeader(t *testing.T) {
+	var got string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		got = r.Header.Get("Stripe-Version")
+		w.Write([]byte(`{}`))
+	}))
+	defer srv.Close()
+
+	svc := NewDefaultBillingService(StripeConfig{SecretKey: "sk_test"}, nil)
+	if _, _, err := svc.stripeRequest(context.Background(), http.MethodPost, srv.URL, "", managedPaymentsAPIVersion); err != nil {
+		t.Fatal(err)
+	}
+	if got != managedPaymentsAPIVersion {
+		t.Fatalf("Stripe-Version = %q, want %q", got, managedPaymentsAPIVersion)
 	}
 }

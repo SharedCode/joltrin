@@ -106,7 +106,15 @@ type StripeConfig struct {
 	SuccessURL        string `json:"success_url"`
 	CancelURL         string `json:"cancel_url"`
 	Simulate          bool   `json:"simulate"`
+	// ManagedPayments routes checkout through Stripe Managed Payments, where
+	// Stripe handles indirect tax, fraud, and transaction support. The account
+	// must be enrolled or Stripe rejects the session.
+	ManagedPayments bool `json:"managed_payments"`
 }
+
+// managedPaymentsAPIVersion is the Stripe API version required to create
+// Checkout Sessions with managed_payments enabled.
+const managedPaymentsAPIVersion = "2026-02-25.preview"
 
 // TierCheckout describes whether a tier can be bought through checkout.
 // Mode is one of "stripe", "simulated", "contact_sales", or "unavailable".
@@ -377,7 +385,7 @@ func (s *DefaultBillingService) Config() StripeConfig {
 // retry won't change a malformed or rejected request. This is the graceful
 // degradation layer for a commercial billing surface: a single Stripe blip
 // shouldn't fail a customer's checkout outright.
-func (s *DefaultBillingService) stripeRequest(ctx context.Context, method, url, body string) (*http.Response, []byte, error) {
+func (s *DefaultBillingService) stripeRequest(ctx context.Context, method, url, body, apiVersion string) (*http.Response, []byte, error) {
 	const maxAttempts = 3
 	backoff := 500 * time.Millisecond
 
@@ -389,6 +397,9 @@ func (s *DefaultBillingService) stripeRequest(ctx context.Context, method, url, 
 		}
 		req.Header.Set("Authorization", "Bearer "+s.cfg.SecretKey)
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		if apiVersion != "" {
+			req.Header.Set("Stripe-Version", apiVersion)
+		}
 
 		resp, err := s.httpClient.Do(req)
 		if err != nil {
@@ -494,7 +505,13 @@ func (s *DefaultBillingService) CreateCheckoutSession(ctx context.Context, tenan
 	data.Set("success_url", successURL)
 	data.Set("cancel_url", cancelURL)
 
-	resp, bodyBytes, err := s.stripeRequest(ctx, http.MethodPost, "https://api.stripe.com/v1/checkout/sessions", data.Encode())
+	apiVersion := ""
+	if s.cfg.ManagedPayments {
+		data.Set("managed_payments[enabled]", "true")
+		apiVersion = managedPaymentsAPIVersion
+	}
+
+	resp, bodyBytes, err := s.stripeRequest(ctx, http.MethodPost, "https://api.stripe.com/v1/checkout/sessions", data.Encode(), apiVersion)
 	if err != nil {
 		return nil, err
 	}
@@ -538,7 +555,7 @@ func (s *DefaultBillingService) CreatePortalSession(ctx context.Context, custome
 		data.Set("return_url", returnURL)
 	}
 
-	resp, body, err := s.stripeRequest(ctx, http.MethodPost, "https://api.stripe.com/v1/billing_portal/sessions", data.Encode())
+	resp, body, err := s.stripeRequest(ctx, http.MethodPost, "https://api.stripe.com/v1/billing_portal/sessions", data.Encode(), "")
 	if err != nil {
 		return "", err
 	}

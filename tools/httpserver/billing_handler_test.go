@@ -488,3 +488,13 @@ func TestLoadStripeConfig_UnsetPlaceholderStaysInSimulation(t *testing.T) {
 		t.Fatalf("the Key Vault placeholder must be treated as empty, got %+v", cfg)
 	}
 }
+
+func TestLoadStripeConfig_ManagedPayments(t *testing.T) {
+	if loadStripeConfig(envFrom(nil)).ManagedPayments {
+		t.Fatal("managed payments must be off by default")
+	}
+	cfg := loadStripeConfig(envFrom(map[string]string{"STRIPE_MANAGED_PAYMENTS": "true"}))
+	if !cfg.ManagedPayments {
+		t.Fatal("STRIPE_MANAGED_PAYMENTS=true should enable managed payments")
+	}
+}

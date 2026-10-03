@@ -18,7 +18,8 @@
 # empty the matching feature stays off: no Pro price means no Pro checkout,
 # no Enterprise price means Enterprise stays contact-sales.
 #   STRIPE_PUBLISHABLE_KEY, STRIPE_PRO_PRICE_ID, STRIPE_ENTERPRISE_PRICE_ID,
-#   JOLTRIN_PUBLIC_URL
+#   JOLTRIN_PUBLIC_URL, STRIPE_MANAGED_PAYMENTS (true once the Stripe account is
+#   enrolled in Managed Payments)
 #
 # Flow: deploy the Bicep stack first (it has a public placeholder default for
 # containerImage, so it stands up the ACR/Key Vault/environment/Container App
@@ -84,6 +85,7 @@ jobs:
             -p stripeProPriceId="${{ vars.STRIPE_PRO_PRICE_ID }}" \
             -p stripeEnterprisePriceId="${{ vars.STRIPE_ENTERPRISE_PRICE_ID }}" \
             -p publicBaseUrl="${{ vars.JOLTRIN_PUBLIC_URL }}" \
+            -p stripeManagedPayments="${{ vars.STRIPE_MANAGED_PAYMENTS || 'false' }}" \
             -o json > deploy-output.json
           acr_login_server=$(jq -r '.properties.outputs.acrLoginServer.value' deploy-output.json)
           echo "acrLoginServer=${acr_login_server}" >> "$GITHUB_OUTPUT"
