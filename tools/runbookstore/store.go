@@ -11,7 +11,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/sharedcode/joltrin/ai/verify"
+	"github.com/sharedcode/joltrin/v5/verify"
 )
 
 // DefaultMaxTraces bounds how many execution traces a Store retains. A

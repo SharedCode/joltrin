@@ -26,7 +26,7 @@ import (
 	"fmt"
 
 	"github.com/sharedcode/joltrin/ai/ledger"
-	"github.com/sharedcode/joltrin/ai/verify"
+	"github.com/sharedcode/joltrin/v5/verify"
 )
 
 // DecisionPayload is the canonical JSON shape recorded on a

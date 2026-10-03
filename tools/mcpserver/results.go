@@ -1,6 +1,6 @@
 package mcpserver
 
-import "github.com/sharedcode/joltrin/ai/verify"
+import "github.com/sharedcode/joltrin/v5/verify"
 
 // This file defines the structured (JSON) result shapes read_sop,
 // validate_step, and execute_step return, and the tool output schemas

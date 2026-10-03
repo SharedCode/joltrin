@@ -48,7 +48,7 @@ Or skip the install. These run entirely in your browser with no backend:
 
 - **Latency.** About 6.9 microseconds per B-Tree write or read, over 140,000 ops/sec with WAL logging, from the repo's own harness on a 2015 dual-core MacBook Pro. Reproduce it with `go run ./tools/benchmark`. Details and limits are in [docs/BENCHMARKS.md](docs/BENCHMARKS.md).
 - **Correctness.** The race detector runs on the core engine packages in CI, `govulncheck` runs on every push, and the build and unit tests run on Linux, macOS, and Windows.
-- **Agent safety.** `ai/verify` is served over both MCP and A2A, and the same barrier compiles to WebAssembly for the browser demo. See [docs/AGENT_PROTOCOLS.md](docs/AGENT_PROTOCOLS.md).
+- **Agent safety.** `verify` is served over both MCP and A2A, and the same barrier compiles to WebAssembly for the browser demo. See [docs/AGENT_PROTOCOLS.md](docs/AGENT_PROTOCOLS.md).
 - **Packages.** Published on PyPI (`sop4py`) and NuGet (`Sop`), plus the Go module.
 
 There are no documented production deployments or paying customers yet, and no third-party benchmarks. [docs/INVESTORS.md](docs/INVESTORS.md) lists what has and has not been proven.
@@ -64,7 +64,7 @@ There are no documented production deployments or paying customers yet, and no t
 | Joltrin engine                                           |
 |  copy-on-write B-Tree      WAL + two-phase commit (ACID) |
 |  vector similarity search  Reed-Solomon erasure coding   |
-|  swarm task coordination   ai/verify barrier (MCP, A2A)  |
+|  swarm task coordination   verify barrier (MCP, A2A)  |
 +----------------------------------------------------------+
 ```
 

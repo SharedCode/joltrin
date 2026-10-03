@@ -1,12 +1,12 @@
 # Agent protocols: MCP, A2A, and the verification barrier
 
-Joltrin runbooks are reachable from two agent protocols, [Model Context Protocol](https://modelcontextprotocol.io/) and [Agent2Agent](https://a2a-protocol.org/), both gated by the same safety-and-reachability check before a step is allowed to commit. Real, tested code (`ai/verify`, `tools/mcpserver`, `tools/a2aagent`), not a diagram of an idea; see [MCP, A2A, and the Verification Engine](MCP_A2A_AND_VERIFICATION_ENGINE.md) for the full audit and design writeup.
+Joltrin runbooks are reachable from two agent protocols, [Model Context Protocol](https://modelcontextprotocol.io/) and [Agent2Agent](https://a2a-protocol.org/), both gated by the same safety-and-reachability check before a step is allowed to commit. Real, tested code (`verify`, `tools/mcpserver`, `tools/a2aagent`), not a diagram of an idea; see [MCP, A2A, and the Verification Engine](MCP_A2A_AND_VERIFICATION_ENGINE.md) for the full audit and design writeup.
 
 <p align="center">
-  <img src="assets/mcp-a2a-architecture.svg" alt="An MCP client and an A2A orchestrator each reach a separate protocol server, both backed by the same tools/runbookstore.Store and gated by the same ai/verify safety check before a step commits" width="900" />
+  <img src="assets/mcp-a2a-architecture.svg" alt="An MCP client and an A2A orchestrator each reach a separate protocol server, both backed by the same tools/runbookstore.Store and gated by the same verify safety check before a step commits" width="900" />
 </p>
 
-**Try the barrier yourself, live: [joltrinhq.com/agents](https://joltrinhq.com/agents/).** GitHub Pages can't run a real MCP or A2A network server (no backend), so this page runs the actual `ai/verify` check compiled to WASM, wired to buttons instead of protocol calls, the same logic those servers call before committing a step. Click "Drop Prod DB" first and watch it block; the trace persists to OPFS, so a reload picks up where you left off. This is a real recording of that page, not a mockup:
+**Try the barrier yourself, live: [joltrinhq.com/agents](https://joltrinhq.com/agents/).** GitHub Pages can't run a real MCP or A2A network server (no backend), so this page runs the actual `verify` check compiled to WASM, wired to buttons instead of protocol calls, the same logic those servers call before committing a step. Click "Drop Prod DB" first and watch it block; the trace persists to OPFS, so a reload picks up where you left off. This is a real recording of that page, not a mockup:
 
 <p align="center">
   <img src="assets/agent-barrier-demo.gif" alt="Real browser recording of the live agent verification barrier demo: dropping the database is blocked until backup and validation steps actually commit, then the same drop is allowed" width="900" />
@@ -15,7 +15,7 @@ Joltrin runbooks are reachable from two agent protocols, [Model Context Protocol
 The same scenario also runs as a terminal program, `examples/verify_barrier`, and the servers themselves are one command away:
 
 <p align="center">
-  <img src="assets/ltl-barrier.gif" alt="Real terminal recording of ai/verify blocking a database drop until a backup is validated, then allowing it once the precondition is actually met" width="760" />
+  <img src="assets/ltl-barrier.gif" alt="Real terminal recording of verify blocking a database drop until a backup is validated, then allowing it once the precondition is actually met" width="760" />
 </p>
 
 ```bash
@@ -40,7 +40,7 @@ go run ./cmd/sop-a2a-bridge -agent-url http://localhost:8087
 
 ### Wiring `sop-mcp-server` into Claude
 
-`cmd/sop-mcp-server` speaks JSON-RPC over stdio and evaluates the barrier policies below (`ai/verify`'s `CheckSafety`) before `execute_step` is allowed to commit; a blocked step comes back as `input-required`, not a crash. Point either Claude client at the command:
+`cmd/sop-mcp-server` speaks JSON-RPC over stdio and evaluates the barrier policies below (`verify`'s `CheckSafety`) before `execute_step` is allowed to commit; a blocked step comes back as `input-required`, not a crash. Point either Claude client at the command:
 
 **Claude Desktop** (`claude_desktop_config.json`, stdio transport):
 
@@ -105,9 +105,9 @@ go run ./cmd/sop-a2a-bridge -agent-url http://localhost:8087
 claude mcp add --transport stdio joltrin-a2a -- go run ./cmd/sop-a2a-bridge -agent-url http://localhost:8087
 ```
 
-### Barrier policies `ai/verify` enforces
+### Barrier policies `verify` enforces
 
-`ai/verify` is a general-purpose explicit-state precondition/postcondition graph (`Step`, `SafetyRule`, `ReachabilityRule` in `ai/verify/verify.go`) with no built-in notion of databases, clusters, or money. Every state is an opaque string, so a barrier policy for any category of risky action is defined the same way: name the states that must hold, name the step that establishes the dangerous one, and let `CheckSafety` gate it. This repo ships three concrete runbooks in `tools/runbookstore` built on that same generic mechanism, one per risky-action category, plus the generic out-of-order rejection that applies to all of them:
+`verify` is a general-purpose explicit-state precondition/postcondition graph (`Step`, `SafetyRule`, `ReachabilityRule` in `verify/verify.go`) with no built-in notion of databases, clusters, or money. Every state is an opaque string, so a barrier policy for any category of risky action is defined the same way: name the states that must hold, name the step that establishes the dangerous one, and let `CheckSafety` gate it. This repo ships three concrete runbooks in `tools/runbookstore` built on that same generic mechanism, one per risky-action category, plus the generic out-of-order rejection that applies to all of them:
 
 - **Destructive operations** (`DBMaintenanceWorkflow`, e.g. dropping a database): `drop_prod_db` requires `backup_validated`, which only `validate_backup` establishes after `take_backup`. A `SafetyRule` (`no-drop-without-validated-backup`) names the barrier explicitly, and a `ReachabilityRule` guarantees `rollback_complete` stays reachable even after the drop.
 - **Resource & topology mutations** (`ClusterTopologyWorkflow`, e.g. draining a node, failing over a cluster): `drain_node` and `failover_cluster` both require `replica_parity_verified`, which requires `health_check_passed` first. Reinstating the node or cluster (`topology_rollback_complete`) stays reachable from every state in the graph, including after a worker is terminated post-drain.

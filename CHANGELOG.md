@@ -2,6 +2,9 @@
 
 ## v5.8.0
 
+### Verify
+- Moved the verification barrier from `github.com/sharedcode/joltrin/ai/verify` to `github.com/sharedcode/joltrin/v5/verify`. The `ai` module depended on modules that have no published versions, so `go get` on it failed from outside this repo. `verify` only uses the standard library, so `go get github.com/sharedcode/joltrin/v5/verify` now works on its own. Update imports from `joltrin/ai/verify` to `joltrin/v5/verify`.
+
 ### Billing
 - `GET /api/billing/plan` now returns a `checkout` block that says whether Pro and Enterprise can be bought and which environment variables are missing. It lists variable names only, never values, so an operator can see why checkout is off without reading logs. The same check is available as `governance.AssessBilling`.
 - Live mode (a Stripe secret key is set) now refuses every webhook until `STRIPE_WEBHOOK_SECRET` is configured. Before, a live server with no signing secret skipped signature verification and would accept a forged `checkout.session.completed`. The public webhook route also returns 503 when no signing secret exists at all.

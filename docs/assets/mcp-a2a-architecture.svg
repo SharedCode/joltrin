@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" role="img" aria-labelledby="title desc">
 <title id="title">MCP and A2A protocol interoperability over one shared verification barrier</title>
-<desc id="desc">An MCP client and an A2A orchestrator each reach a separate protocol server, tools/mcpserver and tools/a2aagent, both backed by the same tools/runbookstore.Store and gated by the same ai/verify safety and reachability check before a step commits.</desc>
+<desc id="desc">An MCP client and an A2A orchestrator each reach a separate protocol server, tools/mcpserver and tools/a2aagent, both backed by the same tools/runbookstore.Store and gated by the same verify safety and reachability check before a step commits.</desc>
 <style>
 text{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif}
 .mono{font-family:"SF Mono",Menlo,Consolas,monospace}
@@ -12,7 +12,7 @@ text{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Ne
 </style>
 <rect width="1200" height="640" rx="20" fill="#0a0e14"/>
 <text x="40" y="46" class="h">MCP + A2A: two protocols, one barrier</text>
-<text x="40" y="68" class="sub mono">tools/mcpserver · tools/a2aagent · tools/runbookstore · ai/verify</text>
+<text x="40" y="68" class="sub mono">tools/mcpserver · tools/a2aagent · tools/runbookstore · verify</text>
 
 <!-- Left client: MCP -->
 <g transform="translate(40,110)">
@@ -56,7 +56,7 @@ text{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Ne
 <!-- Barrier -->
 <g transform="translate(430,530)">
   <rect width="340" height="70" rx="12" fill="#1a1420" stroke="#e0a020" stroke-width="2"/>
-  <text x="170" y="28" text-anchor="middle" class="label" fill="#e0a020">ai/verify.CheckSafety</text>
+  <text x="170" y="28" text-anchor="middle" class="label" fill="#e0a020">verify.CheckSafety</text>
   <text x="170" y="50" text-anchor="middle" class="small mono">barrier certificate: verify, then act</text>
 </g>
 

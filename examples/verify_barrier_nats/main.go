@@ -19,7 +19,7 @@ import (
 	natsgo "github.com/nats-io/nats.go"
 
 	natsbridge "github.com/sharedcode/joltrin/adapters/nats"
-	"github.com/sharedcode/joltrin/ai/verify"
+	"github.com/sharedcode/joltrin/v5/verify"
 )
 
 func must(err error) {

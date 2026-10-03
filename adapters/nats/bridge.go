@@ -8,7 +8,7 @@ import (
 
 	"github.com/nats-io/nats.go"
 
-	"github.com/sharedcode/joltrin/ai/verify"
+	"github.com/sharedcode/joltrin/v5/verify"
 )
 
 // BarrierDecision is the structured event VerifyBridge publishes to NATS
