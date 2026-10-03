@@ -85,6 +85,7 @@ func loadStripeConfig(getenv func(string) string) governance.StripeConfig {
 	entPriceID := firstNonEmpty(getenv("STRIPE_ENTERPRISE_PRICE_ID"), getenv("JOLTRIN_STRIPE_ENTERPRISE_PRICE_ID"))
 	simulateStr := strings.ToLower(getenv("STRIPE_SIMULATE"))
 	simulate := simulateStr == "true" || simulateStr == "1" || secretKey == ""
+	managedStr := strings.ToLower(getenv("STRIPE_MANAGED_PAYMENTS"))
 
 	// Stripe requires absolute return URLs. JOLTRIN_PUBLIC_URL (the
 	// site's public origin, no trailing slash) builds them; without it
@@ -105,6 +106,7 @@ func loadStripeConfig(getenv func(string) string) governance.StripeConfig {
 		SuccessURL:        firstNonEmpty(getenv("STRIPE_SUCCESS_URL"), successDefault),
 		CancelURL:         firstNonEmpty(getenv("STRIPE_CANCEL_URL"), cancelDefault),
 		Simulate:          simulate,
+		ManagedPayments:   managedStr == "true" || managedStr == "1",
 	}
 }
 

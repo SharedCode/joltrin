@@ -54,6 +54,9 @@ param stripeEnterprisePriceId string = ''
 @description('Public origin of the deployed app, e.g. https://app.example.com (no trailing slash). Used to build the absolute Stripe success and cancel URLs.')
 param publicBaseUrl string = ''
 
+@description('Route checkout through Stripe Managed Payments. The Stripe account must be enrolled or Stripe rejects the checkout session.')
+param stripeManagedPayments bool = false
+
 var resourceToken = uniqueString(resourceGroup().id, appName)
 var logAnalyticsName = '${appName}-logs-${resourceToken}'
 var acrName = replace('${appName}acr${resourceToken}', '-', '')
@@ -137,6 +140,7 @@ module containerApp 'modules/container-app.bicep' = {
     stripeProPriceId: stripeProPriceId
     stripeEnterprisePriceId: stripeEnterprisePriceId
     publicBaseUrl: publicBaseUrl
+    stripeManagedPayments: stripeManagedPayments
     stripeEnabled: !empty(stripeSecretKey) && !empty(stripeWebhookSecret)
   }
 }

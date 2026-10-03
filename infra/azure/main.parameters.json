@@ -28,6 +28,9 @@
     },
     "publicBaseUrl": {
       "value": ""
+    },
+    "stripeManagedPayments": {
+      "value": false
     }
   }
 }
