@@ -12,7 +12,7 @@ type Tier string
 const (
 	// TierCore is the 100% free, MIT-licensed open-source embedded engine.
 	// Includes full copy-on-write B-Tree, WAL, 2PC, erasure coding, AI memory,
-	// in-memory vector similarity, embedded MCP server, A2A agent runtime, and local ai/verify barrier.
+	// in-memory vector similarity, embedded MCP server, A2A agent runtime, and local verify barrier.
 	TierCore Tier = "core"
 
 	// TierPro provides policy-as-code runtime validation, signed audit export,

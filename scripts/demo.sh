@@ -53,7 +53,7 @@ print_header() {
 
 run_barrier_demo() {
   print_header "Option 1: Verification Barrier Demo (Precedence Safety Check)"
-  echo -e "${YELLOW}Demonstrating explicit-state precedence checking (ai/verify).${NC}"
+  echo -e "${YELLOW}Demonstrating explicit-state precedence checking (verify).${NC}"
   echo -e "An agent attempting to drop prod is blocked until preconditions commit."
   echo ""
   go run ./examples/verify_barrier

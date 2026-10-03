@@ -1,4 +1,4 @@
-// Package runbookstore holds the registered ai/verify.Workflow runbooks and
+// Package runbookstore holds the registered verify.Workflow runbooks and
 // their in-progress execution traces, shared by every protocol front-end
 // this repo exposes them through (tools/mcpserver, tools/a2aagent). Sharing
 // one Store is what makes the two protocols actually interoperable rather

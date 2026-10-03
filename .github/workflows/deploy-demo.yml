@@ -81,7 +81,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "Compiling ai/verify barrier demo to WebAssembly..."
+          echo "Compiling verify barrier demo to WebAssembly..."
           cd demo-agents
           GOOS=js GOARCH=wasm go build -ldflags="-s -w" -o sop-agents.wasm .
           ls -lh sop-agents.wasm wasm_exec.js index.html
@@ -111,7 +111,7 @@ jobs:
           cp demo/index.html demo/sop.wasm demo/wasm_exec.js demo/404.html demo/favicon.svg demo/favicon.ico demo/og-image.png demo/logo-mark.png _site/
           # SOP Arena lives at a subpath of the same site: joltrinhq.com/arena/
           cp -r sop-arena/dist/. _site/arena/
-          # Agent verification barrier (ai/verify in WASM) lives at joltrinhq.com/agents/
+          # Agent verification barrier (verify in WASM) lives at joltrinhq.com/agents/
           cp demo-agents/index.html demo-agents/sop-agents.wasm demo-agents/wasm_exec.js demo-agents/favicon.svg demo-agents/favicon.ico demo-agents/og-image.png demo-agents/logo-mark.png _site/agents/
           # Preserve custom domain (e.g. joltrinhq.com) if CNAME exists
           if [ -f "CNAME" ]; then

@@ -13,7 +13,7 @@ import (
 	"github.com/sharedcode/joltrin/v5/verify"
 )
 
-// dbMaintenanceWorkflow mirrors ai/verify's own test fixture: production
+// dbMaintenanceWorkflow mirrors verify's own test fixture: production
 // database drop is forbidden without a validated backup, and rollback
 // remains reachable even after the drop.
 func dbMaintenanceWorkflow(t *testing.T) *verify.Workflow {

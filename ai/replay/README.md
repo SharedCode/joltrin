@@ -1,6 +1,6 @@
 # ai/replay
 
-Closes the loop between [`ai/ledger`](../ledger) and [`ai/verify`](../verify):
+Closes the loop between [`ai/ledger`](../ledger) and [`verify`](../../verify):
 records verification-barrier decisions into a run's ledger, then replays a
 run's recorded decision history against a candidate `verify.Workflow` to
 catch behavioral drift before a workflow definition change ships.

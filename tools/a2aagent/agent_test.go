@@ -15,7 +15,7 @@ import (
 
 const invokePath = "/a2a/invoke"
 
-// dbMaintenanceWorkflow mirrors ai/verify's and tools/mcpserver's own test
+// dbMaintenanceWorkflow mirrors verify's and tools/mcpserver's own test
 // fixture, so all three packages are demonstrably verifying the same
 // property against the same shape of workflow.
 func dbMaintenanceWorkflow(t *testing.T) *verify.Workflow {

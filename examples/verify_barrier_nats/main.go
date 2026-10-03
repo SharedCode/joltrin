@@ -3,7 +3,7 @@
 // an external subscriber (this program's own second goroutine, standing in
 // for a dashboard or another service) can observe them in real time. The
 // barrier itself behaves identically to examples/verify_barrier; nothing
-// about ai/verify changes, and joltrin's embedded core never depends on
+// about verify changes, and joltrin's embedded core never depends on
 // NATS, only this example (and any caller who opts in the same way) does.
 //
 // Needs a NATS server reachable at nats://127.0.0.1:4222 (the default of
