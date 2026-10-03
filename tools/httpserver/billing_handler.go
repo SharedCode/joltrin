@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/mail"
 	"os"
 	"path/filepath"
 	"strings"
@@ -230,6 +231,73 @@ func handleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		"session_id":   sess.ID,
 		"tier":         sess.Tier,
 		"simulate":     getBillingService().Config().Simulate,
+	})
+}
+
+// publicCheckoutOrigins may call the checkout endpoint from a browser. The
+// marketing site is static, so its Pro form reaches this server cross-origin.
+var publicCheckoutOrigins = map[string]bool{
+	"https://joltrinhq.com":     true,
+	"https://www.joltrinhq.com": true,
+}
+
+// handlePublicCheckout lets the static site start a Pro Checkout Session
+// without a login. The tier and tenant are fixed server side, the caller only
+// supplies an email, and the plan is granted by the signed webhook, never by
+// this request. It is rate limited like the other pre-auth billing routes.
+func handlePublicCheckout(w http.ResponseWriter, r *http.Request) {
+	if origin := r.Header.Get("Origin"); publicCheckoutOrigins[origin] {
+		w.Header().Set("Access-Control-Allow-Origin", origin)
+		w.Header().Set("Vary", "Origin")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	}
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	if !checkBillingRateLimit(w, r) {
+		return
+	}
+
+	var req struct {
+		Email string `json:"email"`
+	}
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4096)).Decode(&req); err != nil {
+		writeJSONError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+	addr, err := mail.ParseAddress(strings.TrimSpace(req.Email))
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, "a valid email is required")
+		return
+	}
+
+	sess, err := getBillingService().CreateCheckoutSession(r.Context(), "public", addr.Address, governance.TierPro)
+	if errors.Is(err, governance.ErrBillingNotConfigured) {
+		writeJSONError(w, http.StatusServiceUnavailable, "checkout is not available yet: billing is not fully configured")
+		return
+	}
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "failed to create checkout session")
+		return
+	}
+	if getBillingService().Config().Simulate {
+		// A simulated session URL is relative to this API host and would
+		// grant a plan without payment, so never hand it to the public site.
+		writeJSONError(w, http.StatusServiceUnavailable, "checkout is not available yet: billing is in simulation mode")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(map[string]any{
+		"status":       "ok",
+		"checkout_url": sess.URL,
+		"session_id":   sess.ID,
 	})
 }
 

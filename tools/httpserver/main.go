@@ -437,6 +437,7 @@ func main() {
 	// Billing & Commercial Governance Endpoints
 	http.HandleFunc("/api/billing/plan", withAuth(handleGetPlan))
 	http.HandleFunc("/api/billing/checkout", withAuth(handleCreateCheckoutSession))
+	http.HandleFunc("/api/billing/public-checkout", handlePublicCheckout)
 	http.HandleFunc("/api/billing/portal", withAuth(handleCreatePortalSession))
 	http.HandleFunc("/api/billing/checkout/simulate", handleSimulateCheckout)
 	http.HandleFunc("/api/billing/enterprise-contact", handleSubmitEnterpriseInquiry)

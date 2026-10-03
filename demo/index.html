@@ -2294,8 +2294,9 @@ claude mcp add joltrin -- sop-mcp-server</pre>
 
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3500);
-        const res = await fetch('/api/billing/checkout', {
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+        const apiBase = ['joltrinhq.com', 'www.joltrinhq.com'].includes(location.hostname) ? 'https://joltrin-app.livelybay-0f85ed7b.eastus.azurecontainerapps.io' : '';
+        const res = await fetch(apiBase + '/api/billing/public-checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

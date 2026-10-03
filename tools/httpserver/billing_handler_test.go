@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -112,6 +113,62 @@ func TestHandleCreateCheckoutSession(t *testing.T) {
 	}
 	if resp["checkout_url"] == "" {
 		t.Error("expected non-empty checkout_url")
+	}
+}
+
+func TestHandlePublicCheckout_CORS(t *testing.T) {
+	pre := httptest.NewRequest(http.MethodOptions, "/api/billing/public-checkout", nil)
+	pre.Header.Set("Origin", "https://joltrinhq.com")
+	w := httptest.NewRecorder()
+	handlePublicCheckout(w, pre)
+	if w.Code != http.StatusNoContent {
+		t.Fatalf("preflight: expected 204, got %d", w.Code)
+	}
+	if got := w.Header().Get("Access-Control-Allow-Origin"); got != "https://joltrinhq.com" {
+		t.Errorf("expected joltrinhq.com allowed, got %q", got)
+	}
+
+	other := httptest.NewRequest(http.MethodOptions, "/api/billing/public-checkout", nil)
+	other.Header.Set("Origin", "https://evil.example")
+	w = httptest.NewRecorder()
+	handlePublicCheckout(w, other)
+	if got := w.Header().Get("Access-Control-Allow-Origin"); got != "" {
+		t.Errorf("unexpected CORS header for foreign origin: %q", got)
+	}
+
+}
+
+func TestHandlePublicCheckout_Requests(t *testing.T) {
+	post := func(body string) *httptest.ResponseRecorder {
+		req := httptest.NewRequest(http.MethodPost, "/api/billing/public-checkout", strings.NewReader(body))
+		req.Header.Set("Origin", "https://joltrinhq.com")
+		w := httptest.NewRecorder()
+		handlePublicCheckout(w, req)
+		return w
+	}
+
+	if w := post(`{"email":"not-an-email"}`); w.Code != http.StatusBadRequest {
+		t.Errorf("bad email: expected 400, got %d", w.Code)
+	}
+	if w := post(`{`); w.Code != http.StatusBadRequest {
+		t.Errorf("bad json: expected 400, got %d", w.Code)
+	}
+
+	get := httptest.NewRecorder()
+	handlePublicCheckout(get, httptest.NewRequest(http.MethodGet, "/api/billing/public-checkout", nil))
+	if get.Code != http.StatusMethodNotAllowed {
+		t.Errorf("GET: expected 405, got %d", get.Code)
+	}
+
+	// Tests run with no Stripe keys, so billing is simulated. The public
+	// route must refuse rather than hand out a simulated session URL that
+	// grants a plan without payment, and a caller cannot pick tier or tenant.
+	w := post(`{"email":"a@example.com","tier":"enterprise","tenant_id":"victim"}`)
+	if w.Code != http.StatusServiceUnavailable {
+		t.Fatalf("simulation mode: expected 503, got %d: %s", w.Code, w.Body.String())
+	}
+	if strings.Contains(w.Body.String(), "checkout_url") {
+		t.Errorf("simulated checkout URL leaked: %s", w.Body.String())
 	}
 }
 
