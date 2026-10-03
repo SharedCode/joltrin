@@ -17,6 +17,6 @@ require (
 	github.com/klauspost/reedsolomon v1.12.4 // indirect
 	github.com/ncw/directio v1.0.5 // indirect
 	github.com/redis/go-redis/v9 v9.8.0 // indirect
-	github.com/sethvargo/go-retry v0.3.0 // indirect
+	github.com/sethvargo/go-retry v0.4.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 )
