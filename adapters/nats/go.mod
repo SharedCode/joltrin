@@ -1,6 +1,6 @@
 module github.com/sharedcode/joltrin/adapters/nats
 
-go 1.26.8
+go 1.27.0
 
 require (
 	github.com/nats-io/nats-server/v2 v2.15.0

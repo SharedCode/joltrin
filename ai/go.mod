@@ -1,11 +1,11 @@
 module github.com/sharedcode/joltrin/ai
 
-go 1.26.8
+go 1.27.0
 
 require (
 	github.com/google/cel-go v0.30.0
 	github.com/google/uuid v1.6.0
-	github.com/kelindar/search v0.4.1
+	github.com/kelindar/search v0.5.0
 	github.com/sethvargo/go-retry v0.4.0
 	github.com/sharedcode/joltrin/infs v0.1.0
 	github.com/sharedcode/joltrin/jsondb v0.1.0
@@ -20,13 +20,12 @@ require (
 	cel.dev/expr v0.25.2 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/ebitengine/purego v0.8.1 // indirect
 	github.com/goccy/go-json v0.9.11 // indirect
 	github.com/gocql/gocql v1.7.0 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/hailocab/go-hostpool v0.0.0-20160125115350-e80d13ce29ed // indirect
 	github.com/kelindar/iostream v1.4.0 // indirect
-	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
+	github.com/klauspost/cpuid/v2 v2.4.0 // indirect
 	github.com/klauspost/reedsolomon v1.12.4 // indirect
 	github.com/ncw/directio v1.0.5 // indirect
 	github.com/redis/go-redis/v9 v9.22.0 // indirect

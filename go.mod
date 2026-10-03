@@ -1,34 +1,24 @@
 module github.com/sharedcode/joltrin/v5
 
-go 1.26.8
-
-require (
-	github.com/a2aproject/a2a-go v0.3.15
-	github.com/goccy/go-json v0.9.11
-	github.com/google/cel-go v0.30.0
-	github.com/google/uuid v1.6.0
-	github.com/klauspost/reedsolomon v1.12.4
-	github.com/mark3labs/mcp-go v1.1.1
-)
+go 1.27.0
 
 require (
 	cel.dev/expr v0.25.2 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/ebitengine/purego v0.8.1 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/jsonschema-go v0.4.2 // indirect
 	github.com/hailocab/go-hostpool v0.0.0-20160125115350-e80d13ce29ed // indirect
 	github.com/kelindar/iostream v1.4.0 // indirect
-	github.com/kelindar/search v0.4.1 // indirect
+	github.com/kelindar/search v0.5.0 // indirect
 	github.com/klauspost/compress v1.20.0 // indirect
-	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
+	github.com/klauspost/cpuid/v2 v2.4.0 // indirect
 	github.com/nats-io/nkeys v0.4.16 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/redis/go-redis/v9 v9.22.0 // indirect
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
-	github.com/stretchr/testify v1.12.1 // indirect
+	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
@@ -44,7 +34,13 @@ require (
 )
 
 require (
+	github.com/a2aproject/a2a-go v0.3.15
+	github.com/goccy/go-json v0.9.11
 	github.com/gocql/gocql v1.7.0
+	github.com/google/cel-go v0.30.0
+	github.com/google/uuid v1.6.0
+	github.com/klauspost/reedsolomon v1.12.4
+	github.com/mark3labs/mcp-go v1.1.1
 	github.com/nats-io/nats.go v1.54.0
 	github.com/ncw/directio v1.0.5
 	github.com/sethvargo/go-retry v0.4.0
