@@ -1,10 +1,13 @@
 # Changelog
 
-## Unreleased
+## v5.10.0
 
 - `sop-mcp-server setup` prints the commands that register the server with Claude Code, Codex, and the Gemini CLI using its own full path, and `setup --apply` runs them for the agent CLIs found on this machine. A bare `sop-mcp-server` fails with "Executable not found" when Go's bin folder is not on the PATH the agent starts with. `--lessons` and `--runbooks` set the memory folder and the runbook file for Claude Code and Codex.
 - `SOP_RUNBOOKS` serves your own runbooks from a JSON file instead of the built-in example. The file is checked strictly: an unknown field, a step that requires a state nothing establishes, or a rule about a state nothing produces is an error, and nothing is registered if any runbook is invalid.
 - With memory on (`SOP_LESSONS_DIR`), the server has a `read_lessons` tool that returns what earlier runs got blocked on and the order of steps that works, as structured fields and as one sentence each. It is the same list as the startup instructions and `LESSONS.md`, for agents whose client does not pass the instructions to the model. It is advice only, and it is not listed when memory is off.
+- Each release attaches prebuilt `sop-mcp-server` binaries for macOS, Linux and Windows on amd64 and arm64, with a `sop-mcp-server-SHA256SUMS` file, so setting up an agent does not need Go or the roughly 400 MB that `go install` downloads on a first run.
+- A blocked `execute_step` result now says how many times that step has been blocked for that reason in this trace (`attempts`) and what to do instead of retrying (`next`): `run_established_by_steps` when a registered step establishes the missing state, `stop_and_ask` when none does. `validate_step` returns `next` and leaves `attempts` out, a retry that reuses its `idempotency_key` gets the original count, and A2A `input-required` messages carry both fields. In `verify`, `Violation.Attempts` and `Workflow.NextAction` expose the same thing. The fields are additive.
+- With memory on, `read_lessons` also returns `stats`: for each runbook, how many runs called `execute_step`, and for each rule how many runs it blocked and how many of those went on to run every step it had blocked. The block log records runs and recoveries as new entry kinds; files written before this still load.
 
 ## v5.9.0
 
