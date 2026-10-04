@@ -253,6 +253,7 @@ test.describe('Critical Interactive Features Suite', () => {
     await expect(execLog).toContainText('"blocked_by":"precondition"');
     await expect(execLog).toContainText('"missing_state":"backup_validated"');
     await expect(execLog).toContainText('"established_by_steps":["validate_backup"]');
+    await expect(page.locator('#feedback-note')).toContainText('established_by_steps');
 
     // --- SAFETY CHECK 2: Execute Step 1 (Take Backup) ---
     await takeBackupBtn.click();
