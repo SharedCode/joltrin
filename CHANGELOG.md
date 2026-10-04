@@ -2,7 +2,10 @@
 
 ## Unreleased
 
+- `sop-mcp-server setup` prints the commands that register the server with Claude Code, Codex, and the Gemini CLI using its own full path, and `setup --apply` runs them for the agent CLIs found on this machine. A bare `sop-mcp-server` fails with "Executable not found" when Go's bin folder is not on the PATH the agent starts with. `--lessons` and `--runbooks` set the memory folder and the runbook file for Claude Code and Codex.
+- `SOP_RUNBOOKS` serves your own runbooks from a JSON file instead of the built-in example. The file is checked strictly: an unknown field, a step that requires a state nothing establishes, or a rule about a state nothing produces is an error, and nothing is registered if any runbook is invalid.
 - With memory on (`SOP_LESSONS_DIR`), the server has a `read_lessons` tool that returns what earlier runs got blocked on and the order of steps that works, as structured fields and as one sentence each. It is the same list as the startup instructions and `LESSONS.md`, for agents whose client does not pass the instructions to the model. It is advice only, and it is not listed when memory is off.
+
 ## v5.9.0
 
 - Security: an `idempotency_key` that was first used for one step could be reused for a different step in the same trace, and `execute_step` (MCP) and the A2A agent returned the first call's answer for the second step without checking it. A reused key from a successful call made a blocked step such as `drop_prod_db` come back as `executed: true` with `replayed: true`. The trace itself and every later check stayed correct, but a caller that trusted that answer would have gone ahead, and an agent picks its own keys. A key now replays only the step it was first used for. Reusing it for another step is refused and changes nothing: `verify` returns a `KeyReusedError`, MCP returns an error result with `used_for_step` and `requested_step`, and A2A fails the task. This affects v5.6.0 to v5.8.2, the releases that accept an idempotency key.

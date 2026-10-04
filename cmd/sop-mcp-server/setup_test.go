@@ -128,3 +128,23 @@ func TestSetupUnknownFlagIsAUsageError(t *testing.T) {
 		t.Errorf("exit %d, want 2", code)
 	}
 }
+
+func TestSetupRunbooksSetsTheEnvironmentWithAnAbsolutePath(t *testing.T) {
+	_, out, _ := setup(t, "/bin/sop-mcp-server", &recorder{}, "--runbooks", "/home/me/my runbooks.json", "--lessons", "/home/me/.joltrin")
+	for _, want := range []string{
+		"claude mcp add --scope user joltrin -e SOP_LESSONS_DIR=/home/me/.joltrin -e 'SOP_RUNBOOKS=/home/me/my runbooks.json' -- /bin/sop-mcp-server",
+		"codex mcp add joltrin --env SOP_LESSONS_DIR=/home/me/.joltrin --env 'SOP_RUNBOOKS=/home/me/my runbooks.json' -- /bin/sop-mcp-server",
+		"gemini mcp add --scope user joltrin /bin/sop-mcp-server",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("output missing %q:\n%s", want, out)
+		}
+	}
+}
+
+func TestSetupRunbooksRelativePathBecomesAbsolute(t *testing.T) {
+	_, out, _ := setup(t, "/bin/sop-mcp-server", &recorder{}, "--runbooks", "runbooks.json")
+	if strings.Contains(out, "SOP_RUNBOOKS=runbooks.json") || !strings.Contains(out, "SOP_RUNBOOKS=/") {
+		t.Errorf("an agent starts the server from any folder, so the path must be absolute:\n%s", out)
+	}
+}
