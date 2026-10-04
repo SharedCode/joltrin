@@ -248,6 +248,11 @@ test.describe('Critical Interactive Features Suite', () => {
     const execLog = page.locator('#exec-log');
     await expect(execLog).toContainText(/BLOCKED/i, { timeout: 5_000 });
     await expect(execLog).toContainText(/backup_validated/i);
+    // The block also shows the structured result an agent receives: which rule
+    // tripped, the missing state, and the step that would establish it.
+    await expect(execLog).toContainText('"blocked_by":"precondition"');
+    await expect(execLog).toContainText('"missing_state":"backup_validated"');
+    await expect(execLog).toContainText('"established_by_steps":["validate_backup"]');
 
     // --- SAFETY CHECK 2: Execute Step 1 (Take Backup) ---
     await takeBackupBtn.click();
