@@ -53,10 +53,10 @@ Any agent that supports MCP can use the barrier. Three steps:
 
 ```bash
 go install github.com/sharedcode/joltrin/v5/cmd/sop-mcp-server@latest
-claude mcp add joltrin -- sop-mcp-server    # Claude Code. Other agents: add an MCP server that runs `sop-mcp-server`
+claude mcp add joltrin -- "$(go env GOPATH)/bin/sop-mcp-server"    # Claude Code. Other agents: add an MCP server whose command is that same path
 ```
 
-Then tell your agent: "Use the joltrin tools to run `drop_prod_db` on workflow `db-maintenance` with trace id `t1`." The server refuses until `take_backup` and `validate_backup` have run in that trace, whatever the agent claims. Make sure `$(go env GOPATH)/bin` is on your `PATH`. A recorded run with real agents, and what it does not prove, is in [docs/AGENT_BARRIER_TESTS.md](docs/AGENT_BARRIER_TESTS.md).
+Then tell your agent: "Use the joltrin tools to run `drop_prod_db` on workflow `db-maintenance` with trace id `t1`." The server refuses until `take_backup` and `validate_backup` have run in that trace, whatever the agent claims. The command uses the full path, so it works even when `$(go env GOPATH)/bin` is not on your `PATH`. A bare `sop-mcp-server` fails with "Executable not found" in that case. A recorded run with real agents, and what it does not prove, is in [docs/AGENT_BARRIER_TESTS.md](docs/AGENT_BARRIER_TESTS.md).
 
 Two limits to know. The `trace_id` names a run and the caller chooses it, so issue one per run in your integration. And the barrier only answers: whatever performs the real action has to wait for that answer, or an agent can skip it.
 
@@ -65,7 +65,7 @@ Two limits to know. The `trace_id` names a run and the caller chooses it, so iss
 Set `SOP_LESSONS_DIR` and the server records each block once per run and tells the next agent when it connects. It also keeps a short `LESSONS.md` there that you can add to a `CLAUDE.md` (`@~/.joltrin/LESSONS.md`) or point an `AGENTS.md` at.
 
 ```bash
-claude mcp add joltrin -e SOP_LESSONS_DIR=$HOME/.joltrin -- sop-mcp-server
+claude mcp add joltrin -e SOP_LESSONS_DIR=$HOME/.joltrin -- "$(go env GOPATH)/bin/sop-mcp-server"
 ```
 
 It is off by default and advice only: the barrier still checks every call, so history never unlocks a step. Lessons name only steps and states from your runbook, and they expire after 30 days or when the runbook changes. Use one server process per folder.

@@ -663,9 +663,9 @@
       <!-- Test with your own agent -->
       <div id="test-your-agent" class="mt-6 p-4 rounded-xl bg-dark-950 border border-dark-800 text-xs">
         <span class="text-white font-bold block text-sm mb-1">Test it with your own AI agent</span>
-        <p class="text-slate-400 mb-3">Any agent that supports MCP can use the barrier. Install the server, then add it to your agent. The second line is for Claude Code; for other agents, add an MCP server that runs <code>sop-mcp-server</code>.</p>
+        <p class="text-slate-400 mb-3">Any agent that supports MCP can use the barrier. Install the server, then add it to your agent. The second line is for Claude Code and uses the full path, so it works even when Go's bin folder is not on your PATH. For other agents, add an MCP server whose command is that same path.</p>
         <pre class="whitespace-pre-wrap break-all rounded-lg bg-dark-900 border border-dark-800 p-3 font-mono text-slate-200 leading-relaxed">go install github.com/sharedcode/joltrin/v5/cmd/sop-mcp-server@latest
-claude mcp add joltrin -- sop-mcp-server</pre>
+claude mcp add joltrin -- "$(go env GOPATH)/bin/sop-mcp-server"</pre>
         <p class="text-slate-400 mt-3">Then ask it: "Use the joltrin tools to run <code>drop_prod_db</code> on workflow <code>db-maintenance</code> with trace id <code>t1</code>." The server refuses until <code>take_backup</code> and <code>validate_backup</code> have run in that trace, whatever the agent claims. <a href="https://github.com/SharedCode/joltrin/blob/master/docs/AGENT_BARRIER_TESTS.md" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:text-white underline underline-offset-2">Recorded runs with real agents</a>.</p>
       </div>
     </section>
