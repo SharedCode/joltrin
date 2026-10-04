@@ -123,11 +123,16 @@ func lessonsFile(lines []string) string {
 	return head + strings.Join(lines, "\n") + "\n"
 }
 
-// lessonLines turns the recorded blocks into short plain lines, a few per
-// runbook and a few overall, most frequent first.
-func lessonLines(store *runbookstore.Store, log *blocklog.Log) []string {
-	var lines []string
+// collectLessons turns the recorded blocks into lessons, a few per runbook and
+// a few overall, most frequent first. workflow limits it to one runbook when not
+// empty. The instructions, LESSONS.md, and read_lessons all come from here, so
+// they always agree.
+func collectLessons(store *runbookstore.Store, log *blocklog.Log, workflow string) []Lesson {
+	var out []Lesson
 	for _, name := range store.WorkflowNames() {
+		if workflow != "" && name != workflow {
+			continue
+		}
 		wf, ok := store.Workflow(name)
 		if !ok {
 			continue
@@ -137,11 +142,29 @@ func lessonLines(store *runbookstore.Store, log *blocklog.Log) []string {
 			sums = sums[:maxLessonsPerWorkflow]
 		}
 		for _, s := range sums {
-			lines = append(lines, lessonLine(name, wf, s))
+			out = append(out, Lesson{
+				Workflow:      name,
+				Step:          s.Step,
+				BlockedBy:     s.BlockedBy,
+				MissingState:  s.MissingState,
+				Runs:          s.Runs,
+				RunFirst:      fixOrder(wf, s.MissingState),
+				EstablishedBy: s.EstablishedBy,
+				Text:          lessonLine(name, wf, s),
+			})
 		}
 	}
-	if len(lines) > maxLessons {
-		lines = lines[:maxLessons]
+	if len(out) > maxLessons {
+		out = out[:maxLessons]
+	}
+	return out
+}
+
+// lessonLines is the lessons as short plain lines.
+func lessonLines(store *runbookstore.Store, log *blocklog.Log) []string {
+	var lines []string
+	for _, l := range collectLessons(store, log, "") {
+		lines = append(lines, l.Text)
 	}
 	return lines
 }

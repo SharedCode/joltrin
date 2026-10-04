@@ -120,3 +120,24 @@ type KeyReusedResult struct {
 	UsedForStep    verify.StepID `json:"used_for_step" jsonschema_description:"The step this key was first used for in this trace."`
 	RequestedStep  verify.StepID `json:"requested_step" jsonschema_description:"The step the call asked for."`
 }
+
+// Lesson is one thing earlier runs on this server got blocked on. It is advice:
+// the barrier still checks every call.
+type Lesson struct {
+	Workflow     string        `json:"workflow" jsonschema_description:"The runbook the block happened in."`
+	Step         verify.StepID `json:"step" jsonschema_description:"The step that was blocked."`
+	BlockedBy    string        `json:"blocked_by" jsonschema_description:"'precondition' or the name of the safety rule that blocked it."`
+	MissingState verify.State  `json:"missing_state" jsonschema_description:"The state that was missing."`
+	Runs         int           `json:"runs" jsonschema_description:"How many separate runs hit this block."`
+	// RunFirst is the steps to run, in order, to establish MissingState. It is
+	// omitted when the path is not clear, for example when two steps could
+	// establish it.
+	RunFirst      []verify.StepID `json:"run_first,omitempty" jsonschema_description:"Steps to run, in order, before this one. Omitted when the path is not clear."`
+	EstablishedBy []verify.StepID `json:"established_by_steps,omitempty" jsonschema_description:"Steps that would establish the missing state."`
+	Text          string          `json:"text" jsonschema_description:"The same lesson as one plain sentence."`
+}
+
+// ReadLessonsResult is read_lessons' result.
+type ReadLessonsResult struct {
+	Lessons []Lesson `json:"lessons" jsonschema_description:"What earlier runs got blocked on, most frequent first. Empty when nothing has been recorded."`
+}

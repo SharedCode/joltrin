@@ -76,7 +76,30 @@ func New(store *runbookstore.Store, opts ...Option) *server.MCPServer {
 		executeStepHandler(store, cfg),
 	)
 
+	// read_lessons exists only when memory is on, so a server without it shows
+	// the same three tools it always has.
+	if cfg.log != nil {
+		s.AddTool(
+			mcp.NewTool("read_lessons",
+				mcp.WithDescription("List what earlier runs on this server got blocked on and the order of steps that works. Call it before you start a task. It is advice only: the barrier still checks every call."),
+				mcp.WithString("workflow", mcp.Description("Optional. Only lessons for this runbook.")),
+				mcp.WithOutputSchema[ReadLessonsResult](),
+			),
+			readLessonsHandler(store, cfg),
+		)
+	}
+
 	return s
+}
+
+func readLessonsHandler(store *runbookstore.Store, cfg *config) server.ToolHandlerFunc {
+	return func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		lessons := collectLessons(store, cfg.log, req.GetString("workflow", ""))
+		if lessons == nil {
+			lessons = []Lesson{} // an empty list, not null
+		}
+		return mcp.NewToolResultStructuredOnly(ReadLessonsResult{Lessons: lessons}), nil
+	}
 }
 
 func readSOPHandler(store *runbookstore.Store) server.ToolHandlerFunc {

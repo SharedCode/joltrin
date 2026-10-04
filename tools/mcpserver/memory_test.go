@@ -2,6 +2,7 @@ package mcpserver
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -271,5 +272,98 @@ func TestConcurrentBlocksLeaveACompleteLessonsFile(t *testing.T) {
 	}
 	if _, err := os.Stat(lessons + ".tmp"); !os.IsNotExist(err) {
 		t.Error("a temporary lessons file was left behind")
+	}
+}
+
+func toolNames(t *testing.T, c *client.Client) map[string]bool {
+	t.Helper()
+	res, err := c.ListTools(context.Background(), mcp.ListToolsRequest{})
+	if err != nil {
+		t.Fatalf("ListTools: %v", err)
+	}
+	out := map[string]bool{}
+	for _, tool := range res.Tools {
+		out[tool.Name] = true
+	}
+	return out
+}
+
+func readLessons(t *testing.T, c *client.Client, args map[string]any) ReadLessonsResult {
+	t.Helper()
+	return structuredAs[ReadLessonsResult](t, callTool(t, c, "read_lessons", args))
+}
+
+func TestReadLessonsToolOnlyExistsWhenMemoryIsOn(t *testing.T) {
+	off, _ := connect(t)
+	if toolNames(t, off)["read_lessons"] {
+		t.Error("without memory the server must show only the tools it always had")
+	}
+	on, _ := connect(t, WithMemory(blocklog.New(), ""))
+	names := toolNames(t, on)
+	for _, want := range []string{"read_sop", "validate_step", "execute_step", "read_lessons"} {
+		if !names[want] {
+			t.Errorf("tool %s missing with memory on: %v", want, names)
+		}
+	}
+}
+
+func TestReadLessonsReturnsWhatBlockedAndTheOrderThatWorks(t *testing.T) {
+	log := blocklog.New()
+	c, _ := connect(t, WithMemory(log, ""))
+
+	if got := readLessons(t, c, nil); got.Lessons == nil || len(got.Lessons) != 0 {
+		t.Fatalf("nothing recorded should give an empty list, got %+v", got)
+	}
+	raw, err := json.Marshal(readLessons(t, c, nil))
+	if err != nil || !strings.Contains(string(raw), `"lessons":[]`) {
+		t.Errorf("an empty result should serialize as [], got %s", raw)
+	}
+
+	execute(t, c, "run-1", "drop_prod_db", "")
+	execute(t, c, "run-2", "drop_prod_db", "")
+
+	got := readLessons(t, c, nil)
+	if len(got.Lessons) != 1 {
+		t.Fatalf("want one lesson, got %+v", got.Lessons)
+	}
+	l := got.Lessons[0]
+	if l.Workflow != "db-maintenance" || l.Step != "drop_prod_db" || l.BlockedBy != "precondition" ||
+		l.MissingState != "backup_validated" || l.Runs != 2 {
+		t.Errorf("unexpected lesson: %+v", l)
+	}
+	if len(l.RunFirst) != 2 || l.RunFirst[0] != "take_backup" || l.RunFirst[1] != "validate_backup" {
+		t.Errorf("RunFirst = %v, want [take_backup validate_backup]", l.RunFirst)
+	}
+	if !strings.Contains(l.Text, "before drop_prod_db, run take_backup, then validate_backup") {
+		t.Errorf("Text = %q", l.Text)
+	}
+}
+
+func TestReadLessonsAgreesWithTheInstructionsAndFiltersByWorkflow(t *testing.T) {
+	log := blocklog.New()
+	c, _ := connect(t, WithMemory(log, ""))
+	execute(t, c, "run-1", "drop_prod_db", "")
+
+	_, instr := connect(t, WithMemory(log, ""))
+	for _, l := range readLessons(t, c, nil).Lessons {
+		if !strings.Contains(instr, l.Text) {
+			t.Errorf("the instructions should carry the same lesson %q:\n%s", l.Text, instr)
+		}
+	}
+	if got := readLessons(t, c, map[string]any{"workflow": "db-maintenance"}); len(got.Lessons) != 1 {
+		t.Errorf("filtering by the right workflow should keep the lesson, got %+v", got.Lessons)
+	}
+	if got := readLessons(t, c, map[string]any{"workflow": "some-other-runbook"}); len(got.Lessons) != 0 {
+		t.Errorf("filtering by another workflow should return none, got %+v", got.Lessons)
+	}
+}
+
+func TestReadLessonsNeverUnlocksAStep(t *testing.T) {
+	log := blocklog.New()
+	c, _ := connect(t, WithMemory(log, ""))
+	execute(t, c, "run-1", "drop_prod_db", "")
+	readLessons(t, c, nil)
+	if got := execute(t, c, "run-2", "drop_prod_db", ""); got.Executed {
+		t.Error("reading lessons must not let a step run")
 	}
 }
