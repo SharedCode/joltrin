@@ -24,6 +24,14 @@ test.describe('Homepage', () => {
     expect(frameY).toBeGreaterThan(heroY);
   });
 
+  test('header has a Watch demo button that jumps to the video', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const btn = page.locator('#watch-demo-btn');
+    await expect(btn).toBeVisible();
+    await expect(btn).toHaveAttribute('href', '#demo-video');
+    await expect(page.locator('#demo-video iframe')).toHaveCount(1);
+  });
+
   test('explains how to test the barrier with your own AI agent', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const section = page.locator('#test-your-agent');
