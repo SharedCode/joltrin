@@ -29,9 +29,21 @@ import (
 )
 
 // New builds an MCP server with read_sop, validate_step, and execute_step
-// registered against store.
-func New(store *runbookstore.Store) *server.MCPServer {
-	s := server.NewMCPServer("joltrin-runbook-server", "0.1.0")
+// registered against store. With no options it behaves exactly as it always
+// has; WithMemory adds the optional record of earlier blocks.
+func New(store *runbookstore.Store, opts ...Option) *server.MCPServer {
+	cfg := &config{}
+	for _, o := range opts {
+		o(cfg)
+	}
+	var serverOpts []server.ServerOption
+	if cfg.log != nil {
+		if text := instructions(store, cfg.log); text != "" {
+			serverOpts = append(serverOpts, server.WithInstructions(text))
+		}
+		cfg.writeLessons(store)
+	}
+	s := server.NewMCPServer("joltrin-runbook-server", "0.1.0", serverOpts...)
 
 	s.AddTool(
 		mcp.NewTool("read_sop",
@@ -61,7 +73,7 @@ func New(store *runbookstore.Store) *server.MCPServer {
 			mcp.WithString("idempotency_key", mcp.Description("Optional. A unique ID for this specific call, chosen by the caller. Retrying with the same key after a lost response returns the original result rather than executing the step again. Omit it and every call is treated as new, matching the pre-existing behavior.")),
 			mcp.WithOutputSchema[ExecuteStepResult](),
 		),
-		executeStepHandler(store),
+		executeStepHandler(store, cfg),
 	)
 
 	return s
@@ -112,7 +124,7 @@ func validateStepHandler(store *runbookstore.Store) server.ToolHandlerFunc {
 	}
 }
 
-func executeStepHandler(store *runbookstore.Store) server.ToolHandlerFunc {
+func executeStepHandler(store *runbookstore.Store, cfg *config) server.ToolHandlerFunc {
 	return func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		name := req.GetString("workflow", "")
 		stepID := req.GetString("step", "")
@@ -148,6 +160,9 @@ func executeStepHandler(store *runbookstore.Store) server.ToolHandlerFunc {
 		var v *verify.Violation
 		if !errors.As(err, &v) {
 			return unknownStepResult(wf, name, stepID), nil
+		}
+		if !replayed {
+			cfg.recordBlock(store, name, traceID, stepID, wf, v)
 		}
 		return mcp.NewToolResultStructuredOnly(ExecuteStepResult{
 			Executed: false,

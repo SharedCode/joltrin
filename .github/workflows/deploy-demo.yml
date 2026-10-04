@@ -8,6 +8,7 @@ on:
     paths:
       - 'demo/**'
       - 'demo-agents/**'
+      - 'docs/assets/agent-follows-feedback.gif'
       - 'sop-arena/**'
       - '.github/workflows/deploy-demo.yml'
   workflow_dispatch: # Allows manual trigger from the GitHub Actions UI
@@ -109,6 +110,9 @@ jobs:
           mkdir -p _site/arena _site/agents
           # Technical demo (WASM) lives at the site root: joltrinhq.com/
           cp demo/index.html demo/sop.wasm demo/wasm_exec.js demo/404.html demo/favicon.svg demo/favicon.ico demo/og-image.png demo/logo-mark.png _site/
+          # The homepage shows this replay from ./assets/
+          mkdir -p _site/assets
+          cp docs/assets/agent-follows-feedback.gif _site/assets/
           # SOP Arena lives at a subpath of the same site: joltrinhq.com/arena/
           cp -r sop-arena/dist/. _site/arena/
           # Agent verification barrier (verify in WASM) lives at joltrinhq.com/agents/
@@ -119,6 +123,13 @@ jobs:
           elif [ -f "demo/CNAME" ]; then
             cp demo/CNAME _site/CNAME
           fi
+          # Fail the deploy if the homepage points at a local file that is not in the site.
+          for ref in $(grep -oE '(src|href)="\./[^"#?]+"' _site/index.html | sed -E 's/^(src|href)="\.\///; s/"$//'); do
+            if [ ! -e "_site/${ref}" ]; then
+              echo "Error: _site/index.html references ./${ref} but it is not in the site" >&2
+              exit 1
+            fi
+          done
           ls -lh _site _site/arena _site/agents
 
       - name: Setup GitHub Pages

@@ -12,6 +12,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"syscall/js"
 
@@ -29,6 +30,12 @@ type stepResult struct {
 	Blocked bool     `json:"blocked"`
 	Reason  string   `json:"reason,omitempty"`
 	Trace   []string `json:"trace"`
+	// BlockedBy, MissingState and EstablishedBy are the same structured
+	// fields tools/mcpserver returns from execute_step, so the page can show
+	// what an agent actually receives, not only the message text.
+	BlockedBy     string   `json:"blocked_by,omitempty"`
+	MissingState  string   `json:"missing_state,omitempty"`
+	EstablishedBy []string `json:"established_by_steps,omitempty"`
 }
 
 func snapshotTrace() []string {
@@ -49,6 +56,14 @@ func jsExecuteStep(this js.Value, args []js.Value) any {
 	if err := workflow.CheckSafety(trace, step); err != nil {
 		res.Blocked = true
 		res.Reason = err.Error()
+		var v *verify.Violation
+		if errors.As(err, &v) {
+			res.BlockedBy = v.Rule
+			res.MissingState = string(v.MissingState)
+			for _, id := range workflow.StepsThatEstablish(v.MissingState) {
+				res.EstablishedBy = append(res.EstablishedBy, string(id))
+			}
+		}
 	} else {
 		_ = workflow.Commit(trace, step)
 	}

@@ -452,6 +452,10 @@
       <div id="exec-log" class="font-mono text-xs bg-dark-950 border border-dark-800 rounded-lg p-4 h-64 overflow-y-auto space-y-1.5">
         <div class="text-slate-500">// waiting for WASM engine...</div>
       </div>
+      <p id="feedback-note" class="text-xs text-slate-500 mt-3">
+        A block is feedback, not a dead end. The <code>result:</code> line is what an agent receives: the rule that tripped (<code>blocked_by</code>), the state that is missing (<code>missing_state</code>), and the steps that would establish it (<code>established_by_steps</code>). Try the steps it names, in order.
+        <a href="https://github.com/SharedCode/joltrin/blob/master/docs/AGENT_BARRIER_TESTS.md#does-the-agent-act-on-the-block-feedback" class="text-brand-400 hover:text-brand-300 underline underline-offset-2">See how real agents used it.</a>
+      </p>
     </div>
 
     <!-- MCP / A2A honesty section -->
@@ -753,6 +757,11 @@ curl localhost:8087/.well-known/agent-card.json</pre>
       if (res.blocked) {
         log(`<span class="text-rose-400">→ execute_step(${id}) ... BLOCKED</span>`);
         log(`<span class="text-rose-300/80 pl-4">${res.reason}</span>`);
+        if (res.blocked_by) {
+          const out = { blocked_by: res.blocked_by, missing_state: res.missing_state };
+          if (res.established_by_steps) out.established_by_steps = res.established_by_steps;
+          log(`<span class="text-amber-300 pl-4">result: ${JSON.stringify(out)}</span>`);
+        }
       } else {
         log(`<span class="text-brand-400">→ execute_step(${id}) ... committed</span>`);
       }

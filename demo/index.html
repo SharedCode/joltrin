@@ -710,7 +710,20 @@ claude mcp add joltrin -- sop-mcp-server</pre>
         <button id="team-run" type="button" class="ml-auto px-4 py-2 rounded-lg bg-brand-500 hover:bg-brand-400 text-dark-950 font-mono font-semibold text-sm transition">Run the agents</button>
       </div>
       <pre id="team-log" aria-live="polite" class="p-4 rounded-xl bg-dark-950 border border-dark-750 text-xs font-mono text-slate-300 overflow-x-auto min-h-[16rem] whitespace-pre-wrap"></pre>
-      <p class="text-xs text-slate-500 mt-3">Replays the output of <code>go run ./examples/agent_team</code>. The tools are stubs, the checks are real (<code>ai/verify</code> plus an allowlist and an evidence check).</p>
+      <p class="text-xs text-slate-500 mt-3">Replays the output of <code>go run ./examples/agent_team</code>. The tools are stubs, the checks are real (<code>ai/verify</code> plus an allowlist and an evidence check). A <code>result:</code> line is the structured block an MCP agent gets back from <code>execute_step</code>: the rule that tripped, the missing state, and the steps that would establish it.</p>
+      <div id="agent-feedback" class="mt-6 grid gap-5 lg:grid-cols-2 items-center p-5 rounded-xl bg-dark-950 border border-dark-750">
+        <div>
+          <h3 class="text-lg font-bold text-white">A block is feedback, not a dead end</h3>
+          <p class="text-slate-400 text-sm mt-2 leading-relaxed">
+            When the barrier blocks a step, the agent gets back which rule tripped, the state that is missing, and the steps that would establish it. It can correct course from the block itself instead of guessing or retrying.
+          </p>
+          <p class="text-slate-400 text-sm mt-2 leading-relaxed">
+            In our runs, Claude agents that were allowed to fix the problem used those fields to take the missing steps and finish, with no identical blocked call repeated. It is a small sample, so the prompts, models, and transcripts are written up in full.
+          </p>
+          <a href="https://github.com/SharedCode/joltrin/blob/master/docs/AGENT_BARRIER_TESTS.md#does-the-agent-act-on-the-block-feedback" class="inline-block mt-3 text-sm font-mono text-brand-400 hover:text-brand-300 underline underline-offset-4">Read the agent test results</a>
+        </div>
+        <img src="./assets/agent-follows-feedback.gif" width="672" height="630" loading="lazy" alt="Terminal replay: an agent is blocked on drop_prod_db, follows established_by_steps to validate_backup, is blocked again, follows it to take_backup, then runs validate_backup and drop_prod_db" class="w-full rounded-lg border border-dark-750" />
+      </div>
     </section>
     <script>
       (function () {
@@ -729,12 +742,16 @@ claude mcp add joltrin -- sop-mcp-server</pre>
               "text-brand-400"
             ],
             [
-              "aws-agent       -> aws.scale_up",
+              "aws-agent       -> aws.scale_out",
               ""
             ],
             [
-              "  BLOCKED order: step \"aws.scale_up\" requires state \"evidence_confirmed\", which has not been established in this trace",
+              "  BLOCKED order: step \"aws.scale_out\" requires state \"evidence_confirmed\", which has not been established in this trace",
               "text-rose-400"
+            ],
+            [
+              "  result: {\"blocked_by\":\"precondition\",\"missing_state\":\"evidence_confirmed\",\"established_by_steps\":[\"grafana.query\"]}",
+              "text-amber-300"
             ],
             [
               "grafana-agent   -> grafana.query",
@@ -745,7 +762,7 @@ claude mcp add joltrin -- sop-mcp-server</pre>
               "text-brand-400"
             ],
             [
-              "aws-agent       -> aws.scale_up",
+              "aws-agent       -> aws.scale_out",
               ""
             ],
             [
@@ -753,7 +770,7 @@ claude mcp add joltrin -- sop-mcp-server</pre>
               "text-rose-400"
             ],
             [
-              "aws-agent       -> aws.scale_up",
+              "aws-agent       -> aws.scale_out",
               ""
             ],
             [
@@ -769,7 +786,7 @@ claude mcp add joltrin -- sop-mcp-server</pre>
               "text-rose-400"
             ],
             [
-              "aws-agent       -> aws.scale_up",
+              "aws-agent       -> aws.scale_out",
               ""
             ],
             [
@@ -777,7 +794,7 @@ claude mcp add joltrin -- sop-mcp-server</pre>
               "text-brand-400"
             ],
             [
-              "trace: [jira.get_ticket grafana.query aws.scale_up]",
+              "trace: [jira.get_ticket grafana.query aws.scale_out]",
               "text-accent-cyan"
             ]
           ],
@@ -803,12 +820,20 @@ claude mcp add joltrin -- sop-mcp-server</pre>
               "text-rose-400"
             ],
             [
+              "  result: {\"blocked_by\":\"precondition\",\"missing_state\":\"recovery_confirmed\",\"established_by_steps\":[\"grafana.recheck\"]}",
+              "text-amber-300"
+            ],
+            [
               "aws-agent       -> aws.rollback_deploy",
               ""
             ],
             [
               "  BLOCKED order: step \"aws.rollback_deploy\" requires state \"evidence_confirmed\", which has not been established in this trace",
               "text-rose-400"
+            ],
+            [
+              "  result: {\"blocked_by\":\"precondition\",\"missing_state\":\"evidence_confirmed\",\"established_by_steps\":[\"grafana.query\"]}",
+              "text-amber-300"
             ],
             [
               "grafana-agent   -> grafana.query",
@@ -893,13 +918,18 @@ claude mcp add joltrin -- sop-mcp-server</pre>
           select(current);
           var lines = scenarios[current];
           var i = 0;
-          (function next() {
-            if (i >= lines.length) return;
+          function add() {
             var row = document.createElement('div');
             row.className = lines[i][1];
             row.textContent = lines[i][0];
             log.appendChild(row);
             i++;
+          }
+          (function next() {
+            if (i >= lines.length) return;
+            add();
+            // a result line belongs to the BLOCKED line above it, so it shows with it
+            while (i < lines.length && lines[i][0].indexOf('  result:') === 0) add();
             timer = setTimeout(next, 500);
           })();
         });
