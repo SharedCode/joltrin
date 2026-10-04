@@ -55,6 +55,18 @@ test.describe('Homepage', () => {
     await expect(log).toContainText('"missing_state":"recovery_confirmed"');
   });
 
+  test('agent feedback callout explains the structured block and shows the replay', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const callout = page.locator('#agent-feedback');
+    await expect(callout).toContainText('A block is feedback, not a dead end');
+    await expect(callout).toContainText('which rule tripped');
+    await expect(callout.getByRole('link', { name: /agent test results/i })).toHaveAttribute('href', /AGENT_BARRIER_TESTS\.md#does-the-agent-act-on-the-block-feedback/);
+    const img = callout.locator('img');
+    await img.scrollIntoViewIfNeeded();
+    await expect(img).toBeVisible();
+    await expect.poll(() => img.evaluate((el: HTMLImageElement) => el.naturalWidth)).toBeGreaterThan(0);
+  });
+
   test('pricing shows open source, Pro, and Enterprise contact without live-checkout claims', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const pricing = page.locator('#pricing');
