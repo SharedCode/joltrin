@@ -49,7 +49,23 @@ Or skip the install. These run entirely in your browser with no backend:
 
 ## Test it with your own AI agent
 
-Any agent that supports MCP can use the barrier. Two commands:
+Any agent that supports MCP can use the barrier. You can download a binary of about 6 MB, or build it with Go.
+
+**Download (no Go needed).** Pick the file for your machine from the [latest release](https://github.com/SharedCode/joltrin/releases/latest): `darwin-arm64`, `darwin-amd64`, `linux-amd64`, `linux-arm64`, or a `windows-*.exe`. On macOS or Linux:
+
+```bash
+os_arch=darwin-arm64   # or darwin-amd64, linux-amd64, linux-arm64
+base=https://github.com/SharedCode/joltrin/releases/latest/download
+curl -fsSLO "$base/sop-mcp-server-$os_arch" -O "$base/sop-mcp-server-SHA256SUMS"
+shasum -a 256 -c --ignore-missing sop-mcp-server-SHA256SUMS   # on Linux: sha256sum -c --ignore-missing
+mkdir -p "$HOME/.joltrin/bin" && mv "sop-mcp-server-$os_arch" "$HOME/.joltrin/bin/sop-mcp-server"
+chmod +x "$HOME/.joltrin/bin/sop-mcp-server"
+"$HOME/.joltrin/bin/sop-mcp-server" setup --apply
+```
+
+Move the file somewhere it will stay before running `setup`, because it registers the binary by that path. On Windows, download the `.exe` and the checksum file from the same page and run `.\sop-mcp-server-windows-amd64.exe setup --apply` from the folder you keep it in.
+
+**Build with Go.**
 
 ```bash
 go install github.com/sharedcode/joltrin/v5/cmd/sop-mcp-server@latest
@@ -58,9 +74,9 @@ go install github.com/sharedcode/joltrin/v5/cmd/sop-mcp-server@latest
 
 `setup --apply` registers the server with Claude Code, Codex, and the Gemini CLI, whichever are installed, using the binary's full path. That avoids the "Executable not found" failure you get when Go's bin folder is not on your `PATH`. Run `setup` without `--apply` to see the commands first.
 
-The first install downloads the Go modules. If your Go is older than 1.26.8, Go also downloads that toolchain once, about 240 MB, so the first run takes a few minutes. Later installs are quick.
+The first `go install` downloads the Go modules. If your Go is older than 1.26.8, Go also downloads that toolchain once, about 240 MB, so the first run takes a few minutes. Later installs are quick. The download above skips all of that.
 
-Then tell your agent: "Use the joltrin tools to run `drop_prod_db` on workflow `db-maintenance` with trace id `t1`." The server refuses until `take_backup` and `validate_backup` have run in that trace, whatever the agent claims. The command uses the full path, so it works even when `$(go env GOPATH)/bin` is not on your `PATH`. A bare `sop-mcp-server` fails with "Executable not found" in that case. A recorded run with real agents, and what it does not prove, is in [docs/AGENT_BARRIER_TESTS.md](docs/AGENT_BARRIER_TESTS.md).
+Then tell your agent: "Use the joltrin tools to run `drop_prod_db` on workflow `db-maintenance` with trace id `t1`." The server refuses until `take_backup` and `validate_backup` have run in that trace, whatever the agent claims. A bare `sop-mcp-server` fails with "Executable not found" when its folder is not on the `PATH` your agent starts with, which is why `setup` registers the full path. A recorded run with real agents, and what it does not prove, is in [docs/AGENT_BARRIER_TESTS.md](docs/AGENT_BARRIER_TESTS.md).
 
 Two limits to know. The `trace_id` names a run and the caller chooses it, so issue one per run in your integration. And the barrier only answers: whatever performs the real action has to wait for that answer, or an agent can skip it.
 
