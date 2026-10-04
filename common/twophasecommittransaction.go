@@ -217,17 +217,20 @@ func (t *Transaction) Phase2Commit(ctx context.Context) error {
 		return nil
 	}
 	if err := t.phase2Commit(ctx); err != nil {
+		// Release locks and undo work even if the caller's context was canceled.
+		cctx, cancel := cleanupContext(ctx)
+		defer cancel()
 		if t.nodesKeysExist() {
-			if p1Err := t.logger.priorityRollback(ctx, t.registry, t.GetID()); p1Err != nil {
+			if p1Err := t.logger.priorityRollback(cctx, t.registry, t.GetID()); p1Err != nil {
 				log.Warn(fmt.Sprintf("phase 2 commit priorityRollback failed, details: %v", p1Err))
 				// Should generate a failover below.
 				if se, ok := p1Err.(sop.Error); ok && se.Code == sop.RestoreRegistryFileSectorFailure {
 					err = se
 				}
 			}
-			t.unlockNodesKeys(ctx)
+			t.unlockNodesKeys(cctx)
 		} else {
-			if err := t.logger.PriorityLog().Remove(ctx, t.GetID()); err != nil {
+			if err := t.logger.PriorityLog().Remove(cctx, t.GetID()); err != nil {
 				log.Warn(fmt.Sprintf("phase 2 commit priority log remove failed, details: %v", err))
 			}
 		}
