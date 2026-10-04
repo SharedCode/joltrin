@@ -213,3 +213,22 @@ func TestLessonsAreCapped(t *testing.T) {
 		t.Errorf("got %d lines for one workflow, cap is %d", n, maxLessonsPerWorkflow)
 	}
 }
+
+func TestLongTraceIdsAreNotStoredAsFreeText(t *testing.T) {
+	dir := t.TempDir()
+	log, err := blocklog.Open(filepath.Join(dir, "blocks.jsonl"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	c, _ := connect(t, WithMemory(log, ""))
+	long := strings.Repeat("x", 5000)
+	execute(t, c, long, "drop_prod_db", "")
+	log.Close()
+	b, err := os.ReadFile(filepath.Join(dir, "blocks.jsonl"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(b) > 1000 || strings.Contains(string(b), "xxxxxxxx") {
+		t.Errorf("trace id should be stored as a short hash, file is %d bytes", len(b))
+	}
+}

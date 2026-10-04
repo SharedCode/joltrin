@@ -54,6 +54,14 @@ func workflowVersion(wf *verify.Workflow) string {
 	return hex.EncodeToString(sum[:8])
 }
 
+// shortID stands in for the caller-supplied trace id in the log. The id is
+// free text from the client, so only a short hash is kept: enough to tell runs
+// apart, and it keeps each entry a fixed size.
+func shortID(id string) string {
+	sum := sha256.Sum256([]byte(id))
+	return hex.EncodeToString(sum[:6])
+}
+
 // recordBlock stores a block in the log and refreshes the lessons file when it
 // was new. Errors are dropped on purpose: memory must never affect the barrier.
 func (c *config) recordBlock(store *runbookstore.Store, workflow, traceID, step string, wf *verify.Workflow, v *verify.Violation) {
@@ -63,7 +71,7 @@ func (c *config) recordBlock(store *runbookstore.Store, workflow, traceID, step 
 	added, _ := c.log.Record(blocklog.Entry{
 		Workflow:      workflow,
 		Version:       workflowVersion(wf),
-		TraceID:       traceID,
+		TraceID:       shortID(traceID),
 		Step:          verify.StepID(step),
 		BlockedBy:     v.Rule,
 		MissingState:  v.MissingState,
