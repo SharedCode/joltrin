@@ -522,3 +522,54 @@ func Test_MCP_ExecuteStep_KeyReusedForADifferentStepIsRefused(t *testing.T) {
 		t.Errorf("take_backup with its own key should run: %+v", got)
 	}
 }
+
+func Test_MCP_ExecuteStep_RepeatedBlockCountsAttemptsAndPointsAtTheFix(t *testing.T) {
+	c := newTestClient(t)
+	call := func(key string) ExecuteStepResult {
+		return structuredAs[ExecuteStepResult](t, callTool(t, c, "execute_step", map[string]any{
+			"workflow": "db-maintenance", "trace_id": "repeat-1", "step": "drop_prod_db", "idempotency_key": key,
+		}))
+	}
+
+	for i, key := range []string{"k1", "k2", "k3"} {
+		res := call(key)
+		if res.Executed || res.Blocked == nil {
+			t.Fatalf("call %d should be blocked: %+v", i+1, res)
+		}
+		if res.Blocked.Attempts != i+1 {
+			t.Errorf("call %d: attempts = %d, want %d", i+1, res.Blocked.Attempts, i+1)
+		}
+		if res.Blocked.Next != verify.NextRunEstablishingSteps {
+			t.Errorf("call %d: next = %q, want %q", i+1, res.Blocked.Next, verify.NextRunEstablishingSteps)
+		}
+	}
+
+	// The same key replays the original block and does not count again.
+	replay := call("k2")
+	if !replay.Replayed || replay.Blocked.Attempts != 2 {
+		t.Errorf("a replay should return the original count, got replayed=%v attempts=%d", replay.Replayed, replay.Blocked.Attempts)
+	}
+	if next := call("k4"); next.Blocked.Attempts != 4 {
+		t.Errorf("replay must not count: next real block has attempts %d, want 4", next.Blocked.Attempts)
+	}
+}
+
+func Test_MCP_ValidateStep_TellsTheNextActionButDoesNotCount(t *testing.T) {
+	c := newTestClient(t)
+	args := map[string]any{"workflow": "db-maintenance", "trace_id": "dry-1", "step": "drop_prod_db"}
+	for i := 0; i < 2; i++ {
+		res := structuredAs[ValidateStepResult](t, callTool(t, c, "validate_step", args))
+		if res.Safe || res.Reason == nil {
+			t.Fatalf("should be blocked: %+v", res)
+		}
+		if res.Reason.Attempts != 0 || res.Reason.Next != verify.NextRunEstablishingSteps {
+			t.Errorf("a dry run has no attempts and still names the next action, got attempts=%d next=%q", res.Reason.Attempts, res.Reason.Next)
+		}
+	}
+	res := structuredAs[ExecuteStepResult](t, callTool(t, c, "execute_step", map[string]any{
+		"workflow": "db-maintenance", "trace_id": "dry-1", "step": "drop_prod_db",
+	}))
+	if res.Blocked.Attempts != 1 {
+		t.Errorf("dry runs must not count toward attempts, got %d", res.Blocked.Attempts)
+	}
+}

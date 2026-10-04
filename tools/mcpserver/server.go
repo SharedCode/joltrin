@@ -66,7 +66,7 @@ func New(store *runbookstore.Store, opts ...Option) *server.MCPServer {
 
 	s.AddTool(
 		mcp.NewTool("execute_step",
-			mcp.WithDescription("Execute a step. Blocked server-side if the safety barrier check fails, an agent cannot bypass this by asserting a precondition was met. Never returns a bare error: an unknown workflow or step comes back with the server's actual inventory, and a blocked step comes back with the missing state and which registered steps would establish it. Safe to retry: pass idempotency_key and a retried call after a dropped or timed-out response returns the original outcome instead of executing (or re-checking) again."),
+			mcp.WithDescription("Execute a step. Blocked server-side if the safety barrier check fails, an agent cannot bypass this by asserting a precondition was met. Never returns a bare error: an unknown workflow or step comes back with the server's actual inventory, and a blocked step comes back with the missing state, which registered steps would establish it, how many times this step has been blocked for that reason in this trace (attempts), and what to do next (next): run those steps, or stop and ask if none can. Retrying a blocked step unchanged will not help. Safe to retry: pass idempotency_key and a retried call after a dropped or timed-out response returns the original outcome instead of executing (or re-checking) again."),
 			mcp.WithString("workflow", mcp.Required(), mcp.Description("Name of the runbook.")),
 			mcp.WithString("trace_id", mcp.Required(), mcp.Description("Identifies this execution's trace.")),
 			mcp.WithString("step", mcp.Required(), mcp.Description("ID of the step to execute.")),
@@ -223,6 +223,8 @@ func blockReason(wf *verify.Workflow, v *verify.Violation) *BlockReason {
 		MissingState:  v.MissingState,
 		Message:       v.Message,
 		EstablishedBy: wf.StepsThatEstablish(v.MissingState),
+		Attempts:      v.Attempts,
+		Next:          wf.NextAction(v),
 	}
 }
 

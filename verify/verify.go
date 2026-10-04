@@ -126,6 +126,16 @@ type Trace struct {
 	// retried. commitOrder tracks insertion order for the eviction above.
 	commits     map[string]commitRecord
 	commitOrder []string
+	// blocked counts how many times each step was blocked for each rule in
+	// this trace, so a Violation can say how often the caller has hit the
+	// same wall. Its size is bounded by the workflow (steps times rules),
+	// since only a known step can be blocked.
+	blocked map[blockKey]int
+}
+
+type blockKey struct {
+	step StepID
+	rule string
 }
 
 // commitRecord is the cached outcome of one idempotent call. The step is kept
@@ -158,7 +168,7 @@ func IsKeyReused(err error) bool {
 
 // NewTrace starts an empty execution trace.
 func NewTrace() *Trace {
-	return &Trace{Holds: make(map[State]bool), commits: make(map[string]commitRecord)}
+	return &Trace{Holds: make(map[State]bool), commits: make(map[string]commitRecord), blocked: make(map[blockKey]int)}
 }
 
 // ExecutedSteps returns a copy of the steps committed to this trace so far.
@@ -189,6 +199,13 @@ type Violation struct {
 	// establish it via Workflow.StepsThatEstablish and hand the agent a
 	// concrete next action instead of a string to parse.
 	MissingState State
+	// Attempts is how many times this step has been blocked for this rule in
+	// this trace, counting the current call. It is zero when nothing was
+	// counted: CheckSafety is read-only, so a dry run never raises it, and a
+	// replayed idempotency key returns the count from the original call. A
+	// value of 2 or more means the caller is repeating a call that cannot
+	// succeed until MissingState is established.
+	Attempts int
 }
 
 func (v *Violation) Error() string { return v.Message }
@@ -323,6 +340,12 @@ func (w *Workflow) CheckAndCommitIdempotent(trace *Trace, next StepID, idempoten
 // under exactly one lock acquisition.
 func (w *Workflow) checkAndCommitLocked(trace *Trace, next StepID) error {
 	if err := w.checkSafetyLocked(trace, next); err != nil {
+		var v *Violation
+		if errors.As(err, &v) {
+			key := blockKey{step: next, rule: v.Rule}
+			trace.blocked[key]++
+			v.Attempts = trace.blocked[key]
+		}
 		return err
 	}
 	return w.commitLocked(trace, next)
@@ -355,6 +378,29 @@ func (w *Workflow) commitLocked(trace *Trace, next StepID) error {
 		trace.Holds[est] = true
 	}
 	return nil
+}
+
+// What a caller should do after a block. A blocked step is not a reason to
+// call it again with different parameters: the block names a missing state, and
+// the only thing that changes the answer is that state being established.
+const (
+	// NextRunEstablishingSteps means at least one registered step establishes
+	// the missing state, so the caller can run it (and what it requires) and
+	// then try the blocked step again.
+	NextRunEstablishingSteps = "run_established_by_steps"
+	// NextStopAndAsk means no step in the workflow establishes the missing
+	// state, so nothing the caller does inside this runbook can unblock the
+	// step. It needs a person, or a change to the runbook.
+	NextStopAndAsk = "stop_and_ask"
+)
+
+// NextAction tells a caller what to do about a block: NextRunEstablishingSteps
+// when a step can establish the missing state, NextStopAndAsk when none can.
+func (w *Workflow) NextAction(v *Violation) string {
+	if len(w.StepsThatEstablish(v.MissingState)) > 0 {
+		return NextRunEstablishingSteps
+	}
+	return NextStopAndAsk
 }
 
 // StepsThatEstablish returns the IDs of every step in the workflow whose

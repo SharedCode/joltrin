@@ -156,6 +156,8 @@ func (e *Executor) Execute(ctx context.Context, reqCtx *a2asrv.RequestContext, q
 					"missing_state":        string(v.MissingState),
 					"message":              v.Message,
 					"established_by_steps": establishedIDs,
+					"attempts":             v.Attempts,
+					"next":                 wf.NextAction(v),
 					"replayed":             replayed,
 				}},
 			))
