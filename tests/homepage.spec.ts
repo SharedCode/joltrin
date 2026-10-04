@@ -36,9 +36,8 @@ test.describe('Homepage', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const section = page.locator('#test-your-agent');
     await expect(section).toContainText('sop-mcp-server');
-    await expect(section).toContainText('claude mcp add');
     // The full path works when Go's bin folder is not on PATH; a bare command fails with ENOENT.
-    await expect(section).toContainText('$(go env GOPATH)/bin/sop-mcp-server');
+    await expect(section).toContainText('$(go env GOPATH)/bin/sop-mcp-server" setup --apply');
   });
 
   test('three live experiences are linked right after the hero', async ({ page }) => {
