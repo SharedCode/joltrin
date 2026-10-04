@@ -72,6 +72,8 @@ Register it with `--lessons` (it sets `SOP_LESSONS_DIR`, which Claude Code and C
 "$(go env GOPATH)/bin/sop-mcp-server" setup --apply --lessons "$HOME/.joltrin"
 ```
 
+Agents can also ask for the same list with the `read_lessons` tool, which exists only while memory is on. That helps with clients that do not show a server's startup instructions to the model, which the Gemini CLI did not in my test.
+
 It is off by default and advice only: the barrier still checks every call, so history never unlocks a step. Lessons name only steps and states from your runbook, and they expire after 30 days or when the runbook changes. Use one server process per folder.
 
 ## Agents that hand off work

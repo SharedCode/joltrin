@@ -123,9 +123,14 @@ The cold runs went `drop_prod_db` (blocked), `validate_backup` (blocked), `take_
 
 Codex had an extra kind of block. When it retried a step after fixing what was missing, it reused the same `idempotency_key`, so the server returned the original blocked answer with `replayed: true`. This is how idempotent retries are meant to work. Codex then retried with a new key and the step ran. The table counts those replayed blocks separately from new ones. Counting only new blocks, Codex matches Claude: 2 in every cold run, and 1 in two of the three warm runs. In the third warm run it made the same 2 as a cold run.
 
+The `read_lessons` tool, which lets an agent ask for the lessons instead of relying on the server's startup instructions, was tried on the same runbook with the step named (`drop_prod_db`) and the agent told to call `read_lessons` before it starts. Cold, both agents hit 2 blocked calls (`drop_prod_db`, then `validate_backup`) in 5 calls. Warm, both read 2 lessons and ran `take_backup`, `validate_backup`, `drop_prod_db` in order with 0 blocked calls. That is one pair for `claude-opus-5-5` and one for `claude-sonnet-5-5`.
+
+A separate run did not name the steps or mention the tool. All four agents called `read_lessons` first on their own, but they then guessed tool names that do not exist, so they never reached the barrier and nothing was recorded. That run shows the tool is easy to find. It does not show that it helps.
+
 What this does not show:
 - It is not a controlled test of the lessons. The transcripts do not quote them. The only difference between a cold and a warm run is the recorded block.
 - The Codex row is 3 pairs, and in one of them the warm run did no better than the cold run.
+- The `read_lessons` result is one pair per model, and the agent was told to call the tool. Gemini and Codex were not tried with it.
 - One Sonnet pair is left out because the model refused the task in both runs and never reached the server.
 - A second prompt that did not tell the agent to start with `drop_prod_db` was also run. The agents guessed tool names that do not exist, never reached the server, and nothing was recorded, so those runs are discarded.
 - Gemini is one pair, and the warm run did no better than the cold run. Its cold run followed `established_by_steps` correctly, so it uses the block feedback. The server instructions did not change what it did, and I did not confirm whether the Gemini CLI passes MCP server instructions to the model. A second warm run that loaded `LESSONS.md` through a `GEMINI.md` file did not complete, because the free-tier daily quota ran out, so that route is untested. Gemini also called its own built-in tools, and the last reply of the warm run failed with an API error after the steps had finished.
