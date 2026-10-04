@@ -75,7 +75,22 @@ func (t *Transaction) getToBeObsoleteEntries() sop.Tuple[[]sop.RegistryPayload[s
 	}
 }
 
+// cleanupMaxDuration bounds how long cleanup after a failed commit may run.
+const cleanupMaxDuration = 5 * time.Minute
+
+// cleanupContext returns a context for releasing locks and undoing work after a
+// failure. It keeps the caller's values but not its cancellation. A caller whose
+// context was canceled, for example because a sibling goroutine failed, still
+// has locks to release. With the canceled context every cache and registry call
+// fails at once and the locks stay held until their TTL, up to the transaction's
+// maxTime, which makes every other transaction on those nodes wait.
+func cleanupContext(ctx context.Context) (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.WithoutCancel(ctx), cleanupMaxDuration)
+}
+
 func (t *Transaction) rollback(ctx context.Context, rollbackTrackedItemsValues bool) error {
+	ctx, cancel := cleanupContext(ctx)
+	defer cancel()
 	var lastErr error
 
 	// Rollback pre commit logged items.
