@@ -5,6 +5,10 @@
 //
 //	go run ./cmd/sop-mcp-server
 //
+// Run "sop-mcp-server setup" to print the commands that register it with Claude
+// Code, Codex, and the Gemini CLI by its full path, or "setup --apply" to run
+// them for the agents installed on this machine.
+//
 // Set SOP_LESSONS_DIR to a directory to turn on memory: the server records
 // which steps were blocked in each run, tells later agents about them when
 // they connect, and keeps a LESSONS.md in that directory that can be added to
@@ -24,6 +28,12 @@ import (
 )
 
 func main() {
+	// "sop-mcp-server setup" registers this binary with your agent by its full
+	// path. Anything else starts the server, which agents launch with no arguments.
+	if len(os.Args) > 1 && os.Args[1] == "setup" {
+		os.Exit(setupMain(os.Args[2:]))
+	}
+
 	wf, err := runbookstore.DBMaintenanceWorkflow()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "sop-mcp-server:", err)
