@@ -293,3 +293,27 @@ func Test_AgentCard_SetsProtocolVersion(t *testing.T) {
 		t.Fatalf("AgentCard().ProtocolVersion = %q, want %q (a2a.Version)", card.ProtocolVersion, a2a.Version)
 	}
 }
+
+// A key already used in the trace for one step must not answer for a different
+// step. Over A2A the second call fails instead of reporting the destructive step
+// as completed.
+func Test_A2A_ExecuteStep_KeyReusedForADifferentStepFails(t *testing.T) {
+	srv, store := newTestServer(t)
+	c := newTestClient(t, srv)
+
+	first := sendStepWithKey(t, c, "db-maintenance", "reuse-1", "take_backup", "k")
+	if first.Status.State != a2a.TaskStateCompleted {
+		t.Fatalf("take_backup should complete, got %q", first.Status.State)
+	}
+	// No validated backup exists, so drop_prod_db must not complete.
+	second := sendStepWithKey(t, c, "db-maintenance", "reuse-1", "drop_prod_db", "k")
+	if second.Status.State == a2a.TaskStateCompleted {
+		t.Fatalf("a reused key must not complete drop_prod_db")
+	}
+	if second.Status.State != a2a.TaskStateFailed {
+		t.Errorf("want the task to fail, got %q", second.Status.State)
+	}
+	if got := store.TraceFor("reuse-1").ExecutedSteps(); len(got) != 1 || got[0] != "take_backup" {
+		t.Errorf("trace = %v, want only take_backup", got)
+	}
+}

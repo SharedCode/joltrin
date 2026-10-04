@@ -109,3 +109,14 @@ type WorkflowDescription struct {
 	Steps  map[string]StepDescription `json:"steps"`
 	Safety []SafetyRuleDescription    `json:"safety"`
 }
+
+// KeyReusedResult is returned instead of a replay when an idempotency_key that
+// was already used in this trace for one step is sent for a different step. A
+// key names one call, so the server does not check or run the second step with
+// it. The fix is a new key.
+type KeyReusedResult struct {
+	Error          string        `json:"error" jsonschema_description:"Human-readable description of the problem."`
+	IdempotencyKey string        `json:"idempotency_key" jsonschema_description:"The key that was reused."`
+	UsedForStep    verify.StepID `json:"used_for_step" jsonschema_description:"The step this key was first used for in this trace."`
+	RequestedStep  verify.StepID `json:"requested_step" jsonschema_description:"The step the call asked for."`
+}
