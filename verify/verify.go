@@ -124,13 +124,41 @@ type Trace struct {
 	// answer to the same question just by asking twice, and a step never
 	// gets double-committed to Executed because its client timed out and
 	// retried. commitOrder tracks insertion order for the eviction above.
-	commits     map[string]error
+	commits     map[string]commitRecord
 	commitOrder []string
+}
+
+// commitRecord is the cached outcome of one idempotent call. The step is kept
+// so a key can only replay the call it was first used for.
+type commitRecord struct {
+	step StepID
+	err  error
+}
+
+// KeyReusedError is returned by CheckAndCommitIdempotent when the
+// idempotency key was already used in this trace for a different step. Nothing
+// is checked or committed and the key keeps pointing at its first step. A key
+// names one call, so replaying that call's answer for another step would
+// report a step as allowed or run when it was never checked.
+type KeyReusedError struct {
+	Key       string
+	UsedFor   StepID
+	Requested StepID
+}
+
+func (e *KeyReusedError) Error() string {
+	return fmt.Sprintf("idempotency_key %q was already used in this trace for step %q, so it cannot be used for step %q: use a new idempotency_key", e.Key, e.UsedFor, e.Requested)
+}
+
+// IsKeyReused reports whether err is a KeyReusedError.
+func IsKeyReused(err error) bool {
+	var e *KeyReusedError
+	return errors.As(err, &e)
 }
 
 // NewTrace starts an empty execution trace.
 func NewTrace() *Trace {
-	return &Trace{Holds: make(map[State]bool), commits: make(map[string]error)}
+	return &Trace{Holds: make(map[State]bool), commits: make(map[string]commitRecord)}
 }
 
 // ExecutedSteps returns a copy of the steps committed to this trace so far.
@@ -254,6 +282,9 @@ func (w *Workflow) CheckAndCommit(trace *Trace, next StepID) error {
 // the same key and get back the true answer to "what actually happened,"
 // not a fresh recomputation that might disagree with it.
 //
+// A key names one call: it replays only for the step it was first used with.
+// Reusing it for a different step returns a *KeyReusedError and changes nothing.
+//
 // An empty idempotencyKey disables the cache for that call and behaves
 // exactly like CheckAndCommit (replayed is always false), so this is
 // purely additive: a caller that never passes a key sees no behavior
@@ -264,7 +295,10 @@ func (w *Workflow) CheckAndCommitIdempotent(trace *Trace, next StepID, idempoten
 
 	if idempotencyKey != "" {
 		if cached, ok := trace.commits[idempotencyKey]; ok {
-			return true, cached
+			if cached.step != next {
+				return false, &KeyReusedError{Key: idempotencyKey, UsedFor: cached.step, Requested: next}
+			}
+			return true, cached.err
 		}
 	}
 
@@ -279,7 +313,7 @@ func (w *Workflow) CheckAndCommitIdempotent(trace *Trace, next StepID, idempoten
 			}
 			trace.commitOrder = append(trace.commitOrder, idempotencyKey)
 		}
-		trace.commits[idempotencyKey] = err
+		trace.commits[idempotencyKey] = commitRecord{step: next, err: err}
 	}
 	return false, err
 }

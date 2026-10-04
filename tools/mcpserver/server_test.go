@@ -429,3 +429,59 @@ func Test_MCP_ExecuteStep_ReplayedSuccessHasNoHint(t *testing.T) {
 		t.Fatalf("a replayed success needs no hint: %+v", again)
 	}
 }
+
+// An agent chooses its own idempotency_key. A key already used in the trace for
+// one step must never produce an answer for a different step: reporting a step
+// as executed without checking it would hand out an approval the barrier never
+// gave.
+func Test_MCP_ExecuteStep_KeyReusedForADifferentStepIsRefused(t *testing.T) {
+	c := newTestClient(t)
+	call := func(trace, step, key string) *mcp.CallToolResult {
+		return callTool(t, c, "execute_step", map[string]any{
+			"workflow": "db-maintenance", "trace_id": trace, "step": step, "idempotency_key": key,
+		})
+	}
+
+	if got := structuredAs[ExecuteStepResult](t, call("reuse-1", "take_backup", "k")); !got.Executed {
+		t.Fatalf("take_backup should run: %+v", got)
+	}
+
+	// No validated backup exists, so drop_prod_db is blocked. The key from the
+	// successful call must not turn that into an approval.
+	res := call("reuse-1", "drop_prod_db", "k")
+	if !res.IsError {
+		t.Fatalf("a reused key should be an error result, got: %s", resultText(res))
+	}
+	got := structuredAs[KeyReusedResult](t, res)
+	if got.UsedForStep != "take_backup" || got.RequestedStep != "drop_prod_db" || got.IdempotencyKey != "k" {
+		t.Errorf("unexpected result: %+v", got)
+	}
+	if !strings.Contains(got.Error, "new idempotency_key") {
+		t.Errorf("the error should say to use a new key, got %q", got.Error)
+	}
+	if strings.Contains(resultText(res), `"executed":true`) {
+		t.Errorf("a refused call must not say executed: %s", resultText(res))
+	}
+
+	// The barrier still decides drop_prod_db on its own, and the trace is unchanged.
+	v := structuredAs[ValidateStepResult](t, callTool(t, c, "validate_step", map[string]any{
+		"workflow": "db-maintenance", "trace_id": "reuse-1", "step": "drop_prod_db",
+	}))
+	if v.Safe {
+		t.Error("drop_prod_db must still be unsafe")
+	}
+	real := structuredAs[ExecuteStepResult](t, call("reuse-1", "drop_prod_db", "another"))
+	if real.Executed || real.Blocked == nil {
+		t.Errorf("drop_prod_db with a fresh key must be blocked: %+v", real)
+	}
+
+	// A key first used on a blocked call must not hide an allowed step either.
+	call("reuse-2", "drop_prod_db", "j")
+	res2 := call("reuse-2", "take_backup", "j")
+	if !res2.IsError {
+		t.Errorf("reusing a blocked call's key for take_backup should be refused, got: %s", resultText(res2))
+	}
+	if got := structuredAs[ExecuteStepResult](t, call("reuse-2", "take_backup", "j2")); !got.Executed {
+		t.Errorf("take_backup with its own key should run: %+v", got)
+	}
+}
