@@ -58,61 +58,27 @@ claude mcp add joltrin -- sop-mcp-server    # Claude Code. Other agents: add an 
 
 Then tell your agent: "Use the joltrin tools to run `drop_prod_db` on workflow `db-maintenance` with trace id `t1`." The server refuses until `take_backup` and `validate_backup` have run in that trace, whatever the agent claims. Make sure `$(go env GOPATH)/bin` is on your `PATH`. A recorded run with real agents, and what it does not prove, is in [docs/AGENT_BARRIER_TESTS.md](docs/AGENT_BARRIER_TESTS.md).
 
+Two limits to know. The `trace_id` names a run and the caller chooses it, so issue one per run in your integration. And the barrier only answers: whatever performs the real action has to wait for that answer, or an agent can skip it.
+
 ### Let the server remember what blocked
 
-Set `SOP_LESSONS_DIR` and the server records each block, once per run, and tells the next agent about it when that agent connects. It also keeps a short `LESSONS.md` in that folder.
+Set `SOP_LESSONS_DIR` and the server records each block once per run and tells the next agent when it connects. It also keeps a short `LESSONS.md` there that you can add to a `CLAUDE.md` (`@~/.joltrin/LESSONS.md`) or point an `AGENTS.md` at.
 
 ```bash
 claude mcp add joltrin -e SOP_LESSONS_DIR=$HOME/.joltrin -- sop-mcp-server
 ```
 
-The lessons read like `before drop_prod_db, run take_backup, then validate_backup. It was blocked in 2 runs.` For Claude Code you can also add `@~/.joltrin/LESSONS.md` to a `CLAUDE.md`. For agents that read an `AGENTS.md`, point them at the same file.
-
-It is off by default and it is advice only: the barrier still checks every call, so history never unlocks a step. Lessons only name steps and states from your own runbook, they expire after 30 days, and they stop applying when the runbook changes. Use one server process per folder.
+It is off by default and advice only: the barrier still checks every call, so history never unlocks a step. Lessons name only steps and states from your runbook, and they expire after 30 days or when the runbook changes. Use one server process per folder.
 
 ## Agents that hand off work
 
-Jira, Grafana, AWS, and PagerDuty agents pass work to each other. Every call passes three checks first: the tool is on that agent's allowlist and within its limits, any claim matches evidence a tool actually returned, and the steps it depends on have committed (`ai/verify`). Each run includes a skipped step, a made-up number, and an agent reaching past its scope.
+Jira, Grafana, AWS, and PagerDuty agents hand off work, and every call passes three checks first: the tool is on that agent's allowlist, any claim matches evidence a tool returned, and the steps it depends on have committed (`verify`).
 
 <p align="center">
   <img src="docs/assets/agent-team-pagerduty.gif" alt="Terminal recording: PagerDuty, Grafana, and AWS agents resolve an incident while the barrier blocks a skipped step, a made-up number, and out-of-scope calls" width="900" />
 </p>
 
-<p align="center">
-  <img src="docs/assets/agent-team-latency.gif" alt="Terminal recording: Jira, Grafana, and AWS agents answer a latency alert while the barrier blocks a skipped step, a made-up number, and out-of-scope calls" width="900" />
-</p>
-
-The PagerDuty run as text, from `go run ./examples/agent_team`:
-
-```
-pagerduty-agent -> pagerduty.get_incident
-  ok: PD-77 checkout 5xx started right after deploy 214
-pagerduty-agent -> pagerduty.resolve
-  BLOCKED order: step "pagerduty.resolve" requires state "recovery_confirmed", which has not been established in this trace
-  result: {"blocked_by":"precondition","missing_state":"recovery_confirmed","established_by_steps":["grafana.recheck"]}
-aws-agent       -> aws.rollback_deploy
-  BLOCKED order: step "aws.rollback_deploy" requires state "evidence_confirmed", which has not been established in this trace
-  result: {"blocked_by":"precondition","missing_state":"evidence_confirmed","established_by_steps":["grafana.query"]}
-grafana-agent   -> grafana.query
-  ok: E1 error_rate_pct=14 deploy=214
-aws-agent       -> aws.rollback_deploy
-  BLOCKED grounding: claimed error_rate_pct=40, evidence E1 says error_rate_pct=14
-aws-agent       -> aws.rollback_deploy
-  BLOCKED scope: services=3 exceeds the approved limit of 1
-pagerduty-agent -> aws.rollback_deploy
-  BLOCKED scope: aws.rollback_deploy is not on pagerduty-agent's allowlist
-aws-agent       -> aws.rollback_deploy
-  ok: checkout rolled back 214 -> 213
-grafana-agent   -> grafana.recheck
-  ok: E2 error_rate_pct=1
-pagerduty-agent -> pagerduty.resolve
-  ok: PD-77 resolved
-trace: [pagerduty.get_incident grafana.query aws.rollback_deploy grafana.recheck pagerduty.resolve]
-```
-
-Each order block also prints the structured result an MCP agent gets back from `execute_step`: the rule that tripped, the state that is missing, and the steps that would establish it. The agent can branch on those fields instead of parsing the message.
-
-The same command also runs a latency-alert example (Jira, Grafana, AWS). Watch both replay on [joltrinhq.com](https://joltrinhq.com/#agent-team). The tools are stubs, the checks are real. Source: [examples/agent_team](examples/agent_team/main.go).
+Run it with `./scripts/demo.sh --team`, or watch it replay on [joltrinhq.com](https://joltrinhq.com/#agent-team). When a step is blocked on order, the output includes a `result:` line: the structured block an MCP agent gets back from `execute_step`, with the rule, the missing state, and the steps that would establish it. The tools are stubs and the checks are real. Source: [examples/agent_team](examples/agent_team/main.go).
 
 ## What is verified
 
