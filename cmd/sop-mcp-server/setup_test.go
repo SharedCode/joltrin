@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"errors"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -130,10 +131,17 @@ func TestSetupUnknownFlagIsAUsageError(t *testing.T) {
 }
 
 func TestSetupRunbooksSetsTheEnvironmentWithAnAbsolutePath(t *testing.T) {
+	// On Windows an absolute-looking path like /home/me gains a drive letter,
+	// so the expected value goes through filepath.Abs like the code does.
+	path, err := filepath.Abs("/home/me/my runbooks.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	runbooks := shellQuote("SOP_RUNBOOKS=" + path)
 	_, out, _ := setup(t, "/bin/sop-mcp-server", &recorder{}, "--runbooks", "/home/me/my runbooks.json", "--lessons", "/home/me/.joltrin")
 	for _, want := range []string{
-		"claude mcp add --scope user joltrin -e SOP_LESSONS_DIR=/home/me/.joltrin -e 'SOP_RUNBOOKS=/home/me/my runbooks.json' -- /bin/sop-mcp-server",
-		"codex mcp add joltrin --env SOP_LESSONS_DIR=/home/me/.joltrin --env 'SOP_RUNBOOKS=/home/me/my runbooks.json' -- /bin/sop-mcp-server",
+		"claude mcp add --scope user joltrin -e SOP_LESSONS_DIR=/home/me/.joltrin -e " + runbooks + " -- /bin/sop-mcp-server",
+		"codex mcp add joltrin --env SOP_LESSONS_DIR=/home/me/.joltrin --env " + runbooks + " -- /bin/sop-mcp-server",
 		"gemini mcp add --scope user joltrin /bin/sop-mcp-server",
 	} {
 		if !strings.Contains(out, want) {
@@ -143,8 +151,12 @@ func TestSetupRunbooksSetsTheEnvironmentWithAnAbsolutePath(t *testing.T) {
 }
 
 func TestSetupRunbooksRelativePathBecomesAbsolute(t *testing.T) {
+	abs, err := filepath.Abs("runbooks.json")
+	if err != nil {
+		t.Fatal(err)
+	}
 	_, out, _ := setup(t, "/bin/sop-mcp-server", &recorder{}, "--runbooks", "runbooks.json")
-	if strings.Contains(out, "SOP_RUNBOOKS=runbooks.json") || !strings.Contains(out, "SOP_RUNBOOKS=/") {
+	if strings.Contains(out, "SOP_RUNBOOKS=runbooks.json") || !strings.Contains(out, shellQuote("SOP_RUNBOOKS="+abs)) {
 		t.Errorf("an agent starts the server from any folder, so the path must be absolute:\n%s", out)
 	}
 }
