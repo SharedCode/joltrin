@@ -87,6 +87,24 @@ func (c *config) recordBlock(store *runbookstore.Store, workflow, traceID, step 
 	}
 }
 
+// recordRun notes that a run called execute_step, the total each rule's block
+// count is read against. Errors are dropped on purpose, like recordBlock.
+func (c *config) recordRun(workflow, traceID string, wf *verify.Workflow) {
+	if c.log == nil {
+		return
+	}
+	_, _ = c.log.RecordRun(workflow, workflowVersion(wf), shortID(traceID))
+}
+
+// recordRecovery notes that a step committed, which counts as a recovery only
+// if that step was blocked earlier in the same run.
+func (c *config) recordRecovery(workflow, traceID, step string, wf *verify.Workflow) {
+	if c.log == nil {
+		return
+	}
+	_, _ = c.log.RecordRecovery(workflow, workflowVersion(wf), shortID(traceID), verify.StepID(step))
+}
+
 func (c *config) writeLessons(store *runbookstore.Store) {
 	if c.log == nil || c.lessonsPath == "" {
 		return
@@ -156,6 +174,33 @@ func collectLessons(store *runbookstore.Store, log *blocklog.Log, workflow strin
 	}
 	if len(out) > maxLessons {
 		out = out[:maxLessons]
+	}
+	return out
+}
+
+// collectStats reports, per runbook, how many runs called execute_step and
+// how many of them each rule blocked and recovered from. A runbook with no
+// recorded runs or blocks is left out. workflow limits it to one runbook when
+// not empty.
+func collectStats(store *runbookstore.Store, log *blocklog.Log, workflow string) []WorkflowStats {
+	out := []WorkflowStats{} // an empty list, not null
+	for _, name := range store.WorkflowNames() {
+		if workflow != "" && name != workflow {
+			continue
+		}
+		wf, ok := store.Workflow(name)
+		if !ok {
+			continue
+		}
+		st := log.Stats(name, workflowVersion(wf))
+		if st.Runs == 0 && len(st.Rules) == 0 {
+			continue
+		}
+		rules := make([]RuleStat, len(st.Rules))
+		for i, r := range st.Rules {
+			rules[i] = RuleStat{BlockedBy: r.BlockedBy, BlockedRuns: r.BlockedRuns, RecoveredRuns: r.RecoveredRuns}
+		}
+		out = append(out, WorkflowStats{Workflow: name, Runs: st.Runs, Rules: rules})
 	}
 	return out
 }

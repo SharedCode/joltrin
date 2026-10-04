@@ -81,7 +81,7 @@ func New(store *runbookstore.Store, opts ...Option) *server.MCPServer {
 	if cfg.log != nil {
 		s.AddTool(
 			mcp.NewTool("read_lessons",
-				mcp.WithDescription("List what earlier runs on this server got blocked on and the order of steps that works. Call it before you start a task. It is advice only: the barrier still checks every call."),
+				mcp.WithDescription("List what earlier runs on this server got blocked on and the order of steps that works, plus per runbook how many runs there were and how many each rule blocked and recovered from. Call it before you start a task. It is advice only: the barrier still checks every call."),
 				mcp.WithString("workflow", mcp.Description("Optional. Only lessons for this runbook.")),
 				mcp.WithOutputSchema[ReadLessonsResult](),
 			),
@@ -98,7 +98,8 @@ func readLessonsHandler(store *runbookstore.Store, cfg *config) server.ToolHandl
 		if lessons == nil {
 			lessons = []Lesson{} // an empty list, not null
 		}
-		return mcp.NewToolResultStructuredOnly(ReadLessonsResult{Lessons: lessons}), nil
+		stats := collectStats(store, cfg.log, req.GetString("workflow", ""))
+		return mcp.NewToolResultStructuredOnly(ReadLessonsResult{Lessons: lessons, Stats: stats}), nil
 	}
 }
 
@@ -168,6 +169,7 @@ func executeStepHandler(store *runbookstore.Store, cfg *config) server.ToolHandl
 			return missingTraceResult(), nil
 		}
 		trace := store.TraceFor(traceID)
+		cfg.recordRun(name, traceID, wf)
 
 		// The barrier certificate: verify before acting, never act then
 		// verify. A failed check here means the step never executes, full
@@ -183,6 +185,9 @@ func executeStepHandler(store *runbookstore.Store, cfg *config) server.ToolHandl
 			return keyReusedResult(reused), nil
 		}
 		if err == nil {
+			if !replayed {
+				cfg.recordRecovery(name, traceID, stepID, wf)
+			}
 			return mcp.NewToolResultStructuredOnly(ExecuteStepResult{
 				Executed: true,
 				Step:     stepID,

@@ -137,7 +137,27 @@ type Lesson struct {
 	Text          string          `json:"text" jsonschema_description:"The same lesson as one plain sentence."`
 }
 
+// RuleStat is how often one rule blocked runs of a runbook, and how many of
+// those runs got past it.
+type RuleStat struct {
+	BlockedBy     string `json:"blocked_by" jsonschema_description:"'precondition' or the name of the safety rule."`
+	BlockedRuns   int    `json:"blocked_runs" jsonschema_description:"How many runs this rule blocked at least once."`
+	RecoveredRuns int    `json:"recovered_runs" jsonschema_description:"Of those runs, how many went on to run every step this rule had blocked."`
+}
+
+// WorkflowStats puts a runbook's blocks next to its run total. A rule that
+// blocks most runs and is usually recovered from is being hit early and then
+// followed, which points at ordering the agent could not see up front. A rule
+// that blocks runs that rarely recover is stopping runs that did not finish
+// the step. Neither says whether the rule is right.
+type WorkflowStats struct {
+	Workflow string     `json:"workflow" jsonschema_description:"The runbook."`
+	Runs     int        `json:"runs" jsonschema_description:"How many runs called execute_step against this runbook."`
+	Rules    []RuleStat `json:"rules" jsonschema_description:"Each rule that blocked a run, most runs first. Empty when nothing was blocked."`
+}
+
 // ReadLessonsResult is read_lessons' result.
 type ReadLessonsResult struct {
-	Lessons []Lesson `json:"lessons" jsonschema_description:"What earlier runs got blocked on, most frequent first. Empty when nothing has been recorded."`
+	Lessons []Lesson        `json:"lessons" jsonschema_description:"What earlier runs got blocked on, most frequent first. Empty when nothing has been recorded."`
+	Stats   []WorkflowStats `json:"stats" jsonschema_description:"Per runbook: how many runs there were and how many each rule blocked and recovered from. Empty when nothing has been recorded."`
 }
