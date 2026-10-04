@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## v5.9.0
+
+- `sop-mcp-server` can remember what blocked in earlier runs. Set `SOP_LESSONS_DIR` and it records each block once per run, tells the next agent in the MCP server instructions when it connects, and keeps a `LESSONS.md` that can be added to a `CLAUDE.md` or `AGENTS.md`. It is off by default and advice only: the barrier checks every call as before. Lessons come from the server, expire after 30 days, and stop applying when the runbook changes.
+- A blocked `execute_step` result that is replayed because an `idempotency_key` was reused now carries a `hint` saying it is the original answer and to retry with a new key after running the missing steps. The decision is unchanged, and the field is absent otherwise.
+- The homepage agent demo and the `/agents/` demo show the structured block result (`blocked_by`, `missing_state`, `established_by_steps`). New tests pin those field names for MCP clients and for code that imports `verify`.
+- Renamed the example tool `aws.scale_up` to `aws.scale_out` in `examples/agent_team`.
+- `docs/AGENT_BARRIER_TESTS.md` records runs on whether agents act on block feedback and whether remembering earlier blocks helps, with Claude, Codex, and Gemini, and what the runs do not show.
 - `sop-server` can create its root admin user on first start from the `JOLTRIN_ROOT_PASSWORD` environment variable (at least 16 characters). It only runs when no config file exists, so it can never replace an existing root password, and the password is hashed before it is written. The first-run wizard accepts only loopback callers, which a hosted container on a distroless image cannot satisfy, so the Azure deployment could never get past "server is not configured yet". The Azure Bicep and deploy workflow now pass the secret from Key Vault when the `JOLTRIN_ROOT_PASSWORD` repository secret is set.
 
 ## v5.8.2
