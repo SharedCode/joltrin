@@ -152,6 +152,47 @@ func Test_MCP_ExecuteStep_BlockedWithoutValidatedBackup(t *testing.T) {
 	}
 }
 
+// Test_MCP_ExecuteStep_BlockedWireFormat pins the JSON a client receives for a
+// blocked step. Agents read these field names directly, so renaming one is a
+// breaking change even though the Go struct would still compile.
+func Test_MCP_ExecuteStep_BlockedWireFormat(t *testing.T) {
+	c := newTestClient(t)
+
+	res := callTool(t, c, "execute_step", map[string]any{
+		"workflow": "db-maintenance",
+		"trace_id": "wire-1",
+		"step":     "drop_prod_db",
+	})
+	raw := res.RawStructuredContent
+	if raw == nil {
+		var err error
+		if raw, err = json.Marshal(res.StructuredContent); err != nil {
+			t.Fatalf("marshal StructuredContent: %v", err)
+		}
+	}
+	var top map[string]any
+	if err := json.Unmarshal(raw, &top); err != nil {
+		t.Fatalf("unmarshal: %v (raw: %s)", err, raw)
+	}
+	if top["executed"] != false {
+		t.Errorf("executed = %v, want false (raw: %s)", top["executed"], raw)
+	}
+	blocked, ok := top["blocked"].(map[string]any)
+	if !ok {
+		t.Fatalf("missing blocked object (raw: %s)", raw)
+	}
+	if blocked["blocked_by"] != "precondition" {
+		t.Errorf("blocked_by = %v, want precondition", blocked["blocked_by"])
+	}
+	if blocked["missing_state"] != "backup_validated" {
+		t.Errorf("missing_state = %v, want backup_validated", blocked["missing_state"])
+	}
+	steps, _ := blocked["established_by_steps"].([]any)
+	if len(steps) != 1 || steps[0] != "validate_backup" {
+		t.Errorf("established_by_steps = %v, want [validate_backup]", blocked["established_by_steps"])
+	}
+}
+
 // Test_MCP_ExecuteStep_UnknownWorkflowIsErrorWithInventory confirms a
 // malformed request (a workflow that was never registered) is reported as
 // an error carrying the server's actual inventory, distinct from a barrier

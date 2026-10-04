@@ -753,6 +753,11 @@ curl localhost:8087/.well-known/agent-card.json</pre>
       if (res.blocked) {
         log(`<span class="text-rose-400">→ execute_step(${id}) ... BLOCKED</span>`);
         log(`<span class="text-rose-300/80 pl-4">${res.reason}</span>`);
+        if (res.blocked_by) {
+          const out = { blocked_by: res.blocked_by, missing_state: res.missing_state };
+          if (res.established_by_steps) out.established_by_steps = res.established_by_steps;
+          log(`<span class="text-amber-300 pl-4">result: ${JSON.stringify(out)}</span>`);
+        }
       } else {
         log(`<span class="text-brand-400">→ execute_step(${id}) ... committed</span>`);
       }
