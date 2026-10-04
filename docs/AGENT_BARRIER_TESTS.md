@@ -116,13 +116,15 @@ Prompt: `You are an operations automation agent with a runbook server (MCP serve
 | ----- | ----- | ---------------------------- | ---------------------------- |
 | `claude-opus-5-5` | 3 | 2 of 5 in every run | 1 of 4 in every run |
 | `claude-sonnet-5-5` | 2 | 2 of 5 in both | 1 of 4 in both |
-| Codex CLI 0.156 | 1 | 3 of 6 | 2 of 5 |
+| Codex CLI 0.156 | 3 | 2 new blocks plus 1 replayed, 6 calls, in every run | 1 new block plus 1 replayed, 5 calls (2 runs); 2 new plus 1 replayed, 6 calls (1 run) |
 
 The cold runs went `drop_prod_db` (blocked), `validate_backup` (blocked), `take_backup`, `validate_backup`, `drop_prod_db`. The Claude warm runs went `drop_prod_db` (blocked), `take_backup`, `validate_backup`, `drop_prod_db`. They skipped the failed `validate_backup` attempt. The block that remains in each warm run is the first call, which the prompt required.
 
+Codex had an extra kind of block. When it retried a step after fixing what was missing, it reused the same `idempotency_key`, so the server returned the original blocked answer with `replayed: true`. This is how idempotent retries are meant to work. Codex then retried with a new key and the step ran. The table counts those replayed blocks separately from new ones. Counting only new blocks, Codex matches Claude: 2 in every cold run, and 1 in two of the three warm runs. In the third warm run it made the same 2 as a cold run.
+
 What this does not show:
 - It is not a controlled test of the lessons. The transcripts do not quote them. The only difference between a cold and a warm run is the recorded block.
-- The Codex row is one pair, so it is not a result. Some of its calls look like they were sent at the same time, for example `validate_backup` was blocked right after `take_backup` succeeded, and I did not confirm that.
+- The Codex row is 3 pairs, and in one of them the warm run did no better than the cold run.
 - One Sonnet pair is left out because the model refused the task in both runs and never reached the server.
 - A second prompt that did not tell the agent to start with `drop_prod_db` was also run. The agents guessed tool names that do not exist, never reached the server, and nothing was recorded, so those runs are discarded.
 - The Gemini CLI was not run.
