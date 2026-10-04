@@ -587,18 +587,17 @@
               <i data-lucide="shield-check" class="w-4 h-4"></i>
             </div>
             <div class="text-brand-400 font-bold">2. Verification Barrier</div>
-            <div class="text-[11px] text-slate-300">Evaluates Preconditions, Invariants &amp; State Leases</div>
+            <div class="text-[11px] text-slate-300">Checks preconditions and safety rules against the run's trace</div>
           </div>
 
           <div class="p-4 rounded-xl bg-dark-900 border border-accent-cyan/40 text-xs space-y-1">
             <div class="w-7 h-7 rounded-lg bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/30 mx-auto flex items-center justify-center mb-2">
               <i data-lucide="scale" class="w-4 h-4"></i>
             </div>
-            <div class="text-accent-cyan font-bold">3. Policy Decision</div>
+            <div class="text-accent-cyan font-bold">3. Decision</div>
             <div class="text-[10px] space-y-0.5">
-              <span class="text-brand-400 font-bold block">ALLOW (Committed)</span>
-              <span class="text-rose-400 font-bold block">BLOCK (Aborted)</span>
-              <span class="text-amber-400 font-bold block">REQUIRE AUDIT</span>
+              <span class="text-brand-400 font-bold block">ALLOW (step committed)</span>
+              <span class="text-rose-400 font-bold block">BLOCK (nothing runs, fix returned)</span>
             </div>
           </div>
 
@@ -613,65 +612,35 @@
         </div>
       </div>
 
-      <!-- Technical Capabilities Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      <!-- What the barrier checks -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div class="p-4 rounded-xl bg-dark-950 border border-dark-800 space-y-2">
           <div class="flex items-center space-x-2 text-brand-400 font-bold text-sm">
             <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-            <span>Explicit-State Verification</span>
+            <span>Preconditions</span>
           </div>
           <p class="text-xs text-slate-400 leading-relaxed">
-            Evaluates proposed actions against formal state machines and explicit pre-conditions before permitting execution.
+            A step is blocked until the states it needs have been established in the run's trace. What the agent claims does not count. A backup must be validated before a drop.
           </p>
         </div>
 
         <div class="p-4 rounded-xl bg-dark-950 border border-dark-800 space-y-2">
           <div class="flex items-center space-x-2 text-accent-cyan font-bold text-sm">
             <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-            <span>Preconditions &amp; Postconditions</span>
+            <span>Safety rules</span>
           </div>
           <p class="text-xs text-slate-400 leading-relaxed">
-            Validates required operational invariants (e.g., verifying that a production database backup is confirmed before allowing drop operations).
+            A rule can forbid reaching a state unless another state already holds, for example no database drop without a validated backup.
           </p>
         </div>
 
         <div class="p-4 rounded-xl bg-dark-950 border border-dark-800 space-y-2">
           <div class="flex items-center space-x-2 text-accent-violet font-bold text-sm">
             <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-            <span>Reachability &amp; Invariants</span>
+            <span>Rollback stays reachable</span>
           </div>
           <p class="text-xs text-slate-400 leading-relaxed">
-            Mathematically ensures that prohibited system states cannot be reached through compound, multi-step agent plans.
-          </p>
-        </div>
-
-        <div class="p-4 rounded-xl bg-dark-950 border border-dark-800 space-y-2">
-          <div class="flex items-center space-x-2 text-amber-400 font-bold text-sm">
-            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-            <span>Declarative Policy Engine</span>
-          </div>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Enforces policy-as-code written in Go or Common Expression Language (CEL) with sub-millisecond evaluation latency.
-          </p>
-        </div>
-
-        <div class="p-4 rounded-xl bg-dark-950 border border-dark-800 space-y-2">
-          <div class="flex items-center space-x-2 text-rose-400 font-bold text-sm">
-            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-            <span>Atomic Rollback &amp; Recovery</span>
-          </div>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            If a downstream tool execution fails or violates rules, Joltrin automatically rolls back in-flight scratchpad state with zero side-effects.
-          </p>
-        </div>
-
-        <div class="p-4 rounded-xl bg-dark-950 border border-dark-800 space-y-2">
-          <div class="flex items-center space-x-2 text-emerald-400 font-bold text-sm">
-            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-            <span>Auditability &amp; Lineage</span>
-          </div>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Generates tamper-evident cryptographic audit records for every allowed, blocked, or intercepted operation.
+            When a runbook is registered, it is checked that rollback can still be reached from every state. A runbook that can dead-end is refused.
           </p>
         </div>
       </div>
@@ -701,7 +670,7 @@ claude mcp add joltrin -- sop-mcp-server</pre>
       <div class="max-w-3xl mb-6">
         <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">Agents hand off work. The barrier checks every call.</h2>
         <p class="text-slate-400 text-sm sm:text-base mt-2 leading-relaxed">
-          Jira, Grafana, AWS, and PagerDuty agents pass work to each other. Before any call runs, three checks: is the tool on that agent's allowlist and within its limits, does the claim match evidence a tool returned, and have the steps it depends on committed. Each run includes a skipped step, a made-up number, and an agent reaching past its scope.
+          Jira, Grafana, AWS, and PagerDuty agents hand off work. Every call passes three checks first: the tool is on that agent's allowlist, any claim matches evidence a tool returned, and the steps it depends on have committed.
         </p>
       </div>
       <div class="flex flex-wrap items-center gap-2 mb-3" role="tablist" aria-label="Agent scenario">
@@ -710,7 +679,7 @@ claude mcp add joltrin -- sop-mcp-server</pre>
         <button id="team-run" type="button" class="ml-auto px-4 py-2 rounded-lg bg-brand-500 hover:bg-brand-400 text-dark-950 font-mono font-semibold text-sm transition">Run the agents</button>
       </div>
       <pre id="team-log" aria-live="polite" class="p-4 rounded-xl bg-dark-950 border border-dark-750 text-xs font-mono text-slate-300 overflow-x-auto min-h-[16rem] whitespace-pre-wrap"></pre>
-      <p class="text-xs text-slate-500 mt-3">Replays the output of <code>go run ./examples/agent_team</code>. The tools are stubs, the checks are real (<code>ai/verify</code> plus an allowlist and an evidence check). A <code>result:</code> line is the structured block an MCP agent gets back from <code>execute_step</code>: the rule that tripped, the missing state, and the steps that would establish it.</p>
+      <p class="text-xs text-slate-500 mt-3">Replays the output of <code>go run ./examples/agent_team</code>. The tools are stubs and the checks are real. A <code>result:</code> line is what an agent gets back when a step is blocked on order: the rule, the missing state, and the steps that would establish it.</p>
       <div id="agent-feedback" class="mt-6 grid gap-5 lg:grid-cols-2 items-center p-5 rounded-xl bg-dark-950 border border-dark-750">
         <div>
           <h3 class="text-lg font-bold text-white">A block is feedback, not a dead end</h3>

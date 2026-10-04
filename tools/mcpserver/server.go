@@ -70,7 +70,7 @@ func New(store *runbookstore.Store, opts ...Option) *server.MCPServer {
 			mcp.WithString("workflow", mcp.Required(), mcp.Description("Name of the runbook.")),
 			mcp.WithString("trace_id", mcp.Required(), mcp.Description("Identifies this execution's trace.")),
 			mcp.WithString("step", mcp.Required(), mcp.Description("ID of the step to execute.")),
-			mcp.WithString("idempotency_key", mcp.Description("Optional. A unique ID for this specific call, chosen by the caller. Retrying with the same key after a lost response returns the original result rather than executing the step again. Omit it and every call is treated as new, matching the pre-existing behavior. A blocked result is replayed too, with a hint: after you run the steps it was missing, use a new key.")),
+			mcp.WithString("idempotency_key", mcp.Description("Optional. A unique ID for this specific call, chosen by the caller. Retrying with the same key after a lost response returns the original result rather than executing the step again. A key names one call: reusing it for a different step is refused, and a replayed blocked result carries a hint to use a new key after running the missing steps. Omit it and every call is treated as new, matching the pre-existing behavior.")),
 			mcp.WithOutputSchema[ExecuteStepResult](),
 		),
 		executeStepHandler(store, cfg),
@@ -155,6 +155,10 @@ func executeStepHandler(store *runbookstore.Store, cfg *config) server.ToolHandl
 		// idempotency_key is set) a retried request gets the original
 		// outcome back instead of being recomputed or double-committed.
 		replayed, err := wf.CheckAndCommitIdempotent(trace, verify.StepID(stepID), idempotencyKey)
+		var reused *verify.KeyReusedError
+		if errors.As(err, &reused) {
+			return keyReusedResult(reused), nil
+		}
 		if err == nil {
 			return mcp.NewToolResultStructuredOnly(ExecuteStepResult{
 				Executed: true,
@@ -221,6 +225,22 @@ func unknownWorkflowResult(store *runbookstore.Store, name string) *mcp.CallTool
 // finished would count for another run's checks.
 func missingTraceResult() *mcp.CallToolResult {
 	return mcp.NewToolResultError("trace_id is required. It names this run: a step is checked against the steps already run under the same trace_id, so a call without one is refused instead of sharing a trace with other callers.")
+}
+
+// keyReusedResult reports an idempotency_key that was already used for a
+// different step as an error result. Nothing was checked or run.
+func keyReusedResult(e *verify.KeyReusedError) *mcp.CallToolResult {
+	r := KeyReusedResult{
+		Error:          e.Error(),
+		IdempotencyKey: e.Key,
+		UsedForStep:    e.UsedFor,
+		RequestedStep:  e.Requested,
+	}
+	return &mcp.CallToolResult{
+		Content:           []mcp.Content{mcp.NewTextContent(r.Error)},
+		StructuredContent: r,
+		IsError:           true,
+	}
 }
 
 // unknownStepResult reports a malformed request (a step ID not registered
