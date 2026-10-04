@@ -386,3 +386,46 @@ func Test_RegisterWorkflow_RejectsUnreachableRollback(t *testing.T) {
 		t.Fatal("expected RegisterWorkflow to refuse a workflow with an unreachable rollback state")
 	}
 }
+
+// Test_MCP_ExecuteStep_ReplayedBlockSaysToUseANewKey covers an agent that
+// reuses its idempotency_key after fixing what was missing: it gets the
+// original blocked answer back, marked replayed, with a hint to use a new key,
+// and a new key then runs the step.
+func Test_MCP_ExecuteStep_ReplayedBlockSaysToUseANewKey(t *testing.T) {
+	c := newTestClient(t)
+	call := func(step, key string) ExecuteStepResult {
+		return structuredAs[ExecuteStepResult](t, callTool(t, c, "execute_step", map[string]any{
+			"workflow": "db-maintenance", "trace_id": "hint-1", "step": step, "idempotency_key": key,
+		}))
+	}
+
+	first := call("drop_prod_db", "drop-1")
+	if first.Executed || first.Replayed || first.Hint != "" {
+		t.Fatalf("a fresh block should not be replayed or carry a hint: %+v", first)
+	}
+	call("take_backup", "take-1")
+	call("validate_backup", "validate-1")
+
+	again := call("drop_prod_db", "drop-1")
+	if again.Executed || !again.Replayed {
+		t.Fatalf("same key should replay the original block: %+v", again)
+	}
+	if !strings.Contains(again.Hint, "new idempotency_key") {
+		t.Errorf("a replayed block should say to use a new key, got %q", again.Hint)
+	}
+
+	fresh := call("drop_prod_db", "drop-2")
+	if !fresh.Executed || fresh.Replayed || fresh.Hint != "" {
+		t.Fatalf("a new key should run the step with no hint: %+v", fresh)
+	}
+}
+
+func Test_MCP_ExecuteStep_ReplayedSuccessHasNoHint(t *testing.T) {
+	c := newTestClient(t)
+	args := map[string]any{"workflow": "db-maintenance", "trace_id": "hint-2", "step": "take_backup", "idempotency_key": "k"}
+	callTool(t, c, "execute_step", args)
+	again := structuredAs[ExecuteStepResult](t, callTool(t, c, "execute_step", args))
+	if !again.Replayed || again.Hint != "" {
+		t.Fatalf("a replayed success needs no hint: %+v", again)
+	}
+}
