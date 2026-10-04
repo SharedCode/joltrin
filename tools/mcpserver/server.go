@@ -103,6 +103,9 @@ func validateStepHandler(store *runbookstore.Store) server.ToolHandlerFunc {
 		if _, ok := wf.Steps[verify.StepID(stepID)]; !ok {
 			return unknownStepResult(wf, name, stepID), nil
 		}
+		if traceID == "" {
+			return missingTraceResult(), nil
+		}
 		trace := store.TraceFor(traceID)
 
 		err := wf.CheckSafety(trace, verify.StepID(stepID))
@@ -137,6 +140,9 @@ func executeStepHandler(store *runbookstore.Store, cfg *config) server.ToolHandl
 		}
 		if _, ok := wf.Steps[verify.StepID(stepID)]; !ok {
 			return unknownStepResult(wf, name, stepID), nil
+		}
+		if traceID == "" {
+			return missingTraceResult(), nil
 		}
 		trace := store.TraceFor(traceID)
 
@@ -212,6 +218,13 @@ func unknownWorkflowResult(store *runbookstore.Store, name string) *mcp.CallTool
 		StructuredContent: r,
 		IsError:           true,
 	}
+}
+
+// missingTraceResult rejects a call with no trace_id. An empty id would put
+// every caller that left it out into one shared trace, so steps one run had
+// finished would count for another run's checks.
+func missingTraceResult() *mcp.CallToolResult {
+	return mcp.NewToolResultError("trace_id is required. It names this run: a step is checked against the steps already run under the same trace_id, so a call without one is refused instead of sharing a trace with other callers.")
 }
 
 // keyReusedResult reports an idempotency_key that was already used for a

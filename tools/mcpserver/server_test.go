@@ -430,6 +430,43 @@ func Test_MCP_ExecuteStep_ReplayedSuccessHasNoHint(t *testing.T) {
 	}
 }
 
+// A call with no trace_id used to land in one shared empty-id trace, so a run
+// that forgot it could use the steps another run had finished. The schema marks
+// trace_id required; the server now enforces it.
+func Test_MCP_MissingTraceIDIsRefused(t *testing.T) {
+	c := newTestClient(t)
+	for _, tool := range []string{"execute_step", "validate_step"} {
+		for name, args := range map[string]map[string]any{
+			"omitted": {"workflow": "db-maintenance", "step": "take_backup"},
+			"empty":   {"workflow": "db-maintenance", "step": "take_backup", "trace_id": ""},
+		} {
+			res := callTool(t, c, tool, args)
+			if !res.IsError {
+				t.Errorf("%s with trace_id %s should be refused, got: %s", tool, name, resultText(res))
+				continue
+			}
+			if !strings.Contains(resultText(res), "trace_id is required") {
+				t.Errorf("%s with trace_id %s: message should say trace_id is required, got %q", tool, name, resultText(res))
+			}
+		}
+	}
+
+	// Two callers that both leave it out can no longer build on each other's steps.
+	for _, step := range []string{"take_backup", "validate_backup", "drop_prod_db"} {
+		res := callTool(t, c, "execute_step", map[string]any{"workflow": "db-maintenance", "step": step})
+		if !res.IsError || strings.Contains(resultText(res), `"executed":true`) {
+			t.Errorf("%s without a trace_id must not execute: %s", step, resultText(res))
+		}
+	}
+	// A real trace is unaffected: the drop is still blocked there.
+	got := structuredAs[ExecuteStepResult](t, callTool(t, c, "execute_step", map[string]any{
+		"workflow": "db-maintenance", "trace_id": "real-1", "step": "drop_prod_db",
+	}))
+	if got.Executed || got.Blocked == nil {
+		t.Errorf("drop_prod_db on a fresh trace must be blocked: %+v", got)
+	}
+}
+
 // An agent chooses its own idempotency_key. A key already used in the trace for
 // one step must never produce an answer for a different step: reporting a step
 // as executed without checking it would hand out an approval the barrier never
