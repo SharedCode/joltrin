@@ -293,3 +293,13 @@ func Test_AgentCard_SetsProtocolVersion(t *testing.T) {
 		t.Fatalf("AgentCard().ProtocolVersion = %q, want %q (a2a.Version)", card.ProtocolVersion, a2a.Version)
 	}
 }
+
+// A2A has always required a trace_id. Pin it so the two protocols stay the same.
+func Test_A2A_ExecuteStep_MissingTraceIDFails(t *testing.T) {
+	srv, _ := newTestServer(t)
+	c := newTestClient(t, srv)
+	task := sendStep(t, c, "db-maintenance", "", "take_backup")
+	if task.Status.State != a2a.TaskStateFailed {
+		t.Errorf("want the task to fail without a trace_id, got %q", task.Status.State)
+	}
+}
