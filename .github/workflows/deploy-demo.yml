@@ -9,6 +9,7 @@ on:
       - 'demo/**'
       - 'demo-agents/**'
       - 'docs/assets/agent-follows-feedback.gif'
+      - 'docs/index.html'
       - 'sop-arena/**'
       - '.github/workflows/deploy-demo.yml'
   workflow_dispatch: # Allows manual trigger from the GitHub Actions UI
@@ -110,6 +111,9 @@ jobs:
           mkdir -p _site/arena _site/agents
           # Technical demo (WASM) lives at the site root: joltrinhq.com/
           cp demo/index.html demo/sop.wasm demo/wasm_exec.js demo/404.html demo/favicon.svg demo/favicon.ico demo/og-image.png demo/logo-mark.png _site/
+          # The documentation index lives at joltrinhq.com/docs/
+          mkdir -p _site/docs
+          cp docs/index.html _site/docs/
           # The homepage shows this replay from ./assets/
           mkdir -p _site/assets
           cp docs/assets/agent-follows-feedback.gif _site/assets/
