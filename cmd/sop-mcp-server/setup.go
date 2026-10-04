@@ -18,28 +18,29 @@ import (
 type agentCLI struct {
 	name string // shown to the user
 	cli  string // the command that registers a server
-	// args builds the registration command. lessonsDir may be empty.
-	args func(exe, lessonsDir string) []string
+	// args builds the registration command. env is a list of KEY=VALUE pairs for
+	// the server and may be empty.
+	args func(exe string, env []string) []string
 }
 
 var agentCLIs = []agentCLI{
-	{"Claude Code", "claude", func(exe, lessons string) []string {
+	{"Claude Code", "claude", func(exe string, env []string) []string {
 		a := []string{"mcp", "add", "--scope", "user", "joltrin"}
-		if lessons != "" {
-			a = append(a, "-e", "SOP_LESSONS_DIR="+lessons)
+		for _, kv := range env {
+			a = append(a, "-e", kv)
 		}
 		return append(a, "--", exe)
 	}},
-	{"Codex", "codex", func(exe, lessons string) []string {
+	{"Codex", "codex", func(exe string, env []string) []string {
 		a := []string{"mcp", "add", "joltrin"}
-		if lessons != "" {
-			a = append(a, "--env", "SOP_LESSONS_DIR="+lessons)
+		for _, kv := range env {
+			a = append(a, "--env", kv)
 		}
 		return append(a, "--", exe)
 	}},
 	// The Gemini CLI takes its environment as a repeated option that can swallow
-	// the arguments after it, so memory is set in its settings file instead.
-	{"Gemini CLI", "gemini", func(exe, _ string) []string {
+	// the arguments after it, so the server's settings go in its settings file.
+	{"Gemini CLI", "gemini", func(exe string, _ []string) []string {
 		return []string{"mcp", "add", "--scope", "user", "joltrin", exe}
 	}},
 }
@@ -75,6 +76,7 @@ func runSetup(args []string, out, errw io.Writer, exe string,
 	fs.SetOutput(errw)
 	apply := fs.Bool("apply", false, "register with the agent CLIs found on this machine")
 	lessons := fs.String("lessons", "", "folder for the memory of earlier blocks (sets SOP_LESSONS_DIR)")
+	runbooks := fs.String("runbooks", "", "JSON file with your own runbooks (sets SOP_RUNBOOKS)")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
@@ -89,6 +91,18 @@ func runSetup(args []string, out, errw io.Writer, exe string,
 		return 1
 	}
 
+	var env []string
+	if *lessons != "" {
+		env = append(env, "SOP_LESSONS_DIR="+*lessons)
+	}
+	if *runbooks != "" {
+		path := *runbooks
+		if abs, err := filepath.Abs(path); err == nil {
+			path = abs // an agent starts the server from any folder
+		}
+		env = append(env, "SOP_RUNBOOKS="+path)
+	}
+
 	fmt.Fprintf(out, "Joltrin MCP server: %s\n\n", exe)
 
 	if !*apply {
@@ -96,7 +110,7 @@ func runSetup(args []string, out, errw io.Writer, exe string,
 		fmt.Fprintln(out, "Go's bin folder is not on your PATH:")
 		fmt.Fprintln(out)
 		for _, a := range agentCLIs {
-			fmt.Fprintf(out, "  %-12s %s\n", a.name, commandLine(a.cli, a.args(exe, *lessons)))
+			fmt.Fprintf(out, "  %-12s %s\n", a.name, commandLine(a.cli, a.args(exe, env)))
 		}
 		fmt.Fprintf(out, "\nOr register it with the ones installed here: %s setup --apply\n", shellQuote(exe))
 		return 0
@@ -108,7 +122,7 @@ func runSetup(args []string, out, errw io.Writer, exe string,
 			fmt.Fprintf(out, "  %-12s %s is not installed here, skipped\n", a.name, a.cli)
 			continue
 		}
-		if err := run(a.cli, a.args(exe, *lessons)...); err != nil {
+		if err := run(a.cli, a.args(exe, env)...); err != nil {
 			fmt.Fprintf(out, "  %-12s failed: %v\n", a.name, err)
 			failed = true
 			continue
