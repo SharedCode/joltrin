@@ -1,0 +1,78 @@
+name: Release MCP server binaries
+
+# Attaches small prebuilt sop-mcp-server binaries to a release, so setting up an
+# agent does not need Go or the roughly 400 MB of Go toolchain and modules that
+# `go install` downloads on a first run.
+#
+# It runs when a version tag is pushed, beside release.yml, which creates the
+# release, so it waits for the release to exist. To add binaries to a release
+# that already exists, run it by hand and give the tag.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing release tag to attach the binaries to (for example v5.9.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  binaries:
+    name: Build and attach sop-mcp-server
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout the tagged source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+
+      - name: Build for every platform
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          for target in darwin/amd64 darwin/arm64 linux/amd64 linux/arm64 windows/amd64 windows/arm64; do
+            os="${target%/*}"
+            arch="${target#*/}"
+            ext=""
+            if [ "$os" = "windows" ]; then ext=".exe"; fi
+            CGO_ENABLED=0 GOOS="$os" GOARCH="$arch" \
+              go build -trimpath -ldflags="-s -w" -o "dist/sop-mcp-server-${os}-${arch}${ext}" ./cmd/sop-mcp-server
+          done
+          (cd dist && sha256sum sop-mcp-server-* > sop-mcp-server-SHA256SUMS)
+          ls -lh dist
+
+      - name: Wait for the release to exist
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 90); do
+            if gh release view "$TAG" >/dev/null 2>&1; then
+              echo "Release $TAG found."
+              exit 0
+            fi
+            echo "Waiting for release $TAG ($i of 90)..."
+            sleep 30
+          done
+          echo "Release $TAG did not appear in time." >&2
+          exit 1
+
+      - name: Attach the binaries to the release
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release upload "$TAG" dist/* --clobber
