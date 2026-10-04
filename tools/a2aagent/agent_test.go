@@ -139,6 +139,31 @@ func Test_A2A_ExecuteStep_BlockedCarriesStructuredData(t *testing.T) {
 	}
 }
 
+func Test_A2A_ExecuteStep_BlockedCarriesAttemptsAndNext(t *testing.T) {
+	srv, _ := newTestServer(t)
+	c := newTestClient(t, srv)
+
+	dataOf := func(task *a2a.Task) map[string]any {
+		t.Helper()
+		for _, part := range task.Status.Message.Parts {
+			if dp, ok := part.(a2a.DataPart); ok {
+				return dp.Data
+			}
+		}
+		t.Fatal("expected a DataPart on the input-required message")
+		return nil
+	}
+
+	first := dataOf(sendStep(t, c, "db-maintenance", "incident-attempts", "drop_prod_db"))
+	second := dataOf(sendStep(t, c, "db-maintenance", "incident-attempts", "drop_prod_db"))
+	if first["attempts"] != float64(1) || second["attempts"] != float64(2) {
+		t.Errorf("attempts = %v then %v, want 1 then 2", first["attempts"], second["attempts"])
+	}
+	if second["next"] != "run_established_by_steps" {
+		t.Errorf("next = %v, want run_established_by_steps", second["next"])
+	}
+}
+
 // Test_A2A_ExecuteStep_IdempotencyKey_RetryDoesNotDuplicate is the A2A
 // counterpart of the MCP proof: a client retrying with the same
 // idempotency_key over the real A2A HTTP+JSON-RPC wire protocol gets back

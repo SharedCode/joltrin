@@ -38,6 +38,14 @@ type BlockReason struct {
 	// it, which itself is useful evidence: the workflow may need a step
 	// added, not just a different call order.
 	EstablishedBy []verify.StepID `json:"established_by_steps,omitempty" jsonschema_description:"Steps that would establish missing_state, if any are registered."`
+	// Attempts is how many times this step has been blocked for this reason
+	// in this trace, counting this call. Two or more means the same call is
+	// being repeated and will keep failing until the missing state exists.
+	// Absent from validate_step, which never counts.
+	Attempts int `json:"attempts,omitempty" jsonschema_description:"How many times this step has been blocked for this reason in this trace, including this call. 2 or more means retrying the same call will not help. Absent on validate_step."`
+	// Next says what to do instead of retrying: run the steps in
+	// established_by_steps, or stop and ask when no step can fix it.
+	Next string `json:"next,omitempty" jsonschema_description:"'run_established_by_steps' when a registered step establishes missing_state, 'stop_and_ask' when none does. Replan; do not retry the blocked step with different parameters."`
 }
 
 // ValidateStepResult is validate_step's result for a well-formed request.
