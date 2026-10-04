@@ -74,6 +74,33 @@ Register it with `--lessons` (it sets `SOP_LESSONS_DIR`, which Claude Code and C
 
 It is off by default and advice only: the barrier still checks every call, so history never unlocks a step. Lessons name only steps and states from your runbook, and they expire after 30 days or when the runbook changes. Use one server process per folder.
 
+### Use your own runbooks
+
+The built-in `db-maintenance` runbook is only an example. Describe your own steps in a JSON file and the barrier enforces them. A step requires states that other steps establish, and a safety rule forbids a state unless another one already holds:
+
+```json
+{
+  "workflows": {
+    "deploy": {
+      "steps": [
+        {"id": "run_tests",    "establishes": ["tests_passed"]},
+        {"id": "get_approval", "requires": ["tests_passed"], "establishes": ["approved"]},
+        {"id": "deploy_prod",  "requires": ["tests_passed", "approved"], "establishes": ["deployed"]}
+      ],
+      "safety": [{"name": "no-deploy-without-approval", "forbidden": "deployed", "requires": "approved"}]
+    }
+  }
+}
+```
+
+```bash
+"$(go env GOPATH)/bin/sop-mcp-server" setup --apply --runbooks "$PWD/runbooks.json"
+```
+
+With a file, the server serves exactly those runbooks. It refuses a file with a typo, such as an unknown field or a state that no step establishes, instead of quietly never blocking anything.
+
+What this catches: an agent that skips a required step, breaks a safety rule, or names a step that does not exist. What it does not do: judge whether an agent's own claim is true. That needs evidence from a tool the agent cannot fake, so it is not something a runbook file can add.
+
 ## Agents that hand off work
 
 Jira, Grafana, AWS, and PagerDuty agents hand off work, and every call passes three checks first: the tool is on that agent's allowlist, any claim matches evidence a tool returned, and the steps it depends on have committed (`verify`).
