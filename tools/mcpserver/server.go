@@ -70,7 +70,7 @@ func New(store *runbookstore.Store, opts ...Option) *server.MCPServer {
 			mcp.WithString("workflow", mcp.Required(), mcp.Description("Name of the runbook.")),
 			mcp.WithString("trace_id", mcp.Required(), mcp.Description("Identifies this execution's trace.")),
 			mcp.WithString("step", mcp.Required(), mcp.Description("ID of the step to execute.")),
-			mcp.WithString("idempotency_key", mcp.Description("Optional. A unique ID for this specific call, chosen by the caller. Retrying with the same key after a lost response returns the original result rather than executing the step again. Omit it and every call is treated as new, matching the pre-existing behavior.")),
+			mcp.WithString("idempotency_key", mcp.Description("Optional. A unique ID for this specific call, chosen by the caller. Retrying with the same key after a lost response returns the original result rather than executing the step again. Omit it and every call is treated as new, matching the pre-existing behavior. A blocked result is replayed too, with a hint: after you run the steps it was missing, use a new key.")),
 			mcp.WithOutputSchema[ExecuteStepResult](),
 		),
 		executeStepHandler(store, cfg),
@@ -164,13 +164,22 @@ func executeStepHandler(store *runbookstore.Store, cfg *config) server.ToolHandl
 		if !replayed {
 			cfg.recordBlock(store, name, traceID, stepID, wf, v)
 		}
-		return mcp.NewToolResultStructuredOnly(ExecuteStepResult{
+		res := ExecuteStepResult{
 			Executed: false,
 			Blocked:  blockReason(wf, v),
 			Replayed: replayed,
-		}), nil
+		}
+		if replayed {
+			res.Hint = replayedBlockHint
+		}
+		return mcp.NewToolResultStructuredOnly(res), nil
 	}
 }
+
+// replayedBlockHint is added to a blocked result that was replayed from an
+// idempotency_key, so an agent that has fixed what was missing knows the
+// answer is the old one and a new key will be checked afresh.
+const replayedBlockHint = "This is the original blocked result, returned again because this idempotency_key was already used. If you have since run the steps in established_by_steps, retry with a new idempotency_key to get a fresh check."
 
 // blockReason turns a *verify.Violation into the structured explanation
 // validate_step and execute_step return: which check blocked it, what

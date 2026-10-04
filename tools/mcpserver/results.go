@@ -61,6 +61,11 @@ type ExecuteStepResult struct {
 	// outcome (success or blocked), not a fresh check. Always false when no
 	// idempotency_key was given.
 	Replayed bool `json:"replayed" jsonschema_description:"True if this call was a retry recognized by idempotency_key: the result is the original outcome, replayed, not a fresh check."`
+	// Hint is present only when a blocked result is replayed. A replayed
+	// block is the original answer, not a fresh check, so an agent that has
+	// since run the steps it was missing needs a new idempotency_key to get
+	// a real answer. The decision itself is unchanged.
+	Hint string `json:"hint,omitempty" jsonschema_description:"Present only on a replayed blocked result: says the answer is the original one and to retry with a new idempotency_key after running the missing steps."`
 }
 
 // UnknownWorkflowResult is returned instead of a plain error when a caller
