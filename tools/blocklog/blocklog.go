@@ -34,8 +34,20 @@ const (
 	DefaultMaxEntries = 10000
 )
 
-// Entry is one recorded block.
+// Kinds of entry. A block has no kind, so files written before the other kinds
+// existed still load as blocks.
+const (
+	// KindRun marks that a run called execute_step. It is the denominator for
+	// how often a rule trips.
+	KindRun = "run"
+	// KindRecovered marks that a step blocked earlier in the same run later
+	// committed.
+	KindRecovered = "recovered"
+)
+
+// Entry is one recorded block, or, when Kind is set, a run or a recovery.
 type Entry struct {
+	Kind          string          `json:"kind,omitempty"`
 	At            time.Time       `json:"at"`
 	Workflow      string          `json:"workflow"`
 	Version       string          `json:"version"`
@@ -58,6 +70,7 @@ type Summary struct {
 }
 
 type key struct {
+	kind                     string
 	workflow, version, trace string
 	step                     verify.StepID
 	blockedBy                string
@@ -65,7 +78,7 @@ type key struct {
 }
 
 func (e Entry) key() key {
-	return key{e.Workflow, e.Version, e.TraceID, e.Step, e.BlockedBy, e.MissingState}
+	return key{e.Kind, e.Workflow, e.Version, e.TraceID, e.Step, e.BlockedBy, e.MissingState}
 }
 
 // Option configures a Log.
@@ -235,6 +248,11 @@ func (l *Log) trim() {
 func (l *Log) Record(e Entry) (added bool, err error) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
+	return l.record(e)
+}
+
+// record is Record with l.mu held.
+func (l *Log) record(e Entry) (added bool, err error) {
 	if _, dup := l.seen[e.key()]; dup {
 		return false, nil
 	}
@@ -256,6 +274,136 @@ func (l *Log) Record(e Entry) (added bool, err error) {
 	return true, nil
 }
 
+// RecordRun notes that a run (trace) called execute_step against workflow at
+// version, and reports whether it was the first time. A run counts once however
+// many calls it makes.
+func (l *Log) RecordRun(workflow, version, trace string) (added bool, err error) {
+	return l.Record(Entry{Kind: KindRun, Workflow: workflow, Version: version, TraceID: trace})
+}
+
+// RecordRecovery notes that step committed in a run where it had been blocked
+// before, once for each recorded block of that step in that run, and returns
+// how many were new. It returns 0 for a step that was never blocked in that
+// run, so the caller can call it on every successful commit.
+func (l *Log) RecordRecovery(workflow, version, trace string, step verify.StepID) (int, error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	var blocks []Entry
+	for _, e := range l.entries {
+		if e.Kind == "" && e.Workflow == workflow && e.Version == version && e.TraceID == trace && e.Step == step {
+			blocks = append(blocks, e)
+		}
+	}
+	var firstErr error
+	n := 0
+	for _, b := range blocks {
+		added, err := l.record(Entry{
+			Kind: KindRecovered, Workflow: workflow, Version: version, TraceID: trace,
+			Step: step, BlockedBy: b.BlockedBy, MissingState: b.MissingState,
+		})
+		if added {
+			n++
+		}
+		if err != nil && firstErr == nil {
+			firstErr = err
+		}
+	}
+	return n, firstErr
+}
+
+// RuleStats is how one rule behaved across runs.
+type RuleStats struct {
+	BlockedBy string `json:"blocked_by"`
+	// BlockedRuns is how many runs this rule blocked at least once.
+	BlockedRuns int `json:"blocked_runs"`
+	// RecoveredRuns is how many of those runs went on to commit every step the
+	// rule had blocked.
+	RecoveredRuns int `json:"recovered_runs"`
+}
+
+// Stats is how often runs of one workflow were blocked, and by which rules.
+type Stats struct {
+	// Runs is how many runs called execute_step.
+	Runs  int         `json:"runs"`
+	Rules []RuleStats `json:"rules"`
+}
+
+// Stats returns run and rule totals for workflow at version within the TTL.
+// Rules are ordered by how many runs they blocked, then by name.
+func (l *Log) Stats(workflow, version string) Stats {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	type stepKey struct {
+		step    verify.StepID
+		missing verify.State
+	}
+	type ruleRun struct{ rule, trace string }
+	cutoff := l.now().Add(-l.ttl)
+	runs := map[string]struct{}{}
+	blocked := map[ruleRun]map[stepKey]bool{} // true once the step recovered
+	for _, e := range l.entries {
+		if e.Workflow != workflow || e.Version != version || e.At.Before(cutoff) {
+			continue
+		}
+		rr, sk := ruleRun{e.BlockedBy, e.TraceID}, stepKey{e.Step, e.MissingState}
+		switch e.Kind {
+		case KindRun:
+			runs[e.TraceID] = struct{}{}
+		case "":
+			if blocked[rr] == nil {
+				blocked[rr] = map[stepKey]bool{}
+			}
+			if _, seen := blocked[rr][sk]; !seen {
+				blocked[rr][sk] = false
+			}
+		}
+	}
+	// Recoveries are matched to blocks in a second pass, so the order they
+	// were recorded in does not matter.
+	for _, e := range l.entries {
+		if e.Kind != KindRecovered || e.Workflow != workflow || e.Version != version || e.At.Before(cutoff) {
+			continue
+		}
+		if steps := blocked[ruleRun{e.BlockedBy, e.TraceID}]; steps != nil {
+			sk := stepKey{e.Step, e.MissingState}
+			if _, ok := steps[sk]; ok {
+				steps[sk] = true
+			}
+		}
+	}
+
+	byRule := map[string]*RuleStats{}
+	for rr, steps := range blocked {
+		rs := byRule[rr.rule]
+		if rs == nil {
+			rs = &RuleStats{BlockedBy: rr.rule}
+			byRule[rr.rule] = rs
+		}
+		rs.BlockedRuns++
+		all := true
+		for _, recovered := range steps {
+			all = all && recovered
+		}
+		if all {
+			rs.RecoveredRuns++
+		}
+	}
+	out := Stats{Runs: len(runs), Rules: make([]RuleStats, 0, len(byRule))}
+	for _, rs := range byRule {
+		out.Rules = append(out.Rules, *rs)
+	}
+	sort.Slice(out.Rules, func(i, j int) bool {
+		a, b := out.Rules[i], out.Rules[j]
+		if a.BlockedRuns != b.BlockedRuns {
+			return a.BlockedRuns > b.BlockedRuns
+		}
+		return a.BlockedBy < b.BlockedBy
+	})
+	return out
+}
+
 // Summaries returns the blocks recorded for workflow at version within the
 // TTL, most frequent first, then most recent, then by step ID.
 func (l *Log) Summaries(workflow, version string) []Summary {
@@ -266,7 +414,7 @@ func (l *Log) Summaries(workflow, version string) []Summary {
 	type group struct{ step, blockedBy, missing string }
 	byGroup := map[group]*Summary{}
 	for _, e := range l.entries {
-		if e.Workflow != workflow || e.Version != version || e.At.Before(cutoff) {
+		if e.Kind != "" || e.Workflow != workflow || e.Version != version || e.At.Before(cutoff) {
 			continue
 		}
 		g := group{string(e.Step), e.BlockedBy, string(e.MissingState)}

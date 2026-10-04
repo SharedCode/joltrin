@@ -74,6 +74,8 @@ Register it with `--lessons` (it sets `SOP_LESSONS_DIR`, which Claude Code and C
 
 Agents can also ask for the same list with the `read_lessons` tool, which exists only while memory is on. That helps with clients that do not show a server's startup instructions to the model, which the Gemini CLI did not in my test.
 
+`read_lessons` also reports, per runbook, how many runs called `execute_step` and, for each rule, how many runs it blocked and how many of those went on to run every step it had blocked. A rule that blocks many runs and is usually recovered from is being hit early and then followed. A rule that blocks runs that rarely recover is stopping runs that never finished the step. The numbers show how often a rule trips and whether agents get past it, not whether the rule is right.
+
 It is off by default and advice only: the barrier still checks every call, so history never unlocks a step. Lessons name only steps and states from your runbook, and they expire after 30 days or when the runbook changes. Use one server process per folder.
 
 ### Use your own runbooks

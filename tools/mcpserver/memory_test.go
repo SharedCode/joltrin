@@ -367,3 +367,57 @@ func TestReadLessonsNeverUnlocksAStep(t *testing.T) {
 		t.Error("reading lessons must not let a step run")
 	}
 }
+
+func TestReadLessonsReportsRuleStatsWithRunTotals(t *testing.T) {
+	c, _ := connect(t, WithMemory(blocklog.New(), ""))
+
+	// run-a is blocked, follows the fix, and finishes. run-b is blocked and
+	// stops. run-c never hits a block.
+	execute(t, c, "run-a", "drop_prod_db", "a1")
+	execute(t, c, "run-a", "take_backup", "a2")
+	execute(t, c, "run-a", "validate_backup", "a3")
+	execute(t, c, "run-a", "drop_prod_db", "a4")
+	execute(t, c, "run-b", "drop_prod_db", "b1")
+	execute(t, c, "run-b", "drop_prod_db", "b2")
+	execute(t, c, "run-c", "take_backup", "c1")
+
+	res := readLessons(t, c, nil)
+	if len(res.Stats) != 1 {
+		t.Fatalf("want stats for the one workflow, got %+v", res.Stats)
+	}
+	st := res.Stats[0]
+	if st.Workflow != "db-maintenance" || st.Runs != 3 {
+		t.Errorf("want 3 runs for db-maintenance, got %+v", st)
+	}
+	if len(st.Rules) != 1 {
+		t.Fatalf("want one rule, got %+v", st.Rules)
+	}
+	r := st.Rules[0]
+	if r.BlockedBy != "precondition" || r.BlockedRuns != 2 || r.RecoveredRuns != 1 {
+		t.Errorf("want precondition blocked 2 runs, 1 recovered, got %+v", r)
+	}
+}
+
+func TestReadLessonsStatsRespectTheWorkflowFilterAndStartEmpty(t *testing.T) {
+	c, _ := connect(t, WithMemory(blocklog.New(), ""))
+	if res := readLessons(t, c, nil); res.Stats == nil || len(res.Stats) != 0 {
+		t.Errorf("with nothing recorded stats should be an empty list, got %+v", res.Stats)
+	}
+	execute(t, c, "run-a", "take_backup", "")
+	if res := readLessons(t, c, map[string]any{"workflow": "no-such"}); len(res.Stats) != 0 {
+		t.Errorf("a filter on another workflow should return no stats, got %+v", res.Stats)
+	}
+	res := readLessons(t, c, map[string]any{"workflow": "db-maintenance"})
+	if len(res.Stats) != 1 || res.Stats[0].Runs != 1 || len(res.Stats[0].Rules) != 0 {
+		t.Errorf("a run with no blocks counts as a run with no rules, got %+v", res.Stats)
+	}
+}
+
+func TestReplayedCallsDoNotCountAsExtraRuns(t *testing.T) {
+	c, _ := connect(t, WithMemory(blocklog.New(), ""))
+	execute(t, c, "run-a", "take_backup", "same")
+	execute(t, c, "run-a", "take_backup", "same")
+	if got := readLessons(t, c, nil).Stats[0].Runs; got != 1 {
+		t.Errorf("Runs = %d, want 1", got)
+	}
+}
