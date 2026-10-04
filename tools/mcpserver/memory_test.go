@@ -2,9 +2,11 @@ package mcpserver
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/mark3labs/mcp-go/client"
@@ -230,5 +232,44 @@ func TestLongTraceIdsAreNotStoredAsFreeText(t *testing.T) {
 	}
 	if len(b) > 1000 || strings.Contains(string(b), "xxxxxxxx") {
 		t.Errorf("trace id should be stored as a short hash, file is %d bytes", len(b))
+	}
+}
+
+// Blocks can arrive on parallel requests. They all rewrite the lessons file, so
+// it must still be complete and parseable afterwards, with no temporary file
+// left behind.
+func TestConcurrentBlocksLeaveACompleteLessonsFile(t *testing.T) {
+	dir := t.TempDir()
+	lessons := filepath.Join(dir, "LESSONS.md")
+	log, err := blocklog.Open(filepath.Join(dir, "blocks.jsonl"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer log.Close()
+	c, _ := connect(t, WithMemory(log, lessons))
+
+	var wg sync.WaitGroup
+	for i := 0; i < 40; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			execute(t, c, fmt.Sprintf("run-%d", i), "drop_prod_db", "")
+		}(i)
+	}
+	wg.Wait()
+
+	b, err := os.ReadFile(lessons)
+	if err != nil {
+		t.Fatalf("lessons file missing: %v", err)
+	}
+	got := string(b)
+	if !strings.HasPrefix(got, "# Joltrin lessons") || !strings.HasSuffix(got, "\n") {
+		t.Errorf("lessons file is not complete:\n%s", got)
+	}
+	if !strings.Contains(got, "blocked in 40 runs") {
+		t.Errorf("want all 40 runs counted, got:\n%s", got)
+	}
+	if _, err := os.Stat(lessons + ".tmp"); !os.IsNotExist(err) {
+		t.Error("a temporary lessons file was left behind")
 	}
 }

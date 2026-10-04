@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/sharedcode/joltrin/v5/tools/blocklog"
 	"github.com/sharedcode/joltrin/v5/tools/runbookstore"
@@ -29,6 +30,10 @@ const (
 type config struct {
 	log         *blocklog.Log
 	lessonsPath string
+	// writeMu keeps two requests from writing the lessons file at once. They
+	// share one temporary file name, so overlapping writes could leave the
+	// file truncated or mixed.
+	writeMu sync.Mutex
 }
 
 // Option configures New.
@@ -86,6 +91,8 @@ func (c *config) writeLessons(store *runbookstore.Store) {
 	if c.log == nil || c.lessonsPath == "" {
 		return
 	}
+	c.writeMu.Lock()
+	defer c.writeMu.Unlock()
 	body := lessonsFile(lessonLines(store, c.log))
 	if err := os.MkdirAll(filepath.Dir(c.lessonsPath), 0o755); err != nil {
 		return
