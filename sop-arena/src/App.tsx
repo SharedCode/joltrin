@@ -486,7 +486,7 @@ export const App: React.FC = () => {
             <h4 className="font-mono text-xs uppercase font-bold text-white mb-2">Open Source</h4>
             <ul className="space-y-1.5 text-xs font-mono">
               <li><a href="https://github.com/SharedCode/joltrin" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">GitHub Repository</a></li>
-              <li><a href="https://github.com/SharedCode/joltrin#readme" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">Documentation</a></li>
+              <li><a href="../docs/" className="hover:text-white transition">Documentation</a></li>
               <li><a href="https://github.com/SharedCode/joltrin/blob/master/LICENSE" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">MIT License</a></li>
             </ul>
           </div>

@@ -75,6 +75,36 @@ test.describe('Homepage', () => {
     await expect.poll(() => img.evaluate((el: HTMLImageElement) => el.naturalWidth)).toBeGreaterThan(0);
   });
 
+  test('Docs is in the header, the mobile menu, and the footer, and points at /docs/', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    // Desktop header, mobile menu panel, and footer.
+    expect(await page.locator('a[href="./docs/"]').count()).toBeGreaterThanOrEqual(3);
+    expect(await page.locator('header nav a[href="./docs/"]').count()).toBeGreaterThanOrEqual(1);
+    expect(await page.locator('#mobile-menu-panel a[href="./docs/"]').count()).toBe(1);
+  });
+
+  test('/docs/ is a real page on the site that lists the documentation', async ({ page, request }) => {
+    const res = await request.get('/docs/');
+    expect(res.status()).toBe(200);
+    const html = await res.text();
+    expect(html).toContain('<title>Documentation | Joltrin</title>');
+    expect(html).toContain('<link rel="canonical" href="https://joltrinhq.com/docs/">');
+
+    await page.goto('/docs/', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1, name: 'Documentation' })).toBeVisible();
+    await expect(page.locator('nav[aria-label="Main"] [aria-current="page"]')).toHaveText('Docs');
+    // Back to the other experiences from the docs page.
+    await expect(page.locator('nav[aria-label="Main"] a[href="../agents/"]')).toBeVisible();
+
+    const hrefs = await page.$$eval('main a[href]', (as) => as.map((a) => (a as HTMLAnchorElement).href));
+    expect(hrefs.length).toBeGreaterThanOrEqual(15);
+    for (const h of hrefs) {
+      expect(h, 'every documentation link goes to the repository over https').toMatch(/^https:\/\/github\.com\/SharedCode\/joltrin\//);
+    }
+    const unsafe = await page.$$eval('main a[target="_blank"]', (as) => as.filter((a) => !/noopener/.test(a.rel) || !/noreferrer/.test(a.rel)).length);
+    expect(unsafe, 'external links must carry rel="noopener noreferrer"').toBe(0);
+  });
+
   test('pricing shows open source, Pro, and Enterprise contact without live-checkout claims', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const pricing = page.locator('#pricing');
