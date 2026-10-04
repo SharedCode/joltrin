@@ -58,6 +58,18 @@ claude mcp add joltrin -- sop-mcp-server    # Claude Code. Other agents: add an 
 
 Then tell your agent: "Use the joltrin tools to run `drop_prod_db` on workflow `db-maintenance` with trace id `t1`." The server refuses until `take_backup` and `validate_backup` have run in that trace, whatever the agent claims. Make sure `$(go env GOPATH)/bin` is on your `PATH`. A recorded run with real agents, and what it does not prove, is in [docs/AGENT_BARRIER_TESTS.md](docs/AGENT_BARRIER_TESTS.md).
 
+### Let the server remember what blocked
+
+Set `SOP_LESSONS_DIR` and the server records each block, once per run, and tells the next agent about it when that agent connects. It also keeps a short `LESSONS.md` in that folder.
+
+```bash
+claude mcp add joltrin -e SOP_LESSONS_DIR=$HOME/.joltrin -- sop-mcp-server
+```
+
+The lessons read like `before drop_prod_db, run take_backup, then validate_backup. It was blocked in 2 runs.` For Claude Code you can also add `@~/.joltrin/LESSONS.md` to a `CLAUDE.md`. For agents that read an `AGENTS.md`, point them at the same file.
+
+It is off by default and it is advice only: the barrier still checks every call, so history never unlocks a step. Lessons only name steps and states from your own runbook, they expire after 30 days, and they stop applying when the runbook changes. Use one server process per folder.
+
 ## Agents that hand off work
 
 Jira, Grafana, AWS, and PagerDuty agents pass work to each other. Every call passes three checks first: the tool is on that agent's allowlist and within its limits, any claim matches evidence a tool actually returned, and the steps it depends on have committed (`ai/verify`). Each run includes a skipped step, a made-up number, and an agent reaching past its scope.
