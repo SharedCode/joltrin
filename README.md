@@ -77,8 +77,10 @@ pagerduty-agent -> pagerduty.get_incident
   ok: PD-77 checkout 5xx started right after deploy 214
 pagerduty-agent -> pagerduty.resolve
   BLOCKED order: step "pagerduty.resolve" requires state "recovery_confirmed", which has not been established in this trace
+  result: {"blocked_by":"precondition","missing_state":"recovery_confirmed","established_by_steps":["grafana.recheck"]}
 aws-agent       -> aws.rollback_deploy
   BLOCKED order: step "aws.rollback_deploy" requires state "evidence_confirmed", which has not been established in this trace
+  result: {"blocked_by":"precondition","missing_state":"evidence_confirmed","established_by_steps":["grafana.query"]}
 grafana-agent   -> grafana.query
   ok: E1 error_rate_pct=14 deploy=214
 aws-agent       -> aws.rollback_deploy
@@ -95,6 +97,8 @@ pagerduty-agent -> pagerduty.resolve
   ok: PD-77 resolved
 trace: [pagerduty.get_incident grafana.query aws.rollback_deploy grafana.recheck pagerduty.resolve]
 ```
+
+Each order block also prints the structured result an MCP agent gets back from `execute_step`: the rule that tripped, the state that is missing, and the steps that would establish it. The agent can branch on those fields instead of parsing the message.
 
 The same command also runs a latency-alert example (Jira, Grafana, AWS). Watch both replay on [joltrinhq.com](https://joltrinhq.com/#agent-team). The tools are stubs, the checks are real. Source: [examples/agent_team](examples/agent_team/main.go).
 

@@ -38,6 +38,7 @@ func TestIncidentBlocksBadCallsAndResolves(t *testing.T) {
 	out := buf.String()
 	for _, want := range []string{
 		`BLOCKED order: step "pagerduty.resolve" requires state "recovery_confirmed"`,
+		`result: {"blocked_by":"precondition","missing_state":"recovery_confirmed","established_by_steps":["grafana.recheck"]}`,
 		"BLOCKED grounding: claimed error_rate_pct=40, evidence E1 says error_rate_pct=14",
 		"BLOCKED scope: services=3 exceeds the approved limit of 1",
 		"BLOCKED scope: aws.rollback_deploy is not on pagerduty-agent's allowlist",
