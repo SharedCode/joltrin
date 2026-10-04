@@ -52,6 +52,7 @@ test.describe('Homepage', () => {
     await page.locator('#team-run').click();
     await expect(log).toContainText('BLOCKED grounding: claimed error_rate_pct=40', { timeout: 10000 });
     await expect(log).toContainText('PD-77 resolved', { timeout: 10000 });
+    await expect(log).toContainText('"missing_state":"recovery_confirmed"');
   });
 
   test('pricing shows open source, Pro, and Enterprise contact without live-checkout claims', async ({ page }) => {

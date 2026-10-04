@@ -11,6 +11,8 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -80,6 +82,10 @@ func (t *team) do(c Call) {
 	}
 	if err := t.wf.CheckSafety(t.trace, verify.StepID(c.Tool)); err != nil {
 		fmt.Fprintf(t.out, "  BLOCKED order: %v\n", err)
+		var v *verify.Violation
+		if errors.As(err, &v) {
+			t.printBlockResult(v)
+		}
 		return
 	}
 	if err := t.wf.Commit(t.trace, verify.StepID(c.Tool)); err != nil {
@@ -87,6 +93,24 @@ func (t *team) do(c Call) {
 		return
 	}
 	t.stub(c)
+}
+
+// blockResult is the structured shape an MCP agent gets back from
+// execute_step when the barrier blocks it (tools/mcpserver BlockReason), so
+// the agent can branch on fields instead of parsing the message.
+type blockResult struct {
+	BlockedBy     string          `json:"blocked_by"`
+	MissingState  verify.State    `json:"missing_state"`
+	EstablishedBy []verify.StepID `json:"established_by_steps,omitempty"`
+}
+
+func (t *team) printBlockResult(v *verify.Violation) {
+	b, _ := json.Marshal(blockResult{
+		BlockedBy:     v.Rule,
+		MissingState:  v.MissingState,
+		EstablishedBy: t.wf.StepsThatEstablish(v.MissingState),
+	})
+	fmt.Fprintf(t.out, "  result: %s\n", b)
 }
 
 // stub is the fake tool backend.

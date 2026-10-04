@@ -703,7 +703,7 @@ claude mcp add joltrin -- sop-mcp-server</pre>
         <button id="team-run" type="button" class="ml-auto px-4 py-2 rounded-lg bg-brand-500 hover:bg-brand-400 text-dark-950 font-mono font-semibold text-sm transition">Run the agents</button>
       </div>
       <pre id="team-log" aria-live="polite" class="p-4 rounded-xl bg-dark-950 border border-dark-750 text-xs font-mono text-slate-300 overflow-x-auto min-h-[16rem] whitespace-pre-wrap"></pre>
-      <p class="text-xs text-slate-500 mt-3">Replays the output of <code>go run ./examples/agent_team</code>. The tools are stubs, the checks are real (<code>ai/verify</code> plus an allowlist and an evidence check).</p>
+      <p class="text-xs text-slate-500 mt-3">Replays the output of <code>go run ./examples/agent_team</code>. The tools are stubs, the checks are real (<code>ai/verify</code> plus an allowlist and an evidence check). A <code>result:</code> line is the structured block an MCP agent gets back from <code>execute_step</code>: the rule that tripped, the missing state, and the steps that would establish it.</p>
     </section>
     <script>
       (function () {
@@ -728,6 +728,10 @@ claude mcp add joltrin -- sop-mcp-server</pre>
             [
               "  BLOCKED order: step \"aws.scale_up\" requires state \"evidence_confirmed\", which has not been established in this trace",
               "text-rose-400"
+            ],
+            [
+              "  result: {\"blocked_by\":\"precondition\",\"missing_state\":\"evidence_confirmed\",\"established_by_steps\":[\"grafana.query\"]}",
+              "text-amber-300"
             ],
             [
               "grafana-agent   -> grafana.query",
@@ -796,12 +800,20 @@ claude mcp add joltrin -- sop-mcp-server</pre>
               "text-rose-400"
             ],
             [
+              "  result: {\"blocked_by\":\"precondition\",\"missing_state\":\"recovery_confirmed\",\"established_by_steps\":[\"grafana.recheck\"]}",
+              "text-amber-300"
+            ],
+            [
               "aws-agent       -> aws.rollback_deploy",
               ""
             ],
             [
               "  BLOCKED order: step \"aws.rollback_deploy\" requires state \"evidence_confirmed\", which has not been established in this trace",
               "text-rose-400"
+            ],
+            [
+              "  result: {\"blocked_by\":\"precondition\",\"missing_state\":\"evidence_confirmed\",\"established_by_steps\":[\"grafana.query\"]}",
+              "text-amber-300"
             ],
             [
               "grafana-agent   -> grafana.query",
@@ -886,13 +898,18 @@ claude mcp add joltrin -- sop-mcp-server</pre>
           select(current);
           var lines = scenarios[current];
           var i = 0;
-          (function next() {
-            if (i >= lines.length) return;
+          function add() {
             var row = document.createElement('div');
             row.className = lines[i][1];
             row.textContent = lines[i][0];
             log.appendChild(row);
             i++;
+          }
+          (function next() {
+            if (i >= lines.length) return;
+            add();
+            // a result line belongs to the BLOCKED line above it, so it shows with it
+            while (i < lines.length && lines[i][0].indexOf('  result:') === 0) add();
             timer = setTimeout(next, 500);
           })();
         });
