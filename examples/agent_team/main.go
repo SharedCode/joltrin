@@ -36,12 +36,12 @@ var allow = map[string]map[string]bool{
 	"jira-agent":      {"jira.get_ticket": true},
 	"pagerduty-agent": {"pagerduty.get_incident": true, "pagerduty.resolve": true},
 	"grafana-agent":   {"grafana.query": true, "grafana.recheck": true},
-	"aws-agent":       {"aws.scale_up": true, "aws.rollback_deploy": true},
+	"aws-agent":       {"aws.scale_out": true, "aws.rollback_deploy": true},
 }
 
 // limits caps numeric arguments: tool -> arg -> max approved value.
 var limits = map[string]map[string]int{
-	"aws.scale_up":        {"to": 6},
+	"aws.scale_out":       {"to": 6},
 	"aws.rollback_deploy": {"services": 1},
 }
 
@@ -131,7 +131,7 @@ func (t *team) stub(c Call) {
 	case "grafana.recheck":
 		t.evidence["E2"] = map[string]int{"error_rate_pct": 1}
 		fmt.Fprintln(t.out, "  ok: E2 error_rate_pct=1")
-	case "aws.scale_up":
+	case "aws.scale_out":
 		fmt.Fprintf(t.out, "  ok: checkout-asg scaled %d -> %d\n", c.Args["from"], c.Args["to"])
 	case "aws.rollback_deploy":
 		fmt.Fprintln(t.out, "  ok: checkout rolled back 214 -> 213")
@@ -150,7 +150,7 @@ func runScaling(out io.Writer) (*team, error) {
 		[]verify.Step{
 			{ID: "jira.get_ticket", Establishes: []verify.State{"ticket_read"}},
 			{ID: "grafana.query", Requires: []verify.State{"ticket_read"}, Establishes: []verify.State{"evidence_confirmed"}},
-			{ID: "aws.scale_up", Requires: []verify.State{"evidence_confirmed"}, Establishes: []verify.State{"scaled"}},
+			{ID: "aws.scale_out", Requires: []verify.State{"evidence_confirmed"}, Establishes: []verify.State{"scaled"}},
 		},
 		[]verify.SafetyRule{{Name: "no-scale-without-evidence", Forbidden: "scaled", Requires: "evidence_confirmed"}},
 	)
@@ -161,15 +161,15 @@ func runScaling(out io.Writer) (*team, error) {
 	fmt.Fprintln(out, "")
 	t.do(Call{Agent: "jira-agent", Tool: "jira.get_ticket"})
 	// The AWS agent jumps ahead before anyone has looked at a graph.
-	t.do(Call{Agent: "aws-agent", Tool: "aws.scale_up", Args: map[string]int{"from": 4, "to": 6}})
+	t.do(Call{Agent: "aws-agent", Tool: "aws.scale_out", Args: map[string]int{"from": 4, "to": 6}})
 	t.do(Call{Agent: "grafana-agent", Tool: "grafana.query"})
 	// Hallucinated number: the evidence says 91.
-	t.do(Call{Agent: "aws-agent", Tool: "aws.scale_up", Args: map[string]int{"from": 4, "to": 6}, CiteID: "E1", CiteKey: "cpu_pct", CiteVal: 97})
+	t.do(Call{Agent: "aws-agent", Tool: "aws.scale_out", Args: map[string]int{"from": 4, "to": 6}, CiteID: "E1", CiteKey: "cpu_pct", CiteVal: 97})
 	// Scope creep: bigger than approved, then a tool nobody granted.
-	t.do(Call{Agent: "aws-agent", Tool: "aws.scale_up", Args: map[string]int{"from": 4, "to": 20}, CiteID: "E1", CiteKey: "cpu_pct", CiteVal: 91})
+	t.do(Call{Agent: "aws-agent", Tool: "aws.scale_out", Args: map[string]int{"from": 4, "to": 20}, CiteID: "E1", CiteKey: "cpu_pct", CiteVal: 91})
 	t.do(Call{Agent: "aws-agent", Tool: "aws.terminate_instances"})
 	// Grounded, in scope, in order.
-	t.do(Call{Agent: "aws-agent", Tool: "aws.scale_up", Args: map[string]int{"from": 4, "to": 6}, CiteID: "E1", CiteKey: "cpu_pct", CiteVal: 91})
+	t.do(Call{Agent: "aws-agent", Tool: "aws.scale_out", Args: map[string]int{"from": 4, "to": 6}, CiteID: "E1", CiteKey: "cpu_pct", CiteVal: 91})
 	t.finish()
 	return t, nil
 }
