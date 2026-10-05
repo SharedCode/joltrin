@@ -146,12 +146,12 @@ docker pull ghcr.io/sharedcode/joltrin-quickstart:stable
 docker run --rm ghcr.io/sharedcode/joltrin-quickstart:stable
 ```
 
-Full server from a release bundle, three commands:
+Full server from a release, three commands (swap the file name for your OS and CPU, see the [releases page](https://github.com/SharedCode/joltrin/releases/latest)):
 
 ```bash
-curl -LO https://github.com/SharedCode/joltrin/releases/latest/download/sop-bundle-linux-amd64.tar.gz
-tar xzf sop-bundle-linux-amd64.tar.gz
-./sop-bundle/sop-httpserver
+curl -fsSLO https://github.com/SharedCode/joltrin/releases/latest/download/sop-httpserver-linux-amd64
+chmod +x sop-httpserver-linux-amd64
+./sop-httpserver-linux-amd64
 ```
 
 The server starts in setup mode on first run; point a browser at `http://localhost:8080`, set the data path, and it is ready. Configuration reference: [CONFIGURATION.md](CONFIGURATION.md). Step-by-step walkthrough: [GETTING_STARTED.md](GETTING_STARTED.md).

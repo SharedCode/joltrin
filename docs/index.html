@@ -79,9 +79,8 @@ drop_prod_db      allowed</pre>
     <p>Repeated blocks add <code>attempts</code> and <code>next</code>, which says whether to run the establishing steps or stop and ask. With memory turned on, the server also counts which rules block runs and how often agents recover.</p>
 
     <h2>4. Five-minute local demo</h2>
-<pre>git clone https://github.com/SharedCode/joltrin.git &amp;&amp; cd joltrin
-./scripts/demo.sh --barrier</pre>
-    <p>Or <a href="../agents/">try the barrier in your browser</a>. It runs the same checks compiled to WebAssembly.</p>
+<pre>go run github.com/sharedcode/joltrin/v5/examples/verify_barrier@latest</pre>
+    <p>That needs Go and no clone. Or <a href="../agents/">try the barrier in your browser</a>. It runs the same checks compiled to WebAssembly.</p>
 
     <h2>5. MCP integration</h2>
     <p>Install the server and register it with the agents on your machine, using its full path:</p>

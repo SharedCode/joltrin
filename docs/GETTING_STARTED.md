@@ -1,46 +1,35 @@
-# Getting Started with SOP
+# Getting Started with Joltrin
 
-Welcome to **Scalable Objects Persistence (SOP)**! This guide will take you from downloading the software to building your first application.
+This guide takes you from downloading the software to building your first application. (Joltrin was called SOP before v5, and some package and binary names still say SOP.)
 
-## 1. Download & Installation
+## 1. Download and run the server
 
-### Step 1: Download the Bundle
-*(For Python, C#, Java, Rust Developers, or Standalone Server Usage)*
+**Note for Go developers:** you do not need the server to use the library. Joltrin is a native Go library, so you can `go get` it (see [Developing with SOP](#3-developing-with-sop) below) and compile your application.
 
-**Note for Go Developers:** You do not need to download this bundle. SOP is a native Go library. You can simply `go get` the package (see [Developing with SOP](#3-developing-with-sop) below) and compile your application.
+The Data Manager server and its UI are one file. Pick the one for your machine from the [latest release](https://github.com/SharedCode/joltrin/releases/latest), then make it executable and run it:
 
-Go to the [Releases Page](https://github.com/SharedCode/joltrin/releases) and download the **Platform Bundle** for your operating system:
+```bash
+curl -fsSLO https://github.com/SharedCode/joltrin/releases/latest/download/sop-httpserver-darwin-arm64   # or darwin-amd64, linux-amd64, linux-arm64
+chmod +x sop-httpserver-darwin-arm64
+./sop-httpserver-darwin-arm64
+```
 
-*   **macOS (Apple Silicon)**: `sop-bundle-macos-arm64.zip`
-*   **macOS (Intel)**: `sop-bundle-macos-amd64.zip`
-*   **Linux**: `sop-bundle-linux-amd64.zip`
-*   **Windows**: `sop-bundle-windows-amd64.zip`
+On Windows, download `sop-httpserver-windows-amd64.exe` (or `-arm64.exe`) from the same page and run it from PowerShell. The download is about 50 MB, and the server was ready in under a second on a MacBook Air.
 
-### Step 2: Extract & Run
-Unzip the downloaded file. You will see a folder structure like this:
+> **AI usage note:** to use the AI Copilot features, you must supply your own LLM API key (for example from Google AI Studio or OpenAI). The system does not come with a trial key. You can enter your key in the "Environment Configuration" after starting the server.
 
-> **AI Usage Note**: To use the AI Copilot features, you must supply your own LLM API Key (e.g., from Google AI Studio or OpenAI). The system does not come with a pre-configured trial key. You can enter your key in the "Environment Configuration" after starting the server.
+**Only for Python, C#, Java, or Rust.** Those packages are also in the platform bundle on the release page, `sop-bundle-<os>-<arch>-<version>.tar.gz` (`.zip` on Windows). It is about 120 MB and unpacks to a folder of the same name:
 
 ```text
-sop-bundle/
+sop-bundle-<os>-<arch>-<version>/
 ├── sop-httpserver       # The Database Server & UI
 ├── libs/                # Shared libraries (for C/Rust)
 ├── python/              # Python package (.whl)
 ├── java/                # Java library (.jar)
-└── dotnet/              # C# package (.nupkg)
+├── dotnet/              # C# package (.nupkg)
+├── rust/
+└── docs/
 ```
-
-**Start the Server:**
-Open a terminal in this folder and run:
-
-**macOS / Linux:**
-```bash
-chmod +x sop-httpserver
-./sop-httpserver
-```
-
-**Windows:**
-Double-click `sop-httpserver.exe` or run it from PowerShell.
 
 ---
 
