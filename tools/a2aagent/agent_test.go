@@ -352,3 +352,19 @@ func Test_A2A_ExecuteStep_KeyReusedForADifferentStepFails(t *testing.T) {
 		t.Errorf("trace = %v, want only take_backup", got)
 	}
 }
+
+func Test_A2A_OverlongIDsFailAndNothingIsStored(t *testing.T) {
+	srv, store := newTestServer(t)
+	c := newTestClient(t, srv)
+	long := strings.Repeat("x", runbookstore.MaxIDLength+1)
+
+	if task := sendStep(t, c, "db-maintenance", long, "take_backup"); task.Status.State != a2a.TaskStateFailed {
+		t.Errorf("an overlong trace_id should fail the task, got %q", task.Status.State)
+	}
+	if task := sendStepWithKey(t, c, "db-maintenance", "ok-trace", "take_backup", long); task.Status.State != a2a.TaskStateFailed {
+		t.Errorf("an overlong idempotency_key should fail the task, got %q", task.Status.State)
+	}
+	if got := store.TraceCount(); got != 0 {
+		t.Errorf("refused calls must not create a trace, the store holds %d", got)
+	}
+}

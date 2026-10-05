@@ -2,6 +2,7 @@ package runbookstore
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 	"testing"
 
@@ -107,5 +108,18 @@ func Test_TraceFor_ConcurrentAccessIsSafe(t *testing.T) {
 
 	if got := store.TraceCount(); got > 16 {
 		t.Fatalf("cap breached under concurrency: %d traces", got)
+	}
+}
+
+func TestCheckIDBoundsWhatACallerCanMakeTheStoreKeep(t *testing.T) {
+	if err := CheckID("trace_id", strings.Repeat("a", MaxIDLength)); err != nil {
+		t.Errorf("an id at the limit should be fine: %v", err)
+	}
+	err := CheckID("trace_id", strings.Repeat("a", MaxIDLength+1))
+	if err == nil || !strings.Contains(err.Error(), "trace_id") || !strings.Contains(err.Error(), fmt.Sprint(MaxIDLength)) {
+		t.Errorf("a long id should be refused, naming the field and the limit: %v", err)
+	}
+	if err := CheckID("idempotency_key", ""); err != nil {
+		t.Errorf("emptiness is each caller's own rule, not this check's: %v", err)
 	}
 }

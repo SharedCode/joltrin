@@ -1,9 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"os/exec"
 	"strings"
 	"testing"
 	"time"
@@ -113,5 +117,114 @@ func Test_OversizedBodyRejected(t *testing.T) {
 
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("expected 400 for an oversized body, got %d", rec.Code)
+	}
+}
+
+// The daemon re-runs this test binary as the command, so these tests need no
+// shell and behave the same on every platform. HELPER selects what it does.
+func TestMain(m *testing.M) {
+	switch os.Getenv("SOP_DAEMON_TEST_HELPER") {
+	case "flood":
+		// Write far more than any response should carry.
+		chunk := bytes.Repeat([]byte("x"), 64<<10)
+		for i := 0; i < 160; i++ { // about 10 MiB
+			os.Stdout.Write(chunk)
+			os.Stderr.Write(chunk[:1024])
+		}
+		os.Exit(0)
+	case "env":
+		fmt.Print(os.Getenv("SOP_DAEMON_TOKEN"), "|", os.Getenv("KEEP_ME"))
+		os.Exit(0)
+	case "orphan":
+		// Start a child that holds the output pipe open and outlives this process,
+		// then wait to be killed by the timeout.
+		cmd := exec.Command(os.Args[0])
+		cmd.Env = append(os.Environ(), "SOP_DAEMON_TEST_HELPER=sleep")
+		cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
+		_ = cmd.Start()
+		time.Sleep(time.Minute)
+		os.Exit(0)
+	case "sleep":
+		time.Sleep(20 * time.Second)
+		os.Exit(0)
+	}
+	os.Exit(m.Run())
+}
+
+func postExec(t *testing.T, cfg *config, env map[string]string) ExecuteResponse {
+	t.Helper()
+	body, _ := json.Marshal(ExecuteRequest{Executable: os.Args[0]})
+	req := httptest.NewRequest(http.MethodPost, "/api/execute", bytes.NewReader(body))
+	rec := httptest.NewRecorder()
+	for k, v := range env {
+		t.Setenv(k, v)
+	}
+	cfg.guard(executeHandler(cfg))(rec, req)
+	var resp ExecuteResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("decode: %v\n%s", err, rec.Body.String())
+	}
+	return resp
+}
+
+// A command that prints without end must not be able to fill the daemon's
+// memory or produce a response of the same size.
+func Test_OutputIsCapped(t *testing.T) {
+	resp := postExec(t, testConfig(), map[string]string{"SOP_DAEMON_TEST_HELPER": "flood"})
+	if len(resp.Stdout) > maxCapturedOutput || len(resp.Stderr) > maxCapturedOutput {
+		t.Fatalf("captured %d bytes of stdout and %d of stderr, cap is %d", len(resp.Stdout), len(resp.Stderr), maxCapturedOutput)
+	}
+	if !resp.StdoutTruncated {
+		t.Error("the response should say stdout was cut off")
+	}
+	if resp.ExitCode != 0 {
+		t.Errorf("a command that finished normally should still report exit 0, got %d (%s)", resp.ExitCode, resp.Error)
+	}
+	if !strings.HasPrefix(resp.Stdout, "xxxx") {
+		t.Error("the start of the output should be kept")
+	}
+}
+
+// Output under the cap is returned whole and is not marked truncated.
+func Test_ShortOutputIsNotTruncated(t *testing.T) {
+	rec := post(t, testConfig(), "", "", "echo small")
+	var resp ExecuteResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatal(err)
+	}
+	if resp.StdoutTruncated || resp.StderrTruncated || !strings.Contains(resp.Stdout, "small") {
+		t.Errorf("unexpected response: %+v", resp)
+	}
+}
+
+// The shared secret that protects the daemon must not be handed to the
+// commands it runs.
+func Test_TokenIsNotPassedToCommands(t *testing.T) {
+	cfg := testConfig()
+	resp := postExec(t, cfg, map[string]string{
+		"SOP_DAEMON_TEST_HELPER": "env",
+		"SOP_DAEMON_TOKEN":       "do-not-leak",
+		"KEEP_ME":                "kept",
+	})
+	if strings.Contains(resp.Stdout, "do-not-leak") {
+		t.Fatalf("the token reached the command: %q", resp.Stdout)
+	}
+	if !strings.Contains(resp.Stdout, "|kept") {
+		t.Errorf("other variables should still pass through: %q", resp.Stdout)
+	}
+}
+
+// A command that leaves a child holding its output open used to keep the
+// request waiting long after the timeout killed the command.
+func Test_TimeoutReturnsEvenIfAChildHoldsTheOutputOpen(t *testing.T) {
+	cfg := testConfig()
+	cfg.commandTimeout = 300 * time.Millisecond
+	start := time.Now()
+	resp := postExec(t, cfg, map[string]string{"SOP_DAEMON_TEST_HELPER": "orphan"})
+	if elapsed := time.Since(start); elapsed > 8*time.Second {
+		t.Fatalf("the request took %s, the timeout was %s", elapsed, cfg.commandTimeout)
+	}
+	if !strings.Contains(resp.Error, "exceeded") {
+		t.Errorf("want a timeout error, got %+v", resp)
 	}
 }

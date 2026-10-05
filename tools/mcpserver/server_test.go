@@ -573,3 +573,49 @@ func Test_MCP_ValidateStep_TellsTheNextActionButDoesNotCount(t *testing.T) {
 		t.Errorf("dry runs must not count toward attempts, got %d", res.Blocked.Attempts)
 	}
 }
+
+// An id is kept in memory for every trace and idempotency key, so a caller
+// must not be able to make the server keep an id of any size.
+func Test_MCP_OverlongIDsAreRefusedAndNothingIsStored(t *testing.T) {
+	long := strings.Repeat("x", runbookstore.MaxIDLength+1)
+	store := runbookstore.New()
+	wf := dbMaintenanceWorkflow(t)
+	if err := store.RegisterWorkflow("db-maintenance", wf); err != nil {
+		t.Fatal(err)
+	}
+	c, err := client.NewInProcessClient(New(store))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { c.Close() })
+	ctx := context.Background()
+	if err := c.Start(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.Initialize(ctx, mcp.InitializeRequest{Params: mcp.InitializeParams{
+		ProtocolVersion: mcp.LATEST_PROTOCOL_VERSION, ClientInfo: mcp.Implementation{Name: "t", Version: "0"},
+	}}); err != nil {
+		t.Fatal(err)
+	}
+
+	for name, args := range map[string]map[string]any{
+		"trace_id":        {"workflow": "db-maintenance", "step": "take_backup", "trace_id": long},
+		"idempotency_key": {"workflow": "db-maintenance", "step": "take_backup", "trace_id": "ok", "idempotency_key": long},
+	} {
+		res := callTool(t, c, "execute_step", args)
+		if !res.IsError || !strings.Contains(resultText(res), name) {
+			t.Errorf("an overlong %s should be refused, naming it: %s", name, resultText(res))
+		}
+	}
+	if res := callTool(t, c, "validate_step", map[string]any{"workflow": "db-maintenance", "step": "take_backup", "trace_id": long}); !res.IsError {
+		t.Errorf("validate_step should refuse an overlong trace_id: %s", resultText(res))
+	}
+	if got := store.TraceCount(); got != 0 {
+		t.Errorf("a refused call must not create a trace, the store holds %d", got)
+	}
+	// An id at the limit still works.
+	ok := strings.Repeat("y", runbookstore.MaxIDLength)
+	if res := callTool(t, c, "execute_step", map[string]any{"workflow": "db-maintenance", "step": "take_backup", "trace_id": ok}); res.IsError {
+		t.Errorf("an id at the limit should work: %s", resultText(res))
+	}
+}

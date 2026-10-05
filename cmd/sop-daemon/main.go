@@ -31,8 +31,16 @@ import (
 )
 
 const (
-	maxRequestBody = 64 << 10             // 64 KiB: a command line, not a file upload.
-	tokenHeader    = "X-SOP-Daemon-Token" //nolint:gosec // header name, not a credential
+	maxRequestBody = 64 << 10 // 64 KiB: a command line, not a file upload.
+	// maxCapturedOutput caps what is kept of each of a command's stdout and
+	// stderr. Without it a command that prints without end fills memory until
+	// the timeout, and the response is as large as what it printed.
+	maxCapturedOutput = 1 << 20
+	// killWait is how long the daemon waits, after a command is killed, for
+	// its output pipes to close. A child the command started can hold them open
+	// and would otherwise keep the request waiting indefinitely.
+	killWait    = 2 * time.Second
+	tokenHeader = "X-SOP-Daemon-Token" //nolint:gosec // header name, not a credential
 )
 
 type ExecuteRequest struct {
@@ -51,6 +59,45 @@ type ExecuteResponse struct {
 	Stderr   string `json:"stderr"`
 	ExitCode int    `json:"exit_code"`
 	Error    string `json:"error,omitempty"`
+	// StdoutTruncated and StderrTruncated are set when the output was longer
+	// than maxCapturedOutput and only the start of it is returned.
+	StdoutTruncated bool `json:"stdout_truncated,omitempty"`
+	StderrTruncated bool `json:"stderr_truncated,omitempty"`
+}
+
+// cappedBuffer keeps the first limit bytes written to it and counts the rest as
+// dropped. Write always reports success, so the command is never slowed or
+// failed by a full buffer, it just stops being recorded.
+type cappedBuffer struct {
+	buf       bytes.Buffer
+	limit     int
+	truncated bool
+}
+
+func (c *cappedBuffer) Write(p []byte) (int, error) {
+	if room := c.limit - c.buf.Len(); room > 0 {
+		if len(p) <= room {
+			c.buf.Write(p)
+			return len(p), nil
+		}
+		c.buf.Write(p[:room])
+	}
+	c.truncated = true
+	return len(p), nil
+}
+
+// childEnv is the daemon's environment without its own shared secret, so a
+// command it runs cannot read the token that protects the daemon.
+func childEnv() []string {
+	env := os.Environ()
+	out := env[:0:0]
+	for _, kv := range env {
+		if strings.HasPrefix(kv, "SOP_DAEMON_TOKEN=") {
+			continue
+		}
+		out = append(out, kv)
+	}
+	return out
 }
 
 // config holds the resolved security settings for one daemon run.
@@ -202,16 +249,21 @@ func executeHandler(cfg *config) http.HandlerFunc {
 		defer cancel()
 
 		cmd := exec.CommandContext(ctx, program, args...)
+		cmd.Env = childEnv()
+		cmd.WaitDelay = killWait
 
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
+		stdout := &cappedBuffer{limit: maxCapturedOutput}
+		stderr := &cappedBuffer{limit: maxCapturedOutput}
+		cmd.Stdout = stdout
+		cmd.Stderr = stderr
 
 		err := cmd.Run()
 
 		resp := ExecuteResponse{
-			Stdout: stdout.String(),
-			Stderr: stderr.String(),
+			Stdout:          stdout.buf.String(),
+			Stderr:          stderr.buf.String(),
+			StdoutTruncated: stdout.truncated,
+			StderrTruncated: stderr.truncated,
 		}
 
 		if err != nil {

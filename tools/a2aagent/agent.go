@@ -234,6 +234,13 @@ func parseStepRequest(msg *a2a.Message) (stepRequest, error) {
 		if v, ok := dp.Data["idempotency_key"].(string); ok {
 			req.IdempotencyKey = v
 		}
+		for _, f := range []struct{ name, value string }{
+			{"workflow", req.Workflow}, {"step", req.Step}, {"trace_id", req.TraceID}, {"idempotency_key", req.IdempotencyKey},
+		} {
+			if err := runbookstore.CheckID(f.name, f.value); err != nil {
+				return stepRequest{}, fmt.Errorf("a2aagent: %w", err)
+			}
+		}
 		if req.Workflow == "" || req.TraceID == "" || req.Step == "" {
 			return stepRequest{}, fmt.Errorf("a2aagent: message data part must include workflow, trace_id, and step")
 		}

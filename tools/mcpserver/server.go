@@ -120,6 +120,9 @@ func validateStepHandler(store *runbookstore.Store) server.ToolHandlerFunc {
 		stepID := req.GetString("step", "")
 		traceID := req.GetString("trace_id", "")
 
+		if err := checkIDs(map[string]string{"workflow": name, "step": stepID, "trace_id": traceID}); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
+		}
 		wf, ok := store.Workflow(name)
 		if !ok {
 			return unknownWorkflowResult(store, name), nil
@@ -158,6 +161,9 @@ func executeStepHandler(store *runbookstore.Store, cfg *config) server.ToolHandl
 		traceID := req.GetString("trace_id", "")
 		idempotencyKey := req.GetString("idempotency_key", "")
 
+		if err := checkIDs(map[string]string{"workflow": name, "step": stepID, "trace_id": traceID, "idempotency_key": idempotencyKey}); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
+		}
 		wf, ok := store.Workflow(name)
 		if !ok {
 			return unknownWorkflowResult(store, name), nil
@@ -256,6 +262,19 @@ func unknownWorkflowResult(store *runbookstore.Store, name string) *mcp.CallTool
 		StructuredContent: r,
 		IsError:           true,
 	}
+}
+
+// checkIDs refuses any value over runbookstore.MaxIDLength, in a fixed order so
+// the message does not depend on map iteration.
+func checkIDs(fields map[string]string) error {
+	for _, k := range []string{"workflow", "step", "trace_id", "idempotency_key"} {
+		if v, ok := fields[k]; ok {
+			if err := runbookstore.CheckID(k, v); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 // missingTraceResult rejects a call with no trace_id. An empty id would put

@@ -94,6 +94,21 @@ func (s *Store) WorkflowNames() []string {
 	return names
 }
 
+// MaxIDLength is the longest trace_id, idempotency_key, workflow or step name a
+// caller may send. The store keeps a trace and its keys in memory for every one
+// it is given, and A2A can be reached over the network, so an id of any size
+// would let one caller grow the server without bound. Real ids are short.
+const MaxIDLength = 256
+
+// CheckID refuses a value over MaxIDLength bytes, naming the field. An empty
+// value passes: whether one is allowed is each caller's own rule.
+func CheckID(field, value string) error {
+	if len(value) > MaxIDLength {
+		return fmt.Errorf("%s is %d bytes, the limit is %d", field, len(value), MaxIDLength)
+	}
+	return nil
+}
+
 // TraceFor returns the Trace for traceID, creating a fresh one on first
 // use and evicting the oldest trace once the store is at its cap.
 func (s *Store) TraceFor(traceID string) *verify.Trace {
