@@ -28,6 +28,11 @@ const (
 )
 
 type config struct {
+	// versions caches workflowVersion by workflow, since the fingerprint is
+	// needed on every call with memory on and a registered workflow is not
+	// changed afterwards.
+	versions sync.Map // *verify.Workflow -> string
+
 	log         *blocklog.Log
 	lessonsPath string
 	// writeMu keeps two requests from writing the lessons file at once. They
@@ -59,6 +64,16 @@ func workflowVersion(wf *verify.Workflow) string {
 	return hex.EncodeToString(sum[:8])
 }
 
+// version is workflowVersion, computed once per workflow.
+func (c *config) version(wf *verify.Workflow) string {
+	if v, ok := c.versions.Load(wf); ok {
+		return v.(string)
+	}
+	v := workflowVersion(wf)
+	c.versions.Store(wf, v)
+	return v
+}
+
 // shortID stands in for the caller-supplied trace id in the log. The id is
 // free text from the client, so only a short hash is kept: enough to tell runs
 // apart, and it keeps each entry a fixed size.
@@ -75,7 +90,7 @@ func (c *config) recordBlock(store *runbookstore.Store, workflow, traceID, step 
 	}
 	added, _ := c.log.Record(blocklog.Entry{
 		Workflow:      workflow,
-		Version:       workflowVersion(wf),
+		Version:       c.version(wf),
 		TraceID:       shortID(traceID),
 		Step:          verify.StepID(step),
 		BlockedBy:     v.Rule,
@@ -93,7 +108,7 @@ func (c *config) recordRun(workflow, traceID string, wf *verify.Workflow) {
 	if c.log == nil {
 		return
 	}
-	_, _ = c.log.RecordRun(workflow, workflowVersion(wf), shortID(traceID))
+	_, _ = c.log.RecordRun(workflow, c.version(wf), shortID(traceID))
 }
 
 // recordRecovery notes that a step committed, which counts as a recovery only
@@ -102,7 +117,7 @@ func (c *config) recordRecovery(workflow, traceID, step string, wf *verify.Workf
 	if c.log == nil {
 		return
 	}
-	_, _ = c.log.RecordRecovery(workflow, workflowVersion(wf), shortID(traceID), verify.StepID(step))
+	_, _ = c.log.RecordRecovery(workflow, c.version(wf), shortID(traceID), verify.StepID(step))
 }
 
 // lessonFor is what earlier runs learned about this block, or "" when memory is
@@ -112,12 +127,11 @@ func (c *config) lessonFor(workflow, step string, wf *verify.Workflow, v *verify
 	if c.log == nil {
 		return ""
 	}
-	for _, s := range c.log.Summaries(workflow, workflowVersion(wf)) {
-		if string(s.Step) == step && s.BlockedBy == v.Rule && s.MissingState == v.MissingState {
-			return strings.TrimPrefix(lessonLine(workflow, wf, s), "- ")
-		}
+	s, ok := c.log.Summary(workflow, c.version(wf), verify.StepID(step), v.Rule, v.MissingState)
+	if !ok {
+		return ""
 	}
-	return ""
+	return strings.TrimPrefix(lessonLine(workflow, wf, s), "- ")
 }
 
 func (c *config) writeLessons(store *runbookstore.Store) {

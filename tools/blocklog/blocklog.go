@@ -487,6 +487,33 @@ func (l *Log) CompactionError() error {
 	return l.compactErr
 }
 
+// Summary returns the summary for one step, rule and missing state of workflow
+// at version within the TTL, the same row Summaries would list, without
+// building the rows for every other block. ok is false if it was never blocked.
+func (l *Log) Summary(workflow, version string, step verify.StepID, blockedBy string, missing verify.State) (s Summary, ok bool) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	cutoff := l.now().Add(-l.ttl)
+	for i := range l.entries {
+		e := &l.entries[i]
+		if e.Kind != "" || e.Workflow != workflow || e.Version != version || e.Step != step ||
+			e.BlockedBy != blockedBy || e.MissingState != missing || e.At.Before(cutoff) {
+			continue
+		}
+		if !ok {
+			s = Summary{Step: e.Step, BlockedBy: e.BlockedBy, MissingState: e.MissingState}
+			ok = true
+		}
+		s.Runs++
+		if !e.At.Before(s.LastSeen) {
+			s.LastSeen = e.At
+			s.EstablishedBy = e.EstablishedBy
+		}
+	}
+	return s, ok
+}
+
 // Close closes the backing file, if any.
 func (l *Log) Close() error {
 	l.mu.Lock()
