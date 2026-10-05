@@ -117,3 +117,46 @@ claude mcp add --transport stdio joltrin-a2a -- go run ./cmd/sop-a2a-bridge -age
 Only `DBMaintenanceWorkflow` is registered by the example binaries (`cmd/sop-mcp-server`, `cmd/sop-a2a-agent`) today; `ClusterTopologyWorkflow` and `LedgerTransferWorkflow` are available in `tools/runbookstore` (with tests in `tools/runbookstore/examples_test.go`) as worked examples of modeling the other two categories on the same engine. Register them with `store.RegisterWorkflow` in your own server to serve them.
 
 What this checker is, precisely, matters more than what it sounds like it might be: explicit-state safety and reachability checking over a finite workflow graph, the "P is preceded by Q" precedence pattern from Dwyer/Avrunin/Corbett's property specification patterns (ICSE 1999), not general-purpose LTL/CTL model checking. No formula parser, no Büchi automata, no neural component translating natural language into the graph today. The full accounting of what's built versus proposed is in the linked doc, not summarized rosily here.
+
+## Run the server with memory and your own runbooks
+
+### Let the server remember what blocked
+
+Register it with `--lessons` (it sets `SOP_LESSONS_DIR`, which Claude Code and Codex support; for the Gemini CLI set that variable in its settings file) and the server records each block once per run and tells the next agent when it connects. It also keeps a short `LESSONS.md` there that you can add to a `CLAUDE.md` (`@~/.joltrin/LESSONS.md`) or point an `AGENTS.md` at.
+
+```bash
+"$(go env GOPATH)/bin/sop-mcp-server" setup --apply --lessons "$HOME/.joltrin"
+```
+
+A blocked `execute_step` also carries the matching lesson in `lesson`, next to `why`, so the agent learns the reason and the order that worked at the moment it is refused. Agents can also ask for the full list with the `read_lessons` tool, which exists only while memory is on. That helps with clients that do not show a server's startup instructions to the model, which the Gemini CLI did not in my test.
+
+`read_lessons` also reports, per runbook, how many runs called `execute_step` and, for each rule, how many runs it blocked and how many of those went on to run every step it had blocked. A rule that blocks many runs and is usually recovered from is being hit early and then followed. A rule that blocks runs that rarely recover is stopping runs that never finished the step. The numbers show how often a rule trips and whether agents get past it, not whether the rule is right.
+
+It is off by default and advice only: the barrier still checks every call, so history never unlocks a step. Lessons name only steps and states from your runbook, and they expire after 30 days or when the runbook changes. Servers that share a folder all keep recording, but each one only sees what the others recorded after it restarts.
+
+### Use your own runbooks
+
+The built-in `db-maintenance` runbook is only an example. Describe your own steps in a JSON file and the barrier enforces them. A step requires states that other steps establish, and a safety rule forbids a state unless another one already holds:
+
+```json
+{
+  "workflows": {
+    "deploy": {
+      "steps": [
+        {"id": "run_tests",    "establishes": ["tests_passed"]},
+        {"id": "get_approval", "requires": ["tests_passed"], "establishes": ["approved"]},
+        {"id": "deploy_prod",  "requires": ["tests_passed", "approved"], "establishes": ["deployed"]}
+      ],
+      "safety": [{"name": "no-deploy-without-approval", "forbidden": "deployed", "requires": "approved"}]
+    }
+  }
+}
+```
+
+```bash
+"$(go env GOPATH)/bin/sop-mcp-server" setup --apply --runbooks "$PWD/runbooks.json"
+```
+
+With a file, the server serves exactly those runbooks. It refuses a file with a typo, such as an unknown field or a state that no step establishes, instead of quietly never blocking anything.
+
+What this catches: an agent that skips a required step, breaks a safety rule, or names a step that does not exist. What it does not do: judge whether an agent's own claim is true. That needs evidence from a tool the agent cannot fake, so it is not something a runbook file can add.
