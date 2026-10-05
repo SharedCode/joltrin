@@ -1,0 +1,62 @@
+name: Gemini Review Skip
+
+# When Gemini cannot review a PR (quota, outage, timeout, missing key), an
+# owner, member, or collaborator can comment "/gemini skip <reason>" to set
+# the "Gemini Review" status to success for the current head commit.
+#
+# A skip is refused when Gemini did review the commit and found issues. It
+# covers one commit: a new push clears it, like any other result. The reason
+# is recorded on the PR. This file never checks out PR code, and the comment
+# text is only passed through env, never interpolated into the script.
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  pull-requests: write
+  issues: write
+  statuses: write
+
+jobs:
+  skip:
+    if: >
+      github.event.issue.pull_request != null &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association) &&
+      startsWith(github.event.comment.body, '/gemini skip')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Set the status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.issue.number }}
+          WHO: ${{ github.event.comment.user.login }}
+          BODY: ${{ github.event.comment.body }}
+        run: |
+          reply() { gh pr comment "$PR" --repo "$REPO" --body "$1"; }
+
+          reason=$(printf '%s' "$BODY" | head -n1 | sed -E 's#^/gemini skip[[:space:]]*##' | cut -c1-80)
+          if [ -z "$reason" ]; then
+            reply "A skip needs a reason, for example: /gemini skip quota used up until tomorrow"
+            exit 1
+          fi
+
+          sha=$(gh api "repos/$REPO/pulls/$PR" --jq .head.sha)
+          current=$(gh api "repos/$REPO/commits/$sha/status" \
+            --jq '[.statuses[] | select(.context=="Gemini Review")][0] | "\(.state)|\(.description)"')
+          state=${current%%|*}
+          desc=${current#*|}
+
+          if [ "$state" = "success" ]; then
+            reply "Gemini Review already passed on $sha, nothing to skip."
+            exit 0
+          fi
+          if [ "$desc" = "Gemini found actionable issues" ]; then
+            reply "Gemini reviewed $sha and found issues, so it cannot be skipped. Fix them, or dispute with /gemini dispute and then /gemini review."
+            exit 1
+          fi
+
+          gh api "repos/$REPO/statuses/$sha" -f state=success -f context="Gemini Review" \
+            -f description="Skipped by @$WHO: $reason"
+          reply "Gemini Review skipped on $sha by @$WHO. Reason: $reason. A new push needs a fresh review or a new skip."
