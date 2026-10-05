@@ -116,6 +116,7 @@ type Log struct {
 	entries    []Entry
 	seen       map[key]struct{}
 	file       *os.File
+	path       string
 	ttl        time.Duration
 	maxEntries int
 	now        func() time.Time
@@ -157,6 +158,7 @@ func Open(path string, opts ...Option) (*Log, error) {
 		return nil, fmt.Errorf("blocklog: open %s: %w", path, err)
 	}
 	l.file = f
+	l.path = path
 	return l, nil
 }
 
@@ -264,6 +266,7 @@ func (l *Log) record(e Entry) (added bool, err error) {
 	if l.file == nil {
 		return true, nil
 	}
+	l.reopenIfReplaced()
 	b, err := json.Marshal(e)
 	if err != nil {
 		return true, fmt.Errorf("blocklog: encode entry: %w", err)
@@ -272,6 +275,25 @@ func (l *Log) record(e Entry) (added bool, err error) {
 		return true, fmt.Errorf("blocklog: write entry: %w", err)
 	}
 	return true, nil
+}
+
+// reopenIfReplaced reopens the file when another server compacted it, which
+// replaces the file at path and leaves this one writing to the old copy.
+func (l *Log) reopenIfReplaced() {
+	cur, err := os.Stat(l.path)
+	if err != nil {
+		return
+	}
+	held, err := l.file.Stat()
+	if err == nil && os.SameFile(held, cur) {
+		return
+	}
+	f, err := os.OpenFile(l.path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
+	if err != nil {
+		return
+	}
+	l.file.Close()
+	l.file = f
 }
 
 // RecordRun notes that a run (trace) called execute_step against workflow at

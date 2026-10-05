@@ -177,3 +177,45 @@ func TestRecordIsSafeForConcurrentUse(t *testing.T) {
 		t.Fatalf("want 10 distinct runs, got %+v", got)
 	}
 }
+
+func TestRecordSurvivesAnotherProcessCompactingTheFile(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "blocks.jsonl")
+	old := time.Now().Add(-90 * 24 * time.Hour)
+	stale := entry("stale", "drop_prod_db")
+	stale.At = old
+	seed, err := Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	seed.Record(stale)
+	seed.Close()
+
+	// A second server starts, finds the expired line, and replaces the file
+	// while the first still holds it open.
+	first, err := Open(path, WithClock(func() time.Time { return old }))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer first.Close()
+	second, err := Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer second.Close()
+
+	fresh := entry("run-1", "drop_prod_db")
+	fresh.At = time.Now()
+	if _, err := first.Record(fresh); err != nil {
+		t.Fatal(err)
+	}
+
+	reopened, err := Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer reopened.Close()
+	got := reopened.Summaries("db-maintenance", "v1")
+	if len(got) != 1 || got[0].Runs != 1 {
+		t.Fatalf("the first server's block was lost: %+v", got)
+	}
+}
