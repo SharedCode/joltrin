@@ -4,9 +4,9 @@
 
 # Joltrin
 
-**Durable memory and a verification barrier for AI agents, in one embedded Go library.**
+**Independent, deterministic verification for AI agent actions.**
 
-[joltrinhq.com](https://joltrinhq.com/) · [Technical demo](https://joltrinhq.com/) · [Arena](https://joltrinhq.com/arena/) · [Agent barrier](https://joltrinhq.com/agents/)
+[joltrinhq.com](https://joltrinhq.com/) · [Live barrier demo](https://joltrinhq.com/agents/) · [Docs](https://joltrinhq.com/docs/) · [Arena](https://joltrinhq.com/arena/)
 
 [![CI](https://github.com/SharedCode/joltrin/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/SharedCode/joltrin/actions/workflows/ci.yml)
 [![Go Tests](https://github.com/SharedCode/joltrin/actions/workflows/go.yml/badge.svg?event=push&branch=master)](https://github.com/SharedCode/joltrin/actions/workflows/go.yml)
@@ -17,11 +17,11 @@
 
 </div>
 
-Joltrin (formerly SOP) is an ACID-compliant B-Tree storage engine that runs inside your process. For AI agents it provides three things in one library: memory that survives a crash and can be resumed by another worker, vector search stored next to structured data in the same transaction, and a verification barrier that blocks a risky action until its preconditions are proven.
+Joltrin (formerly SOP) is an open-source Go library that checks an AI agent's action against the recorded trace before the action commits. The agent proposes. A separate verifier decides, using fixed preconditions and the steps the server has actually recorded. It does not use the agent's claims, its prompt context, its self-evaluation, or its confidence.
 
-**Who it is for.** Engineers building agent systems, edge or local-first apps, and teams running Redis, a queue, and Postgres only to keep one application's state durable.
+**The problem.** An agent can propose a destructive action and report success from its own context. If the same agent also judges the action safe, both judgments can fail for the same reason. That correlated failure is the production risk, and asking the agent to be careful does not remove it.
 
-**Why it matters.** An agent that can call tools needs more than a good prompt. It needs state that survives a failure and a check that runs before the action, not after. Joltrin puts both in the same process and the same transaction boundary, so there is no network hop and no separate service to operate.
+**What Joltrin does.** The agent emits intent. Joltrin checks the intent against the trace and the runbook's rules, outside the agent's context window. The check and the commit are one call, so a step is recorded only if it passed. A step whose required state is missing is refused. A claim that something happened is not evidence that it happened.
 
 <p align="center">
   <a href="https://youtu.be/F0jYkBHJluI">
@@ -29,25 +29,48 @@ Joltrin (formerly SOP) is an ACID-compliant B-Tree storage engine that runs insi
   </a>
 </p>
 
+## A blocked step, then the safe order
+
+A production database drop is blocked until the backup is taken and validated:
+
+```text
+drop_prod_db      blocked, backup_validated is missing
+validate_backup   blocked, backup_taken is missing
+take_backup       allowed
+validate_backup   allowed
+drop_prod_db      allowed
+```
+
+The blocked results are normal payloads, not exceptions, and they tell the agent what to do next:
+
+```json
+{
+  "blocked_by": "precondition",
+  "missing_state": "backup_validated",
+  "established_by_steps": ["validate_backup"]
+}
+```
+
+Read a block as a replan signal. Retrying the same call with different parameters will not change the answer. Repeated blocks also carry `attempts` and `next`, which says whether to run the establishing steps or stop and ask. With memory turned on, the server counts which rules block runs and how many of those runs recover, so you can see whether a rule is catching bad plans or is too strict.
+
 ## Try it in five minutes
 
 ```bash
 git clone https://github.com/sharedcode/joltrin.git && cd joltrin
-go run ./examples/quickstart      # ordered B-Tree with point, range, and descending scans
 ./scripts/demo.sh --barrier       # the barrier blocks a database drop until a backup is validated
-./scripts/demo.sh --memory        # an agent crashes mid-task and a peer resumes from the B-Tree
 ./scripts/demo.sh --team          # Jira, Grafana, AWS, and PagerDuty agents finish tasks behind the barrier
+go run ./examples/quickstart      # the embedded B-Tree that holds the state
 ```
 
-Or skip the install. These run entirely in your browser with no backend:
+Or skip the install. These run in your browser with no backend:
 
 | Live experience | What you do |
 | :--- | :--- |
+| [Agent barrier](https://joltrinhq.com/agents/) | Try to drop a database before the backup is validated and watch the barrier refuse. It runs the real checks, compiled to WebAssembly. |
 | [Technical demo](https://joltrinhq.com/) | Run ACID transactions, vector search, and an agent checkpoint resume on the WASM build of the engine. |
-| [Agent barrier](https://joltrinhq.com/agents/) | Try to drop a database before the backup is validated and watch the barrier refuse. |
 | [Arena](https://joltrinhq.com/arena/) | Crash storage nodes and spike load in a cluster simulation. It illustrates the concepts, it is not a live cluster. |
 
-## Test it with your own AI agent
+## Connect it to an MCP agent
 
 Any agent that supports MCP can use the barrier. You can download a binary of about 6 MB, or build it with Go.
 
@@ -76,17 +99,15 @@ go install github.com/sharedcode/joltrin/v5/cmd/sop-mcp-server@latest
 
 The first `go install` downloads the Go modules. If your Go is older than 1.26.8, Go also downloads that toolchain once, about 240 MB, so the first run takes a few minutes. Later installs are quick. The download above skips all of that.
 
-Then tell your agent: "Use the joltrin tools to run `drop_prod_db` on workflow `db-maintenance` with trace id `t1`." The server refuses until `take_backup` and `validate_backup` have run in that trace, whatever the agent claims. A recorded run with real agents, and what it does not prove, is in [docs/AGENT_BARRIER_TESTS.md](docs/AGENT_BARRIER_TESTS.md).
-
-Two limits to know. The `trace_id` names a run and the caller chooses it, so issue one per run in your integration. And the barrier only answers: whatever performs the real action has to wait for that answer, or an agent can skip it.
+Then tell your agent: "Use the joltrin tools to run `drop_prod_db` on workflow `db-maintenance` with trace id `t1`." The server refuses until `take_backup` and `validate_backup` have run in that trace, whatever the agent claims. A recorded run with real agents, and what it does not prove, is in [docs/AGENT_BARRIER_TESTS.md](docs/AGENT_BARRIER_TESTS.md). The same check also gates an A2A agent, described in [docs/AGENT_PROTOCOLS.md](docs/AGENT_PROTOCOLS.md).
 
 ### Memory and your own runbooks
 
 Add `--lessons <folder>` to `setup` and the server remembers what blocked in earlier runs and tells the next agent. Add `--runbooks <file>` and it enforces your own steps and safety rules from a JSON file instead of the example. Both are optional, and the barrier still checks every call. The details are in [Run the server with memory and your own runbooks](docs/AGENT_PROTOCOLS.md#run-the-server-with-memory-and-your-own-runbooks).
 
-## Agents that hand off work
+### Agents that hand off work
 
-Jira, Grafana, AWS, and PagerDuty agents hand off work, and every call passes three checks first: the tool is on that agent's allowlist, any claim matches evidence a tool returned, and the steps it depends on have committed (`verify`).
+Jira, Grafana, AWS, and PagerDuty agents hand off work, and every call passes three checks first: the tool is on that agent's allowlist, any claim matches evidence a tool returned, and the steps it depends on have committed (`verify`). The tools are stubs and the checks are real.
 
 <p align="center">
   <img src="docs/assets/agent-team-pagerduty.gif" alt="Terminal recording: PagerDuty, Grafana, and AWS agents resolve an incident while the barrier blocks a skipped step, a made-up number, and out-of-scope calls" width="900" />
@@ -94,33 +115,22 @@ Jira, Grafana, AWS, and PagerDuty agents hand off work, and every call passes th
 
 Run it with `./scripts/demo.sh --team`, or watch it replay on [joltrinhq.com](https://joltrinhq.com/#agent-team). When a step is blocked on order, the output includes a `result:` line: the structured block an MCP agent gets back from `execute_step`, with the rule, the missing state, and the steps that would establish it. The tools are stubs and the checks are real. Source: [examples/agent_team](examples/agent_team/main.go).
 
-## What is verified
+## What is verified, simulated, and not claimed
 
-- **Latency.** About 6.9 microseconds per B-Tree write or read, over 140,000 ops/sec with WAL logging, from the repo's own harness on a 2015 dual-core MacBook Pro. Reproduce it with `go run ./tools/benchmark`. Details and limits are in [docs/BENCHMARKS.md](docs/BENCHMARKS.md).
-- **Correctness.** The race detector runs on the core engine packages in CI, `govulncheck` runs on every push, and the build and unit tests run on Linux, macOS, and Windows.
-- **Agent safety.** `verify` is served over both MCP and A2A, and the same barrier compiles to WebAssembly for the browser demo. See [docs/AGENT_PROTOCOLS.md](docs/AGENT_PROTOCOLS.md).
-- **Packages.** Published on PyPI (`sop4py`) and NuGet (`Sop`), plus the Go module.
+| Status | What |
+| :--- | :--- |
+| Implemented, with tests | The check runs before commit. It uses trace state, not the agent's assertion. Blocked calls return structured results. MCP and A2A share one `verify` package, and the same package compiles to WebAssembly for the browser demo. |
+| Demonstrated | Recorded runs with real agents, on one runbook over MCP, in small samples. The write-up lists the limits. |
+| Simulated | The tools in the team demo, and the Arena. They show the checks and the concepts, not live systems. |
+| Not claimed | Production deployments, customers, third-party benchmarks, or scale. [docs/INVESTORS.md](docs/INVESTORS.md) lists what has and has not been proven. |
 
-There are no documented production deployments or paying customers yet, and no third-party benchmarks. [docs/INVESTORS.md](docs/INVESTORS.md) lists what has and has not been proven.
+**Limits.** The barrier only answers, so whatever performs the real action has to wait for that answer, or an agent can skip it. The `trace_id` names a run and the caller chooses it, so issue one per run. The barrier cannot see facts the trace does not contain. A backup in another cloud account has to be represented by a step you trust, such as one that checks that account and records the result. The barrier does not judge whether an agent's own claim is true. A dry-run mode, where blocked calls are logged and allowed so teams can tune rules before enforcing them, is a possible direction and is not implemented.
 
-## How it works
+## The engine underneath
 
-```
-  Application
-       |
-       |  one in-process call
-       v
-+----------------------------------------------------------+
-| Joltrin engine                                           |
-|  copy-on-write B-Tree      WAL + two-phase commit (ACID) |
-|  vector similarity search  Reed-Solomon erasure coding   |
-|  swarm task coordination   verify barrier (MCP, A2A)  |
-+----------------------------------------------------------+
-```
+The verifier sits on an embedded, ACID-compliant B-Tree storage engine, so the trace and the agent's state share one transaction boundary. The same library gives you crash-safe agent memory that another worker can resume, vector search stored next to structured data, Reed-Solomon erasure coding, and swarm task coordination. It is for engineers building agent systems or local-first apps, and for teams running Redis, a queue, and Postgres only to keep one application's state durable. Benchmarks, with their limits, are in [docs/BENCHMARKS.md](docs/BENCHMARKS.md). The long version is in [docs/WHY_JOLTRIN.md](docs/WHY_JOLTRIN.md) and [docs/SOP_ARCHITECTURE_WHITEPAPER.md](docs/SOP_ARCHITECTURE_WHITEPAPER.md).
 
-Storage, queues, and coordination share one transaction boundary. If a worker dies, its uncommitted work rolls back and another worker takes the task. The long version is in [docs/WHY_JOLTRIN.md](docs/WHY_JOLTRIN.md) and [docs/SOP_ARCHITECTURE_WHITEPAPER.md](docs/SOP_ARCHITECTURE_WHITEPAPER.md).
-
-## Install
+## Install the library
 
 | Language | Command |
 | :--- | :--- |
@@ -129,7 +139,7 @@ Storage, queues, and coordination share one transaction boundary. If a worker di
 | C# | `dotnet add package Sop` |
 | Container | `docker run ghcr.io/sharedcode/joltrin-quickstart:stable` |
 
-Java and Rust bindings exist in the repo and are not published yet. Version pinning, the naming note about the old SOP names, and the full package list are in [docs/PACKAGES.md](docs/PACKAGES.md).
+Java and Rust bindings exist in the repo and are not published yet. Version pinning, the note on the old SOP package names, and the full list are in [docs/PACKAGES.md](docs/PACKAGES.md).
 
 ## Open core and plans
 
@@ -137,8 +147,9 @@ The engine, vector search, agent memory, and the verification barrier are MIT li
 
 ## Documentation
 
-- Start here: [What is Joltrin](docs/WHAT_IS_SOP.md), [Getting started](docs/GETTING_STARTED.md), [Examples](docs/EXAMPLES.md)
-- Concepts: [Why Joltrin](docs/WHY_JOLTRIN.md), [Architecture](docs/SOP_ARCHITECTURE_WHITEPAPER.md), [Agent protocols](docs/AGENT_PROTOCOLS.md), [Scalability](docs/SCALABILITY.md)
+- The barrier: [Agent protocols (MCP, A2A, memory, runbooks)](docs/AGENT_PROTOCOLS.md), [Barrier test results](docs/AGENT_BARRIER_TESTS.md), [Verification engine](docs/MCP_A2A_AND_VERIFICATION_ENGINE.md)
+- Start here: [Getting started](docs/GETTING_STARTED.md), [Examples](docs/EXAMPLES.md), [What is Joltrin](docs/WHAT_IS_SOP.md)
+- Concepts: [Why Joltrin](docs/WHY_JOLTRIN.md), [Architecture](docs/SOP_ARCHITECTURE_WHITEPAPER.md), [Scalability](docs/SCALABILITY.md)
 - Operating it: [Operations and failover](docs/OPERATIONS.md), [Data Manager and tools](docs/SOP_PLATFORM_TOOLS.md), [Azure deployment](infra/azure/README.md), [Kubernetes with Argo CD](deploy/aks/README.md)
 - Reference: [Benchmarks](docs/BENCHMARKS.md), [Live demos](docs/LIVE_DEMOS.md), [Roadmap and platform support](docs/ROADMAP.md), [Who it is for](docs/WHO_IS_IT_FOR.md), [Investor notes](docs/INVESTORS.md)
 
