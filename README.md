@@ -76,50 +76,13 @@ go install github.com/sharedcode/joltrin/v5/cmd/sop-mcp-server@latest
 
 The first `go install` downloads the Go modules. If your Go is older than 1.26.8, Go also downloads that toolchain once, about 240 MB, so the first run takes a few minutes. Later installs are quick. The download above skips all of that.
 
-Then tell your agent: "Use the joltrin tools to run `drop_prod_db` on workflow `db-maintenance` with trace id `t1`." The server refuses until `take_backup` and `validate_backup` have run in that trace, whatever the agent claims. A bare `sop-mcp-server` fails with "Executable not found" when its folder is not on the `PATH` your agent starts with, which is why `setup` registers the full path. A recorded run with real agents, and what it does not prove, is in [docs/AGENT_BARRIER_TESTS.md](docs/AGENT_BARRIER_TESTS.md).
+Then tell your agent: "Use the joltrin tools to run `drop_prod_db` on workflow `db-maintenance` with trace id `t1`." The server refuses until `take_backup` and `validate_backup` have run in that trace, whatever the agent claims. A recorded run with real agents, and what it does not prove, is in [docs/AGENT_BARRIER_TESTS.md](docs/AGENT_BARRIER_TESTS.md).
 
 Two limits to know. The `trace_id` names a run and the caller chooses it, so issue one per run in your integration. And the barrier only answers: whatever performs the real action has to wait for that answer, or an agent can skip it.
 
-### Let the server remember what blocked
+### Memory and your own runbooks
 
-Register it with `--lessons` (it sets `SOP_LESSONS_DIR`, which Claude Code and Codex support; for the Gemini CLI set that variable in its settings file) and the server records each block once per run and tells the next agent when it connects. It also keeps a short `LESSONS.md` there that you can add to a `CLAUDE.md` (`@~/.joltrin/LESSONS.md`) or point an `AGENTS.md` at.
-
-```bash
-"$(go env GOPATH)/bin/sop-mcp-server" setup --apply --lessons "$HOME/.joltrin"
-```
-
-Agents can also ask for the same list with the `read_lessons` tool, which exists only while memory is on. That helps with clients that do not show a server's startup instructions to the model, which the Gemini CLI did not in my test.
-
-`read_lessons` also reports, per runbook, how many runs called `execute_step` and, for each rule, how many runs it blocked and how many of those went on to run every step it had blocked. A rule that blocks many runs and is usually recovered from is being hit early and then followed. A rule that blocks runs that rarely recover is stopping runs that never finished the step. The numbers show how often a rule trips and whether agents get past it, not whether the rule is right.
-
-It is off by default and advice only: the barrier still checks every call, so history never unlocks a step. Lessons name only steps and states from your runbook, and they expire after 30 days or when the runbook changes. Use one server process per folder.
-
-### Use your own runbooks
-
-The built-in `db-maintenance` runbook is only an example. Describe your own steps in a JSON file and the barrier enforces them. A step requires states that other steps establish, and a safety rule forbids a state unless another one already holds:
-
-```json
-{
-  "workflows": {
-    "deploy": {
-      "steps": [
-        {"id": "run_tests",    "establishes": ["tests_passed"]},
-        {"id": "get_approval", "requires": ["tests_passed"], "establishes": ["approved"]},
-        {"id": "deploy_prod",  "requires": ["tests_passed", "approved"], "establishes": ["deployed"]}
-      ],
-      "safety": [{"name": "no-deploy-without-approval", "forbidden": "deployed", "requires": "approved"}]
-    }
-  }
-}
-```
-
-```bash
-"$(go env GOPATH)/bin/sop-mcp-server" setup --apply --runbooks "$PWD/runbooks.json"
-```
-
-With a file, the server serves exactly those runbooks. It refuses a file with a typo, such as an unknown field or a state that no step establishes, instead of quietly never blocking anything.
-
-What this catches: an agent that skips a required step, breaks a safety rule, or names a step that does not exist. What it does not do: judge whether an agent's own claim is true. That needs evidence from a tool the agent cannot fake, so it is not something a runbook file can add.
+Add `--lessons <folder>` to `setup` and the server remembers what blocked in earlier runs and tells the next agent. Add `--runbooks <file>` and it enforces your own steps and safety rules from a JSON file instead of the example. Both are optional, and the barrier still checks every call. The details are in [Run the server with memory and your own runbooks](docs/AGENT_PROTOCOLS.md#run-the-server-with-memory-and-your-own-runbooks).
 
 ## Agents that hand off work
 
@@ -170,31 +133,22 @@ Java and Rust bindings exist in the repo and are not published yet. Version pinn
 
 ## Open core and plans
 
-The engine, vector search, agent memory, and the verification barrier are MIT licensed and stay free. Paid tiers add governance on top:
-
-- **Pro, $49 per team per month.** Policy-as-code, tamper-evident audit lineage, team workspaces. Billing runs through Stripe Checkout when a server is configured for it, otherwise it runs in simulation mode.
-- **Enterprise, contact sales.** SSO, compliance exports, and custom policy rules. Use the contact form on [joltrinhq.com](https://joltrinhq.com/#enterprise).
-
-Tier details and the Stripe setup are in [docs/MONETIZATION_AND_TIERS.md](docs/MONETIZATION_AND_TIERS.md).
+The engine, vector search, agent memory, and the verification barrier are MIT licensed and stay free. Paid tiers (Pro, and Enterprise on request) add governance on top. Prices and setup are in [docs/MONETIZATION_AND_TIERS.md](docs/MONETIZATION_AND_TIERS.md).
 
 ## Documentation
 
 - Start here: [What is Joltrin](docs/WHAT_IS_SOP.md), [Getting started](docs/GETTING_STARTED.md), [Examples](docs/EXAMPLES.md)
 - Concepts: [Why Joltrin](docs/WHY_JOLTRIN.md), [Architecture](docs/SOP_ARCHITECTURE_WHITEPAPER.md), [Agent protocols](docs/AGENT_PROTOCOLS.md), [Scalability](docs/SCALABILITY.md)
-- Operating it: [Operations and failover](docs/OPERATIONS.md), [Data Manager and tools](docs/SOP_PLATFORM_TOOLS.md), [Azure deployment](infra/azure/README.md)
+- Operating it: [Operations and failover](docs/OPERATIONS.md), [Data Manager and tools](docs/SOP_PLATFORM_TOOLS.md), [Azure deployment](infra/azure/README.md), [Kubernetes with Argo CD](deploy/aks/README.md)
 - Reference: [Benchmarks](docs/BENCHMARKS.md), [Live demos](docs/LIVE_DEMOS.md), [Roadmap and platform support](docs/ROADMAP.md), [Who it is for](docs/WHO_IS_IT_FOR.md), [Investor notes](docs/INVESTORS.md)
 
 ## Contributing
 
 Run `go test ./...` and `gofmt` before opening a pull request, and include tests with your change. See [CONTRIBUTING.md](.github/CONTRIBUTING.md) and [SECURITY.md](.github/SECURITY.md). Questions and ideas go to [GitHub Discussions](https://github.com/SharedCode/joltrin/discussions).
 
-## Kubernetes and GitOps
-
-[`deploy/aks`](deploy/aks/README.md) runs the Data Manager on AKS with Argo CD syncing from this repo, one replica on a persistent volume, with a recorded run covering deploy, data surviving a pod delete, and self-heal. Production stays on Azure Container Apps.
-
 ## Releases
 
-See the [changelog](CHANGELOG.md) and the [releases page](https://github.com/SharedCode/joltrin/releases). Maintainers cut releases with [RELEASE_PROCESS.md](RELEASE_PROCESS.md) and the short version in [docs/PACKAGES.md](docs/PACKAGES.md).
+See the [changelog](CHANGELOG.md) and the [releases page](https://github.com/SharedCode/joltrin/releases). Maintainers cut releases with [RELEASE_PROCESS.md](RELEASE_PROCESS.md).
 
 <p align="center">
   <sub>MIT License. Built by <a href="https://github.com/sharedcode">SharedCode</a>.</sub>
