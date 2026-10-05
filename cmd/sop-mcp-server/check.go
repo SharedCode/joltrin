@@ -1,9 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 	"sort"
 	"strings"
 
@@ -19,17 +19,82 @@ func loadRunbooks(path string) (*runbookstore.Store, []string, error) {
 	return store, names, err
 }
 
+// checkResult is the machine-readable form of "check --json".
+type checkResult struct {
+	Valid     bool            `json:"valid"`
+	File      string          `json:"file"`
+	Error     string          `json:"error,omitempty"`
+	Workflows []checkWorkflow `json:"workflows,omitempty"`
+}
+
+type checkWorkflow struct {
+	Name         string       `json:"name"`
+	Steps        []checkStep  `json:"steps"`
+	Safety       []checkRule  `json:"safety"`
+	Reachability []checkReach `json:"reachability"`
+}
+
+type checkStep struct {
+	ID          string   `json:"id"`
+	Requires    []string `json:"requires"`
+	Establishes []string `json:"establishes"`
+}
+
+type checkRule struct {
+	Name      string `json:"name"`
+	Forbidden string `json:"forbidden"`
+	Requires  string `json:"requires"`
+}
+
+type checkReach struct {
+	Name   string `json:"name"`
+	Target string `json:"target"`
+}
+
+const checkUsage = "usage: sop-mcp-server check [--json] <runbooks.json>\n"
+
 // runCheck implements "sop-mcp-server check <file>": it loads the file and
-// prints what the barrier will enforce. It returns the process exit code.
+// prints what the barrier will enforce. With --json it prints the same as one
+// JSON document, including the error for a file that does not load, so a script
+// can read the reason. It returns the process exit code.
 func runCheck(args []string, out, errw io.Writer) int {
+	if isHelp(args) {
+		fmt.Fprint(out, checkUsage)
+		return 0
+	}
+	args, asJSON := popFlag(args, "--json")
 	if len(args) != 1 {
-		fmt.Fprintln(errw, "usage: sop-mcp-server check <runbooks.json>")
+		fmt.Fprint(errw, checkUsage)
 		return 2
 	}
 	store, names, err := loadRunbooks(args[0])
 	if err != nil {
-		fmt.Fprintln(errw, "check:", err)
+		if asJSON {
+			writeJSON(out, checkResult{Valid: false, File: args[0], Error: err.Error()})
+		} else {
+			fmt.Fprintln(errw, "check:", err)
+		}
 		return 1
+	}
+
+	if asJSON {
+		res := checkResult{Valid: true, File: args[0]}
+		for _, name := range names {
+			wf, _ := store.Workflow(name)
+			cw := checkWorkflow{Name: name, Steps: []checkStep{}, Safety: []checkRule{}, Reachability: []checkReach{}}
+			for _, s := range orderedSteps(wf) {
+				cw.Steps = append(cw.Steps, checkStep{ID: string(s.ID), Requires: sortedStates(s.Requires), Establishes: sortedStates(s.Establishes)})
+			}
+			for _, r := range wf.Safety {
+				cw.Safety = append(cw.Safety, checkRule{Name: r.Name, Forbidden: string(r.Forbidden), Requires: string(r.Requires)})
+			}
+			for _, r := range wf.Reachability {
+				cw.Reachability = append(cw.Reachability, checkReach{Name: r.Name, Target: string(r.Target)})
+			}
+			res.Workflows = append(res.Workflows, cw)
+		}
+		writeJSON(out, res)
+		return 0
 	}
 
 	noun := "workflows"
@@ -51,6 +116,23 @@ func runCheck(args []string, out, errw io.Writer) int {
 		}
 	}
 	return 0
+}
+
+// sortedStates returns states as sorted strings, never nil, so the JSON shows
+// an empty list rather than null.
+func sortedStates(in []verify.State) []string {
+	out := make([]string, len(in))
+	for i, st := range in {
+		out[i] = string(st)
+	}
+	sort.Strings(out)
+	return out
+}
+
+func writeJSON(w io.Writer, v any) {
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	_ = enc.Encode(v)
 }
 
 // orderedSteps lists the steps that need nothing first, then the rest, each
@@ -80,9 +162,4 @@ func needs(s verify.Step) string {
 	}
 	sort.Strings(req)
 	return "needs " + strings.Join(req, ", ")
-}
-
-// checkMain wires runCheck to the real streams.
-func checkMain(args []string) int {
-	return runCheck(args, os.Stdout, os.Stderr)
 }
