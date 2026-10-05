@@ -199,12 +199,19 @@ func executeStepHandler(store *runbookstore.Store, cfg *config) server.ToolHandl
 		if !errors.As(err, &v) {
 			return unknownStepResult(wf, name, stepID), nil
 		}
+		blocked := blockReason(wf, v)
+		// The lesson comes from runs before this one, so it is read before
+		// this block is recorded. A repeat inside one run has the next
+		// field already and gets no lesson.
+		if v.Attempts <= 1 {
+			blocked.Lesson = cfg.lessonFor(name, stepID, wf, v)
+		}
 		if !replayed {
 			cfg.recordBlock(store, name, traceID, stepID, wf, v)
 		}
 		res := ExecuteStepResult{
 			Executed: false,
-			Blocked:  blockReason(wf, v),
+			Blocked:  blocked,
 			Replayed: replayed,
 		}
 		if replayed {
@@ -227,6 +234,7 @@ func blockReason(wf *verify.Workflow, v *verify.Violation) *BlockReason {
 		BlockedBy:     v.Rule,
 		MissingState:  v.MissingState,
 		Message:       v.Message,
+		Why:           wf.WhyBlocked(v),
 		EstablishedBy: wf.StepsThatEstablish(v.MissingState),
 		Attempts:      v.Attempts,
 		Next:          wf.NextAction(v),

@@ -158,6 +158,7 @@ func (e *Executor) Execute(ctx context.Context, reqCtx *a2asrv.RequestContext, q
 					"established_by_steps": establishedIDs,
 					"attempts":             v.Attempts,
 					"next":                 wf.NextAction(v),
+					"why":                  wf.WhyBlocked(v),
 					"replayed":             replayed,
 				}},
 			))

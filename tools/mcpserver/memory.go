@@ -105,6 +105,21 @@ func (c *config) recordRecovery(workflow, traceID, step string, wf *verify.Workf
 	_, _ = c.log.RecordRecovery(workflow, workflowVersion(wf), shortID(traceID), verify.StepID(step))
 }
 
+// lessonFor is what earlier runs learned about this block, or "" when memory is
+// off or no earlier run was blocked the same way. It matches the step, the rule
+// and the missing state.
+func (c *config) lessonFor(workflow, step string, wf *verify.Workflow, v *verify.Violation) string {
+	if c.log == nil {
+		return ""
+	}
+	for _, s := range c.log.Summaries(workflow, workflowVersion(wf)) {
+		if string(s.Step) == step && s.BlockedBy == v.Rule && s.MissingState == v.MissingState {
+			return strings.TrimPrefix(lessonLine(workflow, wf, s), "- ")
+		}
+	}
+	return ""
+}
+
 func (c *config) writeLessons(store *runbookstore.Store) {
 	if c.log == nil || c.lessonsPath == "" {
 		return
