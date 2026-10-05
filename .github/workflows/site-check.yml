@@ -1,0 +1,58 @@
+name: Site Check
+
+# Builds the site the way the Pages deploy does and fails if any file a page
+# names (video, poster, image, script) is missing from it. The deploy once
+# published a homepage whose video files were never copied, and the local
+# tests did not notice because they assemble the site a different way.
+on:
+  pull_request:
+    paths:
+      - 'demo/**'
+      - 'demo-agents/**'
+      - 'docs/**'
+      - 'sop-arena/**'
+      - 'scripts/assemble-site.sh'
+      - '.github/workflows/deploy-demo.yml'
+      - '.github/workflows/site-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  site-assembles:
+    name: Site assembles with every referenced file
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Build the WebAssembly demos
+        shell: bash
+        run: |
+          set -euo pipefail
+          GOROOT="$(go env GOROOT)"
+          src="${GOROOT}/lib/wasm/wasm_exec.js"
+          [ -f "$src" ] || src="${GOROOT}/misc/wasm/wasm_exec.js"
+          cp "$src" demo/wasm_exec.js
+          cp "$src" demo-agents/wasm_exec.js
+          (cd demo && GOOS=js GOARCH=wasm go build -ldflags="-s -w" -o sop.wasm .)
+          (cd demo-agents && GOOS=js GOARCH=wasm go build -ldflags="-s -w" -o sop-agents.wasm .)
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'sop-arena/package-lock.json'
+
+      - name: Build SOP Arena
+        working-directory: ./sop-arena
+        run: |
+          npm ci || npm install
+          npm run build
+
+      - name: Assemble the site and check every referenced file
+        run: scripts/assemble-site.sh _site
