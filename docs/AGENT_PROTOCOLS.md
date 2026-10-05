@@ -162,3 +162,35 @@ Run `sop-mcp-server check runbooks.json` first to see what the file enforces, or
 With a file, the server serves exactly those runbooks. It refuses a file with a typo, such as an unknown field or a state that no step establishes, instead of quietly never blocking anything.
 
 What this catches: an agent that skips a required step, breaks a safety rule, or names a step that does not exist. What it does not do: judge whether an agent's own claim is true. That needs evidence from a tool the agent cannot fake, so it is not something a runbook file can add.
+
+## Command reference
+
+`sop-mcp-server help` prints this list. With no arguments it serves MCP over stdio, which is how an agent launches it.
+
+| Command | What it does |
+| :--- | :--- |
+| `sop-mcp-server` (or `stdio`, `serve`) | Serve the barrier over MCP on stdin and stdout. |
+| `sop-mcp-server setup [--apply] [--lessons DIR] [--runbooks FILE]` | Print, or with `--apply` run, the commands that register the server with Claude Code, Codex and the Gemini CLI by its full path. It can be run again. A runbook file that does not load is refused. |
+| `sop-mcp-server check [--json] FILE` | Load a runbook file and show what it enforces, or why it does not load. `--json` prints one JSON document, including the error when the file is invalid. |
+| `sop-mcp-server demo [--json]` | Watch the barrier block a database drop until a backup is validated. It needs no agent. `--json` prints each decision. |
+| `sop-mcp-server version` | Print the version. A published binary reports its release tag, and a build from a working copy reports `dev`. |
+| `sop-mcp-server help` | Print the commands. |
+
+Environment variables: `SOP_RUNBOOKS` serves your own runbooks instead of the example, and `SOP_LESSONS_DIR` turns on memory of earlier blocks. `JOLTRIN_DEMO_PAUSE` sets the pause between steps in `go run ./examples/verify_barrier` (`0` removes it).
+
+Exit codes are the same everywhere: 0 for success, 1 for a failure, and 2 for a usage error such as an unknown command. An unknown command no longer starts a server.
+
+`sop-a2a-agent`, `sop-a2a-bridge` and `sop-daemon` list their flags with `-h`. `sop-a2a-agent` listens on loopback unless you set `-addr`, and `-token` requires a shared secret.
+
+## Troubleshooting
+
+- **"Executable not found" in the agent.** The agent was registered with a bare `sop-mcp-server` that is not on the `PATH` it starts with. Run `setup --apply` from the installed binary, which registers its full path.
+- **The tools do not show up after `setup --apply`.** Restart the agent, or reconnect the server from its MCP menu. `claude mcp list`, `codex mcp list` and `gemini mcp list` show what is registered.
+- **`setup --apply` says a CLI failed.** The CLI's own message is shown under the failure. Run `setup` without `--apply` to see the exact commands and run them yourself.
+- **The server exits when the agent starts it.** Run it by hand: `sop-mcp-server` prints the reason on stderr. The usual cause is a runbook file that does not load, so run `sop-mcp-server check runbooks.json`.
+- **A block you did not expect.** The result names the rule, the missing state and the steps that establish it. `sop-mcp-server check` shows the runbook's steps and what each needs.
+- **Memory is on but there are no lessons.** Lessons appear once a block has been recorded for the current runbook. A runbook that has changed starts fresh, and entries expire after 30 days.
+- **A call is refused for an id that is too long.** `trace_id`, `idempotency_key`, workflow and step names are limited to 256 bytes.
+- **The first `go install` takes minutes.** It downloads the Go modules, and a Go older than 1.26.8 also downloads a toolchain. The prebuilt binary skips both: see the install command in the README.
+- **Windows.** Use the `.exe` from the release page and run `setup --apply` from the folder you keep it in, because it registers that path.
+

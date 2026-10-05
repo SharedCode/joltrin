@@ -34,6 +34,9 @@ Thank you for your interest in contributing to Joltrin (formerly SOP, Scalable O
             export SOP_RUN_INCFS_IT=1
             go test -v -tags=integration -count=1 ./incfs/integrationtests/...
             ```
+    *   **Race detector and benchmarks**: `go test -race ./verify/... ./tools/... ./cmd/...` and `go test -run xxx -bench . -benchmem ./verify ./tools/mcpserver ./tools/blocklog`. Compare benchmark numbers before and after a change that touches a hot path, and say so in the pull request.
+    *   **Site tests**: `npm ci`, then `scripts/build-site.sh` and `npx playwright test --project=chromium`. The site is the files under `demo/`, `demo-agents/`, `docs/` and `sop-arena/`.
+    *   **The homepage demo video** is built from the real `sop-mcp-server` by `scripts/promo/build.sh`, which needs Go, Node with Playwright's Chromium, and ffmpeg. Rebuild it when the demo command's output changes.
     *   Ensure all tests pass before submitting your PR.
 
 ## Code Structure & Guidelines
