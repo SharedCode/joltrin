@@ -15,12 +15,12 @@ THE FRAGMENTED MULTI-COMPONENT STACK (Without Joltrin):
 
 [ Application ]
        │
-       ├──► (TCP Hop 1: 5-15ms)  ──► Redis (Distributed Locks & Leases)
-       ├──► (TCP Hop 2: 5-15ms)  ──► RabbitMQ / Kafka (Task Queue)
-       ├──► (TCP Hop 3: 10-30ms) ──► PostgreSQL / Cassandra (Persistent Storage)
+       ├──► (TCP hop 1)        ──► Redis (Distributed Locks & Leases)
+       ├──► (TCP hop 2)        ──► RabbitMQ / Kafka (Task Queue)
+       ├──► (TCP hop 3)        ──► PostgreSQL / Cassandra (Persistent Storage)
        └──► (Failover Glue)      ──► ZooKeeper / Custom Retry & Outbox Daemons
 
- 4 infrastructure boundaries | Estimated 15-50ms network latency tax | High split-brain failure risk | High maintenance overhead
+ 4 infrastructure boundaries | Network round trip to each service | High split-brain failure risk | High maintenance overhead
 ```
 
 When an application worker crashes between releasing a lock in Redis and committing to PostgreSQL, state can enter an inconsistent split-brain condition. Engineering teams end up spending substantial time writing and maintaining outbox listeners, lock renewers, and compensating retry logic.
@@ -34,7 +34,7 @@ THE UNIFIED DATA & COMPUTE PLATFORM (With Joltrin):
 
 [ Application ]
        │
-       └──► (Embedded In-Process Call: < 0.3ms latency)
+       └──► (Embedded In-Process Call: no network hop)
             ┌─────────────────────────────────────────────────────────────┐
             │                        JOLTRIN ENGINE                       │
             │  • Persistent B-Tree Storage (Sector-aligned Direct I/O)    │

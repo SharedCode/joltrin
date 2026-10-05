@@ -1,20 +1,20 @@
-# What is SOP, in plain words
+# What is Joltrin, in plain words
 
-**SOP stores your application's data and keeps it correct, without you running a database server.**
+**Joltrin stores your application's data and keeps it correct, without you running a database server.**
 
 ## The problem
 
 Most software needs three things: a place to keep data, a guarantee the data never ends up half-written, and a way to grow from one machine to many. Today that usually means operating a separate database (Postgres, Cassandra, etc.), plus caching, plus replication. Each piece costs money and people.
 
-## What SOP does instead
+## What Joltrin does instead
 
-SOP is a library you compile into your program. Your app gets:
+Joltrin is a library you compile into your program. Your app gets:
 
 1. **A sorted filing cabinet (B-Tree).** Data stays in order, so "find this record" and "give me everything between A and B" are both fast.
 2. **All-or-nothing saves (ACID transactions).** A crash mid-write never leaves half-updated data.
-3. **Fault tolerance without full copies (erasure coding).** Traditional systems keep 3 full copies of your data. SOP stores math-derived fragments that can rebuild lost pieces, using roughly half the disk.
+3. **Fault tolerance without full copies (erasure coding).** Traditional systems keep 3 full copies of your data. Joltrin stores math-derived fragments that can rebuild lost pieces, using roughly half the disk.
 4. **Grow-as-you-go (swarm computing).** The same program that runs on one laptop can join a cluster and share the work. No rewrite.
-5. **Use it from your language.** The engine is written in Go; Python and C# packages exist today, Java and Rust are in progress.
+5. **Use it from your language.** The engine is written in Go; Python and C# packages are published. Java and Rust bindings are in the repo and not published yet.
 
 ## Who it's for
 
