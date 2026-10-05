@@ -102,6 +102,12 @@ func runSetup(args []string, out, errw io.Writer, exe string,
 		env = append(env, "SOP_LESSONS_DIR="+*lessons)
 	}
 	if *runbooks != "" {
+		// A file the server cannot load would be registered and then exit every
+		// time an agent starts it, so it is refused here with the reason.
+		if _, _, err := loadRunbooks(*runbooks); err != nil {
+			fmt.Fprintln(errw, "setup:", err)
+			return 1
+		}
 		path := *runbooks
 		if abs, err := filepath.Abs(path); err == nil {
 			path = abs // an agent starts the server from any folder
