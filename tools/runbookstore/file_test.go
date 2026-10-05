@@ -174,3 +174,26 @@ func TestLoadFile(t *testing.T) {
 		t.Errorf("the error should name the file, got %v", err)
 	}
 }
+
+func TestLoad_RefusesBadRunbooks(t *testing.T) {
+	good := `{"workflows":{"a":{"steps":[{"id":"x","establishes":["s"]}]}}}`
+	cases := map[string]struct{ in, want string }{
+		"trailing document": {good + `{"workflows":{"b":{"steps":[{"id":"y"}]}}}`, "after the runbook"},
+		"duplicate rule": {`{"workflows":{"a":{"steps":[{"id":"x","establishes":["s","t"]}],"safety":[` +
+			`{"name":"r","forbidden":"s","requires":"t"},{"name":"r","forbidden":"t","requires":"s"}]}}}`, "twice"},
+		"step needs its own state": {`{"workflows":{"a":{"steps":[{"id":"x","requires":["s"],"establishes":["s"]}]}}}`, "only that step"},
+		"too large":                {`{"workflows":{"a":{"steps":[{"id":"` + strings.Repeat("x", 5<<20) + `"}]}}}`, "larger than"},
+	}
+	for name, c := range cases {
+		t.Run(name, func(t *testing.T) {
+			store := New()
+			_, err := Load(store, strings.NewReader(c.in))
+			if err == nil || !strings.Contains(err.Error(), c.want) {
+				t.Fatalf("err = %v, want it to mention %q", err, c.want)
+			}
+			if len(store.WorkflowNames()) != 0 {
+				t.Fatalf("registered %v despite the error", store.WorkflowNames())
+			}
+		})
+	}
+}
