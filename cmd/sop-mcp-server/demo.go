@@ -76,7 +76,10 @@ func runDemoArgs(args []string, out, errw io.Writer) int {
 		return 1
 	}
 	if asJSON {
-		writeJSON(out, res)
+		if err := writeJSON(out, res); err != nil {
+			fmt.Fprintln(errw, "demo: could not write the result:", err)
+			return 1
+		}
 		return 0
 	}
 	for i, s := range res.Steps {
@@ -96,6 +99,3 @@ func runDemoArgs(args []string, out, errw io.Writer) int {
 	fmt.Fprintf(out, "\ntrace: %v\n", res.Trace)
 	return 0
 }
-
-// runDemo is the text form, kept for tests.
-func runDemo(out io.Writer) int { return runDemoArgs(nil, out, io.Discard) }

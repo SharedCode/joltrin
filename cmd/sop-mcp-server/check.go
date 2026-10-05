@@ -70,10 +70,10 @@ func runCheck(args []string, out, errw io.Writer) int {
 	store, names, err := loadRunbooks(args[0])
 	if err != nil {
 		if asJSON {
-			writeJSON(out, checkResult{Valid: false, File: args[0], Error: err.Error()})
-		} else {
-			fmt.Fprintln(errw, "check:", err)
+			emitJSON(out, errw, checkResult{Valid: false, File: args[0], Error: err.Error()}, 1)
+			return 1
 		}
+		fmt.Fprintln(errw, "check:", err)
 		return 1
 	}
 
@@ -93,8 +93,7 @@ func runCheck(args []string, out, errw io.Writer) int {
 			}
 			res.Workflows = append(res.Workflows, cw)
 		}
-		writeJSON(out, res)
-		return 0
+		return emitJSON(out, errw, res, 0)
 	}
 
 	noun := "workflows"
@@ -129,10 +128,22 @@ func sortedStates(in []verify.State) []string {
 	return out
 }
 
-func writeJSON(w io.Writer, v any) {
+// writeJSON writes v as indented JSON and returns the write error, so a closed
+// pipe or a full disk is a failed command and not silent, truncated output.
+func writeJSON(w io.Writer, v any) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
-	_ = enc.Encode(v)
+	return enc.Encode(v)
+}
+
+// emitJSON is writeJSON for a command: it reports a write failure on errw and
+// turns it into the exit code. ok is the code to return when the write works.
+func emitJSON(out, errw io.Writer, v any, ok int) int {
+	if err := writeJSON(out, v); err != nil {
+		fmt.Fprintln(errw, "check: could not write the result:", err)
+		return 1
+	}
+	return ok
 }
 
 // orderedSteps lists the steps that need nothing first, then the rest, each
