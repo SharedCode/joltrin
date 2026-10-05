@@ -1756,6 +1756,7 @@
       // Start the engine first so a slow icon CDN cannot hold it up.
       initWasmEngine();
       if (window.lucide) lucide.createIcons();
+      else console.error('Lucide icon library failed to load from unpkg.com; icons will not render.');
     });
 
     // WASM Engine Initializer
