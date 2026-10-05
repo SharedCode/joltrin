@@ -266,7 +266,9 @@ func (l *Log) record(e Entry) (added bool, err error) {
 	if l.file == nil {
 		return true, nil
 	}
-	l.reopenIfReplaced()
+	if err := l.reopenIfReplaced(); err != nil {
+		return true, err
+	}
 	b, err := json.Marshal(e)
 	if err != nil {
 		return true, fmt.Errorf("blocklog: encode entry: %w", err)
@@ -278,22 +280,24 @@ func (l *Log) record(e Entry) (added bool, err error) {
 }
 
 // reopenIfReplaced reopens the file when another server compacted it, which
-// replaces the file at path and leaves this one writing to the old copy.
-func (l *Log) reopenIfReplaced() {
+// replaces the file at path and leaves this one writing to the old copy. It is
+// called with l.mu held.
+func (l *Log) reopenIfReplaced() error {
 	cur, err := os.Stat(l.path)
 	if err != nil {
-		return
+		return nil // gone or unreadable: the write below reports it
 	}
 	held, err := l.file.Stat()
 	if err == nil && os.SameFile(held, cur) {
-		return
+		return nil
 	}
 	f, err := os.OpenFile(l.path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
 	if err != nil {
-		return
+		return fmt.Errorf("blocklog: reopen %s: %w", l.path, err)
 	}
 	l.file.Close()
 	l.file = f
+	return nil
 }
 
 // RecordRun notes that a run (trace) called execute_step against workflow at
