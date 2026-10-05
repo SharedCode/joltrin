@@ -1,10 +1,13 @@
 package blocklog
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/sharedcode/joltrin/v5/verify"
 )
 
 const (
@@ -133,5 +136,34 @@ func TestStatsIgnoreExpiredEntries(t *testing.T) {
 	now = now.Add(2 * time.Hour)
 	if st := l.Stats(wf, ver); st.Runs != 0 || len(st.Rules) != 0 {
 		t.Errorf("expired entries must not count: %+v", st)
+	}
+}
+
+// Summary must agree with the matching row of Summaries, which is what the
+// lessons are built from.
+func TestSummaryMatchesTheRowInSummaries(t *testing.T) {
+	l := New()
+	for i := 0; i < 40; i++ {
+		e := entry(fmt.Sprintf("run-%d", i), verify.StepID(fmt.Sprintf("step_%d", i%3)))
+		e.MissingState = verify.State(fmt.Sprintf("state_%d", i%2))
+		if _, err := l.Record(e); err != nil {
+			t.Fatal(err)
+		}
+	}
+	rows := l.Summaries("db-maintenance", "v1")
+	if len(rows) == 0 {
+		t.Fatal("no rows")
+	}
+	for _, want := range rows {
+		got, ok := l.Summary("db-maintenance", "v1", want.Step, want.BlockedBy, want.MissingState)
+		if !ok || got.Runs != want.Runs || !got.LastSeen.Equal(want.LastSeen) || fmt.Sprint(got.EstablishedBy) != fmt.Sprint(want.EstablishedBy) {
+			t.Errorf("Summary(%s,%s,%s) = %+v, %v; Summaries has %+v", want.Step, want.BlockedBy, want.MissingState, got, ok, want)
+		}
+	}
+	if _, ok := l.Summary("db-maintenance", "v1", "no_such_step", "precondition", "x"); ok {
+		t.Error("a block that was never recorded must not be found")
+	}
+	if _, ok := l.Summary("db-maintenance", "other-version", rows[0].Step, rows[0].BlockedBy, rows[0].MissingState); ok {
+		t.Error("another runbook version must not match")
 	}
 }
