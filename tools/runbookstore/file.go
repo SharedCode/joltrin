@@ -34,6 +34,8 @@ import (
 // produces is almost always a typo, and it would leave a step that can never
 // run or a rule that never applies, so the file is refused instead.
 
+const maxFileBytes = 4 << 20
+
 type fileStep struct {
 	ID          string   `json:"id"`
 	Requires    []string `json:"requires"`
@@ -80,15 +82,21 @@ func LoadFile(store *Store, path string) ([]string, error) {
 // all or nothing: if any runbook is invalid, none is registered. Unknown fields
 // are errors, so a misspelled key is caught instead of ignored.
 func Load(store *Store, r io.Reader) ([]string, error) {
-	raw, err := io.ReadAll(io.LimitReader(r, 4<<20))
+	raw, err := io.ReadAll(io.LimitReader(r, maxFileBytes+1))
 	if err != nil {
 		return nil, fmt.Errorf("runbooks: %w", err)
+	}
+	if len(raw) > maxFileBytes {
+		return nil, fmt.Errorf("runbooks: the file is larger than %d MB", maxFileBytes>>20)
 	}
 	dec := json.NewDecoder(bytes.NewReader(raw))
 	dec.DisallowUnknownFields()
 	var doc fileDoc
 	if err := dec.Decode(&doc); err != nil {
 		return nil, fmt.Errorf("runbooks: invalid JSON: %w", err)
+	}
+	if dec.More() {
+		return nil, fmt.Errorf("runbooks: unexpected content after the runbook, put every workflow in one document")
 	}
 	if len(doc.Workflows) == 0 {
 		return nil, fmt.Errorf(`runbooks: no workflows found, expected {"workflows": {"name": {"steps": [...]}}}`)
@@ -128,6 +136,7 @@ func buildWorkflow(name string, w fileWorkflow) (*verify.Workflow, error) {
 	}
 
 	established := map[string]bool{}
+	establishers := map[string]map[string]bool{}
 	steps := make([]verify.Step, 0, len(w.Steps))
 	for i, s := range w.Steps {
 		if strings.TrimSpace(s.ID) == "" {
@@ -146,6 +155,10 @@ func buildWorkflow(name string, w fileWorkflow) (*verify.Workflow, error) {
 			}
 			step.Establishes = append(step.Establishes, verify.State(st))
 			established[st] = true
+			if establishers[st] == nil {
+				establishers[st] = map[string]bool{}
+			}
+			establishers[st][s.ID] = true
 		}
 		steps = append(steps, step)
 	}
@@ -155,14 +168,22 @@ func buildWorkflow(name string, w fileWorkflow) (*verify.Workflow, error) {
 			if !established[st] {
 				return nil, fmt.Errorf("step %q requires state %q, but no step establishes it, so the step could never run", s.ID, st)
 			}
+			if len(establishers[st]) == 1 && establishers[st][s.ID] {
+				return nil, fmt.Errorf("step %q requires state %q, but only that step establishes it, so the step could never run", s.ID, st)
+			}
 		}
 	}
 
 	rules := make([]verify.SafetyRule, 0, len(w.Safety))
+	ruleNames := map[string]bool{}
 	for i, r := range w.Safety {
 		if strings.TrimSpace(r.Name) == "" {
 			return nil, fmt.Errorf("safety rule %d has no name", i+1)
 		}
+		if ruleNames[r.Name] {
+			return nil, fmt.Errorf("safety rule %q is defined twice, a block would not say which one fired", r.Name)
+		}
+		ruleNames[r.Name] = true
 		if r.Forbidden == "" || r.Requires == "" {
 			return nil, fmt.Errorf("safety rule %q needs both forbidden and requires", r.Name)
 		}
