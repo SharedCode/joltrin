@@ -395,6 +395,22 @@ const (
 )
 
 // NextAction tells a caller what to do about a block: NextRunEstablishingSteps
+// WhyBlocked says what the failed check protects, so a caller learns the
+// reason and not only the refusal. A precondition is a state an earlier step
+// must establish. A safety rule names the state it keeps out of reach until
+// its required state holds.
+func (w *Workflow) WhyBlocked(v *Violation) string {
+	if v.Rule == "precondition" {
+		return fmt.Sprintf("This step builds on work an earlier step must do first. State %q has not been established in this run, so running it now would act on something that never happened.", v.MissingState)
+	}
+	for _, r := range w.Safety {
+		if r.Name == v.Rule {
+			return fmt.Sprintf("Safety rule %q exists so that state %q is never reached unless state %q is established first. It is not established in this run.", r.Name, r.Forbidden, r.Requires)
+		}
+	}
+	return fmt.Sprintf("Safety rule %q blocked this step until state %q is established.", v.Rule, v.MissingState)
+}
+
 // when a step can establish the missing state, NextStopAndAsk when none can.
 func (w *Workflow) NextAction(v *Violation) string {
 	if len(w.StepsThatEstablish(v.MissingState)) > 0 {

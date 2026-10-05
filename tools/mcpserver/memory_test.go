@@ -15,6 +15,7 @@ import (
 
 	"github.com/sharedcode/joltrin/v5/tools/blocklog"
 	"github.com/sharedcode/joltrin/v5/tools/runbookstore"
+	"github.com/sharedcode/joltrin/v5/verify"
 )
 
 // connect starts a server with the given memory options and returns the client
@@ -419,5 +420,53 @@ func TestReplayedCallsDoNotCountAsExtraRuns(t *testing.T) {
 	execute(t, c, "run-a", "take_backup", "same")
 	if got := readLessons(t, c, nil).Stats[0].Runs; got != 1 {
 		t.Errorf("Runs = %d, want 1", got)
+	}
+}
+
+func TestBlockExplainsWhyAndCarriesTheLessonFromEarlierRuns(t *testing.T) {
+	c, _ := connect(t, WithMemory(blocklog.New(), ""))
+
+	first := execute(t, c, "run-1", "drop_prod_db", "").Blocked
+	if first == nil || first.Why == "" {
+		t.Fatalf("a block must say why it exists, got %+v", first)
+	}
+	if !strings.Contains(first.Why, "backup_validated") {
+		t.Errorf("Why should name the missing state: %q", first.Why)
+	}
+	if first.Lesson != "" {
+		t.Errorf("nothing came before, so there is no lesson yet: %q", first.Lesson)
+	}
+
+	// The same run retrying is not an earlier run.
+	if again := execute(t, c, "run-1", "drop_prod_db", "").Blocked; again.Lesson != "" {
+		t.Errorf("a retry in the same run got a lesson: %q", again.Lesson)
+	}
+
+	second := execute(t, c, "run-2", "drop_prod_db", "").Blocked
+	if !strings.Contains(second.Lesson, "before drop_prod_db, run take_backup, then validate_backup") ||
+		!strings.Contains(second.Lesson, "1 run") {
+		t.Errorf("Lesson = %q", second.Lesson)
+	}
+}
+
+func TestBlockHasNoLessonWhenMemoryIsOff(t *testing.T) {
+	c, _ := connect(t)
+	execute(t, c, "run-1", "drop_prod_db", "")
+	b := execute(t, c, "run-2", "drop_prod_db", "").Blocked
+	if b.Lesson != "" {
+		t.Errorf("memory is off but Lesson = %q", b.Lesson)
+	}
+	if b.Why == "" {
+		t.Error("Why must be present with memory off too")
+	}
+}
+
+func TestWhyNamesTheSafetyRuleAndWhatItProtects(t *testing.T) {
+	wf := dbMaintenanceWorkflow(t)
+	got := blockReason(wf, &verify.Violation{Rule: "no-drop-without-validated-backup", MissingState: "backup_validated"})
+	for _, want := range []string{"no-drop-without-validated-backup", "prod_db_dropped", "backup_validated"} {
+		if !strings.Contains(got.Why, want) {
+			t.Errorf("Why = %q, missing %q", got.Why, want)
+		}
 	}
 }

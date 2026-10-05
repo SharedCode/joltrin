@@ -32,6 +32,13 @@ type BlockReason struct {
 	// Message is the human-readable form of the same fact, for logging or
 	// display; agents should branch on the fields above, not parse this.
 	Message string `json:"message" jsonschema_description:"Human-readable explanation of the block."`
+	// Why explains what the check protects, so an agent learns the reason and
+	// not only the refusal. It is built from the runbook, never from anything
+	// an agent sent.
+	Why string `json:"why,omitempty" jsonschema_description:"Why this check exists: what it protects and what has to be true first. Read it, it is the reason for the block."`
+	// Lesson is what earlier runs learned about this same block, when the
+	// server's memory is on and an earlier run was blocked here too.
+	Lesson string `json:"lesson,omitempty" jsonschema_description:"Present when the server remembers earlier runs blocked here: how many, and the order that worked. Advisory."`
 	// EstablishedBy lists every registered step whose Establishes includes
 	// MissingState, so the caller has a concrete next action rather than
 	// just the name of a gap. Empty if no step in this workflow establishes
