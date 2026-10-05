@@ -117,6 +117,7 @@ type Log struct {
 	seen       map[key]struct{}
 	file       *os.File
 	path       string
+	compactErr error
 	ttl        time.Duration
 	maxEntries int
 	now        func() time.Time
@@ -149,9 +150,11 @@ func Open(path string, opts ...Option) (*Log, error) {
 		return nil, err
 	}
 	if dropped {
-		if err := l.rewrite(path); err != nil {
-			return nil, err
-		}
+		// Compaction is best effort. Windows refuses to replace a file another
+		// process has open, and the next start tries again. The failure is
+		// kept so the caller can say so, because a file that cannot be
+		// compacted keeps growing.
+		l.compactErr = l.rewrite(path)
 	}
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
 	if err != nil {
@@ -473,6 +476,15 @@ func (l *Log) Summaries(workflow, version string) []Summary {
 		return a.MissingState < b.MissingState
 	})
 	return out
+}
+
+// CompactionError reports why the file could not be compacted when it was
+// opened, or nil. Entries that expired are still left out of every summary, but
+// they stay on disk until a later start compacts the file.
+func (l *Log) CompactionError() error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.compactErr
 }
 
 // Close closes the backing file, if any.
