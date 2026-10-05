@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 // setup registers this binary with an agent. It uses the binary's own full
@@ -21,6 +22,11 @@ type agentCLI struct {
 	// args builds the registration command. env is a list of KEY=VALUE pairs for
 	// the server and may be empty.
 	args func(exe string, env []string) []string
+	// remove, if set, is the command that drops an existing registration. It
+	// runs first and its failure is ignored, because the first run has nothing
+	// to remove. Without it, running setup again fails on a CLI that refuses to
+	// add a server that already exists.
+	remove []string
 }
 
 var agentCLIs = []agentCLI{
@@ -30,19 +36,19 @@ var agentCLIs = []agentCLI{
 			a = append(a, "-e", kv)
 		}
 		return append(a, "--", exe)
-	}},
+	}, []string{"mcp", "remove", "--scope", "user", "joltrin"}},
 	{"Codex", "codex", func(exe string, env []string) []string {
 		a := []string{"mcp", "add", "joltrin"}
 		for _, kv := range env {
 			a = append(a, "--env", kv)
 		}
 		return append(a, "--", exe)
-	}},
+	}, nil},
 	// The Gemini CLI takes its environment as a repeated option that can swallow
 	// the arguments after it, so the server's settings go in its settings file.
 	{"Gemini CLI", "gemini", func(exe string, _ []string) []string {
 		return []string{"mcp", "add", "--scope", "user", "joltrin", exe}
-	}},
+	}, nil},
 }
 
 // shellQuote leaves a plain path alone and single-quotes anything else.
@@ -116,19 +122,42 @@ func runSetup(args []string, out, errw io.Writer, exe string,
 		return 0
 	}
 
-	failed, registered := false, 0
-	for _, a := range agentCLIs {
+	// Each CLI takes a second or more to start, so they run at the same time.
+	// The report is written afterwards, in a fixed order.
+	type outcome struct {
+		skipped bool
+		err     error
+	}
+	outcomes := make([]outcome, len(agentCLIs))
+	var wg sync.WaitGroup
+	for i, a := range agentCLIs {
 		if _, err := lookPath(a.cli); err != nil {
+			outcomes[i].skipped = true
+			continue
+		}
+		wg.Add(1)
+		go func(i int, a agentCLI) {
+			defer wg.Done()
+			if a.remove != nil {
+				_ = run(a.cli, a.remove...)
+			}
+			outcomes[i].err = run(a.cli, a.args(exe, env)...)
+		}(i, a)
+	}
+	wg.Wait()
+
+	failed, registered := false, 0
+	for i, a := range agentCLIs {
+		switch o := outcomes[i]; {
+		case o.skipped:
 			fmt.Fprintf(out, "  %-12s %s is not installed here, skipped\n", a.name, a.cli)
-			continue
-		}
-		if err := run(a.cli, a.args(exe, env)...); err != nil {
-			fmt.Fprintf(out, "  %-12s failed: %v\n", a.name, err)
+		case o.err != nil:
+			fmt.Fprintf(out, "  %-12s failed: %v\n", a.name, o.err)
 			failed = true
-			continue
+		default:
+			fmt.Fprintf(out, "  %-12s registered\n", a.name)
+			registered++
 		}
-		fmt.Fprintf(out, "  %-12s registered\n", a.name)
-		registered++
 	}
 	switch {
 	case failed:
@@ -154,10 +183,16 @@ func setupMain(args []string) int {
 		fmt.Fprintln(os.Stderr, "setup: cannot find this binary's path:", err)
 		return 1
 	}
+	// The CLIs run at the same time, so their output is held back and shown
+	// only when one fails. On success each of them just repeats "added".
 	run := func(name string, args ...string) error {
-		cmd := exec.Command(name, args...)
-		cmd.Stdout, cmd.Stderr = os.Stderr, os.Stderr
-		return cmd.Run()
+		b, err := exec.Command(name, args...).CombinedOutput()
+		if err != nil {
+			if msg := strings.TrimSpace(string(b)); msg != "" {
+				return fmt.Errorf("%w: %s", err, msg)
+			}
+		}
+		return err
 	}
 	return runSetup(args, os.Stdout, os.Stderr, exe, exec.LookPath, run)
 }

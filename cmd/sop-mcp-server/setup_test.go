@@ -6,13 +6,24 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
+	"time"
 )
 
 type recorder struct {
+	mu    sync.Mutex
 	have  map[string]bool // CLIs that "exist"
 	calls [][]string
 	fail  map[string]error
+	// removeFails makes every "mcp remove" fail, as it does when nothing is
+	// registered yet.
+	removeFails bool
+	// barrier, when set, makes each add wait until that many adds are in flight
+	// at once, so a serial run times out.
+	barrier  int
+	inFlight int
+	cond     *sync.Cond
 }
 
 func (r *recorder) lookPath(name string) (string, error) {
@@ -23,7 +34,33 @@ func (r *recorder) lookPath(name string) (string, error) {
 }
 
 func (r *recorder) run(name string, args ...string) error {
+	r.mu.Lock()
 	r.calls = append(r.calls, append([]string{name}, args...))
+	r.mu.Unlock()
+	if len(args) > 1 && args[1] == "remove" {
+		if r.removeFails {
+			return errors.New("no such server")
+		}
+		return nil
+	}
+	if r.barrier > 0 {
+		r.mu.Lock()
+		if r.cond == nil {
+			r.cond = sync.NewCond(&r.mu)
+		}
+		r.inFlight++
+		r.cond.Broadcast()
+		deadline := time.AfterFunc(2*time.Second, func() { r.mu.Lock(); r.barrier = -1; r.cond.Broadcast(); r.mu.Unlock() })
+		for r.inFlight < r.barrier && r.barrier > 0 {
+			r.cond.Wait()
+		}
+		timedOut := r.barrier < 0
+		r.mu.Unlock()
+		deadline.Stop()
+		if timedOut {
+			return errors.New("the registrations ran one after another")
+		}
+	}
 	return r.fail[name]
 }
 
@@ -80,12 +117,16 @@ func TestSetupApplyRegistersOnlyTheAgentsFound(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("exit %d, output:\n%s", code, out)
 	}
-	if len(rec.calls) != 1 || rec.calls[0][0] != "claude" {
-		t.Fatalf("want exactly one call, to claude, got %v", rec.calls)
+	if len(rec.calls) != 2 || rec.calls[0][0] != "claude" || rec.calls[1][0] != "claude" {
+		t.Fatalf("want a remove then an add, both to claude, got %v", rec.calls)
+	}
+	remove := []string{"claude", "mcp", "remove", "--scope", "user", "joltrin"}
+	if strings.Join(rec.calls[0], " ") != strings.Join(remove, " ") {
+		t.Errorf("first call = %v, want %v", rec.calls[0], remove)
 	}
 	want := []string{"claude", "mcp", "add", "--scope", "user", "joltrin", "--", "/bin/sop-mcp-server"}
-	if strings.Join(rec.calls[0], " ") != strings.Join(want, " ") {
-		t.Errorf("call = %v, want %v", rec.calls[0], want)
+	if strings.Join(rec.calls[1], " ") != strings.Join(want, " ") {
+		t.Errorf("second call = %v, want %v", rec.calls[1], want)
 	}
 	if !strings.Contains(out, "registered") || !strings.Contains(out, "codex is not installed here, skipped") {
 		t.Errorf("unexpected output:\n%s", out)
@@ -101,7 +142,7 @@ func TestSetupApplyReportsAFailureAndExitsNonZero(t *testing.T) {
 	if !strings.Contains(out, "failed: boom") {
 		t.Errorf("the failure should be shown:\n%s", out)
 	}
-	if len(rec.calls) != 2 {
+	if len(rec.calls) != 3 { // claude remove and add, then codex add
 		t.Errorf("a failure must not stop the other agents, calls = %v", rec.calls)
 	}
 }
@@ -192,4 +233,26 @@ func readRepoFile(t *testing.T, rel string) string {
 		t.Fatal(err)
 	}
 	return string(b)
+}
+
+func TestSetupApplyCanBeRunAgain(t *testing.T) {
+	// Nothing is registered yet, so the remove fails. That must not matter.
+	rec := &recorder{have: map[string]bool{"claude": true}, removeFails: true}
+	code, out, _ := setup(t, "/bin/sop-mcp-server", rec, "--apply")
+	if code != 0 || !strings.Contains(out, "registered") {
+		t.Fatalf("exit %d, output:\n%s", code, out)
+	}
+}
+
+func TestSetupApplyRegistersAgentsAtTheSameTime(t *testing.T) {
+	rec := &recorder{have: map[string]bool{"claude": true, "codex": true, "gemini": true}, barrier: 3}
+	code, out, _ := setup(t, "/bin/sop-mcp-server", rec, "--apply")
+	if code != 0 {
+		t.Fatalf("exit %d, output:\n%s", code, out)
+	}
+	// The report keeps a fixed order however the registrations finish.
+	c, x, g := strings.Index(out, "Claude Code"), strings.Index(out, "Codex"), strings.Index(out, "Gemini CLI")
+	if !(c >= 0 && c < x && x < g) {
+		t.Errorf("the report is out of order:\n%s", out)
+	}
 }

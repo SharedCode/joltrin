@@ -7,11 +7,22 @@
 # It downloads the latest release binary, checks its SHA-256 against the
 # release's checksum file, and puts it in ~/.joltrin/bin. It does not use sudo.
 #
+#   JOLTRIN_VERSION=TAG  install that release instead of the latest, e.g. v5.11.0
 #   JOLTRIN_NO_SETUP=1   install only, do not register with any agent
 #   JOLTRIN_BIN_DIR=DIR  install somewhere other than ~/.joltrin/bin
+#
+# Trust: the script, the binary and the checksum file all come from the same
+# GitHub release, so the checksum catches a damaged or swapped download but not
+# a compromised release. Read this script first, pin a version, or build from
+# source if that matters to you.
 set -eu
 
-base=${JOLTRIN_BASE_URL:-https://github.com/SharedCode/joltrin/releases/latest/download}
+if [ -n "${JOLTRIN_VERSION:-}" ]; then
+  default_base=https://github.com/SharedCode/joltrin/releases/download/$JOLTRIN_VERSION
+else
+  default_base=https://github.com/SharedCode/joltrin/releases/latest/download
+fi
+base=${JOLTRIN_BASE_URL:-$default_base}
 dest=${JOLTRIN_BIN_DIR:-$HOME/.joltrin/bin}
 
 fail() { echo "install: $*" >&2; exit 1; }
