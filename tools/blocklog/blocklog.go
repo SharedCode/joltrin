@@ -149,9 +149,9 @@ func Open(path string, opts ...Option) (*Log, error) {
 		return nil, err
 	}
 	if dropped {
-		if err := l.rewrite(path); err != nil {
-			return nil, err
-		}
+		// Compaction is best effort. Windows refuses to replace a file another
+		// process has open, and the next start tries again.
+		_ = l.rewrite(path)
 	}
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
 	if err != nil {

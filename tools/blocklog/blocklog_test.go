@@ -3,6 +3,7 @@ package blocklog
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"testing"
@@ -179,6 +180,9 @@ func TestRecordIsSafeForConcurrentUse(t *testing.T) {
 }
 
 func TestRecordSurvivesAnotherProcessCompactingTheFile(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Windows does not let a file be replaced while another process has it open, so there is no compaction to survive")
+	}
 	path := filepath.Join(t.TempDir(), "blocks.jsonl")
 	old := time.Now().Add(-90 * 24 * time.Hour)
 	stale := entry("stale", "drop_prod_db")
@@ -217,5 +221,30 @@ func TestRecordSurvivesAnotherProcessCompactingTheFile(t *testing.T) {
 	got := reopened.Summaries("db-maintenance", "v1")
 	if len(got) != 1 || got[0].Runs != 1 {
 		t.Fatalf("the first server's block was lost: %+v", got)
+	}
+}
+
+func TestOpenSucceedsWhenTheFileCannotBeCompacted(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "blocks.jsonl")
+	stale := entry("stale", "drop_prod_db")
+	stale.At = time.Now().Add(-90 * 24 * time.Hour)
+	seed, err := Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	seed.Record(stale)
+	seed.Close()
+
+	// A directory in the way makes the replacement fail on every platform.
+	if err := os.Mkdir(path+".tmp", 0o700); err != nil {
+		t.Fatal(err)
+	}
+	l, err := Open(path)
+	if err != nil {
+		t.Fatalf("a failed compaction must not stop the server starting: %v", err)
+	}
+	defer l.Close()
+	if got := l.Summaries("db-maintenance", "v1"); len(got) != 0 {
+		t.Errorf("the expired entry still counts: %+v", got)
 	}
 }
