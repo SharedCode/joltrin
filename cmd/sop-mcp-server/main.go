@@ -9,6 +9,9 @@
 // Code, Codex, and the Gemini CLI by its full path, or "setup --apply" to run
 // them for the agents installed on this machine.
 //
+// Run "sop-mcp-server demo" to watch the barrier block a database drop until a
+// backup is validated, with no agent and no Go needed.
+//
 // Set SOP_RUNBOOKS to a JSON file to serve your own runbooks instead of the
 // example. See runbookstore.LoadFile for the format. Run
 // "sop-mcp-server check runbooks.json" to see what a file enforces, or why it
@@ -65,6 +68,12 @@ func main() {
 	// the barrier will enforce, without starting a server.
 	if len(os.Args) > 1 && os.Args[1] == "check" {
 		os.Exit(checkMain(os.Args[2:]))
+	}
+
+	// "sop-mcp-server demo" shows the barrier blocking a database drop until a
+	// backup is validated. It needs no agent and finishes at once.
+	if len(os.Args) > 1 && os.Args[1] == "demo" {
+		os.Exit(demoMain())
 	}
 
 	store, names, err := newStore(os.Getenv("SOP_RUNBOOKS"))
