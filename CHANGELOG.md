@@ -1,5 +1,16 @@
 # Changelog
 
+## v5.11.0
+
+- A blocked `execute_step` result now says why the check exists (`why`: what it protects, built from the runbook, also in the A2A `input-required` message). With memory on it also carries `lesson`, what earlier runs learned about the same block, read before the current block is recorded so it only covers earlier runs.
+- One-line install: `curl -fsSL https://raw.githubusercontent.com/SharedCode/joltrin/master/scripts/install.sh | sh` downloads the right `sop-mcp-server` binary for macOS or Linux, checks its checksum, installs it in `~/.joltrin/bin`, and registers it with the agent CLIs found. `JOLTRIN_VERSION` pins a release and `JOLTRIN_NO_SETUP=1` skips registering. The binaries now have signed build provenance, and `JOLTRIN_VERIFY=1` makes the installer verify it with `gh attestation verify`, which does not depend on the checksum file.
+- `sop-mcp-server setup --apply` can be run again. It failed for Claude Code on a second run because that CLI refuses to add a server that already exists. It now registers the agents at the same time, about three times faster, and shows each CLI's own output only when a registration fails.
+- `sop-mcp-server check runbooks.json` loads a runbook file and prints what the barrier will enforce, or the reason the file does not load. `setup --runbooks` runs the same check and refuses a file the server could not start with, which it used to register without complaint.
+- `sop-mcp-server demo` shows the barrier blocking a database drop until a backup is validated, from the downloaded binary, with no Go and no agent. The `verify_barrier` example waits 150 ms between steps instead of 700 ms, and `JOLTRIN_DEMO_PAUSE` sets another delay.
+- The runbook loader refuses more mistakes: a second JSON document after the first, two safety rules with the same name, a step that requires a state only that step establishes, and a file over 4 MB, which used to fail with "unexpected EOF".
+- The block log keeps recording when another server process compacts the shared file, which used to send its writes to a deleted file. A compaction that cannot be done, which Windows refuses while another process holds the file, no longer stops the server starting, and the server says so at startup.
+- The homepage, the docs landing page and the README now lead with independent verification of agent actions. The homepage loads about twice as fast, the download names in the getting-started docs are fixed, and the quickstart commands no longer need a clone.
+
 ## v5.10.0
 
 - `sop-mcp-server setup` prints the commands that register the server with Claude Code, Codex, and the Gemini CLI using its own full path, and `setup --apply` runs them for the agent CLIs found on this machine. A bare `sop-mcp-server` fails with "Executable not found" when Go's bin folder is not on the PATH the agent starts with. `--lessons` and `--runbooks` set the memory folder and the runbook file for Claude Code and Codex.
