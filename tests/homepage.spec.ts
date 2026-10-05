@@ -26,8 +26,9 @@ test.describe('Homepage', () => {
   test('hero shows the blocked then allowed sequence', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const ex = page.locator('#hero-example');
-    await expect(ex).toContainText('backup_validated');
-    await expect(ex.getByText('BLOCKED')).toHaveCount(1);
+    await expect(ex).toContainText('backup_validated missing');
+    await expect(ex).toContainText('backup_taken missing');
+    await expect(ex.getByText('BLOCKED')).toHaveCount(2);
     await expect(ex.getByText('ALLOWED')).toHaveCount(3);
   });
 
@@ -58,68 +59,13 @@ test.describe('Homepage', () => {
     }
   });
 
-  test('the demo video is in the hero, silent, with a poster, and loads nothing until the page has', async ({ page }) => {
-    // Record what the video element looks like when the document has parsed,
-    // which is before the page's load event.
-    await page.addInitScript(() => {
-      document.addEventListener('DOMContentLoaded', () => {
-        const v = document.getElementById('demo-video-el');
-        (window as any).__videoAtParse = { src: v?.getAttribute('src'), preload: v?.getAttribute('preload') };
-      });
-    });
-    await page.goto('/', { waitUntil: 'load' });
-    const video = page.locator('#demo-video video');
-    await expect(video).toHaveCount(1);
-    await expect(video).toHaveJSProperty('muted', true);
-    await expect(video).toHaveAttribute('playsinline', '');
-    await expect(video).toHaveAttribute('preload', 'none');
-    await expect(video).toHaveAttribute('poster', /joltrin-barrier-poster-540\.jpg/);
-    await expect(video).toHaveAttribute('aria-label', /43 second demo/);
-    const atParse = await page.evaluate(() => (window as any).__videoAtParse);
-    expect(atParse, 'the video must not have a source when the document is parsed').toEqual({ src: null, preload: 'none' });
-    // It is part of the hero: above the first content section, not buried below it.
-    const videoY = (await video.boundingBox())!.y;
-    const barrierY = (await page.locator('#verification-barrier').boundingBox())!.y;
-    expect(videoY).toBeLessThan(barrierY);
-  });
-
-  test('the demo video plays when it is on screen and has a working Pause and Play button', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'load' });
-    const video = page.locator('#demo-video-el');
-    const toggle = page.locator('#demo-video-toggle');
-    // On a phone the video sits below the headline, so it starts once scrolled to.
-    await video.scrollIntoViewIfNeeded();
-    await expect.poll(() => video.evaluate((v: HTMLVideoElement) => !v.paused), { timeout: 15000 }).toBe(true);
-    await expect(toggle).toContainText('Pause');
-    await toggle.click();
-    await expect.poll(() => video.evaluate((v: HTMLVideoElement) => v.paused)).toBe(true);
-    await expect(toggle).toContainText('Play');
-    await expect(toggle).toHaveAttribute('aria-label', /Play the demo video/);
-  });
-
-  test('a visitor who prefers reduced motion gets the poster and no autoplay', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/', { waitUntil: 'load' });
-    await page.waitForTimeout(1500);
-    const video = page.locator('#demo-video-el');
-    await expect(video).toHaveJSProperty('paused', true);
-    expect(await video.getAttribute('src')).toBeNull();
-    // They can still start it.
-    await page.locator('#demo-video-toggle').click();
-    await expect.poll(() => video.evaluate((v: HTMLVideoElement) => !v.paused), { timeout: 15000 }).toBe(true);
-  });
-
-  test('the video files and posters the page names all exist and are small', async ({ request }) => {
-    const sizes: Record<string, number> = {
-      '/assets/joltrin-barrier.mp4': 2_500_000,
-      '/assets/joltrin-barrier-720.mp4': 1_500_000,
-      '/assets/joltrin-barrier-poster-540.jpg': 80_000,
-    };
-    for (const [url, max] of Object.entries(sizes)) {
-      const res = await request.get(url);
-      expect(res.status(), url).toBe(200);
-      expect((await res.body()).length, `${url} should stay under ${max} bytes`).toBeLessThan(max);
-    }
+  test('intro video sits below the hero and autoplays muted', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const frame = page.locator('iframe[title="Joltrin intro video"]');
+    await expect(frame).toHaveAttribute('src', /youtube-nocookie\.com\/embed\/F0jYkBHJluI\?.*autoplay=1.*mute=1/);
+    const frameY = (await frame.boundingBox())!.y;
+    const heroY = (await page.getByRole('heading', { level: 1 }).boundingBox())!.y;
+    expect(frameY).toBeGreaterThan(heroY);
   });
 
   test('header has a Watch demo button that jumps to the video', async ({ page }) => {
@@ -127,7 +73,7 @@ test.describe('Homepage', () => {
     const btn = page.locator('#watch-demo-btn');
     await expect(btn).toBeVisible();
     await expect(btn).toHaveAttribute('href', '#demo-video');
-    await expect(page.locator('#demo-video video')).toHaveCount(1);
+    await expect(page.locator('#demo-video iframe')).toHaveCount(1);
   });
 
   test('explains how to test the barrier with your own AI agent', async ({ page }) => {
