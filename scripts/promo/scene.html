@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Joltrin demo scene</title>
+<style>
+  :root {
+    --bg: #07090e; --card: #0b0f17; --line: #22304e; --text: #e2e8f0; --mute: #94a3b8; --dim: #64748b;
+    --green: #34d399; --red: #fb7185; --cyan: #22d3ee; --violet: #a78bfa;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1080px; background: var(--bg); overflow: hidden; }
+  #stage { position: relative; width: 1080px; height: 1080px; font-family: var(--sans); color: var(--text);
+    background:
+      radial-gradient(900px 600px at 85% -10%, rgba(16,185,129,.16), transparent 60%),
+      radial-gradient(700px 500px at -10% 110%, rgba(139,92,246,.12), transparent 60%),
+      var(--bg); }
+  .layer { position: absolute; opacity: 0; will-change: opacity; }
+
+  /* hook */
+  #hook { inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 0 90px; }
+  #hook h1 { font-size: 84px; line-height: 1.08; font-weight: 800; letter-spacing: -.02em; }
+  #hook h2 { margin-top: 56px; font-size: 64px; line-height: 1.12; font-weight: 700; color: var(--mute); letter-spacing: -.01em; }
+  #hook em { font-style: normal; color: var(--red); }
+
+  /* brand */
+  #brand { left: 60px; top: 44px; display: flex; align-items: center; gap: 16px; font-weight: 800; font-size: 40px; letter-spacing: -.01em; }
+  #brand img { width: 48px; height: 48px; }
+  #brand span.tag { font-weight: 600; font-size: 24px; color: var(--mute); margin-left: 8px; }
+
+  /* terminal */
+  #term { left: 60px; top: 130px; width: 960px; height: 600px; background: var(--card); border: 2px solid var(--line);
+    border-radius: 22px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+  #term .bar { height: 54px; display: flex; align-items: center; gap: 10px; padding: 0 22px; border-bottom: 2px solid var(--line); background: #0e1422; }
+  #term .dot { width: 14px; height: 14px; border-radius: 50%; background: #334155; }
+  #term .title { margin-left: 12px; font: 600 22px var(--mono); color: var(--dim); }
+  #lines { position: absolute; left: 0; right: 0; top: 54px; bottom: 76px; padding: 20px 28px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden;
+    font: 500 29px/1.4 var(--mono); }
+  #lines .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.4em; }
+  .c-agent { color: var(--cyan); } .c-step { color: #f8fafc; } .c-red { color: var(--red); font-weight: 800; }
+  .c-green { color: var(--green); font-weight: 800; } .c-mute { color: var(--mute); } .c-dim { color: var(--dim); }
+  #tracebar { position: absolute; left: 0; right: 0; bottom: 0; height: 76px; border-top: 2px solid var(--line); background: #0e1422; display: flex; align-items: center; gap: 14px; padding: 0 28px; font: 600 24px var(--mono); color: var(--dim); }
+  #tracebar .chip { padding: 6px 14px; border-radius: 10px; border: 2px solid rgba(52,211,153,.55); color: var(--green); background: rgba(52,211,153,.1); font-size: 23px; }
+  #tracebar .empty { color: var(--dim); font-weight: 500; }
+
+  /* json panel */
+  #json { left: 60px; top: 130px; width: 960px; height: 600px; background: #0a0e18; border: 2px solid rgba(251,113,133,.55); border-radius: 22px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.55); }
+  #json .bar { height: 54px; display: flex; align-items: center; padding: 0 24px; border-bottom: 2px solid rgba(251,113,133,.35); background: #130d14; font: 700 23px var(--mono); color: var(--red); }
+  #json pre { position: absolute; left: 0; right: 0; top: 54px; bottom: 0; padding: 14px 28px; font: 500 29px/1.42 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; color: var(--mute); }
+  #json .row { opacity: 0; }
+  #json .key { color: var(--violet); } #json .hl { background: rgba(251,113,133,.14); border-radius: 6px; padding: 0 6px; margin: 0 -6px; color: #fff; }
+  #json .hlg { background: rgba(52,211,153,.14); border-radius: 6px; padding: 0 6px; margin: 0 -6px; color: #fff; }
+  #json .faint { opacity: .5; }
+
+  /* captions */
+  #cap { left: 60px; right: 60px; top: 770px; height: 230px; }
+  .cap { position: absolute; inset: 0; opacity: 0; font-size: 50px; line-height: 1.16; font-weight: 800; letter-spacing: -.015em; }
+  .cap em { font-style: normal; color: var(--green); } .cap em.r { color: var(--red); }
+  #foot, #foot2 { left: 60px; bottom: 28px; font: 500 22px var(--mono); color: var(--dim); }
+
+  /* end card */
+  #end { inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 80px; }
+  #end img { width: 120px; height: 120px; }
+  #end .name { margin-top: 24px; font-size: 96px; font-weight: 800; letter-spacing: -.03em; }
+  #end .tagline { margin-top: 36px; font-size: 54px; line-height: 1.16; font-weight: 700; color: var(--text); max-width: 900px; }
+  #end .tagline em { font-style: normal; color: var(--green); }
+  #end .url { margin-top: 56px; font: 800 52px var(--mono); color: var(--green); }
+  #end .try { margin-top: 26px; font: 500 28px var(--mono); color: var(--mute); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="hook" class="layer">
+    <h1 id="h1">AI agents can take<br>real actions.</h1>
+    <h2 id="h2">What happens when<br>the action is <em>wrong</em>?</h2>
+  </div>
+
+  <div id="brand" class="layer"><img src="../../demo/logo-mark.png" alt=""><span>Joltrin</span></div>
+
+  <div id="term" class="layer">
+    <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="title">agent session</span></div>
+    <div id="lines"></div>
+    <div id="tracebar"><span>trace</span><span id="chips"></span></div>
+  </div>
+
+  <div id="json" class="layer">
+    <div class="bar">execute_step returned: blocked</div>
+    <pre id="jsonbody"></pre>
+  </div>
+
+  <div id="cap" class="layer" style="opacity:1">
+    <div class="cap" id="c1">An agent says the backup is fine and <em class="r">proposes dropping production.</em></div>
+    <div class="cap" id="c2">Joltrin checks the action against the <em>recorded trace</em>, not the agent's claim.</div>
+    <div class="cap" id="c3"><em class="r">Blocked</em> before it commits.</div>
+    <div class="cap" id="c4">The agent gets structured feedback: <em>what is missing</em> and <em>which step establishes it</em>.</div>
+    <div class="cap" id="c5">It runs those steps. Each one is checked, then <em>recorded</em>.</div>
+    <div class="cap" id="c6">Same action. Now <em>allowed</em>, because the evidence exists.</div>
+  </div>
+  <div id="foot" class="layer">Real output from <b>sop-mcp-server demo</b></div>
+  <div id="foot2" class="layer">Real MCP response from <b>sop-mcp-server</b> (message field omitted)</div>
+
+  <div id="end" class="layer">
+    <img src="../../demo/logo-mark.png" alt="">
+    <div class="name">Joltrin</div>
+    <div class="tagline">Put a <em>safety barrier</em> between AI agents and irreversible actions.</div>
+    <div class="url">joltrinhq.com</div>
+    <div class="try">$ sop-mcp-server demo</div>
+  </div>
+</div>
+
+<script>
+  // Everything on screen is a pure function of time, so a frame can be drawn for
+  // any t. The text comes from window.DATA, which scripts/promo/capture.mjs
+  // fills from the real binary.
+  var DATA = null, DURATION = 43;
+  var $ = function (id) { return document.getElementById(id); };
+  var clamp = function (x) { return Math.max(0, Math.min(1, x)); };
+  var fade = function (t, a, b, f) { f = f || 0.3; return clamp((t - a) / f) * clamp((b - t) / f); };
+
+  // [segments], start time, characters per second
+  var EVENTS = [];
+  function buildEvents() {
+    var steps = DATA.demo.steps, trace = DATA.demo.trace;
+    var pad = function (s) { return ('  ' + s + '                 ').slice(0, 2 + 17); };
+    var blocked = steps[0], take = steps[1], validate = steps[2], drop = steps[3];
+    EVENTS = [
+      { segs: [['agent: "backup looks fine, dropping prod now"', 'c-agent']], at: 4.2, cps: 38 },
+      { segs: [['joltrin: checking the recorded trace...', 'c-agent']], at: 9.0, cps: 60, until: 13.2, pulse: true },
+      { segs: [[pad(blocked.step), 'c-step'], ['BLOCKED', 'c-red'], ['  ' + blocked.reason, 'c-mute']], at: 13.3, cps: 80, chips: 0 },
+      { blank: true, at: 27.7 },
+      { segs: [[take.Say || 'agent: takes a real backup first, then validates it', 'c-agent']], at: 27.8, cps: 45 },
+      { segs: [[pad(take.step), 'c-step'], ['ALLOWED', 'c-green']], at: 29.3, cps: 60, chips: 1 },
+      { segs: [[pad(validate.step), 'c-step'], ['ALLOWED', 'c-green']], at: 31.2, cps: 60, chips: 2 },
+      { blank: true, at: 33.7 },
+      { segs: [[drop.Say || 'agent: backup is validated, retrying the drop', 'c-agent']], at: 33.8, cps: 45 },
+      { segs: [[pad(drop.step), 'c-step'], ['ALLOWED', 'c-green']], at: 35.7, cps: 60, chips: 3 },
+      { blank: true, at: 36.9 },
+      { segs: [['trace: [' + trace.join(' ') + ']', 'c-dim']], at: 37.0, cps: 70 }
+    ];
+    // The agent lines are the program's own narration. They are in the real text
+    // output, so read them from there rather than repeating them here.
+    var says = DATA.demoText.split('\n').filter(function (l) { return l.indexOf('agent: ') === 0; });
+    EVENTS[0].segs[0][0] = says[0]; EVENTS[4].segs[0][0] = says[1]; EVENTS[8].segs[0][0] = says[2];
+    // JSON rows
+    var b = DATA.mcp.result.blocked, rows = [];
+    var q = function (v) { return JSON.stringify(v); };
+    var line = function (k, v, cls) { return '<span class="row ' + (cls || '') + '">  <span class="key">"' + k + '"</span>: ' + v + ',\n</span>'; };
+    rows.push('<span class="row">{\n</span>');
+    rows.push(line('blocked_by', q(b.blocked_by), 'hl'));
+    rows.push(line('missing_state', q(b.missing_state), 'hl'));
+    rows.push(line('established_by_steps', q(b.established_by_steps), 'hlg'));
+    rows.push(line('next', q(b.next), 'hlg'));
+    rows.push(line('attempts', q(b.attempts), ''));
+    rows.push(line('why', q(b.why), 'faint'));
+    rows.push('<span class="row">}</span>');
+    $('jsonbody').innerHTML = rows.join('');
+  }
+
+  function renderSegs(el, segs, n) {
+    var html = '', left = n;
+    segs.forEach(function (s) {
+      if (left <= 0) return;
+      var txt = s[0].slice(0, left); left -= s[0].length;
+      var esc = txt.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+      html += '<span class="' + s[1] + '">' + esc + '</span>';
+    });
+    el.innerHTML = html;
+  }
+
+  var built = false;
+  window.setData = function (d) { DATA = d; buildEvents(); built = false; };
+
+  window.render = function (t) {
+    if (!DATA) return;
+    var showMain = t >= 3.5 && t < 38.9;
+    var op = function (el, v) { el.style.opacity = v.toFixed(3); };
+
+    op($('hook'), fade(t, 0.15, 3.4, 0.35));
+    $('h2').style.opacity = clamp((t - 1.3) / 0.45);
+    $('h1').style.transform = 'translateY(' + (1 - clamp(t / 0.6)) * 14 + 'px)';
+
+    var mainOp = fade(t, 3.5, 38.9, 0.4);
+    var jOp = fade(t, 19.2, 27.4, 0.35);
+    op($('brand'), mainOp); op($('foot'), mainOp * (1 - jOp)); op($('foot2'), mainOp * jOp);
+    op($('term'), mainOp);
+    op($('json'), jOp);
+
+    // terminal lines
+    var host = $('lines');
+    if (!built) { host.innerHTML = ''; EVENTS.forEach(function () { var d = document.createElement('div'); d.className = 'ln'; host.appendChild(d); }); built = true; }
+    var chips = 0;
+    EVENTS.forEach(function (e, i) {
+      var el = host.children[i];
+      if (t < e.at || (e.until && t >= e.until)) { el.style.display = 'none'; return; }
+      el.style.display = '';
+      if (e.blank) { el.innerHTML = '&nbsp;'; return; }
+      var total = e.segs.reduce(function (a, s) { return a + s[0].length; }, 0);
+      var n = Math.min(total, Math.floor((t - e.at) * e.cps));
+      renderSegs(el, e.segs, n);
+      if (e.pulse) el.style.opacity = (0.65 + 0.35 * Math.sin(t * 8)).toFixed(3);
+      if (n >= total && e.chips !== undefined) chips = Math.max(chips, e.chips);
+    });
+    // trace chips
+    var steps = DATA.demo.trace, ch = $('chips');
+    ch.innerHTML = chips === 0 ? '<span class="empty">[ empty ]</span>' : steps.slice(0, chips).map(function (s) { return '<span class="chip">' + s + '</span>'; }).join(' ');
+
+
+    // json rows appear one by one
+    var rows = $('jsonbody').children;
+    for (var i = 0; i < rows.length; i++) rows[i].style.opacity = clamp((t - (19.7 + i * 0.55)) / 0.2).toFixed(3);
+
+    // captions
+    var CAPS = [['c1', 3.6, 8.7], ['c2', 8.8, 13.0], ['c3', 13.1, 19.1], ['c4', 19.3, 27.5], ['c5', 27.6, 33.6], ['c6', 33.7, 38.8]];
+    CAPS.forEach(function (c) { op($(c[0]), fade(t, c[1], c[2], 0.25)); });
+
+    op($('end'), fade(t, 39.1, DURATION + 1, 0.5));
+    $('end').querySelector('.tagline').style.transform = 'translateY(' + (1 - clamp((t - 39.3) / 0.6)) * 16 + 'px)';
+  };
+</script>
+</body>
+</html>
