@@ -81,6 +81,9 @@ func main() {
 			os.Exit(1)
 		}
 		defer log.Close()
+		if err := log.CompactionError(); err != nil {
+			fmt.Fprintln(os.Stderr, "sop-mcp-server: the block log could not be compacted and will keep growing until it can:", err)
+		}
 		opts = append(opts, mcpserver.WithMemory(log, filepath.Join(dir, "LESSONS.md")))
 	}
 

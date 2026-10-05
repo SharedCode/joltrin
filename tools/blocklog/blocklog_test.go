@@ -247,4 +247,7 @@ func TestOpenSucceedsWhenTheFileCannotBeCompacted(t *testing.T) {
 	if got := l.Summaries("db-maintenance", "v1"); len(got) != 0 {
 		t.Errorf("the expired entry still counts: %+v", got)
 	}
+	if l.CompactionError() == nil {
+		t.Error("the failed compaction should be reported")
+	}
 }
