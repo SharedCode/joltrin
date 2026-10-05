@@ -52,7 +52,11 @@ jobs:
             reply "Gemini Review already passed on $sha, nothing to skip."
             exit 0
           fi
-          if [ "$desc" = "Gemini found actionable issues" ]; then
+          # Gemini reviewed this commit if the status says so, or if it left a
+          # verdict comment for exactly this commit. Either one blocks a skip.
+          flagged=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+            --jq ".[] | select(.body | contains(\"gemini-gate sha=$sha verdict=FAIL\")) | .id")
+          if [ "$desc" = "Gemini found actionable issues" ] || [ -n "$flagged" ]; then
             reply "Gemini reviewed $sha and found issues, so it cannot be skipped. Fix them, or dispute with /gemini dispute and then /gemini review."
             exit 1
           fi

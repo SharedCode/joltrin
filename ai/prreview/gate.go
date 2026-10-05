@@ -15,6 +15,11 @@ import (
 // never satisfy the requirement for a newer one.
 const StatusContext = "Gemini Review"
 
+// StatusFindings is the status description for a commit Gemini reviewed and
+// found issues in. .github/workflows/gemini-skip.yml refuses to skip a commit
+// with this description, and a test keeps the two in step.
+const StatusFindings = "Gemini found actionable issues"
+
 // Verdict is Gemini's machine-readable conclusion for a pull request.
 type Verdict string
 
@@ -275,7 +280,7 @@ func RunGate(ctx context.Context, cfg GateConfig) error {
 	}
 
 	if verdict == VerdictFail {
-		if err := SetCommitStatus(ctx, cfg.Token, cfg.Owner, cfg.Repo, sha, "failure", "Gemini found actionable issues"); err != nil {
+		if err := SetCommitStatus(ctx, cfg.Token, cfg.Owner, cfg.Repo, sha, "failure", StatusFindings); err != nil {
 			return err
 		}
 		return fmt.Errorf("gemini review of %s has actionable findings", sha)
