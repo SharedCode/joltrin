@@ -167,3 +167,21 @@ func TestSummaryMatchesTheRowInSummaries(t *testing.T) {
 		t.Error("another runbook version must not match")
 	}
 }
+
+func TestStatsCountsARepeatedBlockOnceAndIgnoresRunsThatNeverBlocked(t *testing.T) {
+	l := New()
+	l.RecordRun(wf, ver, "r1")
+	l.RecordRun(wf, ver, "clean")
+	// The same step blocked three times in one run is one blocked step.
+	for i := 0; i < 3; i++ {
+		l.Record(entry("r1", "drop_prod_db"))
+	}
+	st := l.Stats(wf, ver)
+	if st.Runs != 2 || len(st.Rules) != 1 || st.Rules[0].BlockedRuns != 1 || st.Rules[0].RecoveredRuns != 0 {
+		t.Fatalf("want 2 runs and one rule that blocked 1 run: %+v", st)
+	}
+	l.RecordRecovery(wf, ver, "r1", "drop_prod_db")
+	if r := l.Stats(wf, ver).Rules[0]; r.BlockedRuns != 1 || r.RecoveredRuns != 1 {
+		t.Errorf("a repeated block recovers with one commit: %+v", r)
+	}
+}

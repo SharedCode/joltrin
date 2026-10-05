@@ -14,7 +14,7 @@ rm -rf "$SITE"
 mkdir -p "$SITE/arena" "$SITE/agents" "$SITE/docs" "$SITE/assets"
 
 # Technical demo (WASM) lives at the site root: joltrinhq.com/
-cp demo/index.html demo/sop.wasm demo/wasm_exec.js demo/404.html demo/favicon.svg demo/favicon.ico demo/og-image.png demo/logo-mark.png "$SITE/"
+cp demo/index.html demo/tailwind.css demo/sop.wasm demo/wasm_exec.js demo/404.html demo/favicon.svg demo/favicon.ico demo/og-image.png demo/logo-mark.png "$SITE/"
 # The documentation index lives at joltrinhq.com/docs/
 cp docs/index.html "$SITE/docs/"
 # The homepage loads its replay and videos from ./assets/. Every file there ships.

@@ -48,5 +48,10 @@ jobs:
           npm ci || npm install
           npm run build
 
+      - name: Check the homepage stylesheet is up to date
+        run: |
+          scripts/build-css.sh
+          git diff --exit-code demo/tailwind.css
+
       - name: Assemble the site and check every referenced file
         run: scripts/assemble-site.sh _site
