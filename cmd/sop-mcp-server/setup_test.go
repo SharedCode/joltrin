@@ -214,6 +214,46 @@ func TestSetupRunbooksRelativePathBecomesAbsolute(t *testing.T) {
 	}
 }
 
+// scripts/install.sh builds the asset name and the checksum file name by hand.
+// If the release workflow stops publishing those names, the one-line install
+// breaks for everyone, so the two are checked against each other here.
+func TestInstallScriptMatchesTheReleaseAssets(t *testing.T) {
+	script := readRepoFile(t, "scripts/install.sh")
+	workflow := readRepoFile(t, ".github/workflows/release-mcp-binaries.yml")
+	for _, want := range []string{`name=sop-mcp-server-$os-$arch`, `sop-mcp-server-SHA256SUMS`} {
+		if !strings.Contains(script, want) {
+			t.Errorf("install.sh no longer contains %q", want)
+		}
+	}
+	for _, want := range []string{`sop-mcp-server-${os}-${arch}`, `sop-mcp-server-SHA256SUMS`} {
+		if !strings.Contains(workflow, want) {
+			t.Errorf("release-mcp-binaries.yml no longer publishes %q", want)
+		}
+	}
+	// The installer's optional provenance check only works if the workflow signs
+	// the same files the installer downloads.
+	if !strings.Contains(script, "gh attestation verify") {
+		t.Error("install.sh no longer verifies provenance")
+	}
+	if !strings.Contains(workflow, "attest-build-provenance") || !strings.Contains(workflow, "dist/sop-mcp-server-*") {
+		t.Error("release-mcp-binaries.yml no longer attests the binaries install.sh verifies")
+	}
+	for _, platform := range []string{"darwin/amd64", "darwin/arm64", "linux/amd64", "linux/arm64"} {
+		if !strings.Contains(workflow, platform) {
+			t.Errorf("release-mcp-binaries.yml no longer builds %q, which install.sh downloads", platform)
+		}
+	}
+}
+
+func readRepoFile(t *testing.T, rel string) string {
+	t.Helper()
+	b, err := os.ReadFile(filepath.Join("..", "..", rel))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(b)
+}
+
 func TestSetupApplyCanBeRunAgain(t *testing.T) {
 	// Nothing is registered yet, so the remove fails. That must not matter.
 	rec := &recorder{have: map[string]bool{"claude": true}, removeFails: true}

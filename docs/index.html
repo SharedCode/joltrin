@@ -83,10 +83,9 @@ drop_prod_db      allowed</pre>
     <p>That needs Go and no clone. Or <a href="../agents/">try the barrier in your browser</a>. It runs the same checks compiled to WebAssembly.</p>
 
     <h2>5. MCP integration</h2>
-    <p>Install the server and register it with the agents on your machine, using its full path:</p>
-<pre>go install github.com/sharedcode/joltrin/v5/cmd/sop-mcp-server@latest
-"$(go env GOPATH)/bin/sop-mcp-server" setup --apply</pre>
-    <p>Prebuilt binaries, your own runbooks, and memory are covered in the <a href="https://github.com/SharedCode/joltrin#connect-it-to-an-mcp-agent" target="_blank" rel="noopener noreferrer">README</a> and <a href="https://github.com/SharedCode/joltrin/blob/master/docs/AGENT_PROTOCOLS.md" target="_blank" rel="noopener noreferrer">Agent protocols</a>.</p>
+    <p>One command installs the server, checks its checksum, and registers it with the agents on your machine. No Go needed:</p>
+<pre>curl -fsSL https://raw.githubusercontent.com/SharedCode/joltrin/master/scripts/install.sh | sh</pre>
+    <p>Building with Go, Windows, your own runbooks, and memory are covered in the <a href="https://github.com/SharedCode/joltrin#connect-it-to-an-mcp-agent" target="_blank" rel="noopener noreferrer">README</a> and <a href="https://github.com/SharedCode/joltrin/blob/master/docs/AGENT_PROTOCOLS.md" target="_blank" rel="noopener noreferrer">Agent protocols</a>.</p>
 
     <h2>6. A2A integration</h2>
     <p>The same check gates an A2A agent. A blocked step moves the task to <code>input-required</code> with the same fields. See <a href="https://github.com/SharedCode/joltrin/blob/master/docs/AGENT_PROTOCOLS.md" target="_blank" rel="noopener noreferrer">Agent protocols</a>.</p>

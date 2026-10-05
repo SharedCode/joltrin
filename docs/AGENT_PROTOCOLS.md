@@ -125,7 +125,7 @@ What this checker is, precisely, matters more than what it sounds like it might 
 Register it with `--lessons` (it sets `SOP_LESSONS_DIR`, which Claude Code and Codex support; for the Gemini CLI set that variable in its settings file) and the server records each block once per run and tells the next agent when it connects. It also keeps a short `LESSONS.md` there that you can add to a `CLAUDE.md` (`@~/.joltrin/LESSONS.md`) or point an `AGENTS.md` at.
 
 ```bash
-"$(go env GOPATH)/bin/sop-mcp-server" setup --apply --lessons "$HOME/.joltrin"
+"$HOME/.joltrin/bin/sop-mcp-server" setup --apply --lessons "$HOME/.joltrin"
 ```
 
 A blocked `execute_step` also carries the matching lesson in `lesson`, next to `why`, so the agent learns the reason and the order that worked at the moment it is refused. Agents can also ask for the full list with the `read_lessons` tool, which exists only while memory is on. That helps with clients that do not show a server's startup instructions to the model, which the Gemini CLI did not in my test.
@@ -154,7 +154,7 @@ The built-in `db-maintenance` runbook is only an example. Describe your own step
 ```
 
 ```bash
-"$(go env GOPATH)/bin/sop-mcp-server" setup --apply --runbooks "$PWD/runbooks.json"
+"$HOME/.joltrin/bin/sop-mcp-server" setup --apply --runbooks "$PWD/runbooks.json"
 ```
 
 Run `sop-mcp-server check runbooks.json` first to see what the file enforces, or the reason it will not load. `setup` runs the same check and refuses a file the server could not start with.
