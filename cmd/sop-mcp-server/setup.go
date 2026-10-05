@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -84,6 +85,9 @@ func runSetup(args []string, out, errw io.Writer, exe string,
 	lessons := fs.String("lessons", "", "folder for the memory of earlier blocks (sets SOP_LESSONS_DIR)")
 	runbooks := fs.String("runbooks", "", "JSON file with your own runbooks (sets SOP_RUNBOOKS)")
 	if err := fs.Parse(args); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return 0
+		}
 		return 2
 	}
 
@@ -178,7 +182,7 @@ func runSetup(args []string, out, errw io.Writer, exe string,
 }
 
 // setupMain wires runSetup to the real environment.
-func setupMain(args []string) int {
+func setupMain(args []string, out, errw io.Writer) int {
 	exe, err := os.Executable()
 	if err == nil {
 		if resolved, rerr := filepath.EvalSymlinks(exe); rerr == nil {
@@ -186,7 +190,7 @@ func setupMain(args []string) int {
 		}
 	}
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "setup: cannot find this binary's path:", err)
+		fmt.Fprintln(errw, "setup: cannot find this binary's path:", err)
 		return 1
 	}
 	// The CLIs run at the same time, so their output is held back and shown
@@ -200,5 +204,5 @@ func setupMain(args []string) int {
 		}
 		return err
 	}
-	return runSetup(args, os.Stdout, os.Stderr, exe, exec.LookPath, run)
+	return runSetup(args, out, errw, exe, exec.LookPath, run)
 }

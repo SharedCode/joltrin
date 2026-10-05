@@ -59,21 +59,10 @@ func newStore(runbooksPath string) (*runbookstore.Store, []string, error) {
 }
 
 func main() {
-	// "sop-mcp-server setup" registers this binary with your agent by its full
-	// path. Anything else starts the server, which agents launch with no arguments.
-	if len(os.Args) > 1 && os.Args[1] == "setup" {
-		os.Exit(setupMain(os.Args[2:]))
-	}
-	// "sop-mcp-server check runbooks.json" loads a runbook file and prints what
-	// the barrier will enforce, without starting a server.
-	if len(os.Args) > 1 && os.Args[1] == "check" {
-		os.Exit(checkMain(os.Args[2:]))
-	}
-
-	// "sop-mcp-server demo" shows the barrier blocking a database drop until a
-	// backup is validated. It needs no agent and finishes at once.
-	if len(os.Args) > 1 && os.Args[1] == "demo" {
-		os.Exit(demoMain())
+	// Anything but the bare command or "stdio" is handled before a server
+	// starts. An unknown word is a usage error, not a silent server.
+	if code, serve := dispatch(os.Args[1:], os.Stdout, os.Stderr); !serve {
+		os.Exit(code)
 	}
 
 	store, names, err := newStore(os.Getenv("SOP_RUNBOOKS"))

@@ -2,13 +2,14 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"strings"
 	"testing"
 )
 
 func TestDemoBlocksTheDropThenAllowsItInOrder(t *testing.T) {
 	var out bytes.Buffer
-	if code := runDemo(&out); code != 0 {
+	if code := runDemoArgs(nil, &out, &out); code != 0 {
 		t.Fatalf("exit %d:\n%s", code, out.String())
 	}
 	s := out.String()
@@ -25,5 +26,22 @@ func TestDemoBlocksTheDropThenAllowsItInOrder(t *testing.T) {
 		if !strings.Contains(s, want) {
 			t.Errorf("output missing %q:\n%s", want, s)
 		}
+	}
+}
+
+// A command whose output cannot be written must fail, not exit 0 with the
+// result cut off. A closed pipe is the usual cause.
+type brokenWriter struct{}
+
+func (brokenWriter) Write([]byte) (int, error) { return 0, errors.New("broken pipe") }
+
+func TestAFailedJSONWriteIsAFailedCommand(t *testing.T) {
+	var errw bytes.Buffer
+	if code := runDemoArgs([]string{"--json"}, brokenWriter{}, &errw); code != 1 || !strings.Contains(errw.String(), "broken pipe") {
+		t.Errorf("demo --json: exit %d, stderr %q", code, errw.String())
+	}
+	errw.Reset()
+	if code := runCheck([]string{"--json", writeRunbook(t, goodRunbook)}, brokenWriter{}, &errw); code != 1 || !strings.Contains(errw.String(), "broken pipe") {
+		t.Errorf("check --json: exit %d, stderr %q", code, errw.String())
 	}
 }
