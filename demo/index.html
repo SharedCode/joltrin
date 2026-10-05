@@ -68,7 +68,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@1.52.0/dist/umd/lucide.min.js" defer></script>
 
   <!-- Go WebAssembly Runtime Support -->
   <script src="wasm_exec.js"></script>
@@ -495,7 +495,7 @@
     <section id="demo-video" aria-label="Joltrin intro video" class="scroll-mt-20 mb-8 rounded-2xl overflow-hidden border border-dark-700/80 bg-dark-900">
       <div class="relative w-full" style="aspect-ratio:16/9">
         <iframe class="absolute inset-0 w-full h-full"
-          src="https://www.youtube-nocookie.com/embed/F0jYkBHJluI?autoplay=1&mute=1&loop=1&playlist=F0jYkBHJluI&playsinline=1&rel=0"
+          data-src="https://www.youtube-nocookie.com/embed/F0jYkBHJluI?autoplay=1&mute=1&loop=1&playlist=F0jYkBHJluI&playsinline=1&rel=0"
           title="Joltrin intro video"
           allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
           allowfullscreen
@@ -1763,6 +1763,13 @@
   <!-- WebAssembly Engine Integration Script -->
   <script>
     let selectedBenchOps = 5000;
+
+    // The intro video player is about 5 MB of scripts. It starts after the page
+    // has loaded, so it never delays the first paint or the load event.
+    window.addEventListener("load", () => {
+      const frame = document.querySelector('#demo-video iframe[data-src]');
+      if (frame) frame.src = frame.dataset.src;
+    });
 
     // Initialize Lucide Icons
     document.addEventListener("DOMContentLoaded", () => {

@@ -11,6 +11,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/sharedcode/joltrin/v5/verify"
@@ -47,7 +48,16 @@ func main() {
 	fmt.Println()
 
 	trace := verify.NewTrace()
-	pause := 700 * time.Millisecond
+	// A short pause between steps keeps the story readable without making you
+	// wait. JOLTRIN_DEMO_PAUSE=0 removes it, or set a longer one such as 700ms.
+	pause := 150 * time.Millisecond
+	if v := os.Getenv("JOLTRIN_DEMO_PAUSE"); v != "" {
+		if d, err := time.ParseDuration(v); err == nil {
+			pause = d
+		} else if v == "0" {
+			pause = 0
+		}
+	}
 
 	fmt.Println("agent: \"backup looks fine, dropping prod now\"")
 	time.Sleep(pause)
