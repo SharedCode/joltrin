@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Joltrin | Verification Barrier &amp; Durable Memory for AI Agents | Embedded ACID Engine</title>
-  <meta name="description" content="Open-source infrastructure for AI agents with durable memory, recovery, and a verification barrier before they take action." />
-  <meta name="keywords" content="AI agent verification barrier, AI agent safety layer, durable AI agent memory, AI agent governance, autonomous AI safety, AI DevOps, MCP infrastructure, agent policy enforcement, ACID B-Tree, Go, WebAssembly" />
+  <title>Joltrin | Independent verification for AI agent actions</title>
+  <meta name="description" content="A deterministic barrier that checks an AI agent's action against the recorded trace before it commits, independent of what the agent claims. Open source, MCP and A2A." />
+  <meta name="keywords" content="AI agent verification barrier, independent verifier, deterministic preconditions, AI agent safety, MCP, A2A, agent policy enforcement, Go, WebAssembly" />
   <link rel="canonical" href="https://joltrinhq.com/" />
 
   <!-- Open Graph / Facebook / LinkedIn -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://joltrinhq.com/" />
-  <meta property="og:title" content="Joltrin | Verification Barrier &amp; Durable Memory for AI Agents" />
-  <meta property="og:description" content="Open-source infrastructure for AI agents with durable memory, recovery, and a verification barrier before they take action." />
+  <meta property="og:title" content="Joltrin | Independent verification for AI agent actions" />
+  <meta property="og:description" content="A deterministic barrier that checks an AI agent's action against the recorded trace before it commits, independent of what the agent claims. Open source, MCP and A2A." />
   <meta property="og:image" content="https://joltrinhq.com/og-image.png" />
 
   <!-- Twitter / X -->
   <meta property="twitter:card" content="summary_large_image" />
   <meta property="twitter:url" content="https://joltrinhq.com/" />
-  <meta property="twitter:title" content="Joltrin | Verification Barrier &amp; Durable Memory for AI Agents" />
-  <meta property="twitter:description" content="Open-source infrastructure for AI agents with durable memory, recovery, and a verification barrier before they take action." />
+  <meta property="twitter:title" content="Joltrin | Independent verification for AI agent actions" />
+  <meta property="twitter:description" content="A deterministic barrier that checks an AI agent's action against the recorded trace before it commits, independent of what the agent claims. Open source, MCP and A2A." />
   <meta property="twitter:image" content="https://joltrinhq.com/og-image.png" />
 
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
@@ -314,7 +314,7 @@
             <a href="./" class="font-extrabold tracking-tight text-white text-lg hover:text-brand-400 transition">Joltrin</a>
             <span class="hidden min-[440px]:inline text-xs px-2 py-0.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 font-mono font-medium whitespace-nowrap">WASM demo</span>
           </div>
-          <p class="text-[10px] text-slate-400 font-mono hidden sm:block">Memory and verification for AI agents</p>
+          <p class="text-[10px] text-slate-400 font-mono hidden sm:block">Independent verification for AI agent actions</p>
         </div>
       </div>
 
@@ -447,51 +447,47 @@
     <!-- Hero -->
     <section class="relative rounded-2xl bg-gradient-to-b from-dark-850 to-dark-900 border border-dark-700/80 p-6 sm:p-10 mb-8 overflow-hidden bg-grid glow-emerald">
       <div class="absolute top-0 right-0 -mt-8 -mr-8 w-72 h-72 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div class="relative z-10 max-w-3xl">
-        <p class="text-xs font-mono font-semibold uppercase tracking-wider text-brand-400 mb-4">Open-source infrastructure for AI agents</p>
+      <div class="relative z-10 grid grid-cols-1 gap-8 lg:grid-cols-2 items-center">
+        <div class="min-w-0">
+          <p class="text-xs font-mono font-semibold uppercase tracking-wider text-brand-400 mb-4">Open source, MCP and A2A</p>
 
-        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight mb-4">
-          Durable memory and a
-          <span class="bg-gradient-to-r from-brand-400 via-accent-cyan to-accent-violet bg-clip-text text-transparent">verification barrier</span>
-          for AI agents.
-        </h1>
+          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight mb-4">
+            Independent, deterministic verification for
+            <span class="bg-gradient-to-r from-brand-400 via-accent-cyan to-accent-violet bg-clip-text text-transparent">AI agent actions</span>.
+          </h1>
 
-        <p class="text-slate-300 text-base sm:text-lg leading-relaxed mb-6">
-          Joltrin is an embedded Go library. Your agents keep state that survives a crash, and risky actions are checked against explicit rules before they run. No separate database or queue to operate.
-        </p>
+          <p class="text-slate-300 text-base sm:text-lg leading-relaxed mb-3">
+            The agent proposes the action. Joltrin checks it against the recorded trace and fixed preconditions before it commits. It does not use the agent's claims, its context, or its confidence.
+          </p>
+          <p class="text-slate-400 text-sm leading-relaxed mb-6">
+            A claim that something happened is not evidence that it happened.
+          </p>
 
-        <div class="flex flex-wrap items-center gap-3 mb-8">
-          <a href="https://github.com/SharedCode/joltrin#try-it-in-five-minutes" target="_blank" rel="noopener noreferrer"
-             class="px-5 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 font-bold text-sm text-black shadow-lg shadow-brand-500/20 flex items-center space-x-2 transition transform active:scale-95">
-            <i data-lucide="terminal" class="w-4 h-4"></i>
-            <span>Start building (MIT core)</span>
-          </a>
-          <a href="./agents/"
-             class="px-5 py-3 rounded-xl bg-dark-900 hover:bg-dark-850 border border-dark-700 text-slate-200 hover:text-white font-semibold text-sm flex items-center space-x-2 transition">
-            <i data-lucide="shield-check" class="w-4 h-4 text-brand-400"></i>
-            <span>Try the live barrier</span>
-          </a>
-          <a href="#pricing" class="px-2 py-3 text-sm text-slate-400 hover:text-white underline underline-offset-4 transition">Pricing</a>
+          <div class="flex flex-wrap items-center gap-3">
+            <a href="./agents/"
+               class="px-5 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 font-bold text-sm text-black shadow-lg shadow-brand-500/20 flex items-center space-x-2 transition">
+              <i data-lucide="shield-check" class="w-4 h-4"></i>
+              <span>Try the live barrier</span>
+            </a>
+            <a href="https://github.com/SharedCode/joltrin#try-it-in-five-minutes" target="_blank" rel="noopener noreferrer"
+               class="px-5 py-3 rounded-xl bg-dark-900 hover:bg-dark-850 border border-dark-700 text-slate-200 hover:text-white font-semibold text-sm flex items-center space-x-2 transition">
+              <i data-lucide="terminal" class="w-4 h-4 text-brand-400"></i>
+              <span>Quickstart on GitHub</span>
+            </a>
+          </div>
         </div>
 
-        <dl class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-dark-800">
-          <div class="bg-dark-950/80 border border-dark-700/80 rounded-xl p-3">
-            <dt class="text-[11px] text-slate-400 font-mono">Pre-action checks</dt>
-            <dd class="text-base sm:text-lg font-bold text-brand-400 font-mono">Deterministic</dd>
+        <div id="hero-example" class="min-w-0 rounded-xl bg-dark-950 border border-dark-700 p-4 font-mono text-xs sm:text-sm" aria-label="A blocked, then allowed, sequence">
+          <div class="text-[11px] text-slate-500 uppercase tracking-wider mb-3">// db-maintenance runbook</div>
+          <div class="space-y-1.5 overflow-x-auto">
+            <div class="sm:whitespace-nowrap"><span class="text-white">drop_prod_db</span>     <span class="text-rose-400 font-bold">BLOCKED</span> <span class="text-slate-400">backup_validated missing</span></div>
+            <div class="sm:whitespace-nowrap"><span class="text-white">validate_backup</span>  <span class="text-rose-400 font-bold">BLOCKED</span> <span class="text-slate-400">backup_taken missing</span></div>
+            <div class="sm:whitespace-nowrap"><span class="text-white">take_backup</span>      <span class="text-brand-400 font-bold">ALLOWED</span></div>
+            <div class="sm:whitespace-nowrap"><span class="text-white">validate_backup</span>  <span class="text-brand-400 font-bold">ALLOWED</span></div>
+            <div class="sm:whitespace-nowrap"><span class="text-white">drop_prod_db</span>     <span class="text-brand-400 font-bold">ALLOWED</span></div>
           </div>
-          <div class="bg-dark-950/80 border border-dark-700/80 rounded-xl p-3">
-            <dt class="text-[11px] text-slate-400 font-mono">Transactions</dt>
-            <dd class="text-base sm:text-lg font-bold text-white font-mono">ACID</dd>
-          </div>
-          <div class="bg-dark-950/80 border border-dark-700/80 rounded-xl p-3">
-            <dt class="text-[11px] text-slate-400 font-mono">Demo network calls</dt>
-            <dd class="text-base sm:text-lg font-bold text-accent-cyan font-mono">0 after load</dd>
-          </div>
-          <div class="bg-dark-950/80 border border-dark-700/80 rounded-xl p-3">
-            <dt class="text-[11px] text-slate-400 font-mono">Core license</dt>
-            <dd class="text-base sm:text-lg font-bold text-accent-violet font-mono">MIT</dd>
-          </div>
-        </dl>
+          <p class="text-[11px] text-slate-500 mt-3 leading-relaxed font-sans">The order is enforced by the barrier, whatever the agent says it already did.</p>
+        </div>
       </div>
     </section>
 
@@ -560,14 +556,13 @@
       <div class="max-w-3xl mb-8">
         <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-mono font-semibold uppercase tracking-wider mb-3">
           <i data-lucide="shield" class="w-3.5 h-3.5"></i>
-          <span>Primary Differentiator</span>
+          <span>How it works</span>
         </div>
         <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
-          The Agent Verification Barrier: <br class="hidden sm:inline"/>
-          A Checkpoint Before Action.
+          The agent and the verifier are separate.
         </h2>
         <p class="text-slate-400 text-sm sm:text-base mt-2 leading-relaxed">
-          An agent that reasons well doesn't automatically deserve unchecked access to your systems. Joltrin sits between what the agent decides to do and the outside world, and checks that the action is actually allowed before it happens.
+          An agent that proposes an action and also judges it safe can be wrong in both places for the same reason. Joltrin keeps the two apart. The agent emits intent. The check runs outside the agent's context window, against the steps the server has actually recorded and the runbook's rules.
         </p>
       </div>
 
@@ -583,7 +578,7 @@
               <i data-lucide="bot" class="w-4 h-4"></i>
             </div>
             <div class="text-white font-bold">1. AI Agent</div>
-            <div class="text-[11px] text-slate-400">Proposes Tool Call, API Mutation or Shell Cmd</div>
+            <div class="text-[11px] text-slate-400">Emits intent: a tool call, API mutation or shell command</div>
           </div>
 
           <div class="p-4 rounded-xl bg-brand-950/40 border-2 border-brand-500/60 text-xs space-y-1 shadow-lg shadow-brand-500/10">
@@ -667,6 +662,30 @@
         <pre class="whitespace-pre-wrap break-all rounded-lg bg-dark-900 border border-dark-800 p-3 font-mono text-slate-200 leading-relaxed">go install github.com/sharedcode/joltrin/v5/cmd/sop-mcp-server@latest
 "$(go env GOPATH)/bin/sop-mcp-server" setup --apply</pre>
         <p class="text-slate-400 mt-3">Then ask it: "Use the joltrin tools to run <code>drop_prod_db</code> on workflow <code>db-maintenance</code> with trace id <code>t1</code>." The server refuses until <code>take_backup</code> and <code>validate_backup</code> have run in that trace, whatever the agent claims. <a href="https://github.com/SharedCode/joltrin/blob/master/docs/AGENT_BARRIER_TESTS.md" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:text-white underline underline-offset-2">Recorded runs with real agents</a>.</p>
+      </div>
+    </section>
+
+    <!-- A block is a replan signal -->
+    <section id="block-result" class="mb-12 p-6 sm:p-10 rounded-2xl bg-dark-900 border border-dark-800">
+      <div class="max-w-3xl mb-6">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">A block tells the agent what to do next.</h2>
+        <p class="text-slate-400 text-sm sm:text-base mt-2 leading-relaxed">
+          A blocked call is a normal result, not an exception or an opaque error. It says what is missing and which recorded step would establish it, so the agent can replan instead of retrying the same call.
+        </p>
+      </div>
+      <div class="grid gap-5 lg:grid-cols-2">
+        <pre class="whitespace-pre overflow-x-auto rounded-xl bg-dark-950 border border-dark-800 p-4 text-xs sm:text-sm font-mono text-slate-200 leading-relaxed">{
+  "blocked_by": "precondition",
+  "missing_state": "backup_validated",
+  "established_by_steps": ["validate_backup"],
+  "attempts": 1,
+  "next": "run_established_by_steps"
+}</pre>
+        <div class="text-sm text-slate-400 leading-relaxed space-y-3">
+          <p><code class="text-slate-200">blocked_by</code> names the rule that stopped the step. <code class="text-slate-200">missing_state</code> is what has not been established in this run. <code class="text-slate-200">established_by_steps</code> lists the steps that would establish it.</p>
+          <p>Read it as a replan signal. <code class="text-slate-200">attempts</code> counts how often the same step was blocked for the same reason in this run, and <code class="text-slate-200">next</code> says whether to run those steps or stop and ask. Retrying the same call with different parameters will not change the answer.</p>
+          <p>With memory turned on, the server also counts, per rule, how many runs it blocked and how many of those went on to commit the step. That shows whether a rule is catching bad plans or is set too strict. It is a count, not an analytics product.</p>
+        </div>
       </div>
     </section>
 
@@ -909,15 +928,40 @@
       })();
     </script>
 
-    <!-- SECTION 3: SECOND DIFFERENTIATOR: DURABLE AGENT MEMORY -->
+    <!-- Proof and limits -->
+    <section id="limits" class="mb-12 p-6 sm:p-10 rounded-2xl bg-dark-900 border border-dark-800">
+      <div class="max-w-3xl mb-6">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">What is real, what is simulated, what it does not do.</h2>
+      </div>
+      <div class="grid gap-4 md:grid-cols-3 text-sm text-slate-400 leading-relaxed">
+        <div class="p-4 rounded-xl bg-dark-950 border border-dark-800">
+          <h3 class="font-bold text-white mb-2">Real</h3>
+          <p>The checks. The same <code class="text-slate-200">verify</code> package serves the MCP and A2A servers and compiles to WebAssembly for the live demo, and the repository has tests for it. A recorded run with real agents covers one runbook over MCP.</p>
+        </div>
+        <div class="p-4 rounded-xl bg-dark-950 border border-dark-800">
+          <h3 class="font-bold text-white mb-2">Simulated</h3>
+          <p>The tools. In the team demo, Jira, Grafana, AWS and PagerDuty are stubs, and the Arena is an illustration, not a cluster. The demos show the checks, not live systems.</p>
+        </div>
+        <div class="p-4 rounded-xl bg-dark-950 border border-dark-800">
+          <h3 class="font-bold text-white mb-2">Not covered</h3>
+          <p>The barrier only answers, so whatever performs the real action must wait for it. It cannot see what the trace does not contain: a backup in another cloud account has to be represented by a step you trust, such as one that checks that account and then records the result. It does not judge whether an agent's own claim is true.</p>
+        </div>
+      </div>
+      <p class="text-slate-500 text-xs mt-4 leading-relaxed">
+        No production deployments, customers or third-party benchmarks are claimed. A dry-run mode, where blocked calls are logged and allowed so teams can tune rules first, is a possible direction and is not implemented.
+        <a href="https://github.com/SharedCode/joltrin/blob/master/docs/AGENT_BARRIER_TESTS.md" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:text-brand-300 underline underline-offset-4">Test results and their limits</a>
+      </p>
+    </section>
+
+    <!-- Supporting capability: durable agent memory -->
     <section id="durable-memory" class="mb-12 p-6 sm:p-10 rounded-2xl bg-dark-900 border border-dark-800">
       <div class="max-w-3xl mb-8">
         <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-accent-violet/10 border border-accent-violet/30 text-accent-violet text-xs font-mono font-semibold uppercase tracking-wider mb-3">
           <i data-lucide="brain" class="w-3.5 h-3.5"></i>
-          <span>Second Big Differentiator</span>
+          <span>Supporting capability</span>
         </div>
         <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
-          Agents Need Memory They Can Trust.
+          Durable state underneath.
         </h2>
         <p class="text-slate-400 text-sm sm:text-base mt-2 leading-relaxed">
           When an agent's process restarts, a network connection drops, or a container gets evicted, whatever it was holding in memory is gone. Joltrin gives it durable state, transactional checkpoints, and a deterministic way to recover.
@@ -962,14 +1006,11 @@
           <div class="text-emerald-400 font-mono font-bold text-xs uppercase">5. Persistent Working Context</div>
           <h3 class="font-bold text-white text-sm">Zero Server Roundtrips</h3>
           <p class="text-xs text-slate-400 leading-relaxed">
-            Runs natively inside your application binary or in-browser via OPFS (Origin Private File System), delivering sub-millisecond local reads without external cloud latencies.
+            Runs natively inside your application binary or in-browser via OPFS (Origin Private File System), so reads do not cross a network.
           </p>
         </div>
       </div>
 
-      <div class="p-4 rounded-xl bg-dark-950 border border-brand-500/20 text-slate-300 text-xs sm:text-sm font-mono">
-        <span class="text-brand-400 font-bold">Recurring Philosophy:</span> "Memory + Recovery + Verification for AI agents."
-      </div>
     </section>
 
     <!-- SECTION 8: UNDER THE HOOD (DATABASE & STORAGE ENGINEERING CREDIBILITY) -->

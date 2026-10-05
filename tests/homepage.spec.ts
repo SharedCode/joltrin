@@ -9,10 +9,54 @@ import { waitForWasmReady } from './helpers/wasm-lifecycle';
 test.describe('Homepage', () => {
   test('hero states the product and offers one primary action', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(/durable memory/i);
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(/verification barrier/i);
-    await expect(page.getByRole('link', { name: /start building/i }).first()).toBeVisible();
+    const h1 = page.getByRole('heading', { level: 1 });
+    await expect(h1).toContainText(/independent/i);
+    await expect(h1).toContainText(/deterministic verification/i);
+    await expect(h1).toContainText(/AI agent actions/i);
     await expect(page.getByRole('link', { name: /try the live barrier/i })).toHaveAttribute('href', /agents/);
+    await expect(page.getByRole('link', { name: /quickstart on github/i })).toHaveAttribute('href', /joltrin#try-it-in-five-minutes/);
+    // The hero text must sit inside the viewport, not be clipped by an overflowing child.
+    const fits = await page.evaluate(() => {
+      const r = document.querySelector('h1')!.getBoundingClientRect();
+      return r.left >= 0 && r.right <= window.innerWidth;
+    });
+    expect(fits, 'the headline fits the viewport').toBe(true);
+  });
+
+  test('hero shows the blocked then allowed sequence', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const ex = page.locator('#hero-example');
+    await expect(ex).toContainText('backup_validated missing');
+    await expect(ex).toContainText('backup_taken missing');
+    await expect(ex.getByText('BLOCKED')).toHaveCount(2);
+    await expect(ex.getByText('ALLOWED')).toHaveCount(3);
+  });
+
+  test('block result section shows the payload fields and the replan reading', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const section = page.locator('#block-result');
+    for (const field of ['blocked_by', 'missing_state', 'established_by_steps']) {
+      await expect(section).toContainText(field);
+    }
+    await expect(section).toContainText(/replan/i);
+  });
+
+  test('limits section separates real, simulated, and not covered', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const section = page.locator('#limits');
+    for (const h of ['Real', 'Simulated', 'Not covered']) {
+      await expect(section.getByRole('heading', { name: h, exact: true })).toBeVisible();
+    }
+    await expect(section).toContainText(/another cloud account/i);
+    await expect(section).toContainText(/not implemented/i);
+  });
+
+  test('the page does not lead with database or infrastructure claims', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const hero = (await page.locator('main section').first().innerText()).toLowerCase();
+    for (const phrase of ['future of databases', 'ai-native', 'autonomous agent platform']) {
+      expect(hero).not.toContain(phrase);
+    }
   });
 
   test('intro video sits below the hero and autoplays muted', async ({ page }) => {
@@ -89,6 +133,7 @@ test.describe('Homepage', () => {
     expect(res.status()).toBe(200);
     const html = await res.text();
     expect(html).toContain('<title>Documentation | Joltrin</title>');
+    expect(html).toContain('independent of what the agent claims');
     expect(html).toContain('<link rel="canonical" href="https://joltrinhq.com/docs/">');
 
     await page.goto('/docs/', { waitUntil: 'domcontentloaded' });
@@ -100,8 +145,13 @@ test.describe('Homepage', () => {
     const hrefs = await page.$$eval('main a[href]', (as) => as.map((a) => (a as HTMLAnchorElement).href));
     expect(hrefs.length).toBeGreaterThanOrEqual(15);
     for (const h of hrefs) {
-      expect(h, 'every documentation link goes to the repository over https').toMatch(/^https:\/\/github\.com\/SharedCode\/joltrin\//);
+      // Documentation opens on GitHub. The one exception is the live demo on this site.
+      expect(h, 'documentation links go to the repository over https, or to the live demo').toMatch(/^(https:\/\/github\.com\/SharedCode\/joltrin[\/#]|https?:\/\/[^/]+\/agents\/$)/);
     }
+    for (const h of ['What it protects against', 'The independent verifier model', 'The blocked-result payload', 'Five-minute local demo', 'MCP integration', 'A2A integration']) {
+      await expect(page.getByRole('heading', { level: 2, name: new RegExp(h, 'i') })).toBeVisible();
+    }
+    await expect(page.locator('main pre').first()).toContainText('missing_state');
     const unsafe = await page.$$eval('main a[target="_blank"]', (as) => as.filter((a) => !/noopener/.test(a.rel) || !/noreferrer/.test(a.rel)).length);
     expect(unsafe, 'external links must carry rel="noopener noreferrer"').toBe(0);
   });

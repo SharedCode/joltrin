@@ -23,7 +23,7 @@ test.describe('Critical Interactive Features Suite', () => {
     // 1. Start at Technical Demo (/)
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await waitForWasmReady(page);
-    await expect(page).toHaveTitle(/Joltrin.*Embedded ACID/i);
+    await expect(page).toHaveTitle(/Joltrin.*independent verification/i);
 
     // 2. Navigate from Tech Demo to Arena via Navbar (or primary link on mobile)
     const arenaLink = isMobile

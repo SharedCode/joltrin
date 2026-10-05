@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Documentation | Joltrin</title>
-  <meta name="description" content="Joltrin documentation: getting started, the agent verification barrier, architecture, operations, and reference.">
+  <meta name="description" content="Joltrin documentation: what the verifier protects against, the blocked-result payload, a local demo, and MCP and A2A integration.">
   <link rel="canonical" href="https://joltrinhq.com/docs/">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <meta property="og:title" content="Joltrin documentation">
-  <meta property="og:description" content="Getting started, the agent verification barrier, architecture, operations, and reference.">
+  <meta property="og:description" content="What the verifier protects against, the blocked-result payload, a local demo, and MCP and A2A integration.">
   <meta property="og:url" content="https://joltrinhq.com/docs/">
   <style>
     :root { color-scheme: dark; }
@@ -33,6 +33,10 @@
     li:first-child { border-top: 0; }
     li a { font-weight: 600; }
     li span { display: block; color: #94a3b8; font-size: 0.9rem; }
+    p { margin: 0 0 1rem; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem; }
+    code { background: #0b1020; border: 1px solid #1e293b; border-radius: 0.3rem; padding: 0.05rem 0.3rem; color: #e2e8f0; }
+    pre { background: #0b1020; border: 1px solid #1e293b; border-radius: 0.75rem; padding: 0.9rem 1rem; overflow-x: auto; margin: 0 0 1rem; color: #e2e8f0; }
     footer { max-width: 56rem; margin: 0 auto; padding: 0 1rem 2.5rem; color: #64748b; font-size: 0.85rem; }
   </style>
 </head>
@@ -51,40 +55,63 @@
 
   <main>
     <h1>Documentation</h1>
-    <p class="lead">Start with the first three. Each page opens on GitHub.</p>
+    <p class="lead">Joltrin checks an AI agent's action against the recorded trace before it commits, independent of what the agent claims. This page is a path from the idea to a working integration.</p>
 
-    <h2>Start here</h2>
-    <ul>
-      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/WHAT_IS_SOP.md" target="_blank" rel="noopener noreferrer">What is Joltrin</a><span>The idea in plain words.</span></li>
-      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/GETTING_STARTED.md" target="_blank" rel="noopener noreferrer">Getting started</a><span>From downloading it to building your first application.</span></li>
-      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/EXAMPLES.md" target="_blank" rel="noopener noreferrer">Examples</a><span>Runnable examples, starting with a quickstart that has no dependencies.</span></li>
-    </ul>
+    <h2>1. What it protects against</h2>
+    <p>An agent can propose a destructive action and report success from its own context. If the same agent also decides the action is safe, both judgments can fail for the same reason. The danger in production is that correlated failure.</p>
 
-    <h2>Agent barrier</h2>
-    <ul>
-      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/AGENT_PROTOCOLS.md" target="_blank" rel="noopener noreferrer">Agent protocols</a><span>MCP, A2A, and how the verification barrier checks each call.</span></li>
-      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/AGENT_BARRIER_TESTS.md" target="_blank" rel="noopener noreferrer">Barrier test results</a><span>Runs with real agents, what they show, and what they do not.</span></li>
-      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/LIVE_DEMOS.md" target="_blank" rel="noopener noreferrer">Live demos</a><span>The three browser experiences, which run without a backend.</span></li>
-    </ul>
+    <h2>2. The independent verifier model</h2>
+    <p>The agent emits intent. The verifier checks that intent against the steps the server has recorded and the runbook's preconditions and safety rules. It does not use the agent's claims, prompt context, self-evaluation or confidence. The check and the commit are one call, so a step is recorded only if it passed, and a step whose required state is missing is refused. A claim that something happened is not evidence that it happened.</p>
 
-    <h2>Concepts</h2>
-    <ul>
-      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/WHY_JOLTRIN.md" target="_blank" rel="noopener noreferrer">Why Joltrin</a><span>The problem, the approach, an honest comparison, and where it is not the right tool.</span></li>
-      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/SOP_ARCHITECTURE_WHITEPAPER.md" target="_blank" rel="noopener noreferrer">Architecture</a><span>A technical whitepaper on how the engine coordinates and stores data.</span></li>
-      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/SCALABILITY.md" target="_blank" rel="noopener noreferrer">Scalability</a><span>Capacity and performance limits, and how it scales with hardware.</span></li>
-    </ul>
+    <h2>3. The blocked-result payload</h2>
+    <p>A blocked call returns a normal result with fields the agent can act on:</p>
+<pre>{
+  "blocked_by": "precondition",
+  "missing_state": "backup_validated",
+  "established_by_steps": ["validate_backup"]
+}</pre>
+    <p>Treat it as a replan signal, not a reason to retry. For a production database drop, the safe order is:</p>
+<pre>drop_prod_db      blocked, backup_validated is missing
+validate_backup   blocked, backup_taken is missing
+take_backup       allowed
+validate_backup   allowed
+drop_prod_db      allowed</pre>
+    <p>Repeated blocks add <code>attempts</code> and <code>next</code>, which says whether to run the establishing steps or stop and ask. With memory turned on, the server also counts which rules block runs and how often agents recover.</p>
 
-    <h2>Operating it</h2>
-    <ul>
-      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/OPERATIONS.md" target="_blank" rel="noopener noreferrer">Operations and failover</a><span>Running it and handling failures.</span></li>
-      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/SOP_PLATFORM_TOOLS.md" target="_blank" rel="noopener noreferrer">Data Manager and tools</a><span>The server and the visual tools.</span></li>
-      <li><a href="https://github.com/SharedCode/joltrin/blob/master/infra/azure/README.md" target="_blank" rel="noopener noreferrer">Azure deployment</a><span>Deploying it on Azure.</span></li>
-    </ul>
+    <h2>4. Five-minute local demo</h2>
+<pre>git clone https://github.com/SharedCode/joltrin.git &amp;&amp; cd joltrin
+./scripts/demo.sh --barrier</pre>
+    <p>Or <a href="../agents/">try the barrier in your browser</a>. It runs the same checks compiled to WebAssembly.</p>
+
+    <h2>5. MCP integration</h2>
+    <p>Install the server and register it with the agents on your machine, using its full path:</p>
+<pre>go install github.com/sharedcode/joltrin/v5/cmd/sop-mcp-server@latest
+"$(go env GOPATH)/bin/sop-mcp-server" setup --apply</pre>
+    <p>Prebuilt binaries, your own runbooks, and memory are covered in the <a href="https://github.com/SharedCode/joltrin#connect-it-to-an-mcp-agent" target="_blank" rel="noopener noreferrer">README</a> and <a href="https://github.com/SharedCode/joltrin/blob/master/docs/AGENT_PROTOCOLS.md" target="_blank" rel="noopener noreferrer">Agent protocols</a>.</p>
+
+    <h2>6. A2A integration</h2>
+    <p>The same check gates an A2A agent. A blocked step moves the task to <code>input-required</code> with the same fields. See <a href="https://github.com/SharedCode/joltrin/blob/master/docs/AGENT_PROTOCOLS.md" target="_blank" rel="noopener noreferrer">Agent protocols</a>.</p>
+
+    <h2>Limits</h2>
+    <p>The barrier only answers, so whatever performs the action must wait for it. It cannot see facts the trace does not contain. A backup in another cloud account has to be represented by a step you trust, such as one that checks that account and records the result. The browser demos run the real checks against stub tools. No production deployments, customers or third-party benchmarks are claimed.</p>
 
     <h2>Reference</h2>
     <ul>
+      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/AGENT_BARRIER_TESTS.md" target="_blank" rel="noopener noreferrer">Barrier test results</a><span>Runs with real agents, what they show, and what they do not.</span></li>
+      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/AGENT_PROTOCOLS.md" target="_blank" rel="noopener noreferrer">Agent protocols</a><span>MCP, A2A, memory, and your own runbooks.</span></li>
+      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/MCP_A2A_AND_VERIFICATION_ENGINE.md" target="_blank" rel="noopener noreferrer">Verification engine</a><span>How the check works and what it is not.</span></li>
+      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/GETTING_STARTED.md" target="_blank" rel="noopener noreferrer">Getting started</a><span>From downloading it to building your first program.</span></li>
+      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/EXAMPLES.md" target="_blank" rel="noopener noreferrer">Examples</a><span>Runnable examples, starting with a quickstart.</span></li>
+      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/LIVE_DEMOS.md" target="_blank" rel="noopener noreferrer">Live demos</a><span>The three browser experiences.</span></li>
+      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/WHAT_IS_SOP.md" target="_blank" rel="noopener noreferrer">What is Joltrin</a><span>The storage engine in plain words.</span></li>
+      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/WHY_JOLTRIN.md" target="_blank" rel="noopener noreferrer">Why Joltrin</a><span>The problem, the approach, and where it is not the right tool.</span></li>
+      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/SOP_ARCHITECTURE_WHITEPAPER.md" target="_blank" rel="noopener noreferrer">Architecture</a><span>A technical whitepaper on the engine.</span></li>
+      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/SCALABILITY.md" target="_blank" rel="noopener noreferrer">Scalability</a><span>Capacity and limits.</span></li>
+      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/OPERATIONS.md" target="_blank" rel="noopener noreferrer">Operations and failover</a><span>Running it and handling failures.</span></li>
+      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/SOP_PLATFORM_TOOLS.md" target="_blank" rel="noopener noreferrer">Data Manager and tools</a><span>The server and the visual tools.</span></li>
+      <li><a href="https://github.com/SharedCode/joltrin/blob/master/infra/azure/README.md" target="_blank" rel="noopener noreferrer">Azure deployment</a><span>Deploying it on Azure.</span></li>
       <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/BENCHMARKS.md" target="_blank" rel="noopener noreferrer">Benchmarks</a><span>Numbers, how to reproduce them, and their limits.</span></li>
-      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/ROADMAP.md" target="_blank" rel="noopener noreferrer">Roadmap and platform support</a><span>What is planned and what is supported today.</span></li>
+      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/ROADMAP.md" target="_blank" rel="noopener noreferrer">Roadmap and platform support</a><span>What is planned and what is supported.</span></li>
       <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/WHO_IS_IT_FOR.md" target="_blank" rel="noopener noreferrer">Who it is for</a><span>Whether it fits your team.</span></li>
       <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/INVESTORS.md" target="_blank" rel="noopener noreferrer">Investor notes</a><span>What has and has not been proven.</span></li>
     </ul>
