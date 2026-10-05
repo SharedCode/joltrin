@@ -71,7 +71,15 @@ If a finding is wrong or not applicable, do not merge around it. Comment `/gemin
 8. Any compensating control.
 9. The resolution you are asking for.
 
-Then comment `/gemini review`. Disputes from owners, members, and collaborators are passed to Gemini as claims to check against the diff, not as facts. The finding is resolved only if the new review on the current commit returns `VERDICT: PASS`. This repository has no maintainer override. If Gemini keeps a finding after a well-supported dispute, fix the code or change the review prompt in a PR.
+Then comment `/gemini review`. Disputes from owners, members, and collaborators are passed to Gemini as claims to check against the diff, not as facts. The finding is resolved only if the new review on the current commit returns `VERDICT: PASS`. The only way around the gate is the skip above, and only when Gemini did not review. If Gemini keeps a finding after a well-supported dispute, fix the code or change the review prompt in a PR.
+
+### When Gemini is unavailable
+
+If Gemini cannot review a commit because of quota, an outage, a timeout, or a missing key, an owner, member, or collaborator can comment `/gemini skip <reason>` on the PR. The `Gemini Review Skip` workflow then sets the status to success for that commit and records who skipped it and why.
+
+- A skip is refused when Gemini did review the commit and found issues. Fix them or dispute them instead.
+- It covers one commit. A new push clears it, so each push needs a fresh review or a new skip.
+- A reason is required and is shown in the status.
 
 ### Branch protection
 

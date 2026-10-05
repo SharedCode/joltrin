@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 	"testing"
 )
@@ -228,5 +229,24 @@ func TestRunGateFailsClosed(t *testing.T) {
 				t.Fatalf("final status must be failure, got %v", g.states)
 			}
 		})
+	}
+}
+
+// The skip workflow cannot import this package, so it repeats the status text
+// and the comment marker. If either drifts, a commit Gemini flagged could be
+// skipped.
+func TestSkipWorkflowMatchesTheGate(t *testing.T) {
+	b, err := os.ReadFile("../../.github/workflows/gemini-skip.yml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	wf := string(b)
+	for _, want := range []string{StatusFindings, StatusContext, "gemini-gate sha=", "verdict=FAIL"} {
+		if !strings.Contains(wf, want) {
+			t.Errorf("gemini-skip.yml no longer contains %q", want)
+		}
+	}
+	if !strings.Contains(FormatGateComment("x", VerdictFail, "abc"), "gemini-gate sha=abc verdict=FAIL") {
+		t.Error("the gate comment marker changed, update gemini-skip.yml")
 	}
 }
