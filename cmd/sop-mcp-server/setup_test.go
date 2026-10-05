@@ -175,12 +175,18 @@ func TestSetupUnknownFlagIsAUsageError(t *testing.T) {
 func TestSetupRunbooksSetsTheEnvironmentWithAnAbsolutePath(t *testing.T) {
 	// On Windows an absolute-looking path like /home/me gains a drive letter,
 	// so the expected value goes through filepath.Abs like the code does.
-	path, err := filepath.Abs("/home/me/my runbooks.json")
+	// The file has to load, so it is a real one, with a space in its name.
+	dir := t.TempDir()
+	path := filepath.Join(dir, "my runbooks.json")
+	if err := os.WriteFile(path, []byte(goodRunbook), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	path, err := filepath.Abs(path)
 	if err != nil {
 		t.Fatal(err)
 	}
 	runbooks := shellQuote("SOP_RUNBOOKS=" + path)
-	_, out, _ := setup(t, "/bin/sop-mcp-server", &recorder{}, "--runbooks", "/home/me/my runbooks.json", "--lessons", "/home/me/.joltrin")
+	_, out, _ := setup(t, "/bin/sop-mcp-server", &recorder{}, "--runbooks", path, "--lessons", "/home/me/.joltrin")
 	for _, want := range []string{
 		"claude mcp add --scope user joltrin -e SOP_LESSONS_DIR=/home/me/.joltrin -e " + runbooks + " -- /bin/sop-mcp-server",
 		"codex mcp add joltrin --env SOP_LESSONS_DIR=/home/me/.joltrin --env " + runbooks + " -- /bin/sop-mcp-server",
@@ -193,6 +199,11 @@ func TestSetupRunbooksSetsTheEnvironmentWithAnAbsolutePath(t *testing.T) {
 }
 
 func TestSetupRunbooksRelativePathBecomesAbsolute(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "runbooks.json"), []byte(goodRunbook), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Chdir(dir)
 	abs, err := filepath.Abs("runbooks.json")
 	if err != nil {
 		t.Fatal(err)

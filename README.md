@@ -56,11 +56,12 @@ Read a block as a replan signal. Retrying the same call with different parameter
 ## Try it in five minutes
 
 ```bash
-git clone https://github.com/sharedcode/joltrin.git && cd joltrin
-./scripts/demo.sh --barrier       # the barrier blocks a database drop until a backup is validated
-./scripts/demo.sh --team          # Jira, Grafana, AWS, and PagerDuty agents finish tasks behind the barrier
-go run ./examples/quickstart      # the embedded B-Tree that holds the state
+go run github.com/sharedcode/joltrin/v5/examples/verify_barrier@latest   # the barrier blocks a database drop until a backup is validated
+go run github.com/sharedcode/joltrin/v5/examples/agent_team@latest       # Jira, Grafana, AWS, and PagerDuty agents finish tasks behind the barrier
+go run github.com/sharedcode/joltrin/v5/examples/quickstart@latest       # the embedded B-Tree that holds the state
 ```
+
+No clone needed, only Go 1.26.8 or newer. The first run downloads the modules and compiles, which took about 10 seconds on a MacBook Air, and later runs are quick. To read the code, or to run `./scripts/demo.sh --memory`, clone the repo.
 
 Or skip the install. These run in your browser with no backend:
 
