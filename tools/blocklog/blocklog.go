@@ -369,9 +369,14 @@ func (l *Log) Stats(workflow, version string) Stats {
 		missing verify.State
 	}
 	type ruleRun struct{ rule, trace string }
+	// A run blocks on a handful of steps, so a slice scan beats a map per run.
+	type blockedStep struct {
+		stepKey
+		recovered bool
+	}
 	cutoff := l.now().Add(-l.ttl)
 	runs := map[string]struct{}{}
-	blocked := map[ruleRun]map[stepKey]bool{} // true once the step recovered
+	blocked := map[ruleRun][]blockedStep{}
 	for _, e := range l.entries {
 		if e.Workflow != workflow || e.Version != version || e.At.Before(cutoff) {
 			continue
@@ -381,11 +386,15 @@ func (l *Log) Stats(workflow, version string) Stats {
 		case KindRun:
 			runs[e.TraceID] = struct{}{}
 		case "":
-			if blocked[rr] == nil {
-				blocked[rr] = map[stepKey]bool{}
+			steps, found := blocked[rr], false
+			for _, b := range steps {
+				if b.stepKey == sk {
+					found = true
+					break
+				}
 			}
-			if _, seen := blocked[rr][sk]; !seen {
-				blocked[rr][sk] = false
+			if !found {
+				blocked[rr] = append(steps, blockedStep{stepKey: sk})
 			}
 		}
 	}
@@ -395,10 +404,12 @@ func (l *Log) Stats(workflow, version string) Stats {
 		if e.Kind != KindRecovered || e.Workflow != workflow || e.Version != version || e.At.Before(cutoff) {
 			continue
 		}
-		if steps := blocked[ruleRun{e.BlockedBy, e.TraceID}]; steps != nil {
-			sk := stepKey{e.Step, e.MissingState}
-			if _, ok := steps[sk]; ok {
-				steps[sk] = true
+		steps := blocked[ruleRun{e.BlockedBy, e.TraceID}]
+		sk := stepKey{e.Step, e.MissingState}
+		for i := range steps {
+			if steps[i].stepKey == sk {
+				steps[i].recovered = true
+				break
 			}
 		}
 	}
@@ -412,8 +423,8 @@ func (l *Log) Stats(workflow, version string) Stats {
 		}
 		rs.BlockedRuns++
 		all := true
-		for _, recovered := range steps {
-			all = all && recovered
+		for _, b := range steps {
+			all = all && b.recovered
 		}
 		if all {
 			rs.RecoveredRuns++
