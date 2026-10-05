@@ -25,49 +25,12 @@
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
   <link rel="alternate icon" href="./favicon.ico" />
 
-  <!-- Start the third-party connections and the 6 MB engine download while the HTML is still parsing -->
-  <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+  <!-- Start the icon CDN connection and the 6 MB engine download while the HTML is still parsing -->
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
   <link rel="preload" href="sop.wasm" as="fetch" type="application/wasm" crossorigin>
 
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#ecfdf5',
-              100: '#d1fae5',
-              400: '#34d399',
-              500: '#10b981',
-              600: '#059669',
-              700: '#047857',
-            },
-            dark: {
-              950: '#07090E',
-              900: '#0B0F17',
-              850: '#111726',
-              800: '#182238',
-              700: '#22304E',
-              600: '#334155'
-            },
-            accent: {
-              cyan: '#06B6D4',
-              violet: '#8B5CF6',
-              amber: '#F59E0B'
-            }
-          },
-          fontFamily: {
-            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-            mono: ['JetBrains Mono', 'Fira Code', 'monospace']
-          }
-        }
-      }
-    }
-  </script>
+  <!-- Built by scripts/build-css.sh from this page; replaces the Tailwind CDN script -->
+  <link rel="stylesheet" href="./tailwind.css" />
 
   <!-- Google Fonts & Lucide Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -427,22 +390,6 @@
         <kbd class="text-[10px] text-slate-500 border border-dark-700 rounded px-1.5 py-0.5 font-mono shrink-0">ESC</kbd>
       </div>
       <div id="cmdk-list" class="max-h-80 overflow-y-auto p-2"></div>
-    </div>
-  </div>
-
-  <!-- WASM Loading Overlay -->
-  <div id="wasm-loader-overlay" class="fixed inset-0 bg-dark-950/90 backdrop-blur-md z-50 flex flex-col items-center justify-center p-4 transition-opacity duration-500">
-    <div class="w-16 h-16 relative flex items-center justify-center mb-6">
-      <div class="absolute inset-0 rounded-full border-4 border-brand-500/20"></div>
-      <div class="absolute inset-0 rounded-full border-4 border-brand-500 border-t-transparent animate-spin"></div>
-      <i data-lucide="cpu" class="w-6 h-6 text-brand-400"></i>
-    </div>
-    <h3 class="text-lg font-bold text-white mb-2">Booting Embedded Go WASM Kernel</h3>
-    <p class="text-sm text-slate-400 text-center max-w-md mb-4 font-mono">
-      Compiling B-Tree transaction log, vector index, and ACID isolation manager into browser memory sandbox...
-    </p>
-    <div class="w-64 bg-dark-800 h-1.5 rounded-full overflow-hidden">
-      <div class="bg-gradient-to-r from-brand-500 to-accent-cyan h-full w-full animate-pulse"></div>
     </div>
   </div>
 
@@ -1030,7 +977,24 @@
     </section>
 
     <!-- SECTION 8: UNDER THE HOOD (DATABASE & STORAGE ENGINEERING CREDIBILITY) -->
-    <section id="under-the-hood" class="mb-12">
+    <section id="under-the-hood" class="relative mb-12">
+      <!-- WASM loading overlay. It covers only this section, so the rest of the page is usable while the engine loads. -->
+      <div id="wasm-loader-overlay" class="absolute inset-0 z-30 rounded-2xl bg-dark-950/90 backdrop-blur-md transition-opacity duration-500">
+        <div class="sticky top-32 flex flex-col items-center justify-center p-4">
+          <div class="w-16 h-16 relative flex items-center justify-center mb-6">
+            <div class="absolute inset-0 rounded-full border-4 border-brand-500/20"></div>
+            <div class="absolute inset-0 rounded-full border-4 border-brand-500 border-t-transparent animate-spin"></div>
+            <i data-lucide="cpu" class="w-6 h-6 text-brand-400"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Booting Embedded Go WASM Kernel</h3>
+          <p class="text-sm text-slate-400 text-center max-w-md mb-4 font-mono">
+            Compiling B-Tree transaction log, vector index, and ACID isolation manager into browser memory sandbox...
+          </p>
+          <div class="w-64 bg-dark-800 h-1.5 rounded-full overflow-hidden">
+            <div class="bg-gradient-to-r from-brand-500 to-accent-cyan h-full w-full animate-pulse"></div>
+          </div>
+        </div>
+      </div>
       <div class="max-w-3xl mb-6">
         <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-accent-cyan/10 border border-accent-cyan/30 text-accent-cyan text-xs font-mono font-semibold uppercase tracking-wider mb-2">
           <i data-lucide="database" class="w-3.5 h-3.5"></i>
@@ -1789,8 +1753,9 @@
 
     // Initialize Lucide Icons
     document.addEventListener("DOMContentLoaded", () => {
-      lucide.createIcons();
+      // Start the engine first so a slow icon CDN cannot hold it up.
       initWasmEngine();
+      if (window.lucide) lucide.createIcons();
     });
 
     // WASM Engine Initializer
