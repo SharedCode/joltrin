@@ -193,4 +193,3 @@ Exit codes are the same everywhere: 0 for success, 1 for a failure, and 2 for a 
 - **A call is refused for an id that is too long.** `trace_id`, `idempotency_key`, workflow and step names are limited to 256 bytes.
 - **The first `go install` takes minutes.** It downloads the Go modules, and a Go older than 1.26.8 also downloads a toolchain. The prebuilt binary skips both: see the install command in the README.
 - **Windows.** Use the `.exe` from the release page and run `setup --apply` from the folder you keep it in, because it registers that path.
-
