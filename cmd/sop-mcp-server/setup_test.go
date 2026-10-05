@@ -230,6 +230,14 @@ func TestInstallScriptMatchesTheReleaseAssets(t *testing.T) {
 			t.Errorf("release-mcp-binaries.yml no longer publishes %q", want)
 		}
 	}
+	// The installer's optional provenance check only works if the workflow signs
+	// the same files the installer downloads.
+	if !strings.Contains(script, "gh attestation verify") {
+		t.Error("install.sh no longer verifies provenance")
+	}
+	if !strings.Contains(workflow, "attest-build-provenance") || !strings.Contains(workflow, "dist/sop-mcp-server-*") {
+		t.Error("release-mcp-binaries.yml no longer attests the binaries install.sh verifies")
+	}
 	for _, platform := range []string{"darwin/amd64", "darwin/arm64", "linux/amd64", "linux/arm64"} {
 		if !strings.Contains(workflow, platform) {
 			t.Errorf("release-mcp-binaries.yml no longer builds %q, which install.sh downloads", platform)

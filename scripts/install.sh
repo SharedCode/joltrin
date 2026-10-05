@@ -7,14 +7,18 @@
 # It downloads the latest release binary, checks its SHA-256 against the
 # release's checksum file, and puts it in ~/.joltrin/bin. It does not use sudo.
 #
+#   JOLTRIN_VERIFY=1     also verify the binary's signed build provenance with
+#                        the GitHub CLI (gh, signed in). It does not rely on the
+#                        checksum file, needs a release from v5.11.0 on, and adds
+#                        a few seconds, so it is off by default
 #   JOLTRIN_VERSION=TAG  install that release instead of the latest, e.g. v5.11.0
 #   JOLTRIN_NO_SETUP=1   install only, do not register with any agent
 #   JOLTRIN_BIN_DIR=DIR  install somewhere other than ~/.joltrin/bin
 #
 # Trust: the script, the binary and the checksum file all come from the same
 # GitHub release, so the checksum catches a damaged or swapped download but not
-# a compromised release. Read this script first, pin a version, or build from
-# source if that matters to you.
+# a compromised release. If that matters to you, set JOLTRIN_VERIFY=1, read this
+# script first, pin a version, or build from source.
 set -eu
 
 if [ -n "${JOLTRIN_VERSION:-}" ]; then
@@ -55,6 +59,13 @@ curl -fsSL -O "$base/$name" -O "$base/sop-mcp-server-SHA256SUMS" || fail "downlo
 if command -v shasum >/dev/null 2>&1; then sum="shasum -a 256"; else sum=sha256sum; fi
 grep " $name\$" sop-mcp-server-SHA256SUMS > want || fail "$name is not in the checksum file"
 $sum -c want >/dev/null 2>&1 || fail "checksum does not match, nothing was installed"
+
+if [ "${JOLTRIN_VERIFY:-}" = 1 ]; then
+  command -v gh >/dev/null 2>&1 || fail "JOLTRIN_VERIFY=1 needs the GitHub CLI (gh), signed in with gh auth login"
+  echo "Verifying build provenance"
+  gh attestation verify "$name" --repo SharedCode/joltrin >/dev/null 2>&1 ||
+    fail "build provenance could not be verified, nothing was installed. It needs gh signed in and a release from v5.11.0 on"
+fi
 
 mkdir -p "$dest"
 mv "$name" "$dest/sop-mcp-server"

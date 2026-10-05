@@ -20,6 +20,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   binaries:
@@ -55,6 +57,15 @@ jobs:
           done
           (cd dist && sha256sum sop-mcp-server-* > sop-mcp-server-SHA256SUMS)
           ls -lh dist
+
+      # Signed build provenance for each binary, so install.sh can check a download
+      # with "gh attestation verify" without trusting the checksum file that
+      # sits beside it. A failure here stops the release binaries rather than
+      # shipping them unsigned.
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: 'dist/sop-mcp-server-*'
 
       - name: Wait for the release to exist
         shell: bash
