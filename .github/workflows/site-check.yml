@@ -4,16 +4,10 @@ name: Site Check
 # names (video, poster, image, script) is missing from it. The deploy once
 # published a homepage whose video files were never copied, and the local
 # tests did not notice because they assemble the site a different way.
+# It runs on every pull request, with no path filter, because it is a required
+# check and a required check that does not run on a PR blocks that PR for good.
 on:
   pull_request:
-    paths:
-      - 'demo/**'
-      - 'demo-agents/**'
-      - 'docs/**'
-      - 'sop-arena/**'
-      - 'scripts/assemble-site.sh'
-      - '.github/workflows/deploy-demo.yml'
-      - '.github/workflows/site-check.yml'
 
 permissions:
   contents: read
