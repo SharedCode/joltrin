@@ -157,6 +157,8 @@ The built-in `db-maintenance` runbook is only an example. Describe your own step
 "$(go env GOPATH)/bin/sop-mcp-server" setup --apply --runbooks "$PWD/runbooks.json"
 ```
 
+Run `sop-mcp-server check runbooks.json` first to see what the file enforces, or the reason it will not load. `setup` runs the same check and refuses a file the server could not start with.
+
 With a file, the server serves exactly those runbooks. It refuses a file with a typo, such as an unknown field or a state that no step establishes, instead of quietly never blocking anything.
 
 What this catches: an agent that skips a required step, breaks a safety rule, or names a step that does not exist. What it does not do: judge whether an agent's own claim is true. That needs evidence from a tool the agent cannot fake, so it is not something a runbook file can add.
