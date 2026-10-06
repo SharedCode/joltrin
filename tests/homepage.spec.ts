@@ -23,6 +23,27 @@ test.describe('Homepage', () => {
     expect(fits, 'the headline fits the viewport').toBe(true);
   });
 
+  test('nothing covers the hero when the icon CDN is unreachable', async ({ page }) => {
+    // The boot overlay once stayed up for good after the icon script failed to load,
+    // and the homepage was a black screen that still answered 200.
+    await page.route(/unpkg\.com/, (route) => route.abort());
+    await page.goto('/', { waitUntil: 'load' });
+    const h1 = page.getByRole('heading', { level: 1 });
+    await expect(h1).toBeVisible();
+    await expect
+      .poll(
+        () =>
+          page.evaluate(() => {
+            const el = document.querySelector('h1')!;
+            const r = el.getBoundingClientRect();
+            const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+            return !!top && el.contains(top);
+          }),
+        { message: 'the headline is the topmost element at its own position', timeout: 15_000 },
+      )
+      .toBe(true);
+  });
+
   test('hero shows the blocked then allowed sequence', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const ex = page.locator('#hero-example');
