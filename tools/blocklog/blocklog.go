@@ -364,28 +364,34 @@ func (l *Log) Stats(workflow, version string) Stats {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	type stepKey struct {
+	type ruleRun struct{ rule, trace string }
+	type blockKey struct {
+		rr      ruleRun
 		step    verify.StepID
 		missing verify.State
 	}
-	type ruleRun struct{ rule, trace string }
+	// counts is how many distinct blocked steps a rule had in one run, and how
+	// many of them recovered. Held by value so a run costs no allocation.
+	type counts struct{ blocked, recovered int }
 	cutoff := l.now().Add(-l.ttl)
 	runs := map[string]struct{}{}
-	blocked := map[ruleRun]map[stepKey]bool{} // true once the step recovered
+	recovered := make(map[blockKey]bool, len(l.entries)) // true once the step recovered
+	perRun := map[ruleRun]counts{}
 	for _, e := range l.entries {
 		if e.Workflow != workflow || e.Version != version || e.At.Before(cutoff) {
 			continue
 		}
-		rr, sk := ruleRun{e.BlockedBy, e.TraceID}, stepKey{e.Step, e.MissingState}
 		switch e.Kind {
 		case KindRun:
 			runs[e.TraceID] = struct{}{}
 		case "":
-			if blocked[rr] == nil {
-				blocked[rr] = map[stepKey]bool{}
-			}
-			if _, seen := blocked[rr][sk]; !seen {
-				blocked[rr][sk] = false
+			rr := ruleRun{e.BlockedBy, e.TraceID}
+			bk := blockKey{rr, e.Step, e.MissingState}
+			if _, seen := recovered[bk]; !seen {
+				recovered[bk] = false
+				c := perRun[rr]
+				c.blocked++
+				perRun[rr] = c
 			}
 		}
 	}
@@ -395,27 +401,25 @@ func (l *Log) Stats(workflow, version string) Stats {
 		if e.Kind != KindRecovered || e.Workflow != workflow || e.Version != version || e.At.Before(cutoff) {
 			continue
 		}
-		if steps := blocked[ruleRun{e.BlockedBy, e.TraceID}]; steps != nil {
-			sk := stepKey{e.Step, e.MissingState}
-			if _, ok := steps[sk]; ok {
-				steps[sk] = true
-			}
+		rr := ruleRun{e.BlockedBy, e.TraceID}
+		bk := blockKey{rr, e.Step, e.MissingState}
+		if done, ok := recovered[bk]; ok && !done {
+			recovered[bk] = true
+			c := perRun[rr]
+			c.recovered++
+			perRun[rr] = c
 		}
 	}
 
 	byRule := map[string]*RuleStats{}
-	for rr, steps := range blocked {
+	for rr, c := range perRun {
 		rs := byRule[rr.rule]
 		if rs == nil {
 			rs = &RuleStats{BlockedBy: rr.rule}
 			byRule[rr.rule] = rs
 		}
 		rs.BlockedRuns++
-		all := true
-		for _, recovered := range steps {
-			all = all && recovered
-		}
-		if all {
+		if c.recovered == c.blocked {
 			rs.RecoveredRuns++
 		}
 	}
