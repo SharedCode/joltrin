@@ -29,6 +29,13 @@ Joltrin (formerly SOP) is an open-source Go library that checks an AI agent's ac
   </a>
 </p>
 
+<table align="center">
+  <tr>
+    <td align="center"><a href="https://www.youtube.com/watch?v=F0jYkBHJluI"><img src="https://img.youtube.com/vi/F0jYkBHJluI/hqdefault.jpg" alt="Joltrin full demo on YouTube" width="360" /></a><br /><sub>Full demo</sub></td>
+    <td align="center"><a href="https://www.youtube.com/shorts/oS1bfq_ZDkg"><img src="https://img.youtube.com/vi/oS1bfq_ZDkg/hqdefault.jpg" alt="Joltrin short on YouTube" width="200" /></a><br /><sub>Short</sub></td>
+  </tr>
+</table>
+
 ## A blocked step, then the safe order
 
 A production database drop is blocked until the backup is taken and validated:
