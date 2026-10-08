@@ -462,3 +462,12 @@ func TestPostCommentSuccess(t *testing.T) {
 		t.Fatalf("PostComment returned an unexpected error: %v", err)
 	}
 }
+
+func TestDropGeneratedFiles(t *testing.T) {
+	diff := "diff --git a/demo/tailwind.css b/demo/tailwind.css\n+minified\ndiff --git a/demo/index.html b/demo/index.html\n+<p>\n"
+	got := DropGeneratedFiles(diff)
+	want := "diff --git a/demo/index.html b/demo/index.html\n+<p>\n"
+	if got != want {
+		t.Fatalf("got %q, want %q", got, want)
+	}
+}
