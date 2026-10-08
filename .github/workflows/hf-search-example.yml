@@ -1,0 +1,56 @@
+name: Hugging Face search example
+
+# Builds the Joltrin native library for Linux, installs CPU PyTorch and
+# transformers, and runs examples/hf_grounded_search/test_search.py: real
+# embeddings, a real Joltrin vector store, and questions with known answers.
+# Not a required check, so it can use a path filter.
+on:
+  pull_request:
+    paths:
+      - 'examples/hf_grounded_search/**'
+      - 'bindings/python/sop/**'
+      - 'bindings/main/**'
+      - 'README.md'
+      - 'docs/AGENT_PROTOCOLS.md'
+      - 'docs/AGENT_BARRIER_TESTS.md'
+      - 'docs/MCP_A2A_AND_VERIFICATION_ENGINE.md'
+      - 'docs/WHO_IS_IT_FOR.md'
+      - '.github/workflows/hf-search-example.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  hf-search:
+    name: Grounded search answers and refuses correctly
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: examples/hf_grounded_search/requirements.txt
+
+      - name: Build the native library
+        run: CGO_ENABLED=1 go build -buildmode=c-shared -o bindings/python/sop/libjsondb_amd64linux.so ./bindings/main
+
+      - name: Install CPU PyTorch and transformers
+        run: pip install -r examples/hf_grounded_search/requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
+
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/huggingface
+          key: hf-all-MiniLM-L6-v2-1110a24
+
+      - name: Run the search test
+        working-directory: examples/hf_grounded_search
+        env:
+          PYTHONPATH: ${{ github.workspace }}/bindings/python
+        run: python test_search.py
