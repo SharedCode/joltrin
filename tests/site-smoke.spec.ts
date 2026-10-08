@@ -87,6 +87,20 @@ for (const blockThirdParty of [false, true]) {
         expect(box!.height, `${path} an iframe has no height`).toBeGreaterThan(50);
       }
 
+      // A visitor using a screen reader hears each button by name, and each heading
+      // in order. An icon-only button without a label, or an h2 followed by an h4,
+      // is a flaw that never shows on screen.
+      const a11y = await page.evaluate(() => {
+        const unnamed = Array.from(document.querySelectorAll('button, [role="button"]'))
+          .filter((b) => !(b.textContent || '').trim() && !b.getAttribute('aria-label') && !b.getAttribute('title') && !b.getAttribute('aria-labelledby'))
+          .map((b) => b.outerHTML.slice(0, 100));
+        const levels = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6')).map((h) => Number(h.tagName[1]));
+        const skips = levels.flatMap((l, i) => (i > 0 && l - levels[i - 1] > 1 ? [`h${levels[i - 1]} then h${l}`] : []));
+        return { unnamed, skips };
+      });
+      expect(a11y.unnamed, `${path} buttons with no accessible name`).toEqual([]);
+      expect(a11y.skips, `${path} heading levels that skip`).toEqual([]);
+
       expect(problems, `${path} problems while loading`).toEqual([]);
     });
   }

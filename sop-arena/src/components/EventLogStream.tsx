@@ -30,9 +30,9 @@ export const EventLogStream: React.FC<EventLogStreamProps> = ({ logs, onClearLog
       <div className="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-dark-800">
         <div className="flex items-center space-x-2">
           <Terminal className="w-4 h-4 text-brand-400" />
-          <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+          <h2 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
             Live Distributed Event Stream
-          </h3>
+          </h2>
           <span className="text-[10px] px-1.5 py-0.5 rounded bg-dark-800 text-slate-400 font-mono">
             {logs.length} events
           </span>
