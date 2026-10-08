@@ -3,7 +3,9 @@ name: Site Check
 # Builds the site the way the Pages deploy does and fails if any file a page
 # names (video, poster, image, script) is missing from it. The deploy once
 # published a homepage whose video files were never copied, and the local
-# tests did not notice because they assemble the site a different way.
+# tests did not notice because they assemble the site a different way. It then
+# opens every page of that assembled site in a browser, with and without the
+# third-party hosts, and checks the embedded YouTube videos still play.
 # It runs on every pull request, with no path filter, because it is a required
 # check and a required check that does not run on a PR blocks that PR for good.
 on:
@@ -55,3 +57,31 @@ jobs:
 
       - name: Assemble the site and check every referenced file
         run: scripts/assemble-site.sh _site
+
+      - name: Check the embedded YouTube videos still embed
+        run: scripts/check-youtube.sh _site
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install test dependencies and browsers
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Open every page of the assembled site
+        env:
+          CI: true
+        run: npx playwright test tests/site-smoke.spec.ts --project=chromium --project=mobile-chrome
+
+      - name: Keep the report when the smoke test fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-smoke-results
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 14
