@@ -131,9 +131,10 @@ def main():
     args = ap.parse_args()
 
     embed = Embedder()
-    index = Index(tempfile.mkdtemp(prefix="joltrin-hf-"))
-    n = index.build(embed)
-    hits, best = index.ask(embed, args.question, args.k, args.min_score)
+    with tempfile.TemporaryDirectory(prefix="joltrin-hf-") as tmp:
+        index = Index(tmp)
+        n = index.build(embed)
+        hits, best = index.ask(embed, args.question, args.k, args.min_score)
     if not hits:
         print(f"I don't know. Nothing in {n} indexed passages is close enough (best score {best:.2f}, needs {args.min_score:.2f}).")
         return 1

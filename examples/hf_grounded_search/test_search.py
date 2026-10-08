@@ -41,7 +41,8 @@ NEAR_DOMAIN_PROBES = [
 ]
 
 embed = search.Embedder()
-index = search.Index(tempfile.mkdtemp(prefix="joltrin-hf-test-"))
+tmp = tempfile.TemporaryDirectory(prefix="joltrin-hf-test-")  # removed when the script exits
+index = search.Index(tmp.name)
 n = index.build(embed)
 print(f"indexed {n} chunks with {search.MODEL}@{search.REVISION[:7]}")
 
