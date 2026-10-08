@@ -44,6 +44,13 @@ Demonstrates a standalone in-memory KnowledgeBase workflow with nested categorie
 - **Key Feature**: `memory.KnowledgeBase` + `memory.NewStore`
 - **Why**: Gives you a minimal app you can run directly to see the high-level API in action.
 
+
+### 6. LangGraph agent over MCP (`langgraph_agent`)
+A LangGraph `StateGraph` that calls the verification barrier through `sop-mcp-server`, gets blocked on `drop_prod_db`, and recovers using the fields in the block. Python, with a pinned `requirements.txt`.
+- **Key Feature**: `langchain-mcp-adapters` over stdio, one session for the whole run.
+- **Models**: Claude through `langchain-anthropic` when `ANTHROPIC_API_KEY` is set, otherwise a scripted policy (not an LLM) so it runs offline.
+- **Check**: `python examples/langgraph_agent/test_agent.py`
+
 ---
 
 ## ▶️ Running the Examples

@@ -1,0 +1,44 @@
+name: LangGraph example
+
+# Runs examples/langgraph_agent against a freshly built sop-mcp-server, offline,
+# so the Python example and the server's structured block result cannot drift
+# apart unnoticed. Not a required check, so it can use a path filter.
+on:
+  pull_request:
+    paths:
+      - 'examples/langgraph_agent/**'
+      - 'tools/mcpserver/**'
+      - 'cmd/sop-mcp-server/**'
+      - 'verify/**'
+      - '.github/workflows/langgraph-example.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  langgraph-agent:
+    name: LangGraph agent recovers from a block
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: examples/langgraph_agent/requirements.txt
+
+      - run: go build -o sop-mcp-server ./cmd/sop-mcp-server
+
+      - run: pip install -r examples/langgraph_agent/requirements.txt
+
+      - name: Run the agent against the server
+        working-directory: examples/langgraph_agent
+        env:
+          JOLTRIN_MCP_SERVER: ${{ github.workspace }}/sop-mcp-server
+        run: python test_agent.py
