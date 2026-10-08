@@ -131,3 +131,42 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  verify-live:
+    name: Open the live site after the deploy
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install test dependencies and browsers
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Wait for the live site to answer
+        run: |
+          for i in $(seq 1 24); do
+            [ "$(curl -s -o /dev/null -w '%{http_code}' https://joltrinhq.com/)" = 200 ] && exit 0
+            sleep 5
+          done
+          echo "Error: https://joltrinhq.com/ did not answer 200 within two minutes" >&2
+          exit 1
+
+      - name: Open every page of the live site
+        env:
+          CI: true
+          LIVE_SITE: '1'
+          BASE_URL: https://joltrinhq.com
+        run: npx playwright test tests/site-smoke.spec.ts --project=chromium --project=mobile-chrome
+
+      - name: Check the live YouTube embeds
+        run: |
+          curl -fsS https://joltrinhq.com/ -o /tmp/live-index.html
+          mkdir -p /tmp/live && cp /tmp/live-index.html /tmp/live/index.html
+          scripts/check-youtube.sh /tmp/live

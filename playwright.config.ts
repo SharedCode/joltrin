@@ -82,7 +82,8 @@ export default defineConfig({
   ],
 
   // Automated webServer lifecycle management: boots static server with WASM MIME type support
-  webServer: {
+  // LIVE_SITE=1 points the tests at BASE_URL, for the check that runs after a deploy.
+  webServer: process.env.LIVE_SITE ? undefined : {
     command: 'node scripts/serve-test-site.mjs',
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,

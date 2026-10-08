@@ -27,28 +27,15 @@ if [ ! -f "demo-agents/sop-agents.wasm" ]; then
   (cd demo-agents && GOOS=js GOARCH=wasm go build -ldflags="-s -w" -o sop-agents.wasm .)
 fi
 
-# Assemble _site
-rm -rf _site
-mkdir -p _site/arena _site/agents _site/docs _site/assets
-
-echo "Copying Technical Demo..."
-cp -r demo/. _site/
-
-echo "Copying Joltrin Arena..."
-cp -r sop-arena/dist/. _site/arena/
-
-echo "Copying Agent Verification Barrier..."
-cp -r demo-agents/. _site/agents/
-
-echo "Copying Documentation and Assets..."
-cp -r docs/. _site/docs/
-cp -r docs/assets/. _site/assets/
-
-# Preserve custom domain (e.g. joltrinhq.com) if CNAME exists
-if [ -f "CNAME" ]; then
-  cp CNAME _site/CNAME
-elif [ -f "demo/CNAME" ]; then
-  cp demo/CNAME _site/CNAME
-fi
-
-echo "Site assembled successfully in _site/"
+# Assemble _site with the same script the Pages deploy runs, so the tests look at
+# what ships. A separate copy list here once let the tests pass on a site the
+# deploy then published with files missing.
+for f in demo/wasm_exec.js demo-agents/wasm_exec.js; do
+  if [ ! -f "$f" ]; then
+    GOROOT="$(go env GOROOT)"
+    src="${GOROOT}/lib/wasm/wasm_exec.js"
+    [ -f "$src" ] || src="${GOROOT}/misc/wasm/wasm_exec.js"
+    cp "$src" "$f"
+  fi
+done
+scripts/assemble-site.sh _site
