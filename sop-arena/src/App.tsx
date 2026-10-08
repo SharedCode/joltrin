@@ -474,7 +474,7 @@ export const App: React.FC = () => {
             </p>
           </div>
           <div>
-            <h4 className="font-mono text-xs uppercase font-bold text-white mb-2">Product Funnel</h4>
+            <h3 className="font-mono text-xs uppercase font-bold text-white mb-2">Product Funnel</h3>
             <ul className="space-y-1.5 text-xs font-mono">
               <li><a href="../" className="hover:text-white transition">🧠 Technical Demo &amp; Engine</a></li>
               <li><a href="./" className="hover:text-white transition text-brand-400">🎮 Joltrin Arena (Simulation)</a></li>
@@ -483,7 +483,7 @@ export const App: React.FC = () => {
             </ul>
           </div>
           <div>
-            <h4 className="font-mono text-xs uppercase font-bold text-white mb-2">Open Source</h4>
+            <h3 className="font-mono text-xs uppercase font-bold text-white mb-2">Open Source</h3>
             <ul className="space-y-1.5 text-xs font-mono">
               <li><a href="https://github.com/SharedCode/joltrin" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">GitHub Repository</a></li>
               <li><a href="../docs/" className="hover:text-white transition">Documentation</a></li>
