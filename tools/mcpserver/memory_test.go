@@ -93,6 +93,7 @@ func TestNextSessionIsToldWhatBlockedBefore(t *testing.T) {
 	_, instr2 := connect(t, WithMemory(open(), lessons))
 	for _, want := range []string{
 		"advisory",
+		"only if execute_step reported it committed",
 		"db-maintenance",
 		"before drop_prod_db",
 		"take_backup, then validate_backup",
@@ -110,6 +111,9 @@ func TestNextSessionIsToldWhatBlockedBefore(t *testing.T) {
 	}
 	if !strings.Contains(string(b), "take_backup, then validate_backup") || !strings.Contains(string(b), "# Joltrin lessons") {
 		t.Errorf("lessons file:\n%s", b)
+	}
+	if !strings.Contains(string(b), evidenceRule) {
+		t.Errorf("lessons file missing the evidence rule:\n%s", b)
 	}
 }
 
