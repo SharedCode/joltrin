@@ -1,8 +1,11 @@
 package blocklog
 
 import (
+	"fmt"
+	"math/rand"
 	"os"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"strings"
 	"sync"
@@ -249,5 +252,79 @@ func TestOpenSucceedsWhenTheFileCannotBeCompacted(t *testing.T) {
 	}
 	if l.CompactionError() == nil {
 		t.Error("the failed compaction should be reported")
+	}
+}
+
+// summaryByScan is Summary as it was before the index: every entry is checked.
+func summaryByScan(l *Log, workflow, version string, step verify.StepID, blockedBy string, missing verify.State) (s Summary, ok bool) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	cutoff := l.now().Add(-l.ttl)
+	for i := range l.entries {
+		e := &l.entries[i]
+		if e.Kind != "" || e.Workflow != workflow || e.Version != version || e.Step != step ||
+			e.BlockedBy != blockedBy || e.MissingState != missing || e.At.Before(cutoff) {
+			continue
+		}
+		if !ok {
+			s = Summary{Step: e.Step, BlockedBy: e.BlockedBy, MissingState: e.MissingState}
+			ok = true
+		}
+		s.Runs++
+		if !e.At.Before(s.LastSeen) {
+			s.LastSeen = e.At
+			s.EstablishedBy = e.EstablishedBy
+		}
+	}
+	return s, ok
+}
+
+// TestSummaryIndexAgreesWithAFullScan records blocks, runs and recoveries
+// through trims and expiry, and checks every lookup against the scan.
+func TestSummaryIndexAgreesWithAFullScan(t *testing.T) {
+	now := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	l := New(WithMaxEntries(40), WithTTL(10*time.Hour), WithClock(func() time.Time { return now }))
+	rng := rand.New(rand.NewSource(1))
+	steps := []verify.StepID{"a", "b", "c"}
+	states := []verify.State{"x", "y"}
+	for i := 0; i < 600; i++ {
+		now = now.Add(time.Duration(rng.Intn(40)) * time.Minute)
+		switch rng.Intn(4) {
+		case 0:
+			_, _ = l.RecordRun("w", "v1", fmt.Sprintf("t%d", rng.Intn(30)))
+		case 1:
+			_, _ = l.RecordRecovery("w", "v1", fmt.Sprintf("t%d", rng.Intn(30)), steps[rng.Intn(3)])
+		default:
+			_, _ = l.Record(Entry{
+				Workflow: "w", Version: fmt.Sprintf("v%d", 1+rng.Intn(2)), TraceID: fmt.Sprintf("t%d", rng.Intn(30)),
+				Step: steps[rng.Intn(3)], BlockedBy: "precondition", MissingState: states[rng.Intn(2)],
+				EstablishedBy: []verify.StepID{steps[rng.Intn(3)]},
+			})
+		}
+		for _, v := range []string{"v1", "v2"} {
+			for _, st := range steps {
+				for _, ms := range states {
+					got, gok := l.Summary("w", v, st, "precondition", ms)
+					want, wok := summaryByScan(l, "w", v, st, "precondition", ms)
+					if gok != wok || !reflect.DeepEqual(got, want) {
+						t.Fatalf("step %d, %s/%s/%s: index %+v %v, scan %+v %v", i, v, st, ms, got, gok, want, wok)
+					}
+				}
+			}
+		}
+	}
+	// Nothing is left behind for entries that were trimmed away.
+	listed := 0
+	for _, seqs := range l.bySum {
+		listed += len(seqs)
+	}
+	blocks := 0
+	for _, e := range l.entries {
+		if e.Kind == "" {
+			blocks++
+		}
+	}
+	if listed != blocks {
+		t.Fatalf("index lists %d entries, log holds %d blocks", listed, blocks)
 	}
 }

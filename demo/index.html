@@ -37,7 +37,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <script>window.lucide = { createIcons: function () {} };</script>
-  <script src="https://unpkg.com/lucide@1.52.0/dist/umd/lucide.min.js" defer></script>
+  <script src="https://unpkg.com/lucide@1.52.0/dist/umd/lucide.min.js" integrity="sha384-SSRIJfpvnhji4rCcULgpNXRJjQ9P/odU9OaWxSumsZiokvJ7zAu4PGQVWyWxTG3u" crossorigin="anonymous" defer></script>
 
   <!-- Go WebAssembly Runtime Support -->
   <script src="wasm_exec.js"></script>
@@ -674,8 +674,8 @@ barrier -&gt; ALLOWED</pre>
         </p>
       </div>
       <div class="flex flex-wrap items-center gap-2 mb-3" role="tablist" aria-label="Agent scenario">
-        <button type="button" role="tab" data-team-scenario="0" aria-selected="true" class="team-tab px-3 py-1.5 rounded-lg border border-brand-500/60 text-brand-400 font-mono text-xs">Latency alert</button>
-        <button type="button" role="tab" data-team-scenario="1" aria-selected="false" class="team-tab px-3 py-1.5 rounded-lg border border-dark-700 text-slate-400 font-mono text-xs">PagerDuty incident</button>
+        <button type="button" role="tab" data-team-scenario="0" aria-selected="true" class="team-tab px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg border border-brand-500/60 text-brand-400 font-mono text-xs">Latency alert</button>
+        <button type="button" role="tab" data-team-scenario="1" aria-selected="false" class="team-tab px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg border border-dark-700 text-slate-400 font-mono text-xs">PagerDuty incident</button>
         <button id="team-run" type="button" class="ml-auto px-4 py-2 rounded-lg bg-brand-500 hover:bg-brand-400 text-dark-950 font-mono font-semibold text-sm transition">Run the agents</button>
       </div>
       <pre id="team-log" aria-live="polite" class="p-4 rounded-xl bg-dark-950 border border-dark-750 text-xs font-mono text-slate-300 overflow-x-auto min-h-[16rem] whitespace-pre-wrap"></pre>
@@ -1129,8 +1129,8 @@ barrier -&gt; ALLOWED</pre>
 
             <!-- Terminal Output Window -->
             <div id="terminal-logs" class="bg-dark-950 rounded-xl p-4 border border-dark-800 font-mono text-[11px] leading-relaxed text-slate-300 h-80 overflow-y-auto terminal-scroll space-y-1.5 flex-grow">
-              <div class="text-dark-600">// Ready to process client-side ACID transactions.</div>
-              <div class="text-dark-600">// Click 'Execute Atomic Transfer' to dispatch transaction to Go WASM kernel.</div>
+              <div class="text-slate-500">// Ready to process client-side ACID transactions.</div>
+              <div class="text-slate-500">// Click 'Execute Atomic Transfer' to dispatch transaction to Go WASM kernel.</div>
             </div>
 
             <!-- Transaction Guarantee Badges -->
@@ -1368,10 +1368,10 @@ barrier -&gt; ALLOWED</pre>
               </button>
             </div>
 
-            <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400 font-mono mb-2">Committed Reasoning Trace</h4>
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 font-mono mb-2">Committed Reasoning Trace</h3>
             <div id="agent-trace-list" class="space-y-2 max-h-64 overflow-y-auto terminal-scroll"></div>
 
-            <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400 font-mono mt-6 mb-2">Recalled From Memory</h4>
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 font-mono mt-6 mb-2">Recalled From Memory</h3>
             <div id="agent-recall-results" class="space-y-2">
               <div class="text-xs text-slate-500 font-mono">Run "Recall Similar Past Incidents" to search committed agent memory.</div>
             </div>
@@ -1657,7 +1657,7 @@ barrier -&gt; ALLOWED</pre>
       <div class="bg-dark-900 border border-brand-500/40 rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
         
         <!-- Close Button -->
-        <button onclick="closeProCheckoutModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition p-1 cursor-pointer">
+        <button type="button" aria-label="Close" onclick="closeProCheckoutModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition p-1 cursor-pointer">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
 
@@ -1942,7 +1942,7 @@ barrier -&gt; ALLOWED</pre>
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center space-x-2">
               <span class="w-5 h-5 rounded-full bg-accent-cyan/10 text-accent-cyan flex items-center justify-center font-mono text-xs font-bold">#${res.rank}</span>
-              <h4 class="font-bold text-white text-sm">${res.title}</h4>
+              <h3 class="font-bold text-white text-sm">${res.title}</h3>
               <span class="text-[10px] px-2 py-0.5 rounded bg-dark-800 text-slate-400 font-mono">${res.category}</span>
             </div>
             <span class="font-mono text-xs font-bold text-accent-cyan">${(res.similarity).toFixed(4)} score</span>

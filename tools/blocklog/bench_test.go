@@ -33,6 +33,17 @@ func BenchmarkSummaries(b *testing.B) {
 	}
 }
 
+// BenchmarkSummary is the lookup execute_step does for one block, over a full log.
+func BenchmarkSummary(b *testing.B) {
+	l := New()
+	fill(b, l, DefaultMaxEntries)
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = l.Summary("db-maintenance", "v1", "step_3", "precondition", "state_3")
+	}
+}
+
 // BenchmarkStats is the run and rule totals over the same log.
 func BenchmarkStats(b *testing.B) {
 	l := New()
@@ -63,5 +74,17 @@ func BenchmarkRecordToFile(b *testing.B) {
 		}); err != nil {
 			b.Fatal(err)
 		}
+	}
+}
+
+// BenchmarkSummaryByScan is the same lookup done the way Summary did it before
+// the index, for comparison.
+func BenchmarkSummaryByScan(b *testing.B) {
+	l := New()
+	fill(b, l, DefaultMaxEntries)
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = summaryByScan(l, "db-maintenance", "v1", "step_3", "precondition", "state_3")
 	}
 }

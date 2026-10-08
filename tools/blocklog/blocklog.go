@@ -81,6 +81,18 @@ func (e Entry) key() key {
 	return key{e.Kind, e.Workflow, e.Version, e.TraceID, e.Step, e.BlockedBy, e.MissingState}
 }
 
+// sumKey is what Summary looks a block up by.
+type sumKey struct {
+	workflow, version string
+	step              verify.StepID
+	blockedBy         string
+	missing           verify.State
+}
+
+func (e *Entry) sumKey() sumKey {
+	return sumKey{e.Workflow, e.Version, e.Step, e.BlockedBy, e.MissingState}
+}
+
 // Option configures a Log.
 type Option func(*Log)
 
@@ -112,9 +124,15 @@ func WithClock(now func() time.Time) Option {
 // Log holds recorded blocks, in memory and optionally in an append-only JSON
 // lines file. It is safe for concurrent use.
 type Log struct {
-	mu         sync.Mutex
-	entries    []Entry
-	seen       map[key]struct{}
+	mu      sync.Mutex
+	entries []Entry
+	seen    map[key]struct{}
+	// base is the sequence number of entries[0]; an entry's sequence number is
+	// base plus its position, and never changes while it is kept. bySum lists,
+	// in order, the sequence numbers of the block entries for each sumKey, so
+	// Summary reads the few that match instead of scanning every entry.
+	base       uint64
+	bySum      map[sumKey][]uint64
 	file       *os.File
 	path       string
 	compactErr error
@@ -126,6 +144,7 @@ type Log struct {
 func newLog(opts []Option) *Log {
 	l := &Log{
 		seen:       make(map[key]struct{}),
+		bySum:      make(map[sumKey][]uint64),
 		ttl:        DefaultTTL,
 		maxEntries: DefaultMaxEntries,
 		now:        time.Now,
@@ -234,15 +253,30 @@ func (l *Log) rewrite(path string) error {
 }
 
 func (l *Log) add(e Entry) {
+	if e.Kind == "" {
+		sk := e.sumKey()
+		l.bySum[sk] = append(l.bySum[sk], l.base+uint64(len(l.entries)))
+	}
 	l.entries = append(l.entries, e)
 	l.seen[e.key()] = struct{}{}
 }
 
-// trim drops the oldest entries until the cap holds.
+// trim drops the oldest entries until the cap holds. A dropped block entry has
+// the lowest sequence number of its sumKey, so it is the first in that list.
 func (l *Log) trim() {
 	for len(l.entries) > l.maxEntries {
-		delete(l.seen, l.entries[0].key())
+		old := &l.entries[0]
+		delete(l.seen, old.key())
+		if old.Kind == "" {
+			sk := old.sumKey()
+			if seqs := l.bySum[sk][1:]; len(seqs) > 0 {
+				l.bySum[sk] = seqs
+			} else {
+				delete(l.bySum, sk)
+			}
+		}
 		l.entries = l.entries[1:]
+		l.base++
 	}
 }
 
@@ -499,10 +533,9 @@ func (l *Log) Summary(workflow, version string, step verify.StepID, blockedBy st
 	defer l.mu.Unlock()
 
 	cutoff := l.now().Add(-l.ttl)
-	for i := range l.entries {
-		e := &l.entries[i]
-		if e.Kind != "" || e.Workflow != workflow || e.Version != version || e.Step != step ||
-			e.BlockedBy != blockedBy || e.MissingState != missing || e.At.Before(cutoff) {
+	for _, seq := range l.bySum[sumKey{workflow, version, step, blockedBy, missing}] {
+		e := &l.entries[seq-l.base]
+		if e.At.Before(cutoff) {
 			continue
 		}
 		if !ok {

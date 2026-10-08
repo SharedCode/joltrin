@@ -82,10 +82,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       {/* Scripted "Aha!" Scenarios Header */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono flex items-center space-x-2">
+          <h2 className="text-xs font-bold text-white uppercase tracking-wider font-mono flex items-center space-x-2">
             <Flame className="w-4 h-4 text-brand-400" />
             <span>Interactive Missions</span>
-          </h3>
+          </h2>
           <span className="text-[10px] text-slate-500 font-mono">Select to start simulation</span>
         </div>
 
@@ -123,9 +123,9 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       {/* Manual Sandbox Controls */}
       <div className="border-t border-dark-800 pt-4 space-y-3">
         <div className="flex items-center justify-between">
-          <h4 className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 font-mono">
+          <h3 className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 font-mono">
             Live Chaos & Swarm Injections
-          </h4>
+          </h3>
           <span className="text-[10px] text-slate-500 font-mono">Test fault tolerance</span>
         </div>
 

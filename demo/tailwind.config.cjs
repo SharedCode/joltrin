@@ -4,6 +4,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // slate-500 is 4.0:1 on the dark panels, under the 4.5:1 small text needs.
+        slate: { 500: '#808fa5' },
         brand: {
           50: '#ecfdf5',
           100: '#d1fae5',

@@ -25,30 +25,14 @@
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
   <link rel="alternate icon" href="./favicon.ico" />
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: { 50:'#ecfdf5', 100:'#d1fae5', 400:'#34d399', 500:'#10b981', 600:'#059669', 700:'#047857' },
-            dark: { 950:'#07090E', 900:'#0B0F17', 850:'#111726', 800:'#182238', 700:'#22304E', 600:'#334155' },
-            accent: { cyan:'#06B6D4', violet:'#8B5CF6', amber:'#F59E0B', rose:'#f43f5e' }
-          },
-          fontFamily: {
-            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-            mono: ['JetBrains Mono', 'Fira Code', 'monospace']
-          }
-        }
-      }
-    }
-  </script>
+  <link rel="stylesheet" href="./tailwind.css" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- No-op until the icon script below loads. If unpkg.com is blocked or slow, createIcons() does nothing and the page still works; icons just do not draw. -->
+  <script>window.lucide = { createIcons: function () {} };</script>
+  <script src="https://unpkg.com/lucide@1.52.0/dist/umd/lucide.min.js" integrity="sha384-SSRIJfpvnhji4rCcULgpNXRJjQ9P/odU9OaWxSumsZiokvJ7zAu4PGQVWyWxTG3u" crossorigin="anonymous" defer></script>
 
   <script src="wasm_exec.js"></script>
 
@@ -240,7 +224,7 @@
         <div class="w-9 h-9 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-center justify-center text-brand-400 mb-3">
           <i data-lucide="brain" class="w-4 h-4"></i>
         </div>
-        <h3 class="font-bold text-white text-sm mb-1.5">Agent Memory</h3>
+        <h2 class="font-bold text-white text-sm mb-1.5">Agent Memory</h2>
         <p class="text-xs text-slate-400 leading-relaxed font-mono">
           Persistent agent state, step checkpoints, and 128-d vector similarity indexing across sessions without external database latency.
         </p>
@@ -250,7 +234,7 @@
         <div class="w-9 h-9 rounded-xl bg-accent-cyan/10 border border-accent-cyan/30 flex items-center justify-center text-accent-cyan mb-3">
           <i data-lucide="refresh-cw" class="w-4 h-4"></i>
         </div>
-        <h3 class="font-bold text-white text-sm mb-1.5">Agent Recovery</h3>
+        <h2 class="font-bold text-white text-sm mb-1.5">Agent Recovery</h2>
         <p class="text-xs text-slate-400 leading-relaxed font-mono">
           Crash resumption, atomic rollback of interrupted reasoning chains, and self-healing task trees when workers fail mid-flight.
         </p>
@@ -260,7 +244,7 @@
         <div class="w-9 h-9 rounded-xl bg-accent-violet/10 border border-accent-violet/30 flex items-center justify-center text-accent-violet mb-3">
           <i data-lucide="shield-check" class="w-4 h-4"></i>
         </div>
-        <h3 class="font-bold text-white text-sm mb-1.5">Agent Verification</h3>
+        <h2 class="font-bold text-white text-sm mb-1.5">Agent Verification</h2>
         <p class="text-xs text-slate-400 leading-relaxed font-mono">
           Deterministic precedence checks gating destructive operations. Evaluates actions against explicit policies before execution.
         </p>
@@ -270,7 +254,7 @@
         <div class="w-9 h-9 rounded-xl bg-accent-amber/10 border border-accent-amber/30 flex items-center justify-center text-accent-amber mb-3">
           <i data-lucide="lock" class="w-4 h-4"></i>
         </div>
-        <h3 class="font-bold text-white text-sm mb-1.5">Agent Governance</h3>
+        <h2 class="font-bold text-white text-sm mb-1.5">Agent Governance</h2>
         <p class="text-xs text-slate-400 leading-relaxed font-mono">
           Okta &amp; Microsoft Entra ID identity binding, tamper-evident audit trails, hierarchical RBAC, and policy rate limits.
         </p>
@@ -351,57 +335,57 @@
     <!-- Realistic Example Use Cases Grid -->
     <section class="mb-12">
       <div class="mb-6">
-        <h3 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">Designed For Enterprise Agentic Workflows</h3>
+        <p class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">Designed For Enterprise Agentic Workflows</p>
         <h2 class="text-xl sm:text-2xl font-bold text-white mt-1">Example Production Use Cases</h2>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div class="p-4 rounded-xl bg-dark-900 border border-dark-800">
-          <h4 class="font-bold text-white text-sm mb-1 flex items-center space-x-1.5">
+          <h3 class="font-bold text-white text-sm mb-1 flex items-center space-x-1.5">
             <i data-lucide="server" class="w-4 h-4 text-brand-400"></i>
             <span>AI DevOps &amp; Cloud Automation</span>
-          </h4>
+          </h3>
           <p class="text-xs text-slate-400 leading-relaxed">
             Guarding Terraform plans, Kubernetes deployments, and database schema migrations with automated pre-flight checks.
           </p>
         </div>
         <div class="p-4 rounded-xl bg-dark-900 border border-dark-800">
-          <h4 class="font-bold text-white text-sm mb-1 flex items-center space-x-1.5">
+          <h3 class="font-bold text-white text-sm mb-1 flex items-center space-x-1.5">
             <i data-lucide="code" class="w-4 h-4 text-accent-cyan"></i>
             <span>Software Engineering Agents</span>
-          </h4>
+          </h3>
           <p class="text-xs text-slate-400 leading-relaxed">
             Persistent workspace checkpoints, reasoning step rollbacks on test failures, and sandboxed tool call verification.
           </p>
         </div>
         <div class="p-4 rounded-xl bg-dark-900 border border-dark-800">
-          <h4 class="font-bold text-white text-sm mb-1 flex items-center space-x-1.5">
+          <h3 class="font-bold text-white text-sm mb-1 flex items-center space-x-1.5">
             <i data-lucide="file-check" class="w-4 h-4 text-accent-violet"></i>
             <span>Enterprise Workflow Agents</span>
-          </h4>
+          </h3>
           <p class="text-xs text-slate-400 leading-relaxed">
             Multi-step invoice processing, payroll approvals, and customer data updates with role-based identity validation.
           </p>
         </div>
         <div class="p-4 rounded-xl bg-dark-900 border border-dark-800">
-          <h4 class="font-bold text-white text-sm mb-1 flex items-center space-x-1.5">
+          <h3 class="font-bold text-white text-sm mb-1 flex items-center space-x-1.5">
             <i data-lucide="users" class="w-4 h-4 text-brand-400"></i>
             <span>Multi-Agent Swarms</span>
-          </h4>
+          </h3>
           <p class="text-xs text-slate-400 leading-relaxed">
             A shared, serializable transactional blackboard enabling swarms of agents to coordinate state without race conditions.
           </p>
         </div>
         <div class="p-4 rounded-xl bg-dark-900 border border-dark-800">
-          <h4 class="font-bold text-white text-sm mb-1 flex items-center space-x-1.5">
+          <h3 class="font-bold text-white text-sm mb-1 flex items-center space-x-1.5">
             <i data-lucide="tool" class="w-4 h-4 text-amber-400"></i>
             <span>Tool-Using AI Agents</span>
-          </h4>
+          </h3>
           <p class="text-xs text-slate-400 leading-relaxed">
             Preventing unvetted API calls, data exfiltration, and quota exhaustion through rate-limited policy verification.
           </p>
         </div>
         <div class="p-4 rounded-xl bg-dark-900 border border-dark-800">
-          <h4 class="font-bold text-white text-sm mb-1 flex items-center space-x-1.5">
+          <h3 class="font-bold text-white text-sm mb-1 flex items-center space-x-1.5">
             <i data-lucide="box" class="w-4 h-4 text-accent-cyan"></i>
             <span>MCP-Based Infrastructure</span>
           </h4>
@@ -688,7 +672,7 @@ curl localhost:8087/.well-known/agent-card.json</pre>
         </p>
       </div>
       <div>
-        <h4 class="font-mono text-xs uppercase font-bold text-white mb-3">Product Funnel</h4>
+        <h3 class="font-mono text-xs uppercase font-bold text-white mb-3">Product Funnel</h3>
         <ul class="space-y-2 text-xs font-mono">
           <li><a href="../" class="hover:text-white transition">🧠 Technical Demo &amp; Engine</a></li>
           <li><a href="../arena/" class="hover:text-white transition">🎮 Joltrin Arena (Simulation)</a></li>
@@ -698,7 +682,7 @@ curl localhost:8087/.well-known/agent-card.json</pre>
         </ul>
       </div>
       <div>
-        <h4 class="font-mono text-xs uppercase font-bold text-white mb-3">Open Source &amp; Community</h4>
+        <h3 class="font-mono text-xs uppercase font-bold text-white mb-3">Open Source &amp; Community</h3>
         <ul class="space-y-2 text-xs font-mono">
           <li><a href="https://github.com/SharedCode/joltrin" target="_blank" rel="noopener noreferrer" class="hover:text-white transition flex items-center space-x-1.5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg><span>GitHub (SharedCode/joltrin)</span></a></li>
           <li><a href="../docs/" class="hover:text-white transition">Documentation</a></li>
