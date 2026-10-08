@@ -44,6 +44,11 @@ Demonstrates a standalone in-memory KnowledgeBase workflow with nested categorie
 - **Key Feature**: `memory.KnowledgeBase` + `memory.NewStore`
 - **Why**: Gives you a minimal app you can run directly to see the high-level API in action.
 
+### 6. Grounded search with Hugging Face embeddings (`hf_grounded_search`)
+Embeds Joltrin's own docs with `all-MiniLM-L6-v2`, stores the vectors in a Joltrin vector store through the Python bindings, and answers questions with citations or says "I don't know". The embedding step is written with `transformers` and `torch` directly so each part is visible.
+- **Key Feature**: `sop.ai` `upsert_batch` and `query`, with the model pinned to one Hub commit.
+- **Check**: `PYTHONPATH=bindings/python python examples/hf_grounded_search/test_search.py` (needs the native library built for your machine)
+
 ---
 
 ## ▶️ Running the Examples
