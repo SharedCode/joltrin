@@ -87,10 +87,7 @@ for (const blockThirdParty of [false, true]) {
         expect(box!.height, `${path} an iframe has no height`).toBeGreaterThan(50);
       }
 
-      // /agents/ still loads Tailwind and the icon library from a CDN at runtime, so
-      // those two errors are known when the CDN is blocked. Anything else is not.
-      const known = path === '/agents/' && blockThirdParty ? /^uncaught error: (ReferenceError: )?(Can't find variable: (tailwind|lucide)|(tailwind|lucide) is not defined)$/ : null;
-      expect(problems.filter((p) => !known || !known.test(p)), `${path} problems while loading`).toEqual([]);
+      expect(problems, `${path} problems while loading`).toEqual([]);
     });
   }
 }

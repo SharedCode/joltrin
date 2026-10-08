@@ -22,7 +22,7 @@ cp -r docs/assets/. "$SITE/assets/"
 # SOP Arena lives at a subpath of the same site: joltrinhq.com/arena/
 cp -r sop-arena/dist/. "$SITE/arena/"
 # Agent verification barrier (verify in WASM) lives at joltrinhq.com/agents/
-cp demo-agents/index.html demo-agents/sop-agents.wasm demo-agents/wasm_exec.js demo-agents/favicon.svg demo-agents/favicon.ico demo-agents/og-image.png demo-agents/logo-mark.png "$SITE/agents/"
+cp demo-agents/index.html demo-agents/tailwind.css demo-agents/sop-agents.wasm demo-agents/wasm_exec.js demo-agents/favicon.svg demo-agents/favicon.ico demo-agents/og-image.png demo-agents/logo-mark.png "$SITE/agents/"
 # Preserve custom domain (e.g. joltrinhq.com) if CNAME exists
 if [ -f CNAME ]; then
   cp CNAME "$SITE/CNAME"
