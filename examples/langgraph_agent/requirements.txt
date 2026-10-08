@@ -1,0 +1,5 @@
+langgraph==1.2.14
+langchain-core==1.6.7
+langchain-mcp-adapters==0.3.2
+mcp==1.30.0
+langchain-anthropic==1.7.5

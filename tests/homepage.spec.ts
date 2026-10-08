@@ -104,6 +104,15 @@ test.describe('Homepage', () => {
     await expect(section).toContainText('curl -fsSL https://raw.githubusercontent.com/SharedCode/joltrin/master/scripts/install.sh | sh');
   });
 
+  test('shows how to drive the barrier from LangGraph and says the offline policy is not a model', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const section = page.locator('#test-your-agent');
+    await expect(section).toContainText('Or drive it from LangGraph');
+    await expect(section).toContainText('The policy is not a language model');
+    await expect(section).toContainText("BLOCKED missing backup_validated, run first: ['validate_backup']");
+    await expect(section.getByRole('link', { name: 'Source and setup' })).toHaveAttribute('href', /examples\/langgraph_agent$/);
+  });
+
   test('three live experiences are linked right after the hero', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const strip = page.locator('#live-experiences');

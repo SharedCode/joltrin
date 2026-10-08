@@ -626,6 +626,19 @@
         <p class="text-slate-400 mb-3">Any agent that supports MCP can use the barrier. This downloads a binary of about 6 MB, checks its checksum, and registers it with Claude Code, Codex, and the Gemini CLI, whichever are installed. No Go needed.</p>
         <pre class="whitespace-pre-wrap break-all rounded-lg bg-dark-900 border border-dark-800 p-3 font-mono text-slate-200 leading-relaxed">curl -fsSL https://raw.githubusercontent.com/SharedCode/joltrin/master/scripts/install.sh | sh</pre>
         <p class="text-slate-400 mt-3">Then ask it: "Use the joltrin tools to run <code>drop_prod_db</code> on workflow <code>db-maintenance</code> with trace id <code>t1</code>." The server refuses until <code>take_backup</code> and <code>validate_backup</code> have run in that trace, whatever the agent claims. <a href="https://github.com/SharedCode/joltrin/blob/master/docs/AGENT_BARRIER_TESTS.md" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:text-white underline underline-offset-2">Recorded runs with real agents</a>.</p>
+        <span class="text-white font-bold block text-sm mt-5 mb-1">Or drive it from LangGraph</span>
+        <p class="text-slate-400 mb-3">A <code>StateGraph</code> with an agent node, a <code>ToolNode</code> over the server's MCP tools, and a loop between them. The agent tries <code>drop_prod_db</code>, reads the block, runs the steps it names, and retries. With <code>ANTHROPIC_API_KEY</code> set, a Claude model makes the calls. Without it, a small scripted policy stands in so the example runs offline and in CI. The policy is not a language model.</p>
+        <pre class="whitespace-pre-wrap break-all rounded-lg bg-dark-900 border border-dark-800 p-3 font-mono text-slate-200 leading-relaxed">agent   -&gt; execute_step drop_prod_db
+barrier -&gt; BLOCKED missing backup_validated, run first: ['validate_backup']
+agent   -&gt; execute_step validate_backup
+barrier -&gt; BLOCKED missing backup_taken, run first: ['take_backup']
+agent   -&gt; execute_step take_backup
+barrier -&gt; ALLOWED
+agent   -&gt; execute_step validate_backup
+barrier -&gt; ALLOWED
+agent   -&gt; execute_step drop_prod_db
+barrier -&gt; ALLOWED</pre>
+        <p class="text-slate-400 mt-3">That output is from a run of <code>examples/langgraph_agent/agent.py</code> with the scripted policy. <a href="https://github.com/SharedCode/joltrin/tree/master/examples/langgraph_agent" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:text-white underline underline-offset-2">Source and setup</a>.</p>
       </div>
     </section>
 
