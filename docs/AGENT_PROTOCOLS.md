@@ -132,6 +132,8 @@ A blocked `execute_step` also carries the matching lesson in `lesson`, next to `
 
 `read_lessons` also reports, per runbook, how many runs called `execute_step` and, for each rule, how many runs it blocked and how many of those went on to run every step it had blocked. A rule that blocks many runs and is usually recovered from is being hit early and then followed. A rule that blocks runs that rarely recover is stopping runs that never finished the step. The numbers show how often a rule trips and whether agents get past it, not whether the rule is right.
 
+Whenever there are lessons, the instructions and `LESSONS.md` also open with one rule about claims: a step is done only if `execute_step` reported it committed in this run, and an agent that is unsure should say so and check. A precondition block is what an agent hits when it acts as if a step ran that did not, so the rule sits next to those lessons. It is a prompt, not a check; the barrier is what enforces it.
+
 It is off by default and advice only: the barrier still checks every call, so history never unlocks a step. Lessons name only steps and states from your runbook, and they expire after 30 days or when the runbook changes. Servers that share a folder all keep recording, but each one only sees what the others recorded after it restarts.
 
 ### Use your own runbooks
