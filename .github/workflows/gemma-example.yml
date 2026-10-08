@@ -1,0 +1,33 @@
+name: Gemma example
+
+# Runs the offline tests for examples/gemma_ollama. They use a scripted Ollama
+# server and the real Joltrin vector store and verify barrier, so no model is
+# needed. The live test against gemma3:4b is skipped unless JOLTRIN_OLLAMA_LIVE=1.
+# Not a required check, so it can use a path filter.
+on:
+  pull_request:
+    paths:
+      - 'examples/gemma_ollama/**'
+      - 'verify/**'
+      - 'ai/vector/**'
+      - 'ai/embed/ollama.go'
+      - '.github/workflows/gemma-example.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  gemma-ollama:
+    name: Gemma agent loop, offline
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - run: go vet ./examples/gemma_ollama
+
+      - run: go test ./examples/gemma_ollama -race -count=1 -v
