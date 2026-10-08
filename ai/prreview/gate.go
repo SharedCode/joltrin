@@ -253,6 +253,7 @@ func RunGate(ctx context.Context, cfg GateConfig) error {
 	if err != nil {
 		return fail("Gemini review failed: could not fetch diff", err)
 	}
+	diff = DropGeneratedFiles(diff)
 	if strings.TrimSpace(diff) == "" {
 		return fail("Gemini review inconclusive: empty diff", nil)
 	}

@@ -230,6 +230,23 @@ func FetchFailingChecks(ctx context.Context, token, owner, repo, sha string) ([]
 	return failing, nil
 }
 
+// DropGeneratedFiles removes per-file sections for build output that is
+// regenerated from source (the compiled Tailwind stylesheets), so a one-line
+// minified file does not push a small change over the size limit.
+func DropGeneratedFiles(diff string) string {
+	var out strings.Builder
+	skip := false
+	for _, line := range strings.SplitAfter(diff, "\n") {
+		if strings.HasPrefix(line, "diff --git ") {
+			skip = strings.HasSuffix(strings.TrimSpace(line), "/tailwind.css")
+		}
+		if !skip {
+			out.WriteString(line)
+		}
+	}
+	return out.String()
+}
+
 // TruncateDiff caps diff at maxBytes so the Gemini request stays within the
 // model's input token budget. It reports whether truncation happened.
 func TruncateDiff(diff string, maxBytes int) (string, bool) {
