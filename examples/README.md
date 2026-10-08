@@ -55,6 +55,13 @@ A LangGraph `StateGraph` that calls the verification barrier through `sop-mcp-se
 - **Models**: Claude through `langchain-anthropic` when `ANTHROPIC_API_KEY` is set, otherwise a scripted policy (not an LLM) so it runs offline.
 - **Check**: `python examples/langgraph_agent/test_agent.py`
 
+### 8. Local agent with Gemma over Ollama (`gemma_ollama`)
+Gemma (`gemma3:4b`) proposes actions and `embeddinggemma` provides the vectors. Joltrin retrieves context from an embedded vector store, runs the verification barrier, and commits each accepted action in a transaction. Everything stays in one Go process with no remote database.
+- **Key Feature**: app-level schema check, then `verify.Workflow.CheckSafety`, then an ACID commit. A model that asks to publish before a human approval is blocked on every attempt and writes nothing.
+- **Why**: Small open-weight models send malformed or out-of-order actions. Splitting payload validation (app code) from ordering rules (the barrier) keeps each layer simple.
+- **Run**: `ollama pull gemma3:4b && ollama pull embeddinggemma`, then `go run ./examples/gemma_ollama`
+- **Check**: `go test ./examples/gemma_ollama` (offline). Add `JOLTRIN_OLLAMA_LIVE=1 -run TestLiveGemma` to run against your local Ollama.
+
 ---
 
 ## ▶️ Running the Examples
