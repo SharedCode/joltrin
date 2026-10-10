@@ -6,7 +6,7 @@ require (
 	github.com/google/cel-go v0.30.0
 	github.com/google/uuid v1.6.0
 	github.com/kelindar/search v0.4.1
-	github.com/sethvargo/go-retry v0.4.0
+	github.com/sethvargo/go-retry v0.5.0
 	github.com/sharedcode/joltrin/infs v0.1.0
 	github.com/sharedcode/joltrin/jsondb v0.1.0
 	github.com/sharedcode/joltrin/search v0.1.0
