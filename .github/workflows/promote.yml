@@ -38,7 +38,7 @@ jobs:
           echo "SHA=${{ github.event.inputs.sha || github.event.workflow_run.head_sha }}" >> "$GITHUB_ENV"
           echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/joltrin-quickstart" >> "$GITHUB_ENV"
 
-      - uses: docker/login-action@v3
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
