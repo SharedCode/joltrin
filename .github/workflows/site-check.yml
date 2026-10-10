@@ -78,7 +78,7 @@ jobs:
 
       - name: Keep the report when the smoke test fails
         if: failure()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: site-smoke-results
           path: |
