@@ -7,7 +7,7 @@ require (
 	github.com/goccy/go-json v0.9.11
 	github.com/google/cel-go v0.30.0
 	github.com/google/uuid v1.6.0
-	github.com/klauspost/reedsolomon v1.12.4
+	github.com/klauspost/reedsolomon v1.14.2
 	github.com/mark3labs/mcp-go v1.1.1
 )
 

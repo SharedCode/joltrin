@@ -17,7 +17,7 @@ require (
 	github.com/google/cel-go v0.30.0 // indirect
 	github.com/hailocab/go-hostpool v0.0.0-20160125115350-e80d13ce29ed // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
-	github.com/klauspost/reedsolomon v1.12.4 // indirect
+	github.com/klauspost/reedsolomon v1.14.2 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/ncw/directio v1.0.5 // indirect
 	github.com/redis/go-redis/v9 v9.22.0 // indirect
