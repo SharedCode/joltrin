@@ -4,7 +4,7 @@ go 1.26.8
 
 require (
 	github.com/a2aproject/a2a-go v0.3.15
-	github.com/goccy/go-json v0.9.11
+	github.com/goccy/go-json v0.11.2
 	github.com/google/cel-go v0.30.0
 	github.com/google/uuid v1.6.0
 	github.com/klauspost/reedsolomon v1.12.4
