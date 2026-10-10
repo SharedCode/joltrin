@@ -6,7 +6,7 @@ require (
 	github.com/sharedcode/joltrin/adapters/cassandra v0.1.0
 	github.com/sharedcode/joltrin/adapters/redis v0.1.0
 	github.com/sharedcode/joltrin/v5 v5.8.0
-	golang.org/x/sync v0.23.0
+	golang.org/x/sync v0.24.0
 )
 
 require (

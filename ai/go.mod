@@ -13,7 +13,7 @@ require (
 	github.com/sharedcode/joltrin/v5 v5.8.1
 	github.com/stretchr/testify v1.12.1
 	github.com/yuin/goldmark v1.8.2
-	golang.org/x/sync v0.23.0
+	golang.org/x/sync v0.24.0
 )
 
 require (
