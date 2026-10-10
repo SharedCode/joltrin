@@ -31,7 +31,7 @@ jobs:
         run: go test -timeout 600s -race -covermode=atomic -coverprofile=coverage.out -coverpkg=./btree/...,./inmemory/...,./fs/...,./common,./verify,./tools/blocklog,./tools/mcpserver,./tools/a2aagent,./tools/runbookstore ./inmemory ./btree ./common ./fs ./verify ./tools/blocklog ./tools/mcpserver ./tools/a2aagent ./tools/runbookstore
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: SharedCode/joltrin
