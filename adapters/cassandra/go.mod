@@ -9,7 +9,7 @@ require (
 )
 
 require (
-	github.com/goccy/go-json v0.9.11 // indirect
+	github.com/goccy/go-json v0.11.2 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hailocab/go-hostpool v0.0.0-20160125115350-e80d13ce29ed // indirect
