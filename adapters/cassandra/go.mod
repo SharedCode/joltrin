@@ -4,7 +4,7 @@ go 1.26.8
 
 require (
 	github.com/gocql/gocql v1.7.0
-	github.com/sethvargo/go-retry v0.4.0
+	github.com/sethvargo/go-retry v0.5.0
 	github.com/sharedcode/joltrin/v5 v5.8.0
 )
 
