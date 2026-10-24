@@ -1,0 +1,14 @@
+# Cloudflare Workers static assets headers. scripts/assemble-site.sh copies this
+# into the site as _headers.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Strict-Transport-Security: max-age=31536000
+
+# Preview and workers.dev hostnames must never be indexed.
+https://:name.:account.workers.dev/*
+  X-Robots-Tag: noindex, nofollow
+https://:version-:name.:account.workers.dev/*
+  X-Robots-Tag: noindex, nofollow

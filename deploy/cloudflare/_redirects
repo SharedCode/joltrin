@@ -1,0 +1,5 @@
+# Keep the permanent redirects GitHub Pages gave for directory URLs without a slash.
+/agents /agents/ 301
+/btree /btree/ 301
+/docs /docs/ 301
+/arena /arena/ 301

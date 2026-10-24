@@ -1,9 +1,8 @@
-name: Deploy SOP Pages (Technical Demo + Arena)
+name: Deploy site (Cloudflare)
 
 on:
   push:
     branches:
-      - main
       - master
     paths:
       - 'demo/**'
@@ -13,27 +12,23 @@ on:
       - 'docs/index.html'
       - 'scripts/assemble-site.sh'
       - 'sop-arena/**'
-      - '.github/workflows/deploy-demo.yml'
-  workflow_dispatch: # Allows manual trigger from the GitHub Actions UI
+      - 'deploy/cloudflare/**'
+      - 'wrangler.jsonc'
+      - '.github/workflows/deploy-site.yml'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'preview uploads a version with its own URL, production deploys it live'
+        type: choice
+        options: [preview, production]
+        default: preview
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow deployments to complete safely.
-#
-# This is the ONLY workflow in the repository that publishes to the
-# "github-pages" environment. It builds both experiences into one combined
-# artifact and deploys them together, on purpose: GitHub Pages workflow
-# deployments fully replace the site's content each time, so two separate
-# workflows publishing separately (as this repo used to do, plus a third
-# Jekyll-based Pages step that was in promote.yml) just overwrite each
-# other's output on whichever one runs last. See CHANGELOG.md for that fix.
+# One deploy at a time; never cancel one that is already running.
 concurrency:
-  group: "pages"
+  group: "site-deploy"
   cancel-in-progress: false
 
 jobs:
@@ -122,30 +117,56 @@ jobs:
           scripts/assemble-site.sh _site
           ls -lh _site _site/arena _site/agents _site/assets
 
-      - name: Setup GitHub Pages
-        uses: actions/configure-pages@v6
-
-      - name: Upload GitHub Pages Artifact
-        uses: actions/upload-pages-artifact@v5
+      - name: Upload the assembled site
+        uses: actions/upload-artifact@v4
         with:
-          path: './_site'
+          name: site
+          path: _site
+          retention-days: 7
 
   deploy:
-    name: Deploy to GitHub Pages
+    name: Deploy to Cloudflare
     needs: build-and-package
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: _site
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+
+      - name: Deploy
+        id: deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'production' }}
+        run: |
+          if [ "$MODE" = production ]; then
+            npx --yes wrangler@4 deploy
+            echo "url=https://joltrinhq.com" >> "$GITHUB_OUTPUT"
+          else
+            # Wrangler writes a JSON line per event to this file, so the URL is read as a field.
+            export WRANGLER_OUTPUT_FILE_PATH="$RUNNER_TEMP/wrangler-output.json"
+            npx --yes wrangler@4 versions upload
+            url=$(jq -r 'select(.type == "version-upload") | .preview_url // empty' "$WRANGLER_OUTPUT_FILE_PATH" | head -1)
+            [ -n "$url" ] || { echo "Error: no preview_url in wrangler output" >&2; exit 1; }
+            echo "url=$url" >> "$GITHUB_OUTPUT"
+          fi
 
   verify-live:
     name: Open the live site after the deploy
     needs: deploy
     runs-on: ubuntu-latest
+    env:
+      SITE_URL: ${{ needs.deploy.outputs.url }}
     steps:
       - uses: actions/checkout@v7
 
@@ -162,21 +183,21 @@ jobs:
       - name: Wait for the live site to answer
         run: |
           for i in $(seq 1 24); do
-            [ "$(curl -s -o /dev/null -w '%{http_code}' https://joltrinhq.com/)" = 200 ] && exit 0
+            [ "$(curl -s -o /dev/null -w '%{http_code}' ${SITE_URL}/)" = 200 ] && exit 0
             sleep 5
           done
-          echo "Error: https://joltrinhq.com/ did not answer 200 within two minutes" >&2
+          echo "Error: ${SITE_URL}/ did not answer 200 within two minutes" >&2
           exit 1
 
       - name: Open every page of the live site
         env:
           CI: true
           LIVE_SITE: '1'
-          BASE_URL: https://joltrinhq.com
+          BASE_URL: ${{ needs.deploy.outputs.url }}
         run: npx playwright test tests/site-smoke.spec.ts --project=chromium --project=mobile-chrome
 
       - name: Check the live YouTube embeds
         run: |
-          curl -fsS https://joltrinhq.com/ -o /tmp/live-index.html
+          curl -fsS "${SITE_URL}/" -o /tmp/live-index.html
           mkdir -p /tmp/live && cp /tmp/live-index.html /tmp/live/index.html
           scripts/check-youtube.sh /tmp/live
