@@ -60,14 +60,21 @@ param rootPasswordEnabled bool = false
 @description('Name of the managed environment storage (Azure Files share) mounted as the app data directory.')
 param dataStorageName string
 
-// Pinned to 1 replica: joltrin's embedded B-Tree engine has no documented
+// At most 1 replica: joltrin's embedded B-Tree engine has no documented
 // multi-process write-safety guarantee, and this deployment optimizes for
 // lowest cost over horizontal scale. CPU/memory/concurrency limits below
 // are guardrails against runaway cost and restart loops on the single
 // replica, not an autoscaling fan-out policy. Revisit if/when the engine's
 // Redis-backed distributed locking (adapters/redis) is wired in and this
 // value is deliberately raised.
-var minReplicas = 1
+//
+// minReplicas is 0 so the app scales to zero when nobody is calling it. The
+// static site is served from GitHub Pages; this app only handles Stripe
+// checkout and webhooks, so an always-on replica was the main cost against
+// the monthly budget. The first request after idle waits for a cold start,
+// and Stripe retries webhooks it cannot deliver. Data lives on the Azure
+// Files share, so it survives scale-to-zero.
+var minReplicas = 0
 var maxReplicas = 1
 
 resource containerApp 'Microsoft.App/containerApps@2023-11-02-preview' = {
