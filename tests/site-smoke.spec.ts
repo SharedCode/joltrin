@@ -10,7 +10,7 @@ import { test, expect, Page } from '@playwright/test';
  * It also runs with every third-party host blocked, since one slow or blocked
  * CDN must not leave a blank page.
  */
-const PAGES = ['/', '/agents/', '/arena/', '/btree/', '/docs/'];
+const PAGES = ['/', '/agents/', '/arena/', '/btree/', '/private-intent/', '/docs/'];
 
 // Smallest screenshot, in bytes, that counts as a page with something on it. A
 // flat black or white screen compresses to a few KB.
