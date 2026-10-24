@@ -20,14 +20,15 @@ test.describe('Homepage sound toggle', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
   });
 
-  test('starts off, switches on, and persists the choice', async ({ page }) => {
+  test('starts off and switches on and off', async ({ page }) => {
     const toggle = page.locator('.sound-toggle');
     await expect(toggle).toHaveText('Sound off');
     await expect(toggle).toHaveAttribute('aria-pressed', 'false');
     await toggle.click();
     await expect(toggle).toHaveText('Sound on');
     await expect(toggle).toHaveAttribute('aria-pressed', 'true');
-    expect(await page.evaluate(() => localStorage.getItem('joltrin-sound'))).toBe('1');
+    await toggle.click();
+    await expect(toggle).toHaveText('Sound off');
   });
 
   test('makes no sound while off, plays on the verdict once on', async ({ page }) => {

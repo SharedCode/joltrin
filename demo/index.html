@@ -2968,13 +2968,12 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
     })();
   </script>
   <script>
-    // Optional sound for the scroll animations. Off until the visitor turns it on, which is also what lets the browser play audio.
+    // Optional sound for the scroll animations. Off on every visit until the visitor turns it on, which is also what lets the browser play audio.
     // Every sound is synthesized here, so there are no audio files to load. It only watches the classes the motion scripts already set.
     (function () {
       var AC = window.AudioContext || window.webkitAudioContext;
       if (!AC || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       var ctx = null, on = false, last = {};
-      try { on = localStorage.getItem('joltrin-sound') === '1'; } catch (e) {}
 
       var btn = document.createElement('button');
       btn.type = 'button';
@@ -2989,12 +2988,9 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         if (ctx.state === 'suspended') ctx.resume();
         return ctx;
       }
-      // Sound can only start after a click, so a saved "on" shows as off until the visitor touches the page.
-      if (on) { on = false; document.addEventListener('pointerdown', function once() { document.removeEventListener('pointerdown', once); on = true; paint(); }, { once: true }); }
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
         on = !on;
-        try { localStorage.setItem('joltrin-sound', on ? '1' : '0'); } catch (err) {}
         paint();
         if (on) tone(660, 0.09, 'sine', 0.05, 990);
       });
