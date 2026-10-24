@@ -56,7 +56,7 @@ jobs:
       # -o is required here: without it, `go build ./demo/...` under
       # GOOS=js GOARCH=wasm writes a binary named after the package
       # directory into the cwd, which collides with the demo/ directory
-      # itself (same reason deploy-demo.yml always passes -o).
+      # itself (same reason deploy-site.yml always passes -o).
       - name: Build Go (wasm demo packages)
         if: matrix.language == 'go'
         shell: bash

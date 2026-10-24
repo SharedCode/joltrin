@@ -12,7 +12,7 @@ on push to `master`; this doc covers what it provisions and how to run it by han
 - **Key Vault** (RBAC-authorized) holding the Stripe secret key, webhook secret, and publishable key
 - **Log Analytics workspace** (30-day retention, caps ingestion cost)
 - **Container Apps environment** wired to that workspace
-- **Container App**, pinned to `minReplicas = maxReplicas = 1` (see the comment in `modules/container-app.bicep` for why), 0.5 vCPU / 1Gi, liveness and startup probes on `/api/health`, readiness probe on `/api/ready`
+- **Container App**, `minReplicas = 0`, `maxReplicas = 1` so it scales to zero when idle and costs close to nothing between requests (see the comment in `modules/container-app.bicep` for why it never scales past 1), 0.5 vCPU / 1Gi, liveness and startup probes on `/api/health`, readiness probe on `/api/ready`
 - **Cost budget** with alerts at 50/75/90/100% of a monthly USD threshold
 - **Azure Monitor metric alerts** (CPU%, memory%, restart-loop, no running replica, burst of 5xx responses) on the Container App, wired to an email action group. The app also serves Prometheus metrics at `/metrics`, including a request duration histogram
 
@@ -24,7 +24,7 @@ joltrin's embedded B-Tree engine has no documented guarantee of safe
 concurrent multi-process writes to the same data path. It does ship a
 Redis-backed distributed-locking `L2Cache` (`adapters/redis`) that would make
 horizontal scaling safe, but this deployment is optimized for lowest cost, so
-it stays single-replica instead of adding an Azure Cache for Redis instance.
+it stays at most one replica instead of adding an Azure Cache for Redis instance.
 Revisit `container-app.bicep`'s `minReplicas`/`maxReplicas` if that tradeoff
 changes.
 

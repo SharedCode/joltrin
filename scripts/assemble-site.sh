@@ -27,12 +27,8 @@ cp demo-agents/index.html demo-agents/tailwind.css demo-agents/sop-agents.wasm d
 cp demo-btree/index.html demo-btree/tailwind.css demo-btree/arena.wasm demo-btree/wasm_exec.js demo-btree/favicon.svg demo-btree/favicon.ico demo-btree/og-image.png demo-btree/logo-mark.png "$SITE/btree/"
 # Private Intent (the intent package in WASM) lives at joltrinhq.com/private-intent/
 cp demo-intent/index.html demo-intent/tailwind.css demo-intent/intent.wasm demo-intent/wasm_exec.js demo-intent/favicon.svg demo-intent/favicon.ico demo-intent/og-image.png demo-intent/logo-mark.png "$SITE/private-intent/"
-# Preserve custom domain (e.g. joltrinhq.com) if CNAME exists
-if [ -f CNAME ]; then
-  cp CNAME "$SITE/CNAME"
-elif [ -f demo/CNAME ]; then
-  cp demo/CNAME "$SITE/CNAME"
-fi
+# Response headers for the Cloudflare deployment.
+cp deploy/cloudflare/_headers deploy/cloudflare/_redirects "$SITE/"
 
 fail=0
 

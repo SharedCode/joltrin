@@ -14,7 +14,7 @@ jobs:
   #
   # `demo` and `demo-agents` are excluded from vet/build/test everywhere
   # below because they are WASM-only packages (import syscall/js) that only
-  # compile under GOOS=js GOARCH=wasm; see .github/workflows/deploy-demo.yml
+  # compile under GOOS=js GOARCH=wasm; see .github/workflows/deploy-site.yml
   # for how they're actually built. `bindings/main` (cgo) is additionally
   # excluded on the Windows leg only; see the comment on the "go vet" step
   # below for why.

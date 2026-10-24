@@ -50,7 +50,7 @@ jobs:
           docker tag $IMAGE:$SHA $IMAGE:stable
           docker push $IMAGE:stable
 
-      # GitHub Pages deployment is handled solely by deploy-demo.yml, which
+      # Site deployment (Cloudflare) is handled solely by deploy-site.yml, which
       # builds and publishes both the WASM demo and SOP Arena together as one
       # artifact. This job used to also run a separate Jekyll build of the
       # whole repo and deploy that to the same "github-pages" environment on

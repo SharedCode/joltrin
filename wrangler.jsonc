@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "joltrin-site",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./_site",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  "routes": [
+    { "pattern": "joltrinhq.com", "custom_domain": true },
+    { "pattern": "www.joltrinhq.com", "custom_domain": true }
+  ],
+  "workers_dev": true,
+  "preview_urls": true
+}
