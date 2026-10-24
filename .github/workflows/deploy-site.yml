@@ -153,9 +153,11 @@ jobs:
             npx --yes wrangler@4 deploy
             echo "url=https://joltrinhq.com" >> "$GITHUB_OUTPUT"
           else
-            npx --yes wrangler@4 versions upload | tee upload.log
-            url=$(grep -oE 'https://[^ ]+\.workers\.dev' upload.log | head -1)
-            [ -n "$url" ] || { echo "Error: no preview URL in wrangler output" >&2; exit 1; }
+            # Wrangler writes a JSON line per event to this file, so the URL is read as a field.
+            export WRANGLER_OUTPUT_FILE_PATH="$RUNNER_TEMP/wrangler-output.json"
+            npx --yes wrangler@4 versions upload
+            url=$(jq -r 'select(.type == "version-upload") | .preview_url // empty' "$WRANGLER_OUTPUT_FILE_PATH" | head -1)
+            [ -n "$url" ] || { echo "Error: no preview_url in wrangler output" >&2; exit 1; }
             echo "url=$url" >> "$GITHUB_OUTPUT"
           fi
 
