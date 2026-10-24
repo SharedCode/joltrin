@@ -33,10 +33,16 @@ if [ ! -f "demo-btree/arena.wasm" ]; then
   GOOS=js GOARCH=wasm go build -ldflags="-s -w" -o demo-btree/arena.wasm ./demo-btree/wasm
 fi
 
+# Ensure Private Intent WASM exists
+if [ ! -f "demo-intent/intent.wasm" ]; then
+  echo "Compiling demo-intent/intent.wasm..."
+  (cd demo-intent && GOOS=js GOARCH=wasm go build -ldflags="-s -w" -o intent.wasm .)
+fi
+
 # Assemble _site with the same script the Pages deploy runs, so the tests look at
 # what ships. A separate copy list here once let the tests pass on a site the
 # deploy then published with files missing.
-for f in demo/wasm_exec.js demo-agents/wasm_exec.js demo-btree/wasm_exec.js; do
+for f in demo/wasm_exec.js demo-agents/wasm_exec.js demo-btree/wasm_exec.js demo-intent/wasm_exec.js; do
   if [ ! -f "$f" ]; then
     GOROOT="$(go env GOROOT)"
     src="${GOROOT}/lib/wasm/wasm_exec.js"
