@@ -719,14 +719,28 @@
       </div>
     </section>
 
-    <!-- Second video (YouTube Short, vertical) -->
-    <section aria-label="Joltrin short video" class="mb-8 mx-auto max-w-sm rounded-2xl overflow-hidden border border-dark-700/80 bg-dark-900">
-      <div class="relative w-full" style="aspect-ratio:9/16">
-        <iframe class="absolute inset-0 w-full h-full" loading="lazy"
-          src="https://www.youtube-nocookie.com/embed/oS1bfq_ZDkg?playsinline=1&rel=0"
-          title="Joltrin short video"
-          allow="encrypted-media; picture-in-picture; fullscreen"
-          referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    <!-- What no one can copy with their own AI -->
+    <section id="only-joltrin" aria-labelledby="only-h" class="mb-12 p-6 sm:p-10 rounded-2xl bg-dark-900 border border-brand-500/30">
+      <p class="text-xs font-mono font-semibold uppercase tracking-wider text-brand-400 mb-3">Why not just ask your AI to write this?</p>
+      <h2 id="only-h" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug max-w-3xl">An AI can write your rules. It cannot sign for your backup system.</h2>
+      <p class="text-slate-400 text-sm sm:text-base mt-3 max-w-3xl leading-relaxed">A prompt or a policy file can be argued with. Joltrin Private Intent moves the proof outside the agent, so the agent has nothing to talk its way around.</p>
+      <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="p-5 rounded-xl bg-dark-950 border border-dark-800">
+          <div class="flex items-center space-x-2 text-white font-bold text-sm mb-2"><i data-lucide="lock" class="w-4 h-4 text-brand-400"></i><span>Your rules stay private</span></div>
+          <p class="text-xs text-slate-400 leading-relaxed">Your wording is sealed in a vault on your machine. The checker sees rule ids and what is required, never what you wrote.</p>
+        </div>
+        <div class="p-5 rounded-xl bg-dark-950 border border-dark-800">
+          <div class="flex items-center space-x-2 text-white font-bold text-sm mb-2"><i data-lucide="pen-tool" class="w-4 h-4 text-brand-400"></i><span>Other systems sign, not the agent</span></div>
+          <p class="text-xs text-slate-400 leading-relaxed">The backup system signs that the backup exists. A named person signs the approval. One approval covers one action, and you can revoke it.</p>
+        </div>
+        <div class="p-5 rounded-xl bg-dark-950 border border-dark-800">
+          <div class="flex items-center space-x-2 text-white font-bold text-sm mb-2"><i data-lucide="receipt" class="w-4 h-4 text-brand-400"></i><span>The tool that holds the keys checks</span></div>
+          <p class="text-xs text-slate-400 leading-relaxed">The action only runs with a signed receipt for that exact action. No receipt, no run, and the block says what is missing.</p>
+        </div>
+      </div>
+      <div class="mt-6 flex flex-wrap items-center gap-3">
+        <a href="./private-intent/" class="px-5 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 font-bold text-sm text-black shadow-lg shadow-brand-500/20 transition">Watch an agent get blocked, then approved</a>
+        <span class="text-[11px] text-slate-500">Simulated in your browser. Open source, free to run.</span>
       </div>
     </section>
 
@@ -917,17 +931,6 @@
         </div>
         <a href="./agents/" class="px-4 py-2 rounded-lg bg-accent-violet hover:bg-accent-violet/80 text-[#fff] font-mono font-semibold shrink-0 transition flex items-center space-x-1.5">
           <span>Launch Agents Barrier Demo →</span>
-        </a>
-      </div>
-
-      <!-- Private Intent callout -->
-      <div class="mt-4 p-4 rounded-xl bg-gradient-to-r from-brand-500/10 via-dark-950 to-dark-950 border border-brand-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-        <div class="space-y-1">
-          <span class="text-white font-bold block text-sm">Keep your rules private and still enforce them:</span>
-          <span class="text-slate-400">Private Intent blocks a risky action until signed evidence and the right approval exist, then issues a receipt the executor checks. Simulated, in your browser.</span>
-        </div>
-        <a href="./private-intent/" class="px-4 py-2 rounded-lg bg-brand-500 hover:bg-brand-400 text-black font-mono font-semibold shrink-0 transition flex items-center space-x-1.5">
-          <span>Try a protected agent →</span>
         </a>
       </div>
 
