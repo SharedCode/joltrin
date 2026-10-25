@@ -53,9 +53,9 @@ func nonNil(s []string) []string {
 	return append([]string{}, s...)
 }
 
-// Verify checks the signature, the verdict and the expiry, and that the
-// receipt covers action. It is a pure function so any party can run it.
-func (r *Receipt) Verify(pub ed25519.PublicKey, action Action, now time.Time) error {
+// VerifySignature checks only that pub signed this receipt. A party that never
+// sees the action, such as a log that records receipts, can run it.
+func (r *Receipt) VerifySignature(pub ed25519.PublicKey) error {
 	if r == nil {
 		return errors.New("intent: no receipt")
 	}
@@ -63,6 +63,15 @@ func (r *Receipt) Verify(pub ed25519.PublicKey, action Action, now time.Time) er
 	c.Sig = nil
 	if r.Version != 1 || len(r.Sig) != ed25519.SignatureSize || !ed25519.Verify(pub, signedBytes("receipt", &c), r.Sig) {
 		return errors.New("intent: receipt signature is not valid")
+	}
+	return nil
+}
+
+// Verify checks the signature, the verdict and the expiry, and that the
+// receipt covers action. It is a pure function so any party can run it.
+func (r *Receipt) Verify(pub ed25519.PublicKey, action Action, now time.Time) error {
+	if err := r.VerifySignature(pub); err != nil {
+		return err
 	}
 	if r.Verdict != Allow {
 		return errors.New("intent: receipt is not an ALLOW")

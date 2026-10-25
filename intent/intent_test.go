@@ -589,3 +589,29 @@ func BenchmarkEvaluateBlock(b *testing.B) {
 		f.eng.Evaluate(f.action)
 	}
 }
+
+func TestReceiptVerifySignatureNeedsNoAction(t *testing.T) {
+	f := newFixture(t)
+	f.attest("prod/orders", time.Hour)
+	f.approve(time.Minute)
+	_, r := f.eng.Authorize(f.action)
+	if r == nil {
+		t.Fatal("no receipt")
+	}
+	if err := r.VerifySignature(f.eng.ReceiptKey()); err != nil {
+		t.Fatalf("genuine receipt rejected: %v", err)
+	}
+	tampered := *r
+	tampered.PolicyDigest = strings.Repeat("0", 64)
+	if err := tampered.VerifySignature(f.eng.ReceiptKey()); err == nil {
+		t.Fatal("tampered receipt accepted")
+	}
+	otherPub, _, _ := GenerateKey()
+	if err := r.VerifySignature(otherPub); err == nil {
+		t.Fatal("receipt accepted under a key that did not sign it")
+	}
+	var none *Receipt
+	if err := none.VerifySignature(f.eng.ReceiptKey()); err == nil {
+		t.Fatal("nil receipt accepted")
+	}
+}
