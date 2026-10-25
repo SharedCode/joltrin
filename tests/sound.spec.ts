@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * The homepage sound layer is opt-in. It must stay silent until the toggle is
- * pressed, then play when the scroll story changes the verdict.
+ * The homepage sound layer is on by default and can be turned off. It plays
+ * when the scroll story changes the verdict and stays silent once switched off.
  */
 test.describe('Homepage sound toggle', () => {
   test.beforeEach(async ({ page }) => {
@@ -20,25 +20,27 @@ test.describe('Homepage sound toggle', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
   });
 
-  test('starts off and switches on and off', async ({ page }) => {
+  test('starts on and switches off and on', async ({ page }) => {
     const toggle = page.locator('.sound-toggle');
-    await expect(toggle).toHaveText('Sound off');
-    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
-    await toggle.click();
     await expect(toggle).toHaveText('Sound on');
     await expect(toggle).toHaveAttribute('aria-pressed', 'true');
     await toggle.click();
     await expect(toggle).toHaveText('Sound off');
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    await toggle.click();
+    await expect(toggle).toHaveText('Sound on');
   });
 
-  test('makes no sound while off, plays on the verdict once on', async ({ page }) => {
-    const story = page.locator('#story');
-    await story.scrollIntoViewIfNeeded();
-    await page.evaluate(() => window.scrollBy(0, 3000));
+  test('plays after the first gesture, and is silent once switched off', async ({ page }) => {
+    const toggle = page.locator('.sound-toggle');
+    // The first click is the gesture that lets the browser start audio, and it turns sound off.
+    await toggle.click();
+    await page.evaluate(() => { (window as any).__oscillators = 0; });
+    await page.evaluate(() => window.scrollBy(0, 4000));
     await page.waitForTimeout(600);
     expect(await page.evaluate(() => (window as any).__oscillators)).toBe(0);
 
-    await page.locator('.sound-toggle').click();
+    await toggle.click();
     await page.evaluate(() => { (window as any).__oscillators = 0; });
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.waitForTimeout(200);

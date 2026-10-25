@@ -2968,17 +2968,17 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
     })();
   </script>
   <script>
-    // Optional sound for the scroll animations. Off on every visit until the visitor turns it on, which is also what lets the browser play audio.
+    // Optional sound for the scroll animations. On by default. Browsers only allow audio after a click, tap or key press, so sound starts at the visitor's first one.
     // Every sound is synthesized here, so there are no audio files to load. It only watches the classes the motion scripts already set.
     (function () {
       var AC = window.AudioContext || window.webkitAudioContext;
       if (!AC || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      var ctx = null, on = false, last = {};
+      var ctx = null, on = true, last = {};
 
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'sound-toggle';
-      btn.setAttribute('aria-pressed', 'false');
+      btn.setAttribute('aria-pressed', 'true');
       function paint() {
         btn.setAttribute('aria-pressed', String(on));
         btn.textContent = on ? 'Sound on' : 'Sound off';
@@ -2988,6 +2988,13 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         if (ctx.state === 'suspended') ctx.resume();
         return ctx;
       }
+      // A suspended context queues sounds and then plays them all at once, so skip them until the browser allows audio.
+      function ready() {
+        return on && audio().state === 'running';
+      }
+      ['pointerdown', 'keydown', 'touchend'].forEach(function (ev) {
+        window.addEventListener(ev, function () { if (on) audio(); }, { passive: true });
+      });
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
         on = !on;
@@ -3005,6 +3012,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         return true;
       }
       function tone(from, dur, type, vol, to) {
+        if (!ready()) return;
         var c = audio(), t = c.currentTime, o = c.createOscillator(), g = c.createGain();
         o.type = type;
         o.frequency.setValueAtTime(from, t);
@@ -3017,6 +3025,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         o.stop(t + dur + 0.02);
       }
       function sweep(dur, vol) {
+        if (!ready()) return;
         var c = audio(), t = c.currentTime, n = Math.floor(c.sampleRate * dur);
         var buf = c.createBuffer(1, n, c.sampleRate), d = buf.getChannelData(0);
         for (var i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
