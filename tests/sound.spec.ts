@@ -10,6 +10,10 @@ test.describe('Homepage sound toggle', () => {
       (window as any).__oscillators = 0;
       const Real = window.AudioContext;
       class Counting extends Real {
+        // CI machines have no audio device, so a real context can stay suspended. Report it running so the sound path is what is tested.
+        get state() {
+          return 'running' as AudioContextState;
+        }
         createOscillator() {
           (window as any).__oscillators += 1;
           return super.createOscillator();
