@@ -10,6 +10,10 @@ test.describe('Homepage sound toggle', () => {
       (window as any).__oscillators = 0;
       const Real = window.AudioContext;
       class Counting extends Real {
+        // CI machines have no audio device, so a real context can stay suspended. Report it running so the sound path is what is tested.
+        get state() {
+          return 'running' as AudioContextState;
+        }
         createOscillator() {
           (window as any).__oscillators += 1;
           return super.createOscillator();
@@ -47,5 +51,36 @@ test.describe('Homepage sound toggle', () => {
     await page.evaluate(() => window.scrollBy(0, 4000));
     await page.waitForTimeout(800);
     expect(await page.evaluate(() => (window as any).__oscillators)).toBeGreaterThan(0);
+  });
+});
+
+test.describe('Homepage sound when the browser refuses audio', () => {
+  test('stays silent and reports no error when resume() rejects', async ({ page }) => {
+    const errors: string[] = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    await page.addInitScript(() => {
+      (window as any).__oscillators = 0;
+      const Real = window.AudioContext;
+      class Refusing extends Real {
+        get state() {
+          return 'suspended' as AudioContextState;
+        }
+        resume() {
+          return Promise.reject(new DOMException('Navigated away from page', 'InvalidStateError'));
+        }
+        createOscillator() {
+          (window as any).__oscillators += 1;
+          return super.createOscillator();
+        }
+      }
+      (window as any).AudioContext = Refusing;
+    });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.locator('.sound-toggle').click();
+    await page.locator('.sound-toggle').click();
+    await page.evaluate(() => window.scrollBy(0, 4000));
+    await page.waitForTimeout(600);
+    expect(errors).toEqual([]);
+    expect(await page.evaluate(() => (window as any).__oscillators)).toBe(0);
   });
 });
