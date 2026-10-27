@@ -203,6 +203,16 @@ test.describe('Homepage', () => {
     await expect(pricing.getByRole('link', { name: /try the barrier in your browser/i })).toBeVisible();
   });
 
+  test('pricing says what Private Intent is today and what is only planned for teams', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const pricing = page.locator('#pricing');
+    const free = pricing.locator('li', { hasText: 'your rules, signed approvals and receipts for one owner' });
+    await expect(free.getByRole('link', { name: 'Private Intent' })).toHaveAttribute('href', './private-intent/');
+    const team = pricing.locator('li', { hasText: 'Private Intent for teams' });
+    await expect(team).toContainText('Planned');
+    await expect(team.getByRole('link', { name: /private intent for teams/i })).toHaveAttribute('href', './private-intent/#pro');
+  });
+
   test('pricing shows open source, Pro, and Enterprise contact without live-checkout claims', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const pricing = page.locator('#pricing');
