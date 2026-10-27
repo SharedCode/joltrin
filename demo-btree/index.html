@@ -121,7 +121,7 @@
     <section aria-labelledby="repro-title" class="mb-12">
       <h2 id="repro-title" class="text-2xl font-bold text-white mb-2">Run it natively</h2>
       <p class="text-sm text-slate-400 mb-4 max-w-2xl">The disk-backed benchmark lives in the repository. These are the documented commands, from <code class="font-mono text-slate-300">docs/BENCHMARKS.md</code>.</p>
-      <pre class="rounded-xl bg-dark-900 border border-dark-700 p-4 text-sm font-mono text-slate-200 overflow-x-auto"><code>go run ./tools/benchmark -count 10000 -slotlength 2000
+      <pre tabindex="0" class="rounded-xl bg-dark-900 border border-dark-700 p-4 text-sm font-mono text-slate-200 overflow-x-auto"><code>go run ./tools/benchmark -count 10000 -slotlength 2000
 go run ./tools/benchmark -count 100000 -slotlength 4000</code></pre>
       <div class="mt-4 rounded-xl bg-dark-900 border border-dark-700 p-5 text-sm text-slate-300 max-w-3xl">
         <p class="font-semibold text-white mb-1">Published native reference, not comparable to the numbers above</p>
@@ -151,7 +151,7 @@ go run ./tools/benchmark -count 100000 -slotlength 4000</code></pre>
         </div>
         <div id="sb-out" class="mt-4" aria-live="polite"></div>
         <p class="mt-4 text-xs text-slate-400">Raw JSON from the last run:</p>
-        <pre id="raw" class="mt-1 rounded-lg bg-dark-950 border border-dark-800 p-3 text-xs font-mono text-slate-300 overflow-x-auto min-h-[3rem]">No run yet.</pre>
+        <pre tabindex="0" id="raw" class="mt-1 rounded-lg bg-dark-950 border border-dark-800 p-3 text-xs font-mono text-slate-300 overflow-x-auto min-h-[3rem]">No run yet.</pre>
       </details>
     </section>
   </main>
@@ -357,7 +357,7 @@ go run ./tools/benchmark -count 100000 -slotlength 4000</code></pre>
         return '<label class="opt flex items-center gap-3 rounded-xl border border-dark-700 bg-dark-950 px-4 py-3 min-h-[48px] cursor-pointer hover:border-dark-600"><input type="radio" name="guess" value="' + esc(o.v) + '" class="accent-emerald-400 w-4 h-4"' + (i === 0 ? ' required' : '') + '><span class="text-sm text-slate-200">' + esc(o.label) + '</span></label>';
       }).join('') +
       '</div></fieldset><p class="text-xs text-slate-400 mt-2 max-w-xl">' + esc(lv.explain) + '</p>' +
-      '<button id="go" type="submit" class="mt-5 rounded-xl bg-brand-600 hover:bg-brand-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold px-6 py-3 min-h-[48px]" ' + (ready ? '' : 'disabled') + '>Lock in my guess and run it</button></form>' +
+      '<button id="go" type="submit" class="mt-5 rounded-xl bg-brand-500 hover:bg-brand-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold px-6 py-3 min-h-[48px]" ' + (ready ? '' : 'disabled') + '>Lock in my guess and run it</button></form>' +
       '<div id="result" class="mt-6" aria-live="polite"></div>';
     $('level-body').innerHTML = html;
     $('guess-form').addEventListener('submit', function (e) { e.preventDefault(); play(lv); });

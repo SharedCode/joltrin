@@ -423,7 +423,7 @@
     .js-story .story-hint.gone { opacity: 0; pointer-events: none; }
     .story-hint span { display: inline-block; animation: story-nudge 1.6s ease-in-out infinite; }
     @keyframes story-nudge { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(0, 5px, 0); } }
-    .js-story .story-words .w { color: rgb(var(--c-fg) / 0.16); }
+    .js-story .story-words .w { color: rgb(var(--c-fg) / 0.52); }
     .js-story .story-words .w.lit { color: rgb(var(--c-fg)); }
     .js-story .story-verdict span { position: absolute; left: 0; top: 0; opacity: 0; transform: translate3d(0, 24px, 0); transition: opacity 0.5s, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
     .js-story .story-verdict span.show { opacity: 1; transform: none; }
@@ -505,9 +505,11 @@
   <div class="scroll-progress" aria-hidden="true"></div>
 
   <!-- Top Navbar -->
+  <aside aria-label="Announcement">
   <a id="intent-strip" href="./private-intent/" onclick="track('intent_strip_click')" class="block bg-brand-500/10 hover:bg-brand-500/15 text-center text-xs sm:text-sm py-2 px-4 text-brand-300 transition">
-    <span class="font-semibold">Private Intent</span><span class="text-slate-400"> &middot; Watch an agent get blocked until you approve it</span> <span aria-hidden="true">&#8250;</span>
+    <span class="font-semibold text-white">Private Intent</span><span class="text-slate-400"> &middot; Watch an agent get blocked until you approve it</span> <span aria-hidden="true">&#8250;</span>
   </a>
+  </aside>
   <header class="border-b border-dark-800 bg-dark-900/80 backdrop-blur-xl backdrop-saturate-150 sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
       <div class="flex items-center space-x-3">
@@ -721,7 +723,7 @@
           <div class="mt-10 min-w-0 w-full text-left max-w-xl mx-auto">
             <p class="text-[11px] font-mono uppercase tracking-wider text-slate-500 mb-1.5">Or run it now (Go 1.26.10 or newer)</p>
             <div class="relative">
-              <pre id="quickstart-cmd" class="rounded-lg bg-dark-950 border border-dark-700 pl-3 pr-16 py-2 font-mono text-xs text-slate-200 overflow-x-auto"><code>go run github.com/sharedcode/joltrin/v5/examples/verify_barrier@latest</code></pre>
+              <pre id="quickstart-cmd" tabindex="0" class="rounded-lg bg-dark-950 border border-dark-700 pl-3 pr-16 py-2 font-mono text-xs text-slate-200 overflow-x-auto"><code>go run github.com/sharedcode/joltrin/v5/examples/verify_barrier@latest</code></pre>
               <button type="button" id="quickstart-copy" onclick="copyQuickstart(this)" class="absolute right-1.5 top-1.5 px-2 py-0.5 rounded-md bg-dark-800 hover:bg-dark-700 border border-dark-700 text-[11px] font-mono text-slate-300 transition cursor-pointer">Copy</button>
             </div>
             <p class="text-[11px] text-slate-500 mt-1.5">It checks the recorded trace, not the world. <a href="#limits" class="underline text-brand-400 hover:text-brand-300">What this does not prove</a></p>
@@ -731,7 +733,7 @@
         <div class="min-w-0 grid grid-cols-1 md:grid-cols-2 gap-4 items-start max-w-5xl mx-auto w-full">
         <div id="hero-example" class="min-w-0 rounded-xl bg-dark-950 border border-dark-700 p-4 font-mono text-xs sm:text-sm" aria-label="A blocked, then allowed, sequence">
           <div class="text-[11px] text-slate-500 uppercase tracking-wider mb-3">// db-maintenance runbook</div>
-          <div class="space-y-1.5 overflow-x-auto">
+          <div class="space-y-1.5 overflow-x-auto" tabindex="0" role="group" aria-label="Runbook decisions">
             <div class="sm:whitespace-nowrap"><span class="text-white">drop_prod_db</span>     <span class="text-rose-400 font-bold">BLOCKED</span> <span class="text-slate-400">backup_validated missing</span></div>
             <div class="sm:whitespace-nowrap"><span class="text-white">validate_backup</span>  <span class="text-rose-400 font-bold">BLOCKED</span> <span class="text-slate-400">backup_taken missing</span></div>
             <div class="sm:whitespace-nowrap"><span class="text-white">take_backup</span>      <span class="text-brand-400 font-bold">ALLOWED</span></div>
@@ -1019,7 +1021,7 @@ barrier -&gt; ALLOWED</pre>
         </p>
       </div>
       <div class="grid gap-5 lg:grid-cols-2">
-        <pre class="whitespace-pre overflow-x-auto rounded-xl bg-dark-950 border border-dark-800 p-4 text-xs sm:text-sm font-mono text-slate-200 leading-relaxed">{
+        <pre tabindex="0" class="whitespace-pre overflow-x-auto rounded-xl bg-dark-950 border border-dark-800 p-4 text-xs sm:text-sm font-mono text-slate-200 leading-relaxed">{
   "blocked_by": "precondition",
   "missing_state": "backup_validated",
   "established_by_steps": ["validate_backup"],
@@ -1041,12 +1043,14 @@ barrier -&gt; ALLOWED</pre>
           Jira, Grafana, AWS, and PagerDuty agents hand off work. Every call passes three checks first: the tool is on that agent's allowlist, any claim matches evidence a tool returned, and the steps it depends on have committed.
         </p>
       </div>
-      <div class="flex flex-wrap items-center gap-2 mb-3" role="tablist" aria-label="Agent scenario">
+      <div class="flex flex-wrap items-center gap-2 mb-3">
+        <div class="flex flex-wrap items-center gap-2" role="tablist" aria-label="Agent scenario">
         <button type="button" role="tab" data-team-scenario="0" aria-selected="true" class="team-tab px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg border border-brand-500/60 text-brand-400 font-mono text-xs">Latency alert</button>
         <button type="button" role="tab" data-team-scenario="1" aria-selected="false" class="team-tab px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg border border-dark-700 text-slate-400 font-mono text-xs">PagerDuty incident</button>
+        </div>
         <button id="team-run" type="button" class="ml-auto px-4 py-2 rounded-lg bg-brand-500 hover:bg-brand-400 text-dark-950 font-mono font-semibold text-sm transition">Run the agents</button>
       </div>
-      <pre id="team-log" aria-live="polite" class="p-4 rounded-xl bg-dark-950 border border-dark-750 text-xs font-mono text-slate-300 overflow-x-auto min-h-[16rem] whitespace-pre-wrap"></pre>
+      <pre id="team-log" tabindex="0" role="log" aria-label="Agent log" aria-live="polite" class="p-4 rounded-xl bg-dark-950 border border-dark-750 text-xs font-mono text-slate-300 overflow-x-auto min-h-[16rem] whitespace-pre-wrap"></pre>
       <p class="text-xs text-slate-500 mt-3">Replays the output of <code>go run ./examples/agent_team</code>. The tools are stubs and the checks are real. A <code>result:</code> line is what an agent gets back when a step is blocked on order: the rule, the missing state, and the steps that would establish it.</p>
       <div id="agent-feedback" class="mt-6 grid gap-5 lg:grid-cols-2 items-center p-5 rounded-xl bg-dark-950 border border-dark-750">
         <div>
@@ -1282,7 +1286,7 @@ barrier -&gt; ALLOWED</pre>
         </p>
       </div>
       <div class="grid gap-5 lg:grid-cols-2 items-start">
-        <pre class="p-4 rounded-xl bg-dark-950 border border-dark-750 text-xs font-mono text-slate-300 overflow-x-auto whitespace-pre-wrap">$ kubectl -n prod delete pvc orders-db-data
+        <pre tabindex="0" class="p-4 rounded-xl bg-dark-950 border border-dark-750 text-xs font-mono text-slate-300 overflow-x-auto whitespace-pre-wrap">$ kubectl -n prod delete pvc orders-db-data
 Error from server: admission webhook "gate.joltrin.dev" denied the request: step "drop_prod_db" requires state "backup_validated", which has not been established in this trace</pre>
         <div class="text-sm text-slate-400 leading-relaxed space-y-3">
           <p>A policy file maps an operation to a runbook step, and it takes the same runbook files as the MCP server. Steps are recorded through a separate endpoint that needs a bearer token. A <code class="text-slate-200">--warn-only</code> mode allows everything and reports what would have been blocked, so a policy can be tried before it enforces.</p>
@@ -3083,7 +3087,10 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         if (on) tone(660, 0.09, 'sine', 0.05, 990);
       });
       paint();
-      document.body.appendChild(btn);
+      var dock = document.createElement('aside');
+      dock.setAttribute('aria-label', 'Page sound');
+      dock.appendChild(btn);
+      document.body.appendChild(dock);
 
       // gap is the minimum time between plays of the same sound, so fast scrolling stays calm.
       function gate(name, gap) {

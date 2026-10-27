@@ -32,6 +32,8 @@
     li { padding: 0.8rem 1rem; background: #0b1020; border-top: 1px solid #1e293b; }
     li:first-child { border-top: 0; }
     li a { font-weight: 600; }
+    /* Links inside running text carry an underline too, so they do not depend on colour alone. */
+    p a, li a, td a, footer a { text-decoration: underline; text-underline-offset: 0.18em; }
     li span { display: block; color: #94a3b8; font-size: 0.9rem; }
     p { margin: 0 0 1rem; }
     code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem; }
@@ -52,7 +54,7 @@
     .copy-command:hover { border-color: #34d399; }
     .copy-status { min-height: 1.6em; margin: 0 1rem 0.75rem; color: #6ee7b7; font-size: 0.9rem; }
     h2[id] { scroll-margin-top: 1rem; }
-    footer { max-width: 56rem; margin: 0 auto; padding: 0 1rem 2.5rem; color: #64748b; font-size: 0.85rem; }
+    footer { max-width: 56rem; margin: 0 auto; padding: 0 1rem 2.5rem; color: #94a3b8; font-size: 0.85rem; }
   </style>
   <meta name="twitter:card" content="summary_large_image" />
   <meta property="twitter:url" content="https://joltrinhq.com/docs/" />
@@ -97,13 +99,13 @@
 
     <h2>3. The blocked-result payload</h2>
     <p>A blocked call returns a normal result with fields the agent can act on:</p>
-<pre>{
+<pre tabindex="0">{
   "blocked_by": "precondition",
   "missing_state": "backup_validated",
   "established_by_steps": ["validate_backup"]
 }</pre>
     <p>Treat it as a replan signal, not a reason to retry. For a production database drop, the safe order is:</p>
-<pre>drop_prod_db      blocked, backup_validated is missing
+<pre tabindex="0">drop_prod_db      blocked, backup_validated is missing
 validate_backup   blocked, backup_taken is missing
 take_backup       allowed
 validate_backup   allowed
@@ -114,7 +116,7 @@ drop_prod_db      allowed</pre>
     <h2 id="local-demo">4. Five-minute local demo</h2>
     <p>You need Go and a terminal. No clone, API key, or running database is required. The first run downloads dependencies and compiles the example.</p>
     <div class="command">
-<pre id="demo-command">go run github.com/sharedcode/joltrin/v5/examples/verify_barrier@latest</pre>
+<pre tabindex="0" id="demo-command">go run github.com/sharedcode/joltrin/v5/examples/verify_barrier@latest</pre>
       <button class="copy-command" type="button" data-command="demo-command" data-label="Go demo command" hidden>Copy Go demo command</button>
       <p class="copy-status" role="status" aria-live="polite" aria-atomic="true"></p>
     </div>
@@ -127,19 +129,19 @@ drop_prod_db      allowed</pre>
     <h2 id="mcp">5. MCP integration</h2>
     <p>On macOS or Linux, this installs the server, checks its checksum, and registers it with Claude Code, Codex, and Gemini CLI, whichever are installed. No Go needed. <a href="https://github.com/SharedCode/joltrin/blob/master/scripts/install.sh" target="_blank" rel="noopener noreferrer">Review the install script</a> before running it:</p>
     <div class="command">
-<pre id="mcp-command">curl -fsSL https://raw.githubusercontent.com/SharedCode/joltrin/master/scripts/install.sh | sh</pre>
+<pre tabindex="0" id="mcp-command">curl -fsSL https://raw.githubusercontent.com/SharedCode/joltrin/master/scripts/install.sh | sh</pre>
       <button class="copy-command" type="button" data-command="mcp-command" data-label="MCP install command" hidden>Copy MCP install command</button>
       <p class="copy-status" role="status" aria-live="polite" aria-atomic="true"></p>
     </div>
     <p>On Windows, in PowerShell (<a href="https://github.com/SharedCode/joltrin/blob/master/scripts/install.ps1" target="_blank" rel="noopener noreferrer">review the script</a>):</p>
     <div class="command">
-<pre id="mcp-command-powershell">irm https://raw.githubusercontent.com/SharedCode/joltrin/master/scripts/install.ps1 | iex</pre>
+<pre tabindex="0" id="mcp-command-powershell">irm https://raw.githubusercontent.com/SharedCode/joltrin/master/scripts/install.ps1 | iex</pre>
       <button class="copy-command" type="button" data-command="mcp-command-powershell" data-label="PowerShell install command" hidden>Copy PowerShell install command</button>
       <p class="copy-status" role="status" aria-live="polite" aria-atomic="true"></p>
     </div>
     <p>Or in Command Prompt (cmd.exe):</p>
     <div class="command">
-<pre id="mcp-command-cmd">powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/SharedCode/joltrin/master/scripts/install.ps1 | iex"</pre>
+<pre tabindex="0" id="mcp-command-cmd">powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/SharedCode/joltrin/master/scripts/install.ps1 | iex"</pre>
       <button class="copy-command" type="button" data-command="mcp-command-cmd" data-label="Command Prompt install command" hidden>Copy Command Prompt install command</button>
       <p class="copy-status" role="status" aria-live="polite" aria-atomic="true"></p>
     </div>
@@ -153,7 +155,7 @@ drop_prod_db      allowed</pre>
 
     <h2 id="kubernetes">7. Kubernetes admission gate</h2>
     <p>The same check can sit in front of cluster operations. <code>sop-k8s-gate</code> is a validating admission webhook. A policy file maps an operation to a runbook step, and the API server refuses the operation until the steps it depends on are recorded for the trace named in the object's <code>joltrin.dev/trace-id</code> annotation:</p>
-<pre>$ kubectl -n prod delete pvc orders-db-data
+<pre tabindex="0">$ kubectl -n prod delete pvc orders-db-data
 Error from server: admission webhook "gate.joltrin.dev" denied the request:
   step "drop_prod_db" requires state "backup_validated",
   which has not been established in this trace</pre>
