@@ -196,3 +196,70 @@ test.describe('Finding Private Intent from the homepage', () => {
   });
 });
 
+test.describe('Receipt checker', () => {
+  async function allowed(page: import('@playwright/test').Page) {
+    await page.goto('/private-intent/', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#b-attempt')).toBeEnabled({ timeout: 30_000 });
+    await page.locator('#b-backup').click();
+    await page.locator('#b-approve').click();
+    await page.locator('#b-attempt').click();
+    await expect(page.locator('#banner-title')).toHaveText('ALLOW');
+    await page.locator('#receipt-check summary').click();
+  }
+
+  test('a real receipt checks out, and one changed character does not', async ({ page }) => {
+    await allowed(page);
+    await expect(page.locator('#rc-key')).toHaveValue(/^[0-9a-f]{64}$/);
+    await page.locator('#rc-load').click();
+    await expect(page.locator('#rc-input')).toHaveValue(/"policy_digest"/);
+    await page.locator('#rc-check').click();
+    await expect(page.locator('#rc-result')).toContainText('Valid. Signed by');
+    await expect(page.locator('#rc-result')).toContainText('does not show the action ran');
+    await page.locator('#rc-flip').click();
+    await expect(page.locator('#rc-result')).toContainText('signature does not match');
+  });
+
+  test('the wrong key, a bad key and garbage are all explained', async ({ page }) => {
+    await allowed(page);
+    await page.locator('#rc-load').click();
+    await page.locator('#rc-key').fill('00'.repeat(32));
+    await page.locator('#rc-check').click();
+    await expect(page.locator('#rc-result')).toContainText('signature does not match');
+    await page.locator('#rc-key').fill('not a key');
+    await page.locator('#rc-check').click();
+    await expect(page.locator('#rc-result')).toContainText('64 hex characters');
+    await page.locator('#rc-input').fill('hello');
+    await page.locator('#rc-check').click();
+    await expect(page.locator('#rc-result')).toContainText('not a receipt');
+  });
+
+  test('refuses a huge paste and unknown fields without trying to read them', async ({ page }) => {
+    await allowed(page);
+    await page.locator('#rc-input').fill('x'.repeat(20_000));
+    await page.locator('#rc-check').click();
+    await expect(page.locator('#rc-result')).toContainText('too large');
+    await page.locator('#rc-load').click();
+    const raw = await page.locator('#rc-input').inputValue();
+    await page.locator('#rc-input').fill(raw.replace('"v": 1', '"v": 1, "extra": true'));
+    await page.locator('#rc-check').click();
+    await expect(page.locator('#rc-result')).toContainText('not a receipt');
+  });
+
+  test('says so when there is no receipt yet', async ({ page }) => {
+    await page.goto('/private-intent/', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#b-attempt')).toBeEnabled({ timeout: 30_000 });
+    await page.locator('#receipt-check summary').click();
+    await page.locator('#rc-load').click();
+    await expect(page.locator('#rc-result')).toContainText('Get an ALLOW');
+  });
+
+  test('a receipt from before a reset no longer checks out', async ({ page }) => {
+    await allowed(page);
+    await page.locator('#rc-load').click();
+    await page.locator('#b-reset').click();
+    await expect(page.locator('#rc-key')).toHaveValue(/^[0-9a-f]{64}$/);
+    await page.locator('#rc-check').click();
+    await expect(page.locator('#rc-result')).toContainText('signature does not match');
+  });
+});
+
