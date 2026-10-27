@@ -20,9 +20,15 @@ test.describe('Search and link-preview metadata', () => {
       for (const sel of ['og:image', 'twitter:image']) {
         const url = await meta(sel);
         expect(url, `${path} ${sel}`).toMatch(/^https:\/\/joltrinhq\.com\/.+\.png$/);
+        // The declared URL must be on the production host (checked above). The file is fetched from the
+        // server under test, because a new image is not on production until after the deploy. A live run
+        // (LIVE_SITE=1, BASE_URL=https://joltrinhq.com) fetches it from production itself.
         const res = await request.get(new URL(url).pathname);
         expect(res.status(), `${url}`).toBe(200);
         expect(res.headers()['content-type']).toContain('image/png');
+        const body = await res.body();
+        expect(body.length, `${url} is a real image`).toBeGreaterThan(1000);
+        expect(body.subarray(0, 8).toString('hex'), `${url} starts with the PNG signature`).toBe('89504e470d0a1a0a');
       }
     });
   }
