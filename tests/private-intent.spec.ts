@@ -297,6 +297,17 @@ test.describe('Fingerprint lab', () => {
     expect(await digest(page)).not.toBe(withSecond);
   });
 
+  test('the engine refuses wording over 500 characters, and the box stops typing at 500', async ({ page }) => {
+    await open(page);
+    const over = await page.evaluate(() => JSON.parse((window as any).joltrinIntentFingerprint('x'.repeat(501), true, true, false)));
+    expect(over.error).toContain('under 500');
+    expect(over.digest).toBeUndefined();
+    const exactly = await page.evaluate(() => JSON.parse((window as any).joltrinIntentFingerprint('x'.repeat(500), true, true, false)));
+    expect(exactly.digest).toMatch(/^[0-9a-f]{64}$/);
+    await page.locator('#fp-words').fill('y'.repeat(600));
+    expect(await page.locator('#fp-words').inputValue()).toHaveLength(500);
+  });
+
   test('a rule with nothing required is refused with a reason', async ({ page }) => {
     await open(page);
     await page.locator('#fp-backup').uncheck();
