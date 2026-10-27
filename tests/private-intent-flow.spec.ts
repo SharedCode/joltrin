@@ -45,3 +45,21 @@ test.describe('Check this receipt', () => {
     await expect(page.locator('#rc-result')).toContainText('signature does not match');
   });
 });
+
+test.describe('The agents page leads on to Private Intent', () => {
+  test('has a next-step card and a footer link that go to the page', async ({ page, request }) => {
+    await page.goto('/agents/', { waitUntil: 'domcontentloaded' });
+    const card = page.locator('#next-private-intent');
+    await expect(card.getByRole('heading', { level: 2 })).toContainText('Private Intent checks who said yes');
+    await expect(card.getByRole('link', { name: 'Try Private Intent' })).toHaveAttribute('href', '../private-intent/');
+    await expect(page.locator('footer a[href="../private-intent/"]')).toHaveCount(1);
+    expect((await request.get('/private-intent/')).status()).toBe(200);
+  });
+
+  test('says only what is true about the page it links to', async ({ page }) => {
+    await page.goto('/agents/', { waitUntil: 'domcontentloaded' });
+    const text = (await page.locator('#next-private-intent').innerText()).toLowerCase();
+    expect(text).toContain('nothing is sent anywhere');
+    for (const claim of ['zero-knowledge', 'self-serve', 'enterprise-grade', 'guarantee']) expect(text).not.toContain(claim);
+  });
+});
