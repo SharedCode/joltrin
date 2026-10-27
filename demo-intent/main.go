@@ -22,6 +22,7 @@ import (
 )
 
 const maxReceiptBytes = 16 << 10
+const maxPreferenceBytes = 500
 
 const preference = "Never delete production data unless a validated backup exists and the production owner approves."
 
@@ -56,19 +57,27 @@ func must[T any](v T, err error) T {
 }
 
 func newSession() *session {
+	return newSessionFor(preference, defaultRequires())
+}
+
+func defaultRequires() []intent.Requirement {
+	return []intent.Requirement{
+		{Kind: intent.NeedEvidence, State: "backup_validated", Describe: "verified backup"},
+		{Kind: intent.NeedApproval, Role: "production_owner", Describe: "owner approval"},
+	}
+}
+
+func newSessionFor(pref string, requires []intent.Requirement) *session {
 	backupPub, backupPriv, _ := intent.GenerateKey()
 	ownerPub, ownerPriv, _ := intent.GenerateKey()
 	_, enginePriv, _ := intent.GenerateKey()
 
 	v := intent.NewVault("demo", nil)
 	must(0, v.Add(intent.Rule{
-		ID: "prod-data-deletion", Label: "Production data deletion", Preference: preference,
+		ID: "prod-data-deletion", Label: "Production data deletion", Preference: pref,
 		Owner: "you", Purpose: "protect production data",
 		Mode: intent.Grant, Agent: "ops-agent", Tool: "db.delete", Resource: "prod/*", Env: "production",
-		Requires: []intent.Requirement{
-			{Kind: intent.NeedEvidence, State: "backup_validated", Describe: "verified backup"},
-			{Kind: intent.NeedApproval, Role: "production_owner", Describe: "owner approval"},
-		},
+		Requires: requires,
 	}))
 	eng := must(intent.NewEngine(intent.Config{
 		Vault: v, SigningKey: enginePriv, ReceiptTTL: 2 * time.Minute,
@@ -85,6 +94,49 @@ func newSession() *session {
 		action: intent.Action{Tenant: "demo", Agent: "ops-agent", Tool: "db.delete", Resource: "prod/orders", Env: "production",
 			Params: map[string]string{"database": "orders"}},
 	}
+}
+
+// fingerprint builds a throwaway rule with the given wording and requirements
+// and returns the policy digest a verifier would see. It exists to show that
+// the digest follows what a rule requires and ignores how the owner worded it.
+// A throwaway vault is used each time, so the version is the same every call
+// and only the content can move the digest.
+func fingerprint(pref string, backup, approval, second bool) string {
+	type result struct {
+		Digest string `json:"digest,omitempty"`
+		Error  string `json:"error,omitempty"`
+	}
+	out := func(r result) string { b, _ := json.Marshal(r); return string(b) }
+	if len(pref) > maxPreferenceBytes {
+		return out(result{Error: "Keep the wording under 500 characters."})
+	}
+	var reqs []intent.Requirement
+	if backup {
+		reqs = append(reqs, intent.Requirement{Kind: intent.NeedEvidence, State: "backup_validated", Describe: "verified backup"})
+	}
+	if approval {
+		reqs = append(reqs, intent.Requirement{Kind: intent.NeedApproval, Role: "production_owner", Describe: "owner approval"})
+	}
+	if second {
+		reqs = append(reqs, intent.Requirement{Kind: intent.NeedApproval, Role: "security_lead", Describe: "security approval"})
+	}
+	if len(reqs) == 0 {
+		return out(result{Error: "A rule needs at least one thing that must be true first."})
+	}
+	var digest string
+	func() {
+		defer func() {
+			if recover() != nil {
+				digest = ""
+			}
+		}()
+		sess := newSessionFor(pref, reqs)
+		digest = sess.eng.Evaluate(sess.action).PolicyDigest
+	}()
+	if digest == "" {
+		return out(result{Error: "That rule could not be built. Try different wording."})
+	}
+	return out(result{Digest: digest})
 }
 
 func (s *session) say(who, kind, text string) {
@@ -262,6 +314,12 @@ func main() {
 			return checkReceipt("", "")
 		}
 		return checkReceipt(args[0].String(), args[1].String())
+	}))
+	js.Global().Set("joltrinIntentFingerprint", js.FuncOf(func(this js.Value, args []js.Value) any {
+		if len(args) < 4 {
+			return fingerprint("", false, false, false)
+		}
+		return fingerprint(args[0].String(), args[1].Bool(), args[2].Bool(), args[3].Bool())
 	}))
 	js.Global().Set("joltrinIntentReset", js.FuncOf(func(this js.Value, args []js.Value) any {
 		s = newSession()
