@@ -2981,26 +2981,43 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'sound-toggle';
-      btn.setAttribute('aria-pressed', 'true');
+      // "on" is what the visitor wants. The label only says "Sound on" once the browser has actually let audio run.
+      function live() { return !!(on && ctx && ctx.state === 'running'); }
       function paint() {
-        btn.setAttribute('aria-pressed', String(on));
-        btn.textContent = on ? 'Sound on' : 'Sound off';
+        btn.setAttribute('aria-pressed', String(live()));
+        btn.textContent = !on ? 'Sound off' : live() ? 'Sound on' : 'Tap for sound';
       }
       function audio() {
-        if (!ctx) ctx = new AC();
+        if (!ctx) {
+          ctx = new AC();
+          ctx.addEventListener('statechange', paint);
+        }
         // resume() rejects when the page is already navigating away, which is not an error worth reporting.
-        if (ctx.state === 'suspended') ctx.resume().catch(function () {});
+        if (ctx.state !== 'running') ctx.resume().then(paint, function () {});
         return ctx;
       }
       // A suspended context queues sounds and then plays them all at once, so skip them until the browser allows audio.
       function ready() {
         return on && audio().state === 'running';
       }
-      ['pointerdown', 'click', 'keydown', 'touchend'].forEach(function (ev) {
-        window.addEventListener(ev, function () { if (on) audio(); }, { passive: true });
+      // Mouse, touch and keyboard presses all unlock audio. Capture phase, so the toggle's stopPropagation cannot hide them.
+      // livePress remembers whether sound was already playing when this press began, because the unlock below can finish before click fires.
+      var livePress = null;
+      ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) {
+        window.addEventListener(ev, function () { livePress = live(); }, { passive: true, capture: true });
+      });
+      ['pointerdown', 'pointerup', 'click', 'keydown', 'touchend'].forEach(function (ev) {
+        window.addEventListener(ev, function () { if (on) audio(); }, { passive: true, capture: true });
       });
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
+        var wasLive = livePress === null ? live() : livePress;
+        livePress = null;
+        // The press that first unlocks audio only unlocks it. It must not flip the sound off.
+        if (on && !wasLive) {
+          audio().resume().then(function () { paint(); tone(660, 0.09, 'sine', 0.05, 990); }, function () {});
+          return;
+        }
         on = !on;
         paint();
         if (on) tone(660, 0.09, 'sine', 0.05, 990);
