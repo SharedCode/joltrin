@@ -56,8 +56,14 @@ func must[T any](v T, err error) T {
 	return v
 }
 
+// newSession builds the fixed demo rule. The inputs are constants, so an error here is a
+// programming mistake and stops the page loudly.
 func newSession() *session {
-	return newSessionFor(preference, defaultRequires())
+	sess, err := newSessionFor(preference, defaultRequires())
+	if err != nil {
+		panic(err)
+	}
+	return sess
 }
 
 func defaultRequires() []intent.Requirement {
@@ -67,33 +73,38 @@ func defaultRequires() []intent.Requirement {
 	}
 }
 
-func newSessionFor(pref string, requires []intent.Requirement) *session {
+func newSessionFor(pref string, requires []intent.Requirement) (*session, error) {
 	backupPub, backupPriv, _ := intent.GenerateKey()
 	ownerPub, ownerPriv, _ := intent.GenerateKey()
 	_, enginePriv, _ := intent.GenerateKey()
 
 	v := intent.NewVault("demo", nil)
-	must(0, v.Add(intent.Rule{
+	if err := v.Add(intent.Rule{
 		ID: "prod-data-deletion", Label: "Production data deletion", Preference: pref,
 		Owner: "you", Purpose: "protect production data",
 		Mode: intent.Grant, Agent: "ops-agent", Tool: "db.delete", Resource: "prod/*", Env: "production",
 		Requires: requires,
-	}))
-	eng := must(intent.NewEngine(intent.Config{
+	}); err != nil {
+		return nil, err
+	}
+	eng, err := intent.NewEngine(intent.Config{
 		Vault: v, SigningKey: enginePriv, ReceiptTTL: 2 * time.Minute,
 		Trust: intent.Trust{
 			Owner:     ownerPub,
 			Issuers:   map[string]intent.TrustedKey{intent.KeyID(backupPub): {Key: backupPub, Scope: []string{"backup_validated"}}},
 			Approvers: map[string]intent.TrustedKey{intent.KeyID(ownerPub): {Key: ownerPub, Scope: []string{"production_owner"}}},
 		},
-	}))
+	})
+	if err != nil {
+		return nil, err
+	}
 	return &session{
 		log:   []logLine{},
 		vault: v, eng: eng, guard: intent.NewGuard(eng.ReceiptKey(), nil),
 		backupKey: backupPriv, ownerKey: ownerPriv,
 		action: intent.Action{Tenant: "demo", Agent: "ops-agent", Tool: "db.delete", Resource: "prod/orders", Env: "production",
 			Params: map[string]string{"database": "orders"}},
-	}
+	}, nil
 }
 
 // fingerprint builds a throwaway rule with the given wording and requirements
@@ -123,20 +134,11 @@ func fingerprint(pref string, backup, approval, second bool) string {
 	if len(reqs) == 0 {
 		return out(result{Error: "A rule needs at least one thing that must be true first."})
 	}
-	var digest string
-	func() {
-		defer func() {
-			if recover() != nil {
-				digest = ""
-			}
-		}()
-		sess := newSessionFor(pref, reqs)
-		digest = sess.eng.Evaluate(sess.action).PolicyDigest
-	}()
-	if digest == "" {
-		return out(result{Error: "That rule could not be built. Try different wording."})
+	sess, err := newSessionFor(pref, reqs)
+	if err != nil {
+		return out(result{Error: "That rule could not be built: " + err.Error()})
 	}
-	return out(result{Digest: digest})
+	return out(result{Digest: sess.eng.Evaluate(sess.action).PolicyDigest})
 }
 
 func (s *session) say(who, kind, text string) {
