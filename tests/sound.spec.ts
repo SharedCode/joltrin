@@ -175,3 +175,63 @@ test.describe('Homepage sound when the browser refuses audio', () => {
     expect(await page.evaluate(() => (window as any).__oscillators)).toBe(0);
   });
 });
+
+test.describe('Sound button on a phone', () => {
+  test.beforeEach(async ({ page }) => {
+    // A browser that lets audio start as soon as resume() is called, so the first press unlocks it in every engine.
+    await page.addInitScript(() => {
+      const Real = window.AudioContext;
+      class Unlockable extends Real {
+        unlocked = false;
+        get state() {
+          return (this.unlocked ? 'running' : 'suspended') as AudioContextState;
+        }
+        resume() {
+          this.unlocked = true;
+          this.dispatchEvent(new Event('statechange'));
+          return Promise.resolve();
+        }
+      }
+      (window as any).AudioContext = Unlockable;
+    });
+    await page.setViewportSize({ width: 375, height: 800 });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+  });
+
+  test('is a 44 pixel round button that keeps its words for screen readers', async ({ page }) => {
+    const toggle = page.locator('.sound-toggle');
+    await expect(toggle).toHaveText('Tap for sound');
+    const box = await toggle.boundingBox();
+    expect(box!.width).toBeGreaterThanOrEqual(43.5);
+    expect(box!.height).toBeGreaterThanOrEqual(43.5);
+    expect(box!.width).toBeLessThanOrEqual(48);
+    // Its accessible name is the words, even though only the icon is drawn.
+    await expect(page.getByRole('button', { name: 'Tap for sound' })).toBeVisible();
+    await expect(toggle.locator('svg.si')).toBeVisible();
+    const wordsBox = await toggle.locator('.st').boundingBox();
+    expect(wordsBox!.width).toBeLessThanOrEqual(2);
+  });
+
+  test('shows the muted icon when sound is off', async ({ page }) => {
+    const toggle = page.locator('.sound-toggle');
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('data-s', 'on');
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('data-s', 'off');
+    await expect(toggle).toHaveText('Sound off');
+    await expect(toggle.locator('.si-off')).toBeVisible();
+  });
+});
+
+test.describe('Sound button on a wide screen', () => {
+  test('keeps the words and hides the icon', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const toggle = page.locator('.sound-toggle');
+    await expect(toggle.locator('.st')).toBeVisible();
+    await expect(toggle.locator('svg.si')).toBeHidden();
+    const box = await toggle.boundingBox();
+    expect(box!.width).toBeGreaterThan(80);
+  });
+});
+
