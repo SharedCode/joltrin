@@ -441,6 +441,22 @@
     footer ul a { display: inline-block; padding-block: .3rem; }
     footer ul a.flex { display: flex; }
   </style>
+  <style>
+    /* Calm skin: one quiet surface colour, no borders, large radii and generous spacing. Content and ids are unchanged. */
+    .display { font-weight: 600; letter-spacing: -0.035em; line-height: 1.04; }
+    main > section[class*="rounded-2xl"], main > section#under-the-hood > div[class*="rounded-2xl"] { border-width: 0 !important; border-radius: 28px !important; background-image: none !important; box-shadow: none !important; background-color: rgb(var(--c-dark-900)) !important; }
+    main > section[id], main > section[aria-label] { margin-bottom: 5rem; }
+    main > section#pricing { border-top-width: 0; padding-top: 0; margin-top: 7rem; }
+    main > section#live-experiences { margin-bottom: 5rem; }
+    main > section#live-experiences > a { border-width: 0 !important; border-radius: 28px !important; background-color: rgb(var(--c-dark-900)) !important; padding: 1.5rem !important; }
+    main > section#live-experiences > a:hover { background-color: rgb(var(--c-dark-850)) !important; }
+    main > section#only-joltrin { box-shadow: 0 0 0 1px rgba(52, 211, 153, .35) inset !important; }
+    main h2 { letter-spacing: -0.025em; }
+    #hero-example, #hero-play { border-width: 0 !important; border-radius: 24px !important; background-color: rgb(var(--c-dark-900)) !important; }
+    #hero-play { padding: 1.25rem; }
+    header.sticky { border-bottom-color: rgba(255, 255, 255, .06); }
+    @media (min-width: 640px) { main > section[class*="rounded-2xl"] { padding: 3rem !important; } }
+  </style>
 </head>
 <body class="bg-dark-950 text-slate-200 min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-black">
 
@@ -465,8 +481,11 @@
   <div class="scroll-progress" aria-hidden="true"></div>
 
   <!-- Top Navbar -->
-  <header class="border-b border-dark-800 bg-dark-900/80 backdrop-blur-md sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+  <a id="intent-strip" href="./private-intent/" onclick="track('intent_strip_click')" class="block bg-brand-500/10 hover:bg-brand-500/15 text-center text-xs sm:text-sm py-2 px-4 text-brand-300 transition">
+    <span class="font-semibold">Private Intent</span><span class="text-slate-400"> &middot; Watch an agent get blocked until you approve it</span> <span aria-hidden="true">&#8250;</span>
+  </a>
+  <header class="border-b border-dark-800 bg-dark-900/80 backdrop-blur-xl backdrop-saturate-150 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
       <div class="flex items-center space-x-3">
         <a href="./" class="w-9 h-9 flex items-center justify-center">
           <img src="./logo-mark.png" alt="Joltrin" class="w-9 h-9 object-contain" width="36" height="36" />
@@ -647,36 +666,35 @@
   <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     <!-- Hero -->
-    <section class="relative rounded-2xl bg-gradient-to-b from-dark-850 to-dark-900 border border-dark-700/80 p-6 sm:p-10 mb-8 overflow-hidden bg-grid glow-emerald">
-      <div class="absolute top-0 right-0 -mt-8 -mr-8 w-72 h-72 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div class="relative z-10 grid grid-cols-1 gap-8 lg:grid-cols-2 items-center">
-        <div class="min-w-0">
-          <p class="text-xs font-mono font-semibold uppercase tracking-wider text-brand-400 mb-4">For teams letting AI agents change infrastructure</p>
+    <section class="hero-calm relative mb-16 pt-6 sm:pt-14">
+      <div class="relative z-10 flex flex-col gap-12 min-w-0">
+        <div class="min-w-0 w-full text-center max-w-3xl mx-auto">
+          <p class="text-sm font-medium text-brand-300 mb-5">For teams letting AI agents change infrastructure</p>
 
-          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight mb-4">
+          <h1 class="display text-[clamp(2.4rem,6.5vw,4.5rem)] text-white mb-6">
             Your AI agent wants to delete production.
-            <span class="bg-gradient-to-r from-brand-400 via-accent-cyan to-accent-violet bg-clip-text text-transparent">Who's stopping it?</span>
+            <span class="text-brand-300">Who's stopping it?</span>
           </h1>
 
-          <p class="text-white font-semibold text-base sm:text-lg leading-relaxed mb-2">
+          <p class="text-white font-medium text-lg sm:text-xl leading-relaxed mb-3">
             Joltrin blocks a risky step, like dropping a database, until the steps before it are recorded, and tells the agent what to do first.</p>
-          <p class="text-slate-400 text-sm leading-relaxed mb-6">
+          <p class="text-slate-400 text-base leading-relaxed mb-8">
             You put it in front of the one tool you want protected. Your agent asks Joltrin before it acts. Open source and free to try in your browser.
           </p>
 
-          <div class="flex flex-wrap items-center gap-3">
+          <div class="flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
             <a href="./agents/"
-               class="px-5 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 font-bold text-sm text-black shadow-lg shadow-brand-500/20 flex items-center space-x-2 transition">
+               class="px-6 py-3 rounded-full bg-brand-500 hover:bg-brand-400 font-semibold text-sm text-black flex items-center space-x-2 transition">
               <i data-lucide="shield-check" class="w-4 h-4"></i>
               <span>Try to make an agent drop a database</span>
             </a>
             <a href="#demo-video"
-               class="px-5 py-3 rounded-xl bg-dark-900 hover:bg-dark-850 border border-dark-700 text-slate-200 hover:text-white font-semibold text-sm flex items-center space-x-2 transition">
+               class="text-brand-300 hover:text-brand-200 font-medium text-sm flex items-center space-x-2 transition">
               <i data-lucide="play" class="w-4 h-4 text-brand-400"></i>
               <span>Watch the short demo</span>
             </a>
           </div>
-          <div class="mt-5 min-w-0">
+          <div class="mt-10 min-w-0 w-full text-left max-w-xl mx-auto">
             <p class="text-[11px] font-mono uppercase tracking-wider text-slate-500 mb-1.5">Or run it now (Go 1.26.10 or newer)</p>
             <div class="relative">
               <pre id="quickstart-cmd" class="rounded-lg bg-dark-950 border border-dark-700 pl-3 pr-16 py-2 font-mono text-xs text-slate-200 overflow-x-auto"><code>go run github.com/sharedcode/joltrin/v5/examples/verify_barrier@latest</code></pre>
@@ -686,7 +704,7 @@
           </div>
         </div>
 
-        <div class="min-w-0">
+        <div class="min-w-0 grid grid-cols-1 md:grid-cols-2 gap-4 items-start max-w-5xl mx-auto w-full">
         <div id="hero-example" class="min-w-0 rounded-xl bg-dark-950 border border-dark-700 p-4 font-mono text-xs sm:text-sm" aria-label="A blocked, then allowed, sequence">
           <div class="text-[11px] text-slate-500 uppercase tracking-wider mb-3">// db-maintenance runbook</div>
           <div class="space-y-1.5 overflow-x-auto">
@@ -699,7 +717,7 @@
           <p class="text-[11px] text-slate-500 mt-3 leading-relaxed font-sans">The order is enforced by the barrier, whatever the agent says it already did.</p>
         </div>
 
-        <div id="hero-play" class="mt-4 rounded-xl bg-dark-950 border border-dark-700 p-4">
+        <div id="hero-play" class="min-w-0 rounded-xl bg-dark-950 border border-dark-700 p-4">
           <p class="font-semibold text-white text-sm">Be the agent. Try to drop the database.</p>
           <p class="text-xs text-slate-400 mt-1">Pick a step. The barrier answers every time, and it does not take your word for anything.</p>
           <div class="flex flex-wrap gap-2 mt-3">
