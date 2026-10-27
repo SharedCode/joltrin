@@ -178,6 +178,22 @@ test.describe('Homepage sound when the browser refuses audio', () => {
 
 test.describe('Sound button on a phone', () => {
   test.beforeEach(async ({ page }) => {
+    // A browser that lets audio start as soon as resume() is called, so the first press unlocks it in every engine.
+    await page.addInitScript(() => {
+      const Real = window.AudioContext;
+      class Unlockable extends Real {
+        unlocked = false;
+        get state() {
+          return (this.unlocked ? 'running' : 'suspended') as AudioContextState;
+        }
+        resume() {
+          this.unlocked = true;
+          this.dispatchEvent(new Event('statechange'));
+          return Promise.resolve();
+        }
+      }
+      (window as any).AudioContext = Unlockable;
+    });
     await page.setViewportSize({ width: 375, height: 800 });
     await page.goto('/', { waitUntil: 'domcontentloaded' });
   });
@@ -199,7 +215,7 @@ test.describe('Sound button on a phone', () => {
   test('shows the muted icon when sound is off', async ({ page }) => {
     const toggle = page.locator('.sound-toggle');
     await toggle.click();
-    await expect(toggle).toHaveAttribute('data-s', /on|tap/);
+    await expect(toggle).toHaveAttribute('data-s', 'on');
     await toggle.click();
     await expect(toggle).toHaveAttribute('data-s', 'off');
     await expect(toggle).toHaveText('Sound off');
