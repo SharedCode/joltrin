@@ -41,8 +41,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+        sans: ['Inter', 'Inter Fallback', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['JetBrains Mono', 'JetBrains Fallback', 'Fira Code', 'monospace'],
       },
     },
   },
