@@ -211,6 +211,48 @@ func (s *session) revoke() {
 	s.say("owner", "info", "Revoked approval "+ap.ID+".")
 }
 
+// The three methods below are attacks. Each one is real: the agent makes its own key, signs what it
+// wants the engine to believe, and the engine decides. Nothing here is scripted to fail.
+
+// cheatClaim has the agent sign "backup validated" with a key the engine was never told to trust.
+func (s *session) cheatClaim() {
+	_, agentKey, _ := intent.GenerateKey()
+	ev := intent.SignEvidence(agentKey, intent.Evidence{Tenant: "demo", State: "backup_validated", Resource: "prod/orders"}, time.Now(), time.Hour)
+	s.say("agent", "info", "ops-agent signs \"backup validated\" with its own key.")
+	if err := s.eng.Ingest(intent.Envelope{Type: "evidence", Evidence: &ev}); err != nil {
+		s.say("joltrin", "block", errText(err))
+		return
+	}
+	s.say("joltrin", "ok", "Accepted. (This should not happen.)")
+}
+
+// cheatApprove has the agent sign an owner approval for its own delete.
+func (s *session) cheatApprove() {
+	_, agentKey, _ := intent.GenerateKey()
+	ap := intent.SignApproval(agentKey, s.action, "production_owner", time.Now(), 10*time.Minute)
+	s.say("agent", "info", "ops-agent approves its own delete as the production owner.")
+	if err := s.eng.Ingest(intent.Envelope{Type: "approval", Approval: &ap}); err != nil {
+		s.say("joltrin", "block", errText(err))
+		return
+	}
+	s.say("joltrin", "ok", "Accepted. (This should not happen.)")
+}
+
+// cheatOther tries to spend the owner's approval for prod/orders on a different database.
+func (s *session) cheatOther() {
+	if len(s.approvals) == 0 {
+		s.say("owner", "info", "There is no approval to misuse yet. Press step 3 first, then try this.")
+		return
+	}
+	other := s.action
+	other.Resource = "prod/users"
+	other.Params = map[string]string{"database": "users"}
+	s.say("agent", "info", "ops-agent reuses the approval for orders to delete prod/users instead.")
+	d := s.eng.Evaluate(other)
+	kind := map[intent.Verdict]string{intent.Allow: "ok", intent.Block: "block", intent.RequireApproval: "ask"}[d.Verdict]
+	s.log = append(s.log, logLine{Who: "joltrin", Text: d.Summary, Kind: kind, Verdict: string(d.Verdict)})
+}
+
 func (s *session) tamper() {
 	if s.lastReceipt == nil {
 		s.say("executor", "info", "No receipt yet. Get an ALLOW first, then try to tamper with it.")
@@ -326,6 +368,9 @@ func main() {
 	bind("joltrinIntentRevoke", s.revoke)
 	bind("joltrinIntentTamper", s.tamper)
 	bind("joltrinIntentReplay", s.replay)
+	bind("joltrinIntentCheatClaim", s.cheatClaim)
+	bind("joltrinIntentCheatApprove", s.cheatApprove)
+	bind("joltrinIntentCheatOther", s.cheatOther)
 	js.Global().Set("joltrinIntentCheckReceipt", js.FuncOf(func(this js.Value, args []js.Value) any {
 		if len(args) < 2 {
 			return checkReceipt("", "")
