@@ -8,11 +8,21 @@ test.describe('Homepage sound toggle', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
       (window as any).__oscillators = 0;
+      (window as any).__lastPress = -1e9;
+      ['pointerdown', 'keydown', 'touchstart'].forEach((ev) =>
+        window.addEventListener(ev, (e) => { if (e.isTrusted) (window as any).__lastPress = performance.now(); }, true));
       const Real = window.AudioContext;
+      // Suspended until resume() is called right after a real press, like a browser with the default autoplay policy.
       class Counting extends Real {
-        // CI machines have no audio device, so a real context can stay suspended. Report it running so the sound path is what is tested.
+        unlocked = false;
         get state() {
-          return 'running' as AudioContextState;
+          return (this.unlocked ? 'running' : 'suspended') as AudioContextState;
+        }
+        resume() {
+          if (performance.now() - (window as any).__lastPress > 5000) return Promise.resolve();
+          this.unlocked = true;
+          this.dispatchEvent(new Event('statechange'));
+          return Promise.resolve();
         }
         createOscillator() {
           (window as any).__oscillators += 1;

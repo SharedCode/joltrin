@@ -311,9 +311,9 @@
       header.sticky, section.rounded-2xl { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 30px -14px rgba(0, 0, 0, 0.12); }
     }
     /* Local fallbacks sized to match Inter and JetBrains Mono. With display=optional the page never reflows when the web fonts arrive. */
-    @font-face { font-family: 'Inter Fallback'; src: local('Arial'); font-weight: 100 599; size-adjust: 107.12%; ascent-override: 90.49%; descent-override: 22.56%; line-gap-override: 0%; }
-    @font-face { font-family: 'Inter Fallback'; src: local('Arial Bold'), local('Arial-BoldMT'); font-weight: 600 900; size-adjust: 105%; ascent-override: 92%; descent-override: 23%; line-gap-override: 0%; }
-    @font-face { font-family: 'JetBrains Fallback'; src: local('Courier New'); size-adjust: 100%; ascent-override: 102%; descent-override: 30%; line-gap-override: 0%; }
+    @font-face { font-family: 'Inter Fallback'; src: local('Arial'), local('Liberation Sans'), local('Arimo'), local('Helvetica Neue'), local('Roboto'); font-weight: 100 599; size-adjust: 107.12%; ascent-override: 90.49%; descent-override: 22.56%; line-gap-override: 0%; }
+    @font-face { font-family: 'Inter Fallback'; src: local('Arial Bold'), local('Arial-BoldMT'), local('Liberation Sans Bold'), local('Arimo Bold'), local('Helvetica Neue Bold'), local('Roboto Bold'); font-weight: 600 900; size-adjust: 105%; ascent-override: 92%; descent-override: 23%; line-gap-override: 0%; }
+    @font-face { font-family: 'JetBrains Fallback'; src: local('Courier New'), local('Liberation Mono'), local('Cousine'), local('Roboto Mono'); size-adjust: 100%; ascent-override: 102%; descent-override: 30%; line-gap-override: 0%; }
     body {
       background-color: rgb(var(--c-dark-950));
       color: rgb(var(--c-slate-200));
