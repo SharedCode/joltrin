@@ -490,3 +490,58 @@ test.describe('Touch targets', () => {
   });
 });
 
+// The page is ready to measure when it has loaded and its fonts are in. This replaces a fixed sleep.
+async function settled(page: import('@playwright/test').Page) {
+  await page.waitForLoadState('load');
+  await page.evaluate(() => document.fonts.ready);
+}
+
+test.describe('Touch targets on the homepage', () => {
+  test.use({ hasTouch: true, isMobile: true, viewport: { width: 375, height: 800 } });
+
+  test('header controls, form fields and buttons are at least 44 pixels', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await settled(page);
+    const small = await page.evaluate(() => {
+      const out: string[] = [];
+      const check = (e: Element, what: string) => {
+        // Layout height, not the drawn box: the scroll reveal draws unrevealed sections at 98.5%.
+        const el = e as HTMLElement;
+        const cs = getComputedStyle(e);
+        if (el.offsetWidth === 0 || el.offsetHeight === 0 || cs.visibility === 'hidden' || e.closest('[hidden], .hidden')) return;
+        if (el.offsetHeight < 44) out.push(`${what} ${el.offsetWidth}x${el.offsetHeight}`);
+      };
+      document.querySelectorAll('header a, header button').forEach((e) => check(e, `header ${e.id || e.tagName.toLowerCase()}`));
+      document.querySelectorAll('main button').forEach((e) => check(e, `button ${e.id || (e.textContent || '').trim().slice(0, 20)}`));
+      document.querySelectorAll('main input:not([type=checkbox]):not([type=radio]), main select').forEach((e) => check(e, `field ${e.id}`));
+      return out;
+    });
+    expect(small, small.join(', ')).toEqual([]);
+  });
+
+  test('bigger targets do not make the homepage scroll sideways', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await settled(page);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+  });
+});
+
+test.describe('Homepage on narrow phones', () => {
+  for (const width of [320, 360, 375, 390, 414]) {
+    test(`the homepage does not scroll sideways at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      await settled(page);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+    });
+  }
+
+  test('GitHub stays reachable on a narrow phone through the menu', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('header a[aria-label="Joltrin on GitHub"]')).toBeHidden();
+    await page.locator('#mobile-menu-btn').click();
+    await expect(page.locator('#mobile-menu-panel a[href="https://github.com/SharedCode/joltrin"]')).toBeVisible();
+  });
+});
+

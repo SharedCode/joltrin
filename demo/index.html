@@ -459,6 +459,25 @@
     #hero-play { padding: 1.25rem; }
     header.sticky { border-bottom-color: rgba(255, 255, 255, .06); }
     @media (min-width: 640px) { main > section[class*="rounded-2xl"] { padding: 3rem !important; } }
+    /* Touch screens get 44 pixel targets for buttons, header controls and standalone links. Links inside a sentence are left alone. */
+    [hidden] { display: none !important; }
+    /* Below 400 pixels the header cannot fit every control. The GitHub icon moves into the menu. */
+    @media (max-width: 399px) { header a[aria-label="Joltrin on GitHub"] { display: none !important; } }
+    @media (max-width: 359px) { #watch-demo-btn { display: none !important; } }
+    @media (pointer: coarse) {
+      header a, header button, header summary, #mobile-menu-panel a, #mobile-menu-panel button { min-height: 44px; }
+      header a, header button { display: inline-flex; align-items: center; justify-content: center; }
+      header a, header button { min-width: 44px; }
+      #mobile-menu-btn { min-width: 44px; }
+      input:not([type="checkbox"]):not([type="radio"]), select, textarea { min-height: 44px; }
+      /* WebKit draws a native dropdown at its own height, so it is drawn by the page here, with its own arrow. */
+      select { -webkit-appearance: none; appearance: none; min-height: 44px; padding: 0.5rem 2.25rem 0.5rem 0.75rem; background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1rem; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E"); }
+      main button, main summary, .sound-toggle { min-height: 44px; }
+      main button:not(.tab-btn):not(.team-tab):not([role="tab"]) { display: inline-flex; align-items: center; justify-content: center; }
+      main a:where(.flex, .inline-flex, .block, .inline-block):not(.hidden) { min-height: 44px; align-items: center; }
+      main a:where(.block, .inline-block) { display: inline-flex; }
+      footer ul a { display: inline-flex; align-items: center; min-height: 44px; }
+    }
   </style>
   <script type="application/ld+json">
 {
@@ -623,6 +642,7 @@
       <a href="#pricing" onclick="closeMobileMenu()" class="block px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition">Pricing</a>
       <button type="button" onclick="closeMobileMenu(); track('pro_click'); openProCheckoutModal()" class="w-full text-left block px-3 py-2 rounded-lg text-brand-400 font-semibold hover:bg-dark-800 transition">Get Pro, $49/mo</button>
       <a href="#enterprise" onclick="closeMobileMenu()" class="block px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition">Enterprise</a>
+      <a href="https://github.com/SharedCode/joltrin" target="_blank" rel="noopener noreferrer" class="block px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition">GitHub</a>
     </nav>
   </header>
 
