@@ -389,3 +389,55 @@ test.describe('Try to cheat it', () => {
   });
 });
 
+test.describe('Share a run', () => {
+  async function ready(page: import('@playwright/test').Page, hash = '') {
+    await page.goto(`/private-intent/${hash}`, { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#b-attempt')).toBeEnabled({ timeout: 30_000 });
+  }
+
+  test('each step goes into the address bar, and Start over clears it', async ({ page }) => {
+    await ready(page);
+    await expect(page.locator('#share-run')).toBeHidden();
+    await page.locator('#b-attempt').click();
+    await page.locator('#b-backup').click();
+    await page.locator('#b-attempt').click();
+    expect(await page.evaluate(() => location.hash)).toBe('#run=ABA');
+    await expect(page.locator('#share-run')).toBeVisible();
+    await page.locator('#b-reset').click();
+    expect(await page.evaluate(() => location.hash)).toBe('');
+    await expect(page.locator('#share-run')).toBeHidden();
+  });
+
+  test('opening a shared link replays the steps against a fresh engine', async ({ page }) => {
+    await ready(page, '#run=BPA');
+    await expect(page.locator('#replay-note')).toContainText('Replaying a shared run of 3 steps');
+    await expect(page.locator('#banner-title')).toHaveText('ALLOW', { timeout: 15_000 });
+    await expect(page.locator('#log')).toContainText('Receipt verified');
+    await expect(page.locator('#replay-note')).toContainText('Replayed 3 steps');
+    expect(await page.evaluate(() => location.hash)).toBe('#run=BPA');
+  });
+
+  test('a shared cheating run replays the refusals too', async ({ page }) => {
+    await ready(page, '#run=XA');
+    await expect(page.locator('#log')).toContainText('signs "backup validated" with its own key', { timeout: 15_000 });
+    await expect(page.locator('#banner-title')).toHaveText('BLOCK', { timeout: 15_000 });
+  });
+
+  for (const [label, hash] of [['unknown letters', '#run=QQQ'], ['markup', '#run=A%3Cscript%3E'], ['lower case', '#run=aba'], ['too many steps', '#run=' + 'A'.repeat(41)]]) {
+    test(`a link with ${label} is ignored`, async ({ page }) => {
+      await ready(page, hash);
+      await page.waitForTimeout(1500);
+      await expect(page.locator('#replay-note')).toBeHidden();
+      await expect(page.locator('#log li')).toHaveCount(0);
+      await expect(page.locator('#banner-title')).toHaveText('READY');
+    });
+  }
+
+  test('the copy button says what happened', async ({ page }) => {
+    await ready(page);
+    await page.locator('#b-attempt').click();
+    await page.locator('#share-run').click();
+    await expect(page.locator('#replay-note')).toContainText(/Link copied|Copy the link from the address bar/);
+  });
+});
+

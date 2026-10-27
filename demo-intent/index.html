@@ -198,7 +198,9 @@
         <div class="mt-2 flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm">
           <button id="b-revoke" type="button" class="text-rose-300 hover:text-rose-200 transition disabled:opacity-40" disabled>Revoke my approval</button>
           <button id="b-reset" type="button" class="text-slate-400 hover:text-white transition disabled:opacity-40" disabled>Start over</button>
+          <button id="share-run" type="button" class="text-brand-300 hover:text-brand-200 transition" hidden>Copy a link to this run</button>
         </div>
+        <p id="replay-note" role="status" aria-live="polite" class="mt-2 text-center text-xs text-slate-500" hidden></p>
 
         <div id="team-cta" class="team-cta mt-6 text-center" aria-hidden="true">
           <div class="rounded-3xl bg-brand-500/10 px-6 py-5">
@@ -634,12 +636,56 @@ go run ./examples/private_intent approve ./pi orders</pre>
         }
       }
 
+      // A run is the list of steps taken, kept in the address bar as #run=ABPA so it can be shared. The link
+      // carries no keys and no receipts: whoever opens it replays the same steps against their own fresh engine.
+      var CODES = { A: 'b-attempt', B: 'b-backup', P: 'b-approve', R: 'b-revoke', X: 'b-cheat-claim', Y: 'b-cheat-approve', Z: 'b-cheat-other' };
+      var CODE_OF = {};
+      Object.keys(CODES).forEach(function (k) { CODE_OF[CODES[k]] = k; });
+      var MAX_STEPS = 40, seq = [], replaying = false;
+      function markRun() {
+        history.replaceState(null, '', location.pathname + location.search + (seq.length ? '#run=' + seq.join('') : ''));
+        $('share-run').hidden = !seq.length;
+      }
       function wire(btn, fn, event) {
         $(btn).addEventListener('click', function () {
-          if (event) track(event);
+          if (event && !replaying) track(event);
+          if (CODE_OF[btn] && seq.length < MAX_STEPS) { seq.push(CODE_OF[btn]); markRun(); }
           render(window[fn]());
         });
       }
+      function replayFromHash() {
+        var m = /^#run=([A-Z]{1,40})$/.exec(location.hash);
+        if (!m) return;
+        var steps = m[1].split('').filter(function (c) { return CODES[c]; });
+        if (!steps.length) return;
+        var note = $('replay-note');
+        note.hidden = false;
+        note.textContent = 'Replaying a shared run of ' + steps.length + ' step' + (steps.length === 1 ? '' : 's') + '. Keys and receipts are new in your browser.';
+        replaying = true;
+        $('try').scrollIntoView({ block: 'start' });
+        var i = 0;
+        (function next() {
+          if (i >= steps.length) {
+            replaying = false;
+            note.textContent = 'Replayed ' + steps.length + ' step' + (steps.length === 1 ? '' : 's') + '. Press Start over to try your own.';
+            return;
+          }
+          $(CODES[steps[i++]]).click();
+          setTimeout(next, 650);
+        })();
+        track('intent_replay');
+      }
+      $('share-run').addEventListener('click', function () {
+        var note = $('replay-note');
+        note.hidden = false;
+        track('intent_share_run');
+        var done = function (msg) { note.textContent = msg; };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(location.href).then(function () { done('Link copied. It replays these steps in the other person\u2019s browser.'); }, function () { done('Copy the link from the address bar.'); });
+        } else {
+          done('Copy the link from the address bar.');
+        }
+      });
 
       function ready() {
         ids.forEach(function (id) { $(id).disabled = false; });
@@ -660,6 +706,7 @@ go run ./examples/private_intent approve ./pi orders</pre>
           $('banner-title').textContent = 'READY';
           $('banner-text').textContent = 'Press step 1 to send the agent’s request.';
           var c = $('team-cta'); c.classList.remove('show'); c.setAttribute('aria-hidden', 'true'); c.querySelector('a').tabIndex = -1;
+          seq = []; replaying = false; markRun(); $('replay-note').hidden = true;
           render(window.joltrinIntentReset());
         });
         $('banner-title').textContent = 'READY';
@@ -667,6 +714,7 @@ go run ./examples/private_intent approve ./pi orders</pre>
         ['fp-words', 'fp-backup', 'fp-approval', 'fp-second'].forEach(function (id) { $(id).disabled = false; });
         $('fp-words').value = lastState.owner_view.preference;
         fpRun();
+        replayFromHash();
       }
 
       var go = new Go();
