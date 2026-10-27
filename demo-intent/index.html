@@ -412,6 +412,21 @@ go run ./examples/private_intent approve ./pi orders</pre>
     })();
   </script>
   <script>
+    // A link like #receipt-check opens that section and brings it into view, so deep links and the
+    // command palette on the home page land on the tool, not on a closed row.
+    (function () {
+      function openFromHash() {
+        var el = location.hash.length > 1 ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
+        if (el && el.tagName === 'DETAILS') {
+          el.open = true;
+          el.scrollIntoView({ block: 'start' });
+        }
+      }
+      window.addEventListener('hashchange', openFromHash);
+      openFromHash();
+    })();
+  </script>
+  <script>
     (function () {
       var stage = document.getElementById('how-stage');
       if (!stage) return;
