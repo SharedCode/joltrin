@@ -293,6 +293,26 @@
             </div>
           </div>
         </details>
+        <details class="list-row py-1" id="fingerprint-lab">
+          <summary class="flex items-center justify-between gap-4 cursor-pointer py-4 text-[#f5f5f7] font-medium">Edit the rule yourself <svg class="chev w-4 h-4 text-slate-500 shrink-0" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4l6 6-6 6"/></svg></summary>
+          <div class="pb-5 space-y-4">
+            <p class="text-sm text-slate-400 leading-relaxed">The verifier sees a fingerprint of what your rule requires, never your words. Reword it as much as you like and the fingerprint holds still. Tick a box and it changes.</p>
+            <label class="block text-xs text-slate-500">YOUR WORDS (only you see these)
+              <textarea id="fp-words" rows="3" maxlength="500" spellcheck="false" class="mt-1 w-full rounded-2xl bg-[#0b0b0f] p-4 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/50" disabled></textarea>
+            </label>
+            <fieldset class="space-y-2">
+              <legend class="text-xs text-slate-500 mb-1">WHAT MUST BE TRUE FIRST</legend>
+              <label class="flex items-center gap-3 text-sm text-slate-300"><input id="fp-backup" type="checkbox" checked disabled class="w-4 h-4 accent-emerald-400" /> A validated backup exists</label>
+              <label class="flex items-center gap-3 text-sm text-slate-300"><input id="fp-approval" type="checkbox" checked disabled class="w-4 h-4 accent-emerald-400" /> The production owner approves</label>
+              <label class="flex items-center gap-3 text-sm text-slate-300"><input id="fp-second" type="checkbox" disabled class="w-4 h-4 accent-emerald-400" /> A security lead also approves</label>
+            </fieldset>
+            <div>
+              <p class="text-xs text-slate-500 mb-1">WHAT THE VERIFIER SEES: THE POLICY FINGERPRINT</p>
+              <p id="fp-digest" class="font-mono text-sm text-slate-200 leading-7 break-all rounded-2xl bg-[#0b0b0f] px-4 py-3" aria-label="Policy fingerprint">Loading the engine...</p>
+              <p id="fp-note" role="status" aria-live="polite" class="mt-2 text-sm text-slate-400">Edit the words or tick a box.</p>
+            </div>
+          </div>
+        </details>
         <details class="list-row py-1" id="receipt-check">
           <summary class="flex items-center justify-between gap-4 cursor-pointer py-4 text-[#f5f5f7] font-medium">Check a receipt yourself <svg class="chev w-4 h-4 text-slate-500 shrink-0" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4l6 6-6 6"/></svg></summary>
           <div class="pb-5 space-y-4">
@@ -469,6 +489,37 @@ go run ./examples/private_intent approve ./pi orders</pre>
 
       function esc(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
+
+      // Fingerprint lab: the policy digest follows what a rule requires, not how it is worded.
+      var fpPrev = null, fpSeen = {};
+      function fpGroups(d) { return d.match(/.{1,8}/g) || []; }
+      function fpRun(why) {
+        var out = JSON.parse(window.joltrinIntentFingerprint($('fp-words').value, $('fp-backup').checked, $('fp-approval').checked, $('fp-second').checked));
+        if (out.error) { $('fp-note').textContent = out.error; $('fp-note').className = 'mt-2 text-sm text-rose-300'; return; }
+        if (!/^[0-9a-f]{64}$/.test(out.digest)) { $('fp-note').textContent = 'The engine returned something that is not a fingerprint.'; return; }
+        var prev = fpPrev ? fpGroups(fpPrev) : null, now = fpGroups(out.digest), box = $('fp-digest');
+        box.textContent = '';
+        now.forEach(function (g, i) {
+          var span = document.createElement('span');
+          span.textContent = g;
+          if (prev && prev[i] !== g) span.className = 'text-brand-300';
+          if (i) box.appendChild(document.createTextNode(' '));
+          box.appendChild(span);
+        });
+        var changed = fpPrev !== null && fpPrev !== out.digest;
+        if (why === 'words') {
+          $('fp-note').textContent = changed ? 'The fingerprint changed.' : 'You changed the words. The fingerprint did not move, because your words are not in it.';
+        } else if (why === 'rule') {
+          $('fp-note').textContent = !changed ? 'Same requirements as before, so the same fingerprint.'
+            : fpSeen[out.digest] ? 'Back to a fingerprint you saw earlier. Same requirements, same fingerprint.'
+            : 'You changed what must be true. The fingerprint changed, and the green groups show where.';
+        }
+        fpSeen[out.digest] = true;
+        $('fp-note').className = 'mt-2 text-sm ' + (why === 'words' && !changed ? 'text-brand-300' : 'text-slate-300');
+        fpPrev = out.digest;
+      }
+      $('fp-words').addEventListener('input', function () { track('intent_fp_words'); fpRun('words'); });
+      ['fp-backup', 'fp-approval', 'fp-second'].forEach(function (id) { $(id).addEventListener('change', function () { track('intent_fp_rule'); fpRun('rule'); }); });
       // Receipt checker: anyone with a receipt and the signer's public key can verify it.
       var lastState = null, keyDirty = false;
       $('rc-key').addEventListener('input', function () { keyDirty = true; });
@@ -586,6 +637,9 @@ go run ./examples/private_intent approve ./pi orders</pre>
         });
         $('banner-title').textContent = 'READY';
         render(window.joltrinIntentState());
+        ['fp-words', 'fp-backup', 'fp-approval', 'fp-second'].forEach(function (id) { $(id).disabled = false; });
+        $('fp-words').value = lastState.owner_view.preference;
+        fpRun();
       }
 
       var go = new Go();

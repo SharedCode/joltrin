@@ -263,3 +263,56 @@ test.describe('Receipt checker', () => {
   });
 });
 
+test.describe('Fingerprint lab', () => {
+  async function open(page: import('@playwright/test').Page) {
+    await page.goto('/private-intent/', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#fp-words')).toBeEnabled({ timeout: 30_000 });
+    await page.locator('#fingerprint-lab summary').click();
+    await expect(page.locator('#fp-digest')).toHaveText(/^[0-9a-f]{8}( [0-9a-f]{8}){7}$/);
+  }
+  const digest = async (page: import('@playwright/test').Page) => (await page.locator('#fp-digest').innerText()).replace(/\s+/g, '');
+
+  test('rewording the rule does not move the fingerprint', async ({ page }) => {
+    await open(page);
+    const before = await digest(page);
+    await page.locator('#fp-words').fill('Please never touch production data without a good backup and a signature from the owner.');
+    await expect(page.locator('#fp-note')).toContainText('did not move');
+    expect(await digest(page)).toBe(before);
+    await page.locator('#fp-words').fill('x');
+    expect(await digest(page)).toBe(before);
+  });
+
+  test('changing what must be true moves it, and undoing it brings it back', async ({ page }) => {
+    await open(page);
+    const before = await digest(page);
+    await page.locator('#fp-second').check();
+    await expect(page.locator('#fp-note')).toContainText('fingerprint changed');
+    const withSecond = await digest(page);
+    expect(withSecond).not.toBe(before);
+    await page.locator('#fp-second').uncheck();
+    await expect(page.locator('#fp-note')).toContainText('Back to a fingerprint you saw earlier');
+    expect(await digest(page)).toBe(before);
+    await page.locator('#fp-backup').uncheck();
+    expect(await digest(page)).not.toBe(before);
+    expect(await digest(page)).not.toBe(withSecond);
+  });
+
+  test('the engine refuses wording over 500 characters, and the box stops typing at 500', async ({ page }) => {
+    await open(page);
+    const over = await page.evaluate(() => JSON.parse((window as any).joltrinIntentFingerprint('x'.repeat(501), true, true, false)));
+    expect(over.error).toContain('under 500');
+    expect(over.digest).toBeUndefined();
+    const exactly = await page.evaluate(() => JSON.parse((window as any).joltrinIntentFingerprint('x'.repeat(500), true, true, false)));
+    expect(exactly.digest).toMatch(/^[0-9a-f]{64}$/);
+    await page.locator('#fp-words').fill('y'.repeat(600));
+    expect(await page.locator('#fp-words').inputValue()).toHaveLength(500);
+  });
+
+  test('a rule with nothing required is refused with a reason', async ({ page }) => {
+    await open(page);
+    await page.locator('#fp-backup').uncheck();
+    await page.locator('#fp-approval').uncheck();
+    await expect(page.locator('#fp-note')).toContainText('at least one thing');
+  });
+});
+
