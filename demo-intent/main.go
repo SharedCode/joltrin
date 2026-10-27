@@ -14,11 +14,14 @@ import (
 	"crypto/ed25519"
 	"encoding/hex"
 	"encoding/json"
+	"strings"
 	"syscall/js"
 	"time"
 
 	"github.com/sharedcode/joltrin/v5/intent"
 )
+
+const maxReceiptBytes = 16 << 10
 
 const preference = "Never delete production data unless a validated backup exists and the production owner approves."
 
@@ -218,8 +221,14 @@ func checkReceipt(raw, keyHex string) string {
 		Expired   bool   `json:"expired,omitempty"`
 	}
 	out := func(r result) string { b, _ := json.Marshal(r); return string(b) }
+	// A real receipt is under 2 KiB. The cap keeps a pasted blob from being parsed at all.
+	if len(raw) > maxReceiptBytes {
+		return out(result{Error: "That is too large to be a receipt."})
+	}
 	var r intent.Receipt
-	if err := json.Unmarshal([]byte(raw), &r); err != nil {
+	dec := json.NewDecoder(strings.NewReader(raw))
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&r); err != nil || dec.More() {
 		return out(result{Error: "That is not a receipt. Paste the receipt JSON from the demo."})
 	}
 	pub, err := hex.DecodeString(keyHex)

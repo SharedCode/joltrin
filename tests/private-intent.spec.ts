@@ -233,6 +233,18 @@ test.describe('Receipt checker', () => {
     await expect(page.locator('#rc-result')).toContainText('not a receipt');
   });
 
+  test('refuses a huge paste and unknown fields without trying to read them', async ({ page }) => {
+    await allowed(page);
+    await page.locator('#rc-input').fill('x'.repeat(20_000));
+    await page.locator('#rc-check').click();
+    await expect(page.locator('#rc-result')).toContainText('too large');
+    await page.locator('#rc-load').click();
+    const raw = await page.locator('#rc-input').inputValue();
+    await page.locator('#rc-input').fill(raw.replace('"v": 1', '"v": 1, "extra": true'));
+    await page.locator('#rc-check').click();
+    await expect(page.locator('#rc-result')).toContainText('not a receipt');
+  });
+
   test('says so when there is no receipt yet', async ({ page }) => {
     await page.goto('/private-intent/', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#b-attempt')).toBeEnabled({ timeout: 30_000 });
