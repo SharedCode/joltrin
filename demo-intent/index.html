@@ -471,11 +471,16 @@ go run ./examples/private_intent approve ./pi orders</pre>
       function fpRun(why) {
         var out = JSON.parse(window.joltrinIntentFingerprint($('fp-words').value, $('fp-backup').checked, $('fp-approval').checked, $('fp-second').checked));
         if (out.error) { $('fp-note').textContent = out.error; $('fp-note').className = 'mt-2 text-sm text-rose-300'; return; }
-        var prev = fpPrev ? fpGroups(fpPrev) : null, now = fpGroups(out.digest);
-        $('fp-digest').innerHTML = now.map(function (g, i) {
-          var moved = prev && prev[i] !== g;
-          return '<span class="' + (moved ? 'text-brand-300' : '') + '">' + g + '</span>';
-        }).join(' ');
+        if (!/^[0-9a-f]{64}$/.test(out.digest)) { $('fp-note').textContent = 'The engine returned something that is not a fingerprint.'; return; }
+        var prev = fpPrev ? fpGroups(fpPrev) : null, now = fpGroups(out.digest), box = $('fp-digest');
+        box.textContent = '';
+        now.forEach(function (g, i) {
+          var span = document.createElement('span');
+          span.textContent = g;
+          if (prev && prev[i] !== g) span.className = 'text-brand-300';
+          if (i) box.appendChild(document.createTextNode(' '));
+          box.appendChild(span);
+        });
         var changed = fpPrev !== null && fpPrev !== out.digest;
         if (why === 'words') {
           $('fp-note').textContent = changed ? 'The fingerprint changed.' : 'You changed the words. The fingerprint did not move, because your words are not in it.';
