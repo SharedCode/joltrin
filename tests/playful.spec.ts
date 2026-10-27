@@ -76,10 +76,10 @@ test.describe('Agent barrier missions', () => {
 });
 
 test.describe('Docs path chooser', () => {
-  test('five paths, and the in-page ones land on real sections', async ({ page }) => {
+  test('six paths, and the in-page ones land on real sections', async ({ page }) => {
     await page.goto('/docs/', { waitUntil: 'domcontentloaded' });
-    await expect(page.locator('a.path')).toHaveCount(5);
-    for (const [href, id] of [['#local-demo', 'local-demo'], ['#mcp', 'mcp'], ['#kubernetes', 'kubernetes']]) {
+    await expect(page.locator('a.path')).toHaveCount(6);
+    for (const [href, id] of [['#local-demo', 'local-demo'], ['#mcp', 'mcp'], ['#private-intent', 'private-intent'], ['#kubernetes', 'kubernetes']]) {
       await expect(page.locator(`a.path[href="${href}"]`)).toBeVisible();
       await expect(page.locator(`#${id}`)).toHaveCount(1);
     }

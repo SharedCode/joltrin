@@ -441,6 +441,26 @@ test.describe('Share a run', () => {
   });
 });
 
+test.describe('Private Intent in the docs', () => {
+  test('the docs header, start-here card and section all lead to it', async ({ page, request }) => {
+    await page.goto('/docs/', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('header nav a[href="../private-intent/"]')).toBeVisible();
+    await expect(page.locator('a.path[href="#private-intent"]')).toContainText('I want agents to follow my rules');
+    const section = page.locator('#private-intent');
+    await expect(section).toHaveText('9. Private Intent');
+    for (const href of ['../private-intent/#try', '../private-intent/#fingerprint-lab', '../private-intent/#receipt-check']) {
+      await expect(page.locator(`a[href="${href}"]`)).toHaveCount(1);
+    }
+    expect((await request.get('/private-intent/')).status()).toBe(200);
+  });
+
+  test('the docs say what it does not do, and do not promise the team layer', async ({ page }) => {
+    await page.goto('/docs/', { waitUntil: 'domcontentloaded' });
+    const text = (await page.locator('main').innerText()).toLowerCase();
+    expect(text).toContain('not a zero-knowledge system');
+    expect(text).toContain('not that the action ran');
+    expect(text).toContain('planned and set up with design partners');
+
 test.describe('Touch targets', () => {
   test.use({ hasTouch: true, isMobile: true, viewport: { width: 375, height: 800 } });
 
