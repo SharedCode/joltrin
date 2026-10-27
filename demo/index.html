@@ -158,6 +158,9 @@
     }
 
     const CMDK_COMMANDS = [
+      { label: 'Private Intent', hint: 'go to', action: () => location.href = './private-intent/' },
+      { label: 'Private Intent: edit a rule, see the fingerprint', hint: 'go to', action: () => location.href = './private-intent/#fingerprint-lab' },
+      { label: 'Private Intent: check a signed receipt', hint: 'go to', action: () => location.href = './private-intent/#receipt-check' },
       { label: 'Verification Barrier', hint: 'section', action: () => location.hash = '#verification-barrier' },
       { label: 'Durable Memory', hint: 'section', action: () => location.hash = '#durable-memory' },
       { label: 'Under the Hood', hint: 'section', action: () => location.hash = '#under-the-hood' },
@@ -1368,6 +1371,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
               <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span>Embedded ACID B-Tree engine</span></li>
               <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span>Durable agent memory and vector search</span></li>
               <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span>Verification barrier, MCP and A2A servers</span></li>
+              <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span><a href="./private-intent/" class="underline underline-offset-2 hover:text-white">Private Intent</a>: your rules, signed approvals and receipts for one owner</span></li>
               <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span>Community support on GitHub</span></li>
             </ul>
           </div>
@@ -1390,6 +1394,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
               <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span>Policy-as-code: one set of rules for every agent</span></li>
               <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span>Tamper-evident audit lineage, with signed export</span></li>
               <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span>Team workspaces and quotas</span></li>
+              <li class="flex items-start space-x-2"><i data-lucide="clock" class="w-4 h-4 text-amber-400 shrink-0"></i><span>Planned, set up with you: <a href="./private-intent/#pro" class="underline underline-offset-2 hover:text-white">Private Intent for teams</a> (shared rules, approval routing)</span></li>
             </ul>
           </div>
           <div>
