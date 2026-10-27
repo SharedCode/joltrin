@@ -65,3 +65,34 @@ test.describe('Page weight', () => {
   }
 });
 
+
+test.describe('Link preview cards', () => {
+  const OWN_CARD = ['/', '/agents/', '/private-intent/', '/btree/'];
+
+  test('each main page has its own 1200 by 630 card, under 300 KB', async ({ page, request }) => {
+    const seen = new Map<string, string>();
+    for (const path of OWN_CARD) {
+      await page.goto(path, { waitUntil: 'domcontentloaded' });
+      const url = await page.locator('meta[property="og:image"]').first().getAttribute('content');
+      const res = await request.get(new URL(url ?? '').pathname);
+      expect(res.status(), `${path} image`).toBe(200);
+      const body = await res.body();
+      expect(body.length, `${path} card size`).toBeLessThan(300_000);
+      // A PNG stores its width and height as two big-endian numbers right after the signature.
+      expect([body.readUInt32BE(16), body.readUInt32BE(20)], `${path} card size in pixels`).toEqual([1200, 630]);
+      const key = body.toString('base64');
+      expect(seen.get(key), `${path} shares its card with ${seen.get(key)}`).toBeUndefined();
+      seen.set(key, path);
+    }
+  });
+
+  test('the cards use the same words as the pages and make none of the old claims', async ({ page }) => {
+    // The images are pictures, so what can be checked here is that every page names its own card.
+    for (const [path, card] of [['/', '/og-image.png'], ['/agents/', '/agents/og-image.png'], ['/private-intent/', '/private-intent/og-image.png'], ['/btree/', '/btree/og-image.png']] as const) {
+      await page.goto(path, { waitUntil: 'domcontentloaded' });
+      for (const sel of ['meta[property="og:image"]', 'meta[property="twitter:image"], meta[name="twitter:image"]']) {
+        expect(await page.locator(sel).first().getAttribute('content'), `${path} ${sel}`).toBe(`https://joltrinhq.com${card}`);
+      }
+    }
+  });
+});
