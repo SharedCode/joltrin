@@ -6,7 +6,7 @@
 
 **Independent, deterministic verification for AI agent actions.**
 
-[joltrinhq.com](https://joltrinhq.com/) · [Live barrier demo](https://joltrinhq.com/agents/) · [Docs](https://joltrinhq.com/docs/) · [Arena](https://joltrinhq.com/arena/)
+[joltrinhq.com](https://joltrinhq.com/) · [Live barrier demo](https://joltrinhq.com/agents/) · [Private Intent](https://joltrinhq.com/private-intent/) · [Docs](https://joltrinhq.com/docs/) · [Arena](https://joltrinhq.com/arena/)
 
 [![CI](https://github.com/SharedCode/joltrin/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/SharedCode/joltrin/actions/workflows/ci.yml)
 [![Go Tests](https://github.com/SharedCode/joltrin/actions/workflows/go.yml/badge.svg?event=push&branch=master)](https://github.com/SharedCode/joltrin/actions/workflows/go.yml)
@@ -74,6 +74,7 @@ Or skip the install. These run in your browser with no backend:
 | Live experience | What you do |
 | :--- | :--- |
 | [Agent barrier](https://joltrinhq.com/agents/) | Try to drop a database before the backup is validated and watch the barrier refuse. It runs the real checks, compiled to WebAssembly. |
+| [Private Intent](https://joltrinhq.com/private-intent/) | Block a risky delete until a signed backup proof and your approval exist, try to cheat the engine, and check the signed receipt yourself. It runs the real engine compiled to WebAssembly, and nothing is sent anywhere. |
 | [Technical demo](https://joltrinhq.com/) | Run ACID transactions, vector search, and an agent checkpoint resume on the WASM build of the engine. |
 | [Joltrin Arena, B-tree challenge](https://joltrinhq.com/btree/) | Guess, then run four short scenarios on the real in-memory B-tree compiled to WebAssembly. Numbers are measured on your device, and the page states what they do not show. |
 | [Arena](https://joltrinhq.com/arena/) | Crash storage nodes and spike load in a cluster simulation. It illustrates the concepts, it is not a live cluster. |
