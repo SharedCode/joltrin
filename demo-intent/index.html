@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="dark no-js">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -32,180 +32,306 @@
     @media (prefers-reduced-motion: reduce) {
       *, ::before, ::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
     }
-    body { background-color: #07090E; color: #E2E8F0; }
-    .banner { transition: background-color .25s ease, border-color .25s ease; }
-    .log-line { animation: fadeIn 0.2s ease; }
+    html { scroll-behavior: smooth; }
+    body { background-color: #050507; color: #d2d4da; }
+    .display { font-weight: 600; letter-spacing: -0.035em; line-height: 1.04; }
+    .surface { background: #101014; border-radius: 28px; }
+    .banner { transition: background-color .35s ease, color .35s ease; }
+    .log-line { animation: fadeIn 0.25s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+    .rise { opacity: 0; transform: translateY(14px); transition: opacity .7s ease, transform .7s cubic-bezier(.16, 1, .3, 1); }
+    .rise.in { opacity: 1; transform: none; }
+    .no-js .rise { opacity: 1; transform: none; }
+    .step-card { transition: background-color .25s ease, box-shadow .25s ease; }
+    .step-card.is-next { background: #16161c; box-shadow: 0 0 0 1px rgba(52, 211, 153, .55); }
+    .step-btn { transition: background-color .2s ease, opacity .2s ease; }
+    .step-btn:disabled { opacity: .45; cursor: not-allowed; }
+    .list-row summary { list-style: none; }
+    .list-row summary::-webkit-details-marker { display: none; }
+    .list-row[open] .chev { transform: rotate(90deg); }
+    .chev { transition: transform .2s ease; }
+    /* How it works: an animated walkthrough that plays itself, and can be driven by hand. */
+    .how-stage { background: #101014; border-radius: 28px; padding: 1.25rem; }
+    @media (min-width: 640px) { .how-stage { padding: 2rem; } }
+    .how-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+    .how-tab { position: relative; text-align: left; padding: .8rem .9rem .95rem; border-radius: 18px; color: #8b8f99; background: transparent; transition: background-color .25s ease, color .25s ease; overflow: hidden; }
+    .how-tab:hover { color: #d9dbe1; background: rgba(255,255,255,.04); }
+    .how-tab[aria-selected="true"] { color: #f5f5f7; background: rgba(255,255,255,.06); }
+    .how-tab b { display: block; font-size: .7rem; letter-spacing: .12em; color: #6b7280; font-weight: 600; }
+    .how-tab[aria-selected="true"] b { color: #34d399; }
+    .how-tab span { display: block; margin-top: .15rem; font-size: .95rem; font-weight: 600; }
+    .how-tab i { position: absolute; left: .9rem; right: .9rem; bottom: .45rem; height: 2px; border-radius: 2px; background: rgba(255,255,255,.08); overflow: hidden; }
+    .how-tab i::after { content: ""; position: absolute; inset: 0; background: #34d399; transform: scaleX(0); transform-origin: left; }
+    .how-tab[aria-selected="true"] i::after { transform: scaleX(1); }
+    .how-stage.playing .how-tab[aria-selected="true"] i::after { transform: scaleX(0); animation: howfill var(--how-ms, 7000ms) linear forwards; }
+    @keyframes howfill { to { transform: scaleX(1); } }
+    .how-art { width: 100%; height: auto; display: block; margin-top: 1.25rem; }
+    .how-art text { font-family: Inter, system-ui, sans-serif; fill: #d2d4da; }
+    .how-art .node { fill: #16161c; stroke: rgba(255,255,255,.08); stroke-width: 1.5; transition: stroke .4s ease, fill .4s ease; }
+    .how-art .lbl { font-size: 19px; font-weight: 600; }
+    .how-art .sub { font-size: 14px; fill: #8b8f99; }
+    .how-art .wire { stroke: rgba(255,255,255,.12); stroke-width: 2; fill: none; stroke-dasharray: 5 7; }
+    .how-art .live { opacity: 0; transition: opacity .5s ease; }
+    .how-stage[data-step="1"] .s1, .how-stage[data-step="2"] .s2, .how-stage[data-step="3"] .s3 { opacity: 1; }
+    .how-stage[data-step="1"] .n-owner, .how-stage[data-step="1"] .n-joltrin { stroke: #34d399; }
+    .how-stage[data-step="2"] .n-backup, .how-stage[data-step="2"] .n-owner, .how-stage[data-step="2"] .n-joltrin { stroke: #34d399; }
+    .how-stage[data-step="2"] .n-agent { stroke: #fb7185; }
+    .how-stage[data-step="3"] .n-joltrin, .how-stage[data-step="3"] .n-exec { stroke: #34d399; }
+    .pkt { transform: translate(0, 0); opacity: 0; }
+    .how-stage[data-step="1"] .pkt.s1, .how-stage[data-step="2"] .pkt.s2, .how-stage[data-step="3"] .pkt.s3 { animation: hop 2.6s cubic-bezier(.45, 0, .2, 1) infinite; animation-delay: var(--d, 0s); }
+    @keyframes hop { 0% { transform: translate(0, 0); opacity: 0; } 12% { opacity: 1; } 70% { transform: translate(var(--dx), var(--dy)); opacity: 1; } 85%, 100% { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
+    .bounce { animation: none; }
+    .how-stage[data-step="2"] .bounce.s2 { animation: bounce 2.6s ease-in-out infinite; animation-delay: .8s; }
+    @keyframes bounce { 0% { transform: translate(0, 0); opacity: 0; } 15% { opacity: 1; } 55% { transform: translate(var(--dx), 0); opacity: 1; } 75% { transform: translate(calc(var(--dx) * .55), 0); opacity: 1; } 100% { transform: translate(calc(var(--dx) * .2), 0); opacity: 0; } }
+    .how-art .ok { fill: #34d399; }
+    .how-art .no { fill: #fb7185; }
+    .how-caption { margin-top: 1rem; min-height: 5.5rem; }
+    .how-caption h3 { color: #f5f5f7; font-size: 1.25rem; font-weight: 600; letter-spacing: -0.02em; }
+    .how-caption p { margin-top: .4rem; color: #9aa0ab; line-height: 1.6; max-width: 46rem; }
+    .team-cta { overflow: hidden; max-height: 0; opacity: 0; transition: max-height .5s ease, opacity .5s ease, margin .5s ease; }
+    .team-cta.show { max-height: 14rem; opacity: 1; }
+    @media (prefers-reduced-motion: reduce) { .pkt, .bounce { animation: none !important; opacity: 1; } }
     footer ul a { display: inline-block; padding-block: .3rem; }
-    button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px solid #34d399; outline-offset: 2px; }
+    button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px solid #34d399; outline-offset: 3px; border-radius: 8px; }
   </style>
 </head>
 <body class="font-sans antialiased selection:bg-brand-500 selection:text-black min-h-screen flex flex-col">
 
-  <header class="border-b border-dark-800 bg-dark-900/80 backdrop-blur sticky top-0 z-40">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-      <div class="flex items-center space-x-3">
-        <a href="../" class="w-9 h-9 flex items-center justify-center" aria-label="Joltrin home">
-          <img src="./logo-mark.png" alt="" class="w-9 h-9 object-contain" width="36" height="36" />
-        </a>
-        <div class="flex items-center space-x-2">
-          <a href="../" class="font-bold text-white hover:text-brand-400 transition">Joltrin</a>
-          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-dark-800 border border-dark-700 text-accent-cyan">PRIVATE INTENT</span>
-        </div>
-      </div>
-      <nav class="flex items-center space-x-1 text-xs font-mono" aria-label="Site">
-        <a href="../" class="px-2.5 py-1.5 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">Overview</a>
-        <a href="../agents/" class="hidden sm:inline px-2.5 py-1.5 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">Agents</a>
-        <a href="../docs/" class="hidden sm:inline px-2.5 py-1.5 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">Docs</a>
-        <a href="#pro" onclick="track('intent_pro_click')" class="px-2.5 py-1.5 rounded-lg bg-brand-500/15 border border-brand-500/40 text-brand-300 hover:bg-brand-500/25 transition font-semibold">Teams</a>
+  <header class="sticky top-0 z-40 bg-[#050507]/75 backdrop-blur-xl backdrop-saturate-150 border-b border-white/5">
+    <div class="max-w-5xl mx-auto px-5 h-12 flex items-center justify-between gap-4">
+      <a href="../" class="flex items-center gap-2 text-white font-semibold text-sm" aria-label="Joltrin home">
+        <img src="./logo-mark.png" alt="" class="w-6 h-6 object-contain" width="24" height="24" />
+        <span>Joltrin</span>
+      </a>
+      <nav class="flex items-center gap-1 sm:gap-5 text-xs text-slate-400" aria-label="Site">
+        <a href="../" class="hidden sm:inline hover:text-white transition">Overview</a>
+        <a href="../agents/" class="hidden md:inline hover:text-white transition">Agents</a>
+        <span aria-current="page" class="text-white font-medium px-2 sm:px-0">Private Intent</span>
+        <a href="../docs/" class="hidden sm:inline hover:text-white transition">Docs</a>
+        <a href="#pro" onclick="track('intent_pro_click')" class="rounded-full bg-white/10 hover:bg-white/15 text-white px-3 py-1 transition">Teams</a>
       </nav>
     </div>
   </header>
 
   <main class="flex-1">
-    <section class="max-w-6xl mx-auto px-4 pt-12 pb-8">
-      <p class="text-xs font-mono text-accent-cyan mb-3">JOLTRIN PRIVATE INTENT</p>
-      <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight max-w-3xl">AI agents that respect your rules before they act.</h1>
-      <p class="mt-4 text-lg text-slate-300 max-w-2xl">Give agents the context they need, keep private data under your control, and independently verify every high-risk action.</p>
-      <div class="mt-6 flex flex-wrap gap-3">
-        <a href="#try" onclick="track('intent_cta_try')" class="px-5 py-2.5 rounded-xl bg-brand-500 text-black font-semibold hover:bg-brand-400 transition">Try a protected agent</a>
-        <a href="#how" class="px-5 py-2.5 rounded-xl border border-dark-600 text-slate-200 font-semibold hover:bg-dark-800 transition">See how it works</a>
+    <section class="max-w-5xl mx-auto px-5 pt-20 sm:pt-28 pb-16 text-center">
+      <p class="rise text-sm font-medium text-brand-300">Private Intent</p>
+      <h1 class="rise display mt-4 text-[clamp(2.5rem,7.5vw,5.25rem)] text-[#f5f5f7] max-w-4xl mx-auto">AI agents that respect your rules before they act.</h1>
+      <p class="rise mt-6 text-[clamp(1.05rem,2.2vw,1.35rem)] leading-relaxed text-slate-400 max-w-2xl mx-auto">Give agents the context they need, keep private data under your control, and independently verify every high-risk action.</p>
+      <div class="rise mt-9 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+        <a href="#try" onclick="track('intent_cta_try')" class="rounded-full bg-brand-500 hover:bg-brand-400 text-black font-semibold px-6 py-3 transition">Try a protected agent</a>
+        <a href="#how" class="group text-brand-300 hover:text-brand-200 transition font-medium">How it works <span aria-hidden="true" class="inline-block transition-transform group-hover:translate-x-0.5">&#8250;</span></a>
       </div>
     </section>
 
-    <section id="try" class="max-w-6xl mx-auto px-4 py-8 scroll-mt-20" aria-labelledby="try-h">
-      <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <h2 id="try-h" class="text-xl font-bold text-white">Try it: an agent wants to delete a production database</h2>
-        <span class="text-xs font-mono px-2 py-1 rounded bg-amber-400/10 border border-amber-400/30 text-amber-300">SIMULATED. No real system is touched.</span>
-      </div>
+    <section id="try" class="max-w-5xl mx-auto px-5 py-6 scroll-mt-16" aria-labelledby="try-h">
+      <div class="surface p-5 sm:p-10">
+        <div class="text-center">
+          <h2 id="try-h" class="display text-2xl sm:text-4xl text-[#f5f5f7]">An agent wants to delete a production database.</h2>
+          <p class="mt-3 text-xs tracking-[0.14em] text-slate-500">SIMULATED. No real system is touched.</p>
+        </div>
 
-      <div id="banner" class="banner rounded-2xl border border-dark-700 bg-dark-850 p-5 mb-5" role="status" aria-live="polite">
-        <p id="banner-title" class="font-mono text-sm text-slate-400">Loading the engine...</p>
-        <p id="banner-text" class="mt-1 text-lg font-semibold text-white">Press the first button to send the agent's request.</p>
-      </div>
+        <div id="banner" class="banner mt-8 rounded-[28px] bg-[#0b0b0f] px-6 py-9 text-center" role="status" aria-live="polite">
+          <p id="banner-title" class="text-xs font-semibold tracking-[0.2em] text-slate-500">LOADING</p>
+          <p id="banner-text" class="mt-2 text-xl sm:text-2xl font-semibold text-[#f5f5f7] max-w-2xl mx-auto">Press step 1 to send the agent's request.</p>
+        </div>
 
-      <div class="grid lg:grid-cols-2 gap-5">
-        <div class="space-y-5">
-          <div class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
-            <h3 class="text-sm font-mono text-slate-400 mb-2">YOUR PRIVATE RULE (only you see this wording)</h3>
-            <p id="owner-pref" class="text-white">...</p>
-            <ul class="mt-4 space-y-2 text-sm" aria-label="What the rule needs">
-              <li class="flex items-center gap-2"><span id="chk-backup" class="w-5 h-5 rounded-full border border-dark-600 flex items-center justify-center text-xs" aria-hidden="true"></span><span>Backup validated by the backup system <span id="chk-backup-t" class="text-slate-400">(missing)</span></span></li>
-              <li class="flex items-center gap-2"><span id="chk-approval" class="w-5 h-5 rounded-full border border-dark-600 flex items-center justify-center text-xs" aria-hidden="true"></span><span>Owner approval of this exact delete <span id="chk-approval-t" class="text-slate-400">(missing)</span></span></li>
-            </ul>
-          </div>
+        <div class="mt-6 text-center">
+          <p class="text-xs text-slate-500">YOUR PRIVATE RULE</p>
+          <p id="owner-pref" class="mt-1 text-slate-200 max-w-2xl mx-auto">...</p>
+          <ul class="mt-3 flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm text-slate-300" aria-label="What the rule needs">
+            <li class="flex items-center gap-2"><span id="chk-backup" class="w-5 h-5 rounded-full border border-dark-600 flex items-center justify-center text-xs" aria-hidden="true"></span><span>Backup validated <span id="chk-backup-t" class="text-slate-500">(missing)</span></span></li>
+            <li class="flex items-center gap-2"><span id="chk-approval" class="w-5 h-5 rounded-full border border-dark-600 flex items-center justify-center text-xs" aria-hidden="true"></span><span>Owner approval <span id="chk-approval-t" class="text-slate-500">(missing)</span></span></li>
+          </ul>
+        </div>
 
-          <div class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
-            <h3 class="text-sm font-mono text-slate-400 mb-3">WHO DOES WHAT</h3>
-            <div class="flex flex-wrap gap-2">
-              <button id="b-attempt" type="button" class="px-4 py-2 rounded-lg bg-accent-violet/20 border border-accent-violet/40 text-violet-200 font-semibold hover:bg-accent-violet/30 transition" disabled>1. Agent: delete prod/orders</button>
-              <button id="b-backup" type="button" class="px-4 py-2 rounded-lg bg-dark-800 border border-dark-600 text-slate-200 font-semibold hover:bg-dark-750 transition" disabled>2. Backup system: validate backup</button>
-              <button id="b-approve" type="button" class="px-4 py-2 rounded-lg bg-dark-800 border border-dark-600 text-slate-200 font-semibold hover:bg-dark-750 transition" disabled>3. Owner: approve</button>
-              <button id="b-revoke" type="button" class="px-4 py-2 rounded-lg bg-dark-800 border border-accent-rose/50 text-rose-300 font-semibold hover:bg-dark-750 transition" disabled>Owner: revoke approval</button>
-              <button id="b-reset" type="button" class="px-4 py-2 rounded-lg text-slate-400 hover:text-white transition" disabled>Reset</button>
+        <ol class="mt-8 grid md:grid-cols-3 gap-4" aria-label="Steps">
+          <li class="step-card rounded-3xl bg-[#0b0b0f] p-5 flex flex-col gap-3">
+            <div class="flex items-center gap-3">
+              <span class="w-7 h-7 rounded-full bg-[#1b1b22] text-xs font-semibold text-slate-300 flex items-center justify-center" aria-hidden="true">1</span>
+              <p class="text-sm text-slate-400">The agent</p>
             </div>
-            <p class="mt-3 text-xs text-slate-400">Try this order: 1, 2, 1, 3, 1. Then approve again, revoke, and press 1.</p>
+            <button id="b-attempt" type="button" class="step-btn bg-accent-violet/25 hover:bg-accent-violet/35 text-violet-100 rounded-full px-4 py-2.5 text-sm font-semibold text-left" disabled>Ask to delete prod/orders</button>
+          </li>
+          <li class="step-card rounded-3xl bg-[#0b0b0f] p-5 flex flex-col gap-3">
+            <div class="flex items-center gap-3">
+              <span class="w-7 h-7 rounded-full bg-[#1b1b22] text-xs font-semibold text-slate-300 flex items-center justify-center" aria-hidden="true">2</span>
+              <p class="text-sm text-slate-400">The backup system</p>
+            </div>
+            <button id="b-backup" type="button" class="step-btn bg-white/10 hover:bg-white/15 text-slate-100 rounded-full px-4 py-2.5 text-sm font-semibold text-left" disabled>Sign "backup validated"</button>
+          </li>
+          <li class="step-card rounded-3xl bg-[#0b0b0f] p-5 flex flex-col gap-3">
+            <div class="flex items-center gap-3">
+              <span class="w-7 h-7 rounded-full bg-[#1b1b22] text-xs font-semibold text-slate-300 flex items-center justify-center" aria-hidden="true">3</span>
+              <p class="text-sm text-slate-400">You</p>
+            </div>
+            <button id="b-approve" type="button" class="step-btn bg-white/10 hover:bg-white/15 text-slate-100 rounded-full px-4 py-2.5 text-sm font-semibold text-left" disabled>Approve this exact delete</button>
+          </li>
+        </ol>
+
+        <p id="next-hint" class="mt-6 text-center text-sm text-brand-300" aria-live="polite">Loading the engine...</p>
+        <div class="mt-2 flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm">
+          <button id="b-revoke" type="button" class="text-rose-300 hover:text-rose-200 transition disabled:opacity-40" disabled>Revoke my approval</button>
+          <button id="b-reset" type="button" class="text-slate-400 hover:text-white transition disabled:opacity-40" disabled>Start over</button>
+        </div>
+
+        <div id="team-cta" class="team-cta mt-6 text-center" aria-hidden="true">
+          <div class="rounded-3xl bg-brand-500/10 px-6 py-5">
+            <p class="text-[#f5f5f7] font-semibold">That was one owner on one machine.</p>
+            <p class="mt-1 text-sm text-slate-300 max-w-xl mx-auto">Pro holds every agent and every engineer on your team to the same rule, with approvals routed to the right people. It is set up with design partners today.</p>
+            <a href="#pro" onclick="track('intent_team_cta')" class="mt-3 inline-block rounded-full bg-brand-500 hover:bg-brand-400 text-black font-semibold px-5 py-2 text-sm transition" tabindex="-1">See team enforcement</a>
           </div>
         </div>
 
-        <div class="rounded-2xl border border-dark-700 bg-dark-900 p-5 min-h-[18rem]">
-          <h3 class="text-sm font-mono text-slate-400 mb-3">WHAT HAPPENED</h3>
+        <div class="mt-8 rounded-3xl bg-[#0b0b0f] p-5 min-h-[9rem]">
+          <h3 class="text-xs text-slate-500 mb-3">WHAT HAPPENED</h3>
           <ol id="log" class="space-y-2 text-sm font-mono" aria-live="polite"></ol>
         </div>
       </div>
-
-      <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-5" aria-label="What each side can see">
-        <div class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
-          <h3 class="text-sm font-mono text-slate-400 mb-2">WHAT YOU CAN SEE</h3>
-          <pre id="owner-json" class="text-xs text-slate-300 whitespace-pre-wrap break-words"></pre>
-        </div>
-        <div class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
-          <h3 class="text-sm font-mono text-slate-400 mb-2">WHAT THE VERIFIER AND RECEIPT CAN SEE</h3>
-          <pre id="verifier-json" class="text-xs text-slate-300 whitespace-pre-wrap break-words"></pre>
-          <p class="mt-2 text-xs text-slate-400">The policy is named and fingerprinted. Your wording is not in it.</p>
-        </div>
-      </div>
     </section>
 
-    <section id="how" class="max-w-6xl mx-auto px-4 py-10 scroll-mt-20" aria-labelledby="how-h">
-      <h2 id="how-h" class="text-xl font-bold text-white mb-5">How it works</h2>
-      <div class="grid md:grid-cols-3 gap-5">
-        <div class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
-          <p class="text-xs font-mono text-accent-cyan">1. YOU SET THE RULE</p>
-          <p class="mt-2 text-slate-300">A rule names the agent, the tool, the resource and what must be true first. It expires, you can edit it, and revoking it blocks the next attempt.</p>
+    <section id="how" class="max-w-5xl mx-auto px-5 pt-24 pb-8 scroll-mt-16" aria-labelledby="how-h">
+      <h2 id="how-h" class="rise display text-3xl sm:text-5xl text-[#f5f5f7] text-center">How it works.</h2>
+      <p class="rise mt-4 text-center text-slate-400 max-w-xl mx-auto">Three steps. Press one to take over, or let it play.</p>
+
+      <div id="how-stage" class="how-stage rise mt-10" data-step="1">
+        <div class="how-tabs" role="tablist" aria-label="How Private Intent works">
+          <button class="how-tab" role="tab" id="how-t1" aria-controls="how-panel" aria-selected="true" data-go="1"><b>STEP 1</b><span>You set the rule</span><i aria-hidden="true"></i></button>
+          <button class="how-tab" role="tab" id="how-t2" aria-controls="how-panel" aria-selected="false" tabindex="-1" data-go="2"><b>STEP 2</b><span>Other systems prove it</span><i aria-hidden="true"></i></button>
+          <button class="how-tab" role="tab" id="how-t3" aria-controls="how-panel" aria-selected="false" tabindex="-1" data-go="3"><b>STEP 3</b><span>The executor checks</span><i aria-hidden="true"></i></button>
         </div>
-        <div class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
-          <p class="text-xs font-mono text-accent-cyan">2. OTHER SYSTEMS PROVE IT</p>
-          <p class="mt-2 text-slate-300">The backup system signs "backup validated". The owner signs an approval for one exact action. The agent cannot sign either, and saying it did changes nothing.</p>
+
+        <svg class="how-art" viewBox="0 0 720 300" role="img" aria-label="Diagram: the owner and the backup system sign evidence for Joltrin, which issues a receipt that the executor checks. The agent cannot sign.">
+          <!-- wires -->
+          <path class="wire" d="M170 55 L300 120"/>
+          <path class="wire" d="M170 245 L300 180"/>
+          <path class="wire" d="M170 150 L300 150"/>
+          <path class="wire" d="M420 150 L550 150"/>
+          <!-- nodes -->
+          <g><rect class="node n-owner" x="20" y="25" width="150" height="60" rx="18"/><text class="lbl" x="95" y="53" text-anchor="middle">You</text><text class="sub" x="95" y="73" text-anchor="middle">the owner</text></g>
+          <g><rect class="node n-agent" x="20" y="120" width="150" height="60" rx="18"/><text class="lbl" x="95" y="148" text-anchor="middle">The agent</text><text class="sub" x="95" y="168" text-anchor="middle">cannot sign</text></g>
+          <g><rect class="node n-backup" x="20" y="215" width="150" height="60" rx="18"/><text class="lbl" x="95" y="243" text-anchor="middle">Backup system</text><text class="sub" x="95" y="263" text-anchor="middle">signs its own facts</text></g>
+          <g><rect class="node n-joltrin" x="300" y="95" width="120" height="110" rx="24"/><text class="lbl" x="360" y="143" text-anchor="middle">Joltrin</text><text class="sub" x="360" y="165" text-anchor="middle">decides</text></g>
+          <g><rect class="node n-exec" x="550" y="120" width="150" height="60" rx="18"/><text class="lbl" x="625" y="148" text-anchor="middle">Executor</text><text class="sub" x="625" y="168" text-anchor="middle">holds the keys</text></g>
+
+          <!-- step 1: the rule is sealed -->
+          <g class="live s1">
+            <rect x="318" y="60" width="84" height="26" rx="13" fill="rgba(52,211,153,.14)"/>
+            <text x="360" y="78" text-anchor="middle" style="font-size:13px;font-weight:600;fill:#34d399">rule sealed</text>
+          </g>
+          <g class="pkt s1" style="--dx:130px;--dy:65px"><circle cx="170" cy="55" r="8" class="ok"/></g>
+          <g class="pkt s1" style="--dx:130px;--dy:65px;--d:1.1s"><circle cx="170" cy="55" r="5" class="ok" opacity=".6"/></g>
+          <text class="sub live s1" x="95" y="105" text-anchor="middle" style="font-size:13px">wording stays with you</text>
+
+          <!-- step 2: two systems sign, the agent is refused -->
+          <g class="pkt s2" style="--dx:130px;--dy:65px"><circle cx="170" cy="55" r="8" class="ok"/></g>
+          <g class="pkt s2" style="--dx:130px;--dy:-65px;--d:.5s"><circle cx="170" cy="245" r="8" class="ok"/></g>
+          <g class="pkt bounce s2" style="--dx:100px"><circle cx="170" cy="150" r="8" class="no"/></g>
+          <text class="live s2" x="248" y="136" text-anchor="middle" style="font-size:20px;font-weight:700;fill:#fb7185">&#215;</text>
+          <text class="sub live s2" x="248" y="116" text-anchor="middle" style="font-size:13px;fill:#fb7185">refused</text>
+          <g class="live s2">
+            <rect x="305" y="214" width="110" height="26" rx="13" fill="rgba(52,211,153,.14)"/>
+            <text x="360" y="232" text-anchor="middle" style="font-size:13px;font-weight:600;fill:#34d399">2 signatures</text>
+          </g>
+
+          <!-- step 3: receipt, check, replay refused -->
+          <g class="pkt s3" style="--dx:130px;--dy:0px"><rect x="420" y="140" width="22" height="20" rx="5" class="ok"/></g>
+          <g class="live s3">
+            <rect x="565" y="196" width="120" height="26" rx="13" fill="rgba(52,211,153,.14)"/>
+            <text x="625" y="214" text-anchor="middle" style="font-size:13px;font-weight:600;fill:#34d399">receipt valid</text>
+            <text x="625" y="248" text-anchor="middle" style="font-size:13px;fill:#fb7185">replay: refused</text>
+          </g>
+        </svg>
+
+        <div class="how-caption" id="how-panel" role="tabpanel" aria-live="polite">
+          <h3 id="how-h3">You set the rule</h3>
+          <p id="how-p">A rule names the agent, the tool, the resource and what must be true first. It expires, you can edit it, and revoking it blocks the next attempt.</p>
         </div>
-        <div class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
-          <p class="text-xs font-mono text-accent-cyan">3. THE EXECUTOR CHECKS</p>
-          <p class="mt-2 text-slate-300">On ALLOW, Joltrin signs a receipt for that action and policy. The system holding the credentials runs the action only with a valid, unused receipt.</p>
+        <div class="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+          <button id="how-toggle" type="button" class="text-slate-400 hover:text-white transition" aria-pressed="true">Pause</button>
+          <a href="#try" class="text-brand-300 hover:text-brand-200 transition" onclick="track('intent_how_try')">Try it yourself &#8250;</a>
         </div>
-      </div>
-      <div class="mt-5 rounded-2xl border border-amber-400/30 bg-amber-400/5 p-5 text-sm text-slate-300">
-        <p class="font-semibold text-amber-300">What this does not do</p>
-        <p class="mt-1">It cannot stop an agent that has its own route to the target system. It only protects actions that run through the executor's check. A receipt shows a decision was made. It does not show the action ran. Preferences are sealed on disk and kept out of decisions and receipts, but the owner's machine and the engine still see them, so this is data minimization and not a zero-knowledge system.</p>
       </div>
 
-      <details class="mt-6 rounded-2xl border border-dark-700 bg-dark-850 p-5" id="dev">
-        <summary class="cursor-pointer font-semibold text-white">Developer view</summary>
-        <div class="mt-4 space-y-4">
-          <p class="text-sm text-slate-300">This page runs the same Go package you can import. Try to cheat the executor:</p>
-          <div class="flex flex-wrap gap-2">
-            <button id="b-tamper" type="button" class="px-3 py-1.5 rounded-lg bg-dark-800 border border-dark-600 text-sm hover:bg-dark-750 transition" disabled>Edit the last receipt's policy digest</button>
-            <button id="b-replay" type="button" class="px-3 py-1.5 rounded-lg bg-dark-800 border border-dark-600 text-sm hover:bg-dark-750 transition" disabled>Replay the last receipt</button>
+      <div class="mt-20 max-w-3xl mx-auto divide-y divide-white/10 border-y border-white/10">
+        <details class="list-row py-1">
+          <summary class="flex items-center justify-between gap-4 cursor-pointer py-4 text-[#f5f5f7] font-medium">What you can see, and what the verifier can see <svg class="chev w-4 h-4 text-slate-500 shrink-0" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4l6 6-6 6"/></svg></summary>
+          <div class="pb-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 class="text-xs text-slate-500 mb-2">YOU</h3>
+              <pre id="owner-json" class="text-xs text-slate-300 whitespace-pre-wrap break-words"></pre>
+            </div>
+            <div>
+              <h3 class="text-xs text-slate-500 mb-2">THE VERIFIER AND THE RECEIPT</h3>
+              <pre id="verifier-json" class="text-xs text-slate-300 whitespace-pre-wrap break-words"></pre>
+              <p class="mt-2 text-xs text-slate-500">The policy is named and fingerprinted. Your wording is not in it.</p>
+            </div>
           </div>
-          <div>
-            <p class="text-xs font-mono text-slate-400 mb-1">LAST DECISION</p>
-            <pre id="decision-json" class="text-xs text-slate-300 whitespace-pre-wrap break-words bg-dark-900 rounded-lg p-3"></pre>
-          </div>
-          <div>
-            <p class="text-xs font-mono text-slate-400 mb-1">LAST RECEIPT</p>
-            <pre id="receipt-json" class="text-xs text-slate-300 whitespace-pre-wrap break-words bg-dark-900 rounded-lg p-3">None yet. Get an ALLOW first.</pre>
-          </div>
-          <div>
-            <p class="text-xs font-mono text-slate-400 mb-1">RUN IT WITH AN MCP AGENT</p>
-            <pre class="text-xs text-slate-300 bg-dark-900 rounded-lg p-3 overflow-x-auto">git clone https://github.com/SharedCode/joltrin &amp;&amp; cd joltrin
+        </details>
+        <details class="list-row py-1">
+          <summary class="flex items-center justify-between gap-4 cursor-pointer py-4 text-[#f5f5f7] font-medium">What this does not do <svg class="chev w-4 h-4 text-slate-500 shrink-0" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4l6 6-6 6"/></svg></summary>
+          <p class="pb-5 text-sm text-slate-400 leading-relaxed">It cannot stop an agent that has its own route to the target system. It only protects actions that run through the executor's check. A receipt shows a decision was made. It does not show the action ran. Preferences are sealed on disk and kept out of decisions and receipts, but the owner's machine and the engine still see them, so this is data minimization and not a zero-knowledge system.</p>
+        </details>
+        <details class="list-row py-1" id="dev">
+          <summary class="flex items-center justify-between gap-4 cursor-pointer py-4 text-[#f5f5f7] font-medium">Developer view <svg class="chev w-4 h-4 text-slate-500 shrink-0" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4l6 6-6 6"/></svg></summary>
+          <div class="pb-5 space-y-4">
+            <p class="text-sm text-slate-400">This page runs the same Go package you can import. Try to cheat the executor:</p>
+            <div class="flex flex-wrap gap-2">
+              <button id="b-tamper" type="button" class="px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 text-sm text-slate-100 transition disabled:opacity-45" disabled>Edit the last receipt's policy digest</button>
+              <button id="b-replay" type="button" class="px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 text-sm text-slate-100 transition disabled:opacity-45" disabled>Replay the last receipt</button>
+            </div>
+            <div>
+              <p class="text-xs text-slate-500 mb-1">LAST DECISION</p>
+              <pre id="decision-json" class="text-xs text-slate-300 whitespace-pre-wrap break-words bg-[#0b0b0f] rounded-2xl p-4"></pre>
+            </div>
+            <div>
+              <p class="text-xs text-slate-500 mb-1">LAST RECEIPT</p>
+              <pre id="receipt-json" class="text-xs text-slate-300 whitespace-pre-wrap break-words bg-[#0b0b0f] rounded-2xl p-4">None yet. Get an ALLOW first.</pre>
+            </div>
+            <div>
+              <p class="text-xs text-slate-500 mb-1">RUN IT WITH AN MCP AGENT</p>
+              <pre class="text-xs text-slate-300 bg-[#0b0b0f] rounded-2xl p-4 overflow-x-auto">git clone https://github.com/SharedCode/joltrin &amp;&amp; cd joltrin
 go run ./examples/private_intent demo        # scripted run, no setup
 go run ./examples/private_intent init ./pi   # then add the printed config to your MCP client
 go run ./examples/private_intent attest ./pi prod/orders
 go run ./examples/private_intent approve ./pi orders</pre>
-            <p class="mt-2 text-xs text-slate-400">The example gives the agent one tool, <code class="font-mono">delete_database</code>. The delete is simulated and appends a line to a log file. <a class="text-brand-300 underline" href="https://github.com/SharedCode/joltrin/blob/master/docs/PRIVATE_INTENT.md" onclick="track('docs_click')">Design, threat model and limits</a>.</p>
+              <p class="mt-2 text-xs text-slate-500">The example gives the agent one tool, <code class="font-mono">delete_database</code>. The delete is simulated and appends a line to a log file. <a class="text-brand-300 hover:text-brand-200" href="https://github.com/SharedCode/joltrin/blob/master/docs/PRIVATE_INTENT.md" onclick="track('docs_click')">Design, threat model and limits</a>.</p>
+            </div>
           </div>
-        </div>
-      </details>
+        </details>
+      </div>
     </section>
 
-    <section id="pro" class="max-w-6xl mx-auto px-4 py-10 scroll-mt-20" aria-labelledby="pro-h">
-      <h2 id="pro-h" class="text-xl font-bold text-white mb-2">One person's rules are not a team's rules</h2>
-      <p class="text-slate-300 max-w-3xl">The rule above lives with one owner on one machine. When a platform team needs the same rule enforced for every agent and every engineer, with approvals from the right people and a record the team can audit, that is the team layer.</p>
-      <div class="mt-5 grid md:grid-cols-3 gap-5">
-        <div class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
-          <p class="font-semibold text-white">Free, MIT</p>
-          <p class="text-xs font-mono text-brand-300 mt-1">AVAILABLE NOW</p>
-          <p class="mt-3 text-sm text-slate-300">The engine, the vault, signed evidence and approvals, receipts, the executor check, the MCP example and this demo. A single owner and local files.</p>
+    <section id="pro" class="max-w-5xl mx-auto px-5 pt-24 pb-24 scroll-mt-16" aria-labelledby="pro-h">
+      <h2 id="pro-h" class="rise display text-3xl sm:text-5xl text-[#f5f5f7] text-center">For teams.</h2>
+      <p class="rise mt-5 text-slate-400 text-lg max-w-2xl mx-auto text-center leading-relaxed">The rule above lives with one owner on one machine. A platform team needs the same rule enforced for every agent and every engineer, with approvals from the right people and a record it can audit.</p>
+      <div class="mt-14 grid md:grid-cols-3 gap-4">
+        <div class="rise surface p-7">
+          <p class="text-xs font-semibold tracking-wide text-brand-300">AVAILABLE NOW</p>
+          <p class="display mt-2 text-2xl text-[#f5f5f7]">Free, MIT</p>
+          <p class="mt-3 text-sm text-slate-400 leading-relaxed">The engine, signed evidence and approvals, receipts, the executor check, the MCP example and this demo, for one owner with local files.</p>
         </div>
-        <div class="rounded-2xl border border-brand-500/40 bg-dark-850 p-5">
-          <p class="font-semibold text-white">Pro, $49/month per team</p>
-          <p class="text-xs font-mono text-amber-300 mt-1">DESIGN PARTNERS, NOT SELF-SERVE YET</p>
-          <p class="mt-3 text-sm text-slate-300">Planned: shared team rules, approval routing, revocable agent grants, policy history, signed evidence exports and a team view. Delivery today is manual and set up with you.</p>
-          <a href="../#pricing" onclick="track('pro_click'); track('intent_pro_click')" class="mt-4 inline-block px-4 py-2 rounded-lg bg-brand-500 text-black font-semibold hover:bg-brand-400 transition">Request team enforcement</a>
+        <div class="rise surface p-7 ring-1 ring-brand-500/40">
+          <p class="text-xs font-semibold tracking-wide text-amber-300">DESIGN PARTNERS, NOT SELF-SERVE YET</p>
+          <p class="display mt-2 text-2xl text-[#f5f5f7]">Pro, $49/month per team</p>
+          <p class="mt-3 text-sm text-slate-400 leading-relaxed">Planned: shared team rules, approval routing, revocable agent grants, policy history and signed evidence exports. Set up with you by hand today.</p>
+          <a href="../#pricing" onclick="track('pro_click'); track('intent_pro_click')" class="mt-5 inline-block rounded-full bg-brand-500 hover:bg-brand-400 text-black font-semibold px-5 py-2.5 text-sm transition">Request team enforcement</a>
         </div>
-        <div class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
-          <p class="font-semibold text-white">Enterprise</p>
-          <p class="text-xs font-mono text-slate-400 mt-1">NOT BUILT</p>
-          <p class="mt-3 text-sm text-slate-300">Planned: identity provider sign-in, key management service integration, retention policies and compliance exports. <a class="text-brand-300 underline" href="../#pricing">Talk to us</a> if this is your blocker.</p>
+        <div class="rise surface p-7">
+          <p class="text-xs font-semibold tracking-wide text-slate-500">NOT BUILT</p>
+          <p class="display mt-2 text-2xl text-[#f5f5f7]">Enterprise</p>
+          <p class="mt-3 text-sm text-slate-400 leading-relaxed">Planned: identity provider sign-in, key management integration, retention policies and compliance exports. <a class="text-brand-300 hover:text-brand-200" href="../#pricing">Talk to us</a> if this is your blocker.</p>
         </div>
       </div>
     </section>
   </main>
 
-  <footer class="border-t border-dark-800 mt-8">
+  <footer class="border-t border-white/5 mt-8">
     <div class="max-w-6xl mx-auto px-4 py-6 text-xs text-slate-400 flex flex-wrap gap-x-6 gap-y-1 justify-between">
       <span>Joltrin core is MIT licensed.</span>
       <ul class="flex gap-4">
         <li><a class="hover:text-slate-200" href="../">Home</a></li>
+        <li><a class="hover:text-slate-200" href="../agents/">Agents</a></li>
         <li><a class="hover:text-slate-200" href="../docs/">Docs</a></li>
         <li><a class="hover:text-slate-200" href="https://github.com/SharedCode/joltrin" onclick="track('github_click')">GitHub</a></li>
       </ul>
@@ -214,15 +340,88 @@ go run ./examples/private_intent approve ./pi orders</pre>
 
   <script>
     (function () {
+      document.documentElement.classList.remove('no-js');
+      var els = document.querySelectorAll('.rise');
+      if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) { els.forEach(function (e) { e.classList.add('in'); }); return; }
+      var io = new IntersectionObserver(function (list) { list.forEach(function (x) { if (x.isIntersecting) { x.target.classList.add('in'); io.unobserve(x.target); } }); }, { threshold: 0.15 });
+      els.forEach(function (e) { io.observe(e); });
+    })();
+  </script>
+  <script>
+    (function () {
+      var stage = document.getElementById('how-stage');
+      if (!stage) return;
+      var copy = {
+        1: ['You set the rule', 'A rule names the agent, the tool, the resource and what must be true first. It expires, you can edit it, and revoking it blocks the next attempt.'],
+        2: ['Other systems prove it', 'The backup system signs "backup validated". You sign an approval for one exact action. The agent cannot sign either, and saying it did changes nothing.'],
+        3: ['The executor checks', 'On ALLOW, Joltrin signs a receipt for that action and policy. The system holding the credentials runs the action only with a valid, unused receipt.']
+      };
+      var MS = 7000, step = 1, timer = null, seen = false, userPaused = false;
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var tabs = [1, 2, 3].map(function (n) { return document.getElementById('how-t' + n); });
+      var toggle = document.getElementById('how-toggle');
+      stage.style.setProperty('--how-ms', MS + 'ms');
+
+      function show(n) {
+        step = n;
+        stage.setAttribute('data-step', String(n));
+        tabs.forEach(function (t, i) { t.setAttribute('aria-selected', String(i + 1 === n)); t.tabIndex = i + 1 === n ? 0 : -1; });
+        document.getElementById('how-h3').textContent = copy[n][0];
+        document.getElementById('how-p').textContent = copy[n][1];
+        if (stage.classList.contains('playing')) { stage.classList.remove('playing'); void stage.offsetWidth; stage.classList.add('playing'); }
+      }
+      function stop() { clearTimeout(timer); timer = null; stage.classList.remove('playing'); }
+      function schedule() {
+        clearTimeout(timer);
+        timer = setTimeout(function () { show(step % 3 + 1); schedule(); }, MS);
+      }
+      function play() {
+        if (reduce || userPaused || !seen) return;
+        stage.classList.add('playing'); schedule();
+      }
+      function label() { toggle.textContent = userPaused || reduce ? 'Play' : 'Pause'; toggle.setAttribute('aria-pressed', String(!(userPaused || reduce))); }
+
+      tabs.forEach(function (t) {
+        t.addEventListener('click', function () { track('intent_how_step'); show(Number(t.getAttribute('data-go'))); if (!userPaused && !reduce) { play(); } });
+        t.addEventListener('keydown', function (e) {
+          var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+          if (!d) return;
+          e.preventDefault();
+          var n = (step - 1 + d + 3) % 3 + 1;
+          show(n); tabs[n - 1].focus();
+        });
+      });
+      toggle.addEventListener('click', function () {
+        if (reduce) { reduce = false; }
+        userPaused = !userPaused;
+        if (userPaused) stop(); else play();
+        label();
+      });
+      stage.addEventListener('pointerenter', function () { if (!userPaused) { clearTimeout(timer); stage.classList.remove('playing'); } });
+      stage.addEventListener('pointerleave', function () { if (!userPaused) play(); });
+      stage.addEventListener('focusin', function () { if (!userPaused) { clearTimeout(timer); stage.classList.remove('playing'); } });
+      stage.addEventListener('focusout', function () { if (!userPaused) play(); });
+
+      label();
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (l) {
+          seen = l[0].isIntersecting;
+          if (seen) play(); else stop();
+        }, { threshold: 0.4 }).observe(stage);
+      }
+    })();
+  </script>
+  <script>
+    (function () {
       var ids = ['b-attempt', 'b-backup', 'b-approve', 'b-revoke', 'b-reset', 'b-tamper', 'b-replay'];
       var $ = function (id) { return document.getElementById(id); };
       var tone = {
-        BLOCK: ['border-accent-rose/60 bg-accent-rose/10', 'text-rose-300', 'BLOCK'],
-        REQUIRE_APPROVAL: ['border-amber-400/60 bg-amber-400/10', 'text-amber-300', 'REQUIRE APPROVAL'],
-        ALLOW: ['border-brand-500/60 bg-brand-500/10', 'text-brand-300', 'ALLOW']
+        BLOCK: ['bg-accent-rose/10', 'text-rose-300', 'BLOCK'],
+        REQUIRE_APPROVAL: ['bg-amber-400/10', 'text-amber-300', 'REQUIRE APPROVAL'],
+        ALLOW: ['bg-brand-500/10', 'text-brand-300', 'ALLOW']
       };
+      var BANNER = 'banner mt-8 rounded-[28px] px-6 py-9 text-center', TITLE = 'text-xs font-semibold tracking-[0.2em]';
       var kindClass = { ok: 'text-brand-300', block: 'text-rose-300', ask: 'text-amber-300', info: 'text-slate-300' };
-      var lastDecisionVerdict = null;
 
       function esc(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
       function mark(el, on) {
@@ -243,6 +442,22 @@ go run ./examples/private_intent approve ./pi orders</pre>
         $('decision-json').textContent = JSON.stringify(s.decision, null, 2);
         if (s.receipt) $('receipt-json').textContent = JSON.stringify(s.receipt, null, 2);
 
+        var lastV = s.log.filter(function (l) { return l.verdict; }).pop();
+        var verdict = lastV ? lastV.verdict : null;
+        var nx = !verdict ? ['b-attempt', 'Start here: the agent asks to delete the database.']
+          : !s.has_backup ? ['b-backup', 'Blocked, as expected. Next the backup system proves a backup exists.']
+          : (!s.has_approval && verdict !== 'REQUIRE_APPROVAL') ? ['b-attempt', verdict === 'ALLOW' ? 'Allowed once. The approval was single use, so ask again to see it refused.' : 'Ask again. The backup is now on record.']
+          : !s.has_approval ? ['b-approve', 'It now needs your approval for this exact delete.']
+          : ['b-attempt', 'Approved. Ask once more.'];
+        ['b-attempt', 'b-backup', 'b-approve'].forEach(function (id) {
+          var on = id === nx[0] && !$(id).disabled;
+          $(id).classList.toggle('is-next', on);
+          $(id).closest('.step-card').classList.toggle('is-next', on);
+        });
+        $('next-hint').textContent = nx[1];
+        var cta = $('team-cta');
+        if (verdict === 'ALLOW') { cta.classList.add('show'); cta.setAttribute('aria-hidden', 'false'); cta.querySelector('a').tabIndex = 0; }
+
         var logEl = $('log');
         var shown = logEl.children.length;
         if (s.log.length < shown) { logEl.innerHTML = ''; shown = 0; }
@@ -256,8 +471,8 @@ go run ./examples/private_intent approve ./pi orders</pre>
           var last = s.log.filter(function (l) { return l.verdict; }).pop();
           if (last) {
             var t = tone[last.verdict] || tone.BLOCK;
-            $('banner').className = 'banner rounded-2xl border p-5 mb-5 ' + t[0];
-            $('banner-title').className = 'font-mono text-sm ' + t[1];
+            $('banner').className = BANNER + ' ' + t[0];
+            $('banner-title').className = TITLE + ' ' + t[1];
             $('banner-title').textContent = t[2];
             $('banner-text').textContent = last.text;
           }
@@ -282,10 +497,11 @@ go run ./examples/private_intent approve ./pi orders</pre>
         $('b-reset').addEventListener('click', function () {
           $('log').innerHTML = '';
           $('receipt-json').textContent = 'None yet. Get an ALLOW first.';
-          $('banner').className = 'banner rounded-2xl border border-dark-700 bg-dark-850 p-5 mb-5';
-          $('banner-title').className = 'font-mono text-sm text-slate-400';
+          $('banner').className = BANNER + ' bg-[#0b0b0f]';
+          $('banner-title').className = TITLE + ' text-slate-500';
           $('banner-title').textContent = 'READY';
-          $('banner-text').textContent = 'Press the first button to send the agent’s request.';
+          $('banner-text').textContent = 'Press step 1 to send the agent’s request.';
+          var c = $('team-cta'); c.classList.remove('show'); c.setAttribute('aria-hidden', 'true'); c.querySelector('a').tabIndex = -1;
           render(window.joltrinIntentReset());
         });
         $('banner-title').textContent = 'READY';
@@ -306,6 +522,7 @@ go run ./examples/private_intent approve ./pi orders</pre>
       }).catch(function (e) {
         $('banner-title').textContent = 'COULD NOT LOAD';
         $('banner-text').textContent = 'The engine did not load in this browser. The Developer view below shows how to run the same code locally.';
+        $('next-hint').textContent = '';
         console.error(e);
       });
     })();

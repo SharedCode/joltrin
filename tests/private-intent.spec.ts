@@ -77,4 +77,122 @@ test.describe('Private Intent demo', () => {
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow).toBeLessThanOrEqual(0);
   });
+
+  test('points at the next step and follows the story', async ({ page }) => {
+    await page.goto('/private-intent/', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#b-attempt')).toBeEnabled({ timeout: 30_000 });
+    await expect(page.locator('#b-attempt')).toHaveClass(/is-next/);
+    await page.locator('#b-attempt').click();
+    await expect(page.locator('#b-backup')).toHaveClass(/is-next/);
+    await expect(page.locator('#b-attempt')).not.toHaveClass(/is-next/);
+    await page.locator('#b-backup').click();
+    await expect(page.locator('#b-attempt')).toHaveClass(/is-next/);
+    await page.locator('#b-attempt').click();
+    await expect(page.locator('#b-approve')).toHaveClass(/is-next/);
+  });
+
+  test('keeps the raw views behind a click until asked for', async ({ page }) => {
+    await page.goto('/private-intent/', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#owner-json')).toBeHidden();
+    await expect(page.locator('#receipt-json')).toBeHidden();
+    await page.getByText('What you can see, and what the verifier can see').click();
+    await expect(page.locator('#owner-json')).toBeVisible();
+  });
 });
+
+test.describe('Private Intent in the top navigation', () => {
+  for (const [name, path, link] of [
+    ['homepage', '/', 'a[href="./private-intent/"]'],
+    ['agents page', '/agents/', 'a[href="../private-intent/"]'],
+  ] as const) {
+    test(`the ${name} header links to Private Intent on a desktop screen`, async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await page.goto(path, { waitUntil: 'domcontentloaded' });
+      const nav = page.locator(`header nav ${link}`).first();
+      await expect(nav).toBeVisible();
+      await expect(nav).toContainText('Private Intent');
+    });
+  }
+
+  for (const width of [1024, 1280, 1440]) {
+    test(`the homepage header does not scroll sideways at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      expect(overflow).toBeLessThanOrEqual(0);
+    });
+  }
+
+  test('below the desktop width the menu still offers Private Intent', async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 800 });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.locator('#mobile-menu-btn').click();
+    await expect(page.locator('#mobile-menu-panel a[href="./private-intent/"]')).toBeVisible();
+  });
+
+  test('the More menu holds the section links and closes when one is chosen', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.locator('#nav-more summary').click();
+    await expect(page.locator('#nav-more a[href="./btree/"]')).toBeVisible();
+    await page.locator('#nav-more a[href="#under-the-hood"]').click();
+    await expect(page.locator('#nav-more')).not.toHaveAttribute('open', '');
+  });
+});
+
+test.describe('Private Intent walkthrough', () => {
+  test('the steps can be driven by click and by arrow keys', async ({ page }) => {
+    await page.goto('/private-intent/', { waitUntil: 'domcontentloaded' });
+    const stage = page.locator('#how-stage');
+    await expect(stage).toHaveAttribute('data-step', '1');
+    await page.locator('#how-t2').click();
+    await expect(stage).toHaveAttribute('data-step', '2');
+    await expect(page.locator('#how-t2')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('#how-h3')).toHaveText('Other systems prove it');
+    await page.locator('#how-t2').focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(stage).toHaveAttribute('data-step', '3');
+    await expect(page.locator('#how-h3')).toHaveText('The executor checks');
+    await page.keyboard.press('ArrowRight');
+    await expect(stage).toHaveAttribute('data-step', '1');
+  });
+
+  test('it plays itself when in view, and can be paused', async ({ page }) => {
+    await page.clock.install();
+    await page.goto('/private-intent/', { waitUntil: 'domcontentloaded' });
+    await page.evaluate(() => document.getElementById('how-stage')!.scrollIntoView({ block: 'center' }));
+    await expect(page.locator('#how-stage')).toHaveClass(/playing/);
+    await page.mouse.move(0, 0);
+    await page.clock.runFor(7100);
+    await expect(page.locator('#how-stage')).toHaveAttribute('data-step', '2');
+    await page.locator('#how-toggle').click();
+    await expect(page.locator('#how-toggle')).toHaveText('Play');
+    await page.clock.runFor(15000);
+    await expect(page.locator('#how-stage')).toHaveAttribute('data-step', '2');
+  });
+
+  test('offers the team step only after an ALLOW, and hides it again on reset', async ({ page }) => {
+    await page.goto('/private-intent/', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#b-attempt')).toBeEnabled({ timeout: 30_000 });
+    await expect(page.locator('#team-cta')).not.toHaveClass(/show/);
+    await page.locator('#b-backup').click();
+    await page.locator('#b-approve').click();
+    await page.locator('#b-attempt').click();
+    await expect(page.locator('#banner-title')).toHaveText('ALLOW');
+    await expect(page.locator('#team-cta')).toHaveClass(/show/);
+    await expect(page.locator('#team-cta a')).toHaveAttribute('href', '#pro');
+    await page.locator('#b-reset').click();
+    await expect(page.locator('#team-cta')).not.toHaveClass(/show/);
+  });
+});
+
+test.describe('Finding Private Intent from the homepage', () => {
+  test('a banner above the header links straight to it', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const strip = page.locator('#intent-strip');
+    await expect(strip).toBeVisible();
+    await expect(strip).toHaveAttribute('href', './private-intent/');
+    await expect(strip).toContainText('Private Intent');
+  });
+});
+
