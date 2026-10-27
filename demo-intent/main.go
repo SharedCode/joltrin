@@ -59,7 +59,7 @@ func must[T any](v T, err error) T {
 // newSession builds the fixed demo rule. The inputs are constants, so an error here is a
 // programming mistake and stops the page loudly.
 func newSession() *session {
-	sess, err := newSessionFor(preference, defaultRequires())
+	sess, err := newSessionFor(preference, defaultRequires(), newKeys())
 	if err != nil {
 		panic(err)
 	}
@@ -73,10 +73,25 @@ func defaultRequires() []intent.Requirement {
 	}
 }
 
-func newSessionFor(pref string, requires []intent.Requirement) (*session, error) {
-	backupPub, backupPriv, _ := intent.GenerateKey()
-	ownerPub, ownerPriv, _ := intent.GenerateKey()
-	_, enginePriv, _ := intent.GenerateKey()
+// keySet is the three key pairs the demo roles use. The fingerprint lab builds a rule on
+// every keystroke, so it reuses one set instead of making new keys each time.
+type keySet struct {
+	backupPub, ownerPub               ed25519.PublicKey
+	backupPriv, ownerPriv, enginePriv ed25519.PrivateKey
+}
+
+func newKeys() keySet {
+	var k keySet
+	k.backupPub, k.backupPriv, _ = intent.GenerateKey()
+	k.ownerPub, k.ownerPriv, _ = intent.GenerateKey()
+	_, k.enginePriv, _ = intent.GenerateKey()
+	return k
+}
+
+var labKeys = newKeys()
+
+func newSessionFor(pref string, requires []intent.Requirement, k keySet) (*session, error) {
+	backupPub, backupPriv, ownerPub, ownerPriv, enginePriv := k.backupPub, k.backupPriv, k.ownerPub, k.ownerPriv, k.enginePriv
 
 	v := intent.NewVault("demo", nil)
 	if err := v.Add(intent.Rule{
@@ -134,7 +149,7 @@ func fingerprint(pref string, backup, approval, second bool) string {
 	if len(reqs) == 0 {
 		return out(result{Error: "A rule needs at least one thing that must be true first."})
 	}
-	sess, err := newSessionFor(pref, reqs)
+	sess, err := newSessionFor(pref, reqs, labKeys)
 	if err != nil {
 		return out(result{Error: "That rule could not be built. Try different wording."})
 	}
