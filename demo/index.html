@@ -461,6 +461,16 @@
     @media (min-width: 640px) { main > section[class*="rounded-2xl"] { padding: 3rem !important; } }
     /* Touch screens get 44 pixel targets for buttons, header controls and standalone links. Links inside a sentence are left alone. */
     [hidden] { display: none !important; }
+    /* On a phone the sound control is a round speaker button, so it does not cover the page. */
+    .sound-toggle .si { display: none; }
+    .sound-toggle .si-off { display: none; }
+    .sound-toggle[data-s="off"] .si-off { display: inline; }
+    .sound-toggle[data-s="off"] .si-on, .sound-toggle[data-s="tap"] .si-on { display: none; }
+    @media (max-width: 639px) {
+      .sound-toggle { left: 12px; bottom: 12px; width: 44px; height: 44px; min-width: 44px; padding: 0; display: flex; align-items: center; justify-content: center; }
+      .sound-toggle .si { display: block; width: 20px; height: 20px; }
+      .sound-toggle .st { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+    }
     /* Below 400 pixels the header cannot fit every control. The GitHub icon moves into the menu. */
     @media (max-width: 399px) { header a[aria-label="Joltrin on GitHub"] { display: none !important; } }
     @media (max-width: 359px) { #watch-demo-btn { display: none !important; } }
@@ -3066,10 +3076,14 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
       btn.type = 'button';
       btn.className = 'sound-toggle';
       // "on" is what the visitor wants. The label only says "Sound on" once the browser has actually let audio run.
+      var SPEAKER = '<svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><g class="si-on"><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></g><g class="si-off"><path d="m16 9 5 6"/><path d="m21 9-5 6"/></g></svg>';
       function live() { return !!(on && ctx && ctx.state === 'running'); }
       function paint() {
         btn.setAttribute('aria-pressed', String(live()));
-        btn.textContent = !on ? 'Sound off' : live() ? 'Sound on' : 'Tap for sound';
+        var state = !on ? 'off' : live() ? 'on' : 'tap';
+        btn.setAttribute('data-s', state);
+        // The words stay in the button for screen readers. On a phone only the speaker icon is drawn.
+        btn.innerHTML = SPEAKER + '<span class="st">' + (state === 'off' ? 'Sound off' : state === 'on' ? 'Sound on' : 'Tap for sound') + '</span>';
       }
       function audio() {
         if (!ctx) {
