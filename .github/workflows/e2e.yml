@@ -132,7 +132,14 @@ jobs:
           for attempt in 1 2 3; do
             if timeout 240 $install; then exit 0; fi
             echo "Install attempt $attempt failed or timed out."
-            sleep 15
+            # Killing the timed out attempt leaves its apt-get running and holding the dpkg lock,
+            # which would fail every later attempt. Stop it and put dpkg back in a clean state.
+            sudo pkill -9 -x apt-get || true
+            sudo pkill -9 -x apt || true
+            sudo pkill -9 -x dpkg || true
+            sudo rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/lib/apt/lists/lock /var/cache/apt/archives/lock
+            sudo dpkg --configure -a || true
+            sleep 10
           done
           exit 1
 
