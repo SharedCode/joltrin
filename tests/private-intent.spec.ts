@@ -463,3 +463,30 @@ test.describe('Private Intent in the docs', () => {
   });
 });
 
+test.describe('Touch targets', () => {
+  test.use({ hasTouch: true, isMobile: true, viewport: { width: 375, height: 800 } });
+
+  test('the controls a thumb has to hit are at least 44 pixels tall', async ({ page }) => {
+    await page.goto('/private-intent/', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#b-attempt')).toBeEnabled({ timeout: 30_000 });
+    for (const id of ['receipt-check', 'fingerprint-lab', 'dev']) await page.locator(`#${id} summary`).click();
+    const ids = ['b-attempt', 'b-backup', 'b-approve', 'b-revoke', 'b-reset', 'b-cheat-claim', 'b-cheat-approve', 'b-cheat-other', 'how-toggle', 'rc-load', 'rc-check', 'rc-flip', 'b-tamper', 'b-replay'];
+    const short: string[] = [];
+    for (const id of ids) {
+      const box = await page.locator(`#${id}`).boundingBox();
+      if (!box || box.height < 43.5) short.push(`${id} ${Math.round(box?.height ?? 0)}px`);
+    }
+    for (const id of ['fp-backup', 'fp-approval', 'fp-second']) {
+      const box = await page.locator(`label:has(#${id})`).boundingBox();
+      if (!box || box.height < 43.5) short.push(`label of ${id} ${Math.round(box?.height ?? 0)}px`);
+    }
+    expect(short, short.join(', ')).toEqual([]);
+  });
+
+  test('making them bigger does not make the page scroll sideways', async ({ page }) => {
+    await page.goto('/private-intent/', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#b-attempt')).toBeEnabled({ timeout: 30_000 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+  });
+});
+
