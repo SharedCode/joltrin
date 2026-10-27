@@ -12,6 +12,7 @@ package main
 
 import (
 	"crypto/ed25519"
+	"encoding/hex"
 	"encoding/json"
 	"syscall/js"
 	"time"
@@ -187,6 +188,7 @@ func (s *session) state() string {
 		"has_backup":    !hasMissing(d, intent.NeedEvidence),
 		"has_approval":  !hasMissing(d, intent.NeedApproval) && len(d.AppliedRules) > 0,
 		"receipt":       s.lastReceipt,
+		"signer_key":    hex.EncodeToString(s.eng.ReceiptKey()),
 		"log":           s.log,
 	}
 	b, _ := json.Marshal(out)
@@ -200,6 +202,34 @@ func hasMissing(d intent.Decision, k intent.RequirementKind) bool {
 		}
 	}
 	return false
+}
+
+// checkReceipt is what anyone holding a receipt and the signer's public key can
+// do: it never sees the action, the rule wording or the vault. It checks the
+// signature only, so a receipt edited by even one character fails.
+func checkReceipt(raw, keyHex string) string {
+	type result struct {
+		OK        bool   `json:"ok"`
+		Error     string `json:"error,omitempty"`
+		Verdict   string `json:"verdict,omitempty"`
+		Signer    string `json:"signer,omitempty"`
+		IssuedAt  int64  `json:"issued_at,omitempty"`
+		ExpiresAt int64  `json:"expires_at,omitempty"`
+		Expired   bool   `json:"expired,omitempty"`
+	}
+	out := func(r result) string { b, _ := json.Marshal(r); return string(b) }
+	var r intent.Receipt
+	if err := json.Unmarshal([]byte(raw), &r); err != nil {
+		return out(result{Error: "That is not a receipt. Paste the receipt JSON from the demo."})
+	}
+	pub, err := hex.DecodeString(keyHex)
+	if err != nil || len(pub) != ed25519.PublicKeySize {
+		return out(result{Error: "The signer key must be 64 hex characters."})
+	}
+	if err := r.VerifySignature(ed25519.PublicKey(pub)); err != nil {
+		return out(result{Error: "The signature does not match. The receipt was edited, or this is not the signer's key."})
+	}
+	return out(result{OK: true, Verdict: string(r.Verdict), Signer: r.Signer, IssuedAt: r.IssuedAt, ExpiresAt: r.ExpiresAt, Expired: time.Now().Unix() >= r.ExpiresAt})
 }
 
 func bind(name string, f func()) {
@@ -218,6 +248,12 @@ func main() {
 	bind("joltrinIntentRevoke", s.revoke)
 	bind("joltrinIntentTamper", s.tamper)
 	bind("joltrinIntentReplay", s.replay)
+	js.Global().Set("joltrinIntentCheckReceipt", js.FuncOf(func(this js.Value, args []js.Value) any {
+		if len(args) < 2 {
+			return checkReceipt("", "")
+		}
+		return checkReceipt(args[0].String(), args[1].String())
+	}))
 	js.Global().Set("joltrinIntentReset", js.FuncOf(func(this js.Value, args []js.Value) any {
 		s = newSession()
 		return s.state()
