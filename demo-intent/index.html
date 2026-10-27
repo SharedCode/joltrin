@@ -168,6 +168,9 @@
         <div id="banner" class="banner mt-8 rounded-[28px] bg-[#0b0b0f] px-6 py-9 text-center" role="status" aria-live="polite">
           <p id="banner-title" class="text-xs font-semibold tracking-[0.2em] text-slate-500">LOADING</p>
           <p id="banner-text" class="mt-2 text-xl sm:text-2xl font-semibold text-[#f5f5f7] max-w-2xl mx-auto">Press step 1 to send the agent's request.</p>
+          <p id="banner-actions" class="mt-4" hidden>
+            <button id="b-check-receipt" type="button" class="text-sm text-brand-300 hover:text-brand-200 underline underline-offset-4 decoration-brand-500/40 transition">Check this receipt yourself</button>
+          </p>
         </div>
 
         <div class="mt-6 text-center">
@@ -580,6 +583,14 @@ go run ./examples/private_intent approve ./pi orders</pre>
         rcShow(null, 'Loaded. Press Check it.');
       });
       $('rc-check').addEventListener('click', rcCheck);
+      // After an ALLOW, one click opens the checker with that receipt loaded and already checked.
+      $('b-check-receipt').addEventListener('click', function () {
+        track('intent_check_this_receipt');
+        $('receipt-check').open = true;
+        $('rc-load').click();
+        rcCheck();
+        $('receipt-check').scrollIntoView({ block: 'start' });
+      });
       $('rc-flip').addEventListener('click', function () {
         var o;
         try { o = JSON.parse($('rc-input').value); } catch (e) { rcShow(false, 'Load a receipt first.'); return; }
@@ -621,6 +632,7 @@ go run ./examples/private_intent approve ./pi orders</pre>
           $(id).closest('.step-card').classList.toggle('is-next', on);
         });
         $('next-hint').textContent = nx[1];
+        $('banner-actions').hidden = !(verdict === 'ALLOW' && s.receipt);
         var cta = $('team-cta');
         if (verdict === 'ALLOW') { cta.classList.add('show'); cta.setAttribute('aria-hidden', 'false'); cta.querySelector('a').tabIndex = 0; }
 
