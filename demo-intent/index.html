@@ -37,6 +37,8 @@
     .log-line { animation: fadeIn 0.2s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
     footer ul a { display: inline-block; padding-block: .3rem; }
+    .step-btn.is-next { box-shadow: 0 0 0 2px #07090E, 0 0 0 4px #34d399; }
+    .step-btn:disabled { opacity: .5; cursor: not-allowed; }
     button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px solid #34d399; outline-offset: 2px; }
   </style>
 </head>
@@ -48,14 +50,12 @@
         <a href="../" class="w-9 h-9 flex items-center justify-center" aria-label="Joltrin home">
           <img src="./logo-mark.png" alt="" class="w-9 h-9 object-contain" width="36" height="36" />
         </a>
-        <div class="flex items-center space-x-2">
-          <a href="../" class="font-bold text-white hover:text-brand-400 transition">Joltrin</a>
-          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-dark-800 border border-dark-700 text-accent-cyan">PRIVATE INTENT</span>
-        </div>
+        <a href="../" class="font-bold text-white hover:text-brand-400 transition">Joltrin</a>
       </div>
       <nav class="flex items-center space-x-1 text-xs font-mono" aria-label="Site">
-        <a href="../" class="px-2.5 py-1.5 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">Overview</a>
-        <a href="../agents/" class="hidden sm:inline px-2.5 py-1.5 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">Agents</a>
+        <a href="../" class="hidden sm:inline px-2.5 py-1.5 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">Overview</a>
+        <a href="../agents/" class="hidden md:inline px-2.5 py-1.5 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">Agents</a>
+        <span aria-current="page" class="px-2.5 py-1.5 rounded-lg bg-accent-cyan/10 border border-accent-cyan/30 text-accent-cyan font-semibold">Private Intent</span>
         <a href="../docs/" class="hidden sm:inline px-2.5 py-1.5 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">Docs</a>
         <a href="#pro" onclick="track('intent_pro_click')" class="px-2.5 py-1.5 rounded-lg bg-brand-500/15 border border-brand-500/40 text-brand-300 hover:bg-brand-500/25 transition font-semibold">Teams</a>
       </nav>
@@ -63,92 +63,112 @@
   </header>
 
   <main class="flex-1">
-    <section class="max-w-6xl mx-auto px-4 pt-12 pb-8">
-      <p class="text-xs font-mono text-accent-cyan mb-3">JOLTRIN PRIVATE INTENT</p>
+    <section class="max-w-6xl mx-auto px-4 pt-10 pb-6">
       <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight max-w-3xl">AI agents that respect your rules before they act.</h1>
       <p class="mt-4 text-lg text-slate-300 max-w-2xl">Give agents the context they need, keep private data under your control, and independently verify every high-risk action.</p>
-      <div class="mt-6 flex flex-wrap gap-3">
+      <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
         <a href="#try" onclick="track('intent_cta_try')" class="px-5 py-2.5 rounded-xl bg-brand-500 text-black font-semibold hover:bg-brand-400 transition">Try a protected agent</a>
-        <a href="#how" class="px-5 py-2.5 rounded-xl border border-dark-600 text-slate-200 font-semibold hover:bg-dark-800 transition">See how it works</a>
+        <a href="#how" class="text-slate-300 hover:text-white underline underline-offset-4 decoration-dark-600 hover:decoration-slate-400 transition">How it works</a>
+        <span class="text-xs font-mono text-slate-400">Runs in your browser. Nothing is sent anywhere.</span>
       </div>
     </section>
 
-    <section id="try" class="max-w-6xl mx-auto px-4 py-8 scroll-mt-20" aria-labelledby="try-h">
+    <section id="try" class="max-w-6xl mx-auto px-4 py-6 scroll-mt-20" aria-labelledby="try-h">
       <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <h2 id="try-h" class="text-xl font-bold text-white">Try it: an agent wants to delete a production database</h2>
+        <h2 id="try-h" class="text-xl font-bold text-white">An agent wants to delete a production database</h2>
         <span class="text-xs font-mono px-2 py-1 rounded bg-amber-400/10 border border-amber-400/30 text-amber-300">SIMULATED. No real system is touched.</span>
       </div>
 
       <div id="banner" class="banner rounded-2xl border border-dark-700 bg-dark-850 p-5 mb-5" role="status" aria-live="polite">
         <p id="banner-title" class="font-mono text-sm text-slate-400">Loading the engine...</p>
-        <p id="banner-text" class="mt-1 text-lg font-semibold text-white">Press the first button to send the agent's request.</p>
+        <p id="banner-text" class="mt-1 text-lg font-semibold text-white">Press step 1 to send the agent's request.</p>
       </div>
 
-      <div class="grid lg:grid-cols-2 gap-5">
-        <div class="space-y-5">
-          <div class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
-            <h3 class="text-sm font-mono text-slate-400 mb-2">YOUR PRIVATE RULE (only you see this wording)</h3>
-            <p id="owner-pref" class="text-white">...</p>
-            <ul class="mt-4 space-y-2 text-sm" aria-label="What the rule needs">
-              <li class="flex items-center gap-2"><span id="chk-backup" class="w-5 h-5 rounded-full border border-dark-600 flex items-center justify-center text-xs" aria-hidden="true"></span><span>Backup validated by the backup system <span id="chk-backup-t" class="text-slate-400">(missing)</span></span></li>
-              <li class="flex items-center gap-2"><span id="chk-approval" class="w-5 h-5 rounded-full border border-dark-600 flex items-center justify-center text-xs" aria-hidden="true"></span><span>Owner approval of this exact delete <span id="chk-approval-t" class="text-slate-400">(missing)</span></span></li>
-            </ul>
-          </div>
+      <div class="grid lg:grid-cols-5 gap-5">
+        <div class="lg:col-span-3 rounded-2xl border border-dark-700 bg-dark-850 p-5">
+          <p class="text-xs font-mono text-slate-400">YOUR PRIVATE RULE</p>
+          <p id="owner-pref" class="mt-1 text-white">...</p>
+          <ul class="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm" aria-label="What the rule needs">
+            <li class="flex items-center gap-2"><span id="chk-backup" class="w-5 h-5 rounded-full border border-dark-600 flex items-center justify-center text-xs" aria-hidden="true"></span><span>Backup validated <span id="chk-backup-t" class="text-slate-400">(missing)</span></span></li>
+            <li class="flex items-center gap-2"><span id="chk-approval" class="w-5 h-5 rounded-full border border-dark-600 flex items-center justify-center text-xs" aria-hidden="true"></span><span>Owner approval <span id="chk-approval-t" class="text-slate-400">(missing)</span></span></li>
+          </ul>
 
-          <div class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
-            <h3 class="text-sm font-mono text-slate-400 mb-3">WHO DOES WHAT</h3>
-            <div class="flex flex-wrap gap-2">
-              <button id="b-attempt" type="button" class="px-4 py-2 rounded-lg bg-accent-violet/20 border border-accent-violet/40 text-violet-200 font-semibold hover:bg-accent-violet/30 transition" disabled>1. Agent: delete prod/orders</button>
-              <button id="b-backup" type="button" class="px-4 py-2 rounded-lg bg-dark-800 border border-dark-600 text-slate-200 font-semibold hover:bg-dark-750 transition" disabled>2. Backup system: validate backup</button>
-              <button id="b-approve" type="button" class="px-4 py-2 rounded-lg bg-dark-800 border border-dark-600 text-slate-200 font-semibold hover:bg-dark-750 transition" disabled>3. Owner: approve</button>
-              <button id="b-revoke" type="button" class="px-4 py-2 rounded-lg bg-dark-800 border border-accent-rose/50 text-rose-300 font-semibold hover:bg-dark-750 transition" disabled>Owner: revoke approval</button>
-              <button id="b-reset" type="button" class="px-4 py-2 rounded-lg text-slate-400 hover:text-white transition" disabled>Reset</button>
-            </div>
-            <p class="mt-3 text-xs text-slate-400">Try this order: 1, 2, 1, 3, 1. Then approve again, revoke, and press 1.</p>
+          <ol class="mt-5 space-y-3" aria-label="Steps">
+            <li class="flex items-start gap-3">
+              <span class="mt-1 w-6 h-6 shrink-0 rounded-full bg-dark-800 border border-dark-600 text-xs font-mono flex items-center justify-center" aria-hidden="true">1</span>
+              <div class="min-w-0">
+                <p class="text-xs font-mono text-slate-400">THE AGENT</p>
+                <button id="b-attempt" type="button" class="step-btn mt-1 px-4 py-2 rounded-lg bg-accent-violet/20 border border-accent-violet/40 text-violet-200 font-semibold hover:bg-accent-violet/30 transition text-left" disabled>Ask to delete prod/orders</button>
+              </div>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="mt-1 w-6 h-6 shrink-0 rounded-full bg-dark-800 border border-dark-600 text-xs font-mono flex items-center justify-center" aria-hidden="true">2</span>
+              <div class="min-w-0">
+                <p class="text-xs font-mono text-slate-400">THE BACKUP SYSTEM</p>
+                <button id="b-backup" type="button" class="step-btn mt-1 px-4 py-2 rounded-lg bg-dark-800 border border-dark-600 text-slate-200 font-semibold hover:bg-dark-750 transition text-left" disabled>Sign "backup validated"</button>
+              </div>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="mt-1 w-6 h-6 shrink-0 rounded-full bg-dark-800 border border-dark-600 text-xs font-mono flex items-center justify-center" aria-hidden="true">3</span>
+              <div class="min-w-0">
+                <p class="text-xs font-mono text-slate-400">YOU</p>
+                <button id="b-approve" type="button" class="step-btn mt-1 px-4 py-2 rounded-lg bg-dark-800 border border-dark-600 text-slate-200 font-semibold hover:bg-dark-750 transition text-left" disabled>Approve this exact delete</button>
+              </div>
+            </li>
+          </ol>
+
+          <p id="next-hint" class="mt-4 text-sm text-brand-300" aria-live="polite">Loading the engine...</p>
+          <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+            <button id="b-revoke" type="button" class="text-rose-300 hover:text-rose-200 underline underline-offset-4 decoration-dark-600 disabled:opacity-40 disabled:no-underline" disabled>Revoke my approval</button>
+            <button id="b-reset" type="button" class="text-slate-400 hover:text-white underline underline-offset-4 decoration-dark-600 disabled:opacity-40 disabled:no-underline" disabled>Start over</button>
           </div>
         </div>
 
-        <div class="rounded-2xl border border-dark-700 bg-dark-900 p-5 min-h-[18rem]">
-          <h3 class="text-sm font-mono text-slate-400 mb-3">WHAT HAPPENED</h3>
+        <div class="lg:col-span-2 rounded-2xl border border-dark-700 bg-dark-900 p-5 min-h-[16rem]">
+          <h3 class="text-xs font-mono text-slate-400 mb-3">WHAT HAPPENED</h3>
           <ol id="log" class="space-y-2 text-sm font-mono" aria-live="polite"></ol>
         </div>
       </div>
 
-      <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-5" aria-label="What each side can see">
-        <div class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
-          <h3 class="text-sm font-mono text-slate-400 mb-2">WHAT YOU CAN SEE</h3>
-          <pre id="owner-json" class="text-xs text-slate-300 whitespace-pre-wrap break-words"></pre>
+      <details class="mt-5 rounded-2xl border border-dark-700 bg-dark-850 p-5">
+        <summary class="cursor-pointer font-semibold text-white">What you can see, and what the verifier can see</summary>
+        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div>
+            <h3 class="text-xs font-mono text-slate-400 mb-2">YOU</h3>
+            <pre id="owner-json" class="text-xs text-slate-300 whitespace-pre-wrap break-words"></pre>
+          </div>
+          <div>
+            <h3 class="text-xs font-mono text-slate-400 mb-2">THE VERIFIER AND THE RECEIPT</h3>
+            <pre id="verifier-json" class="text-xs text-slate-300 whitespace-pre-wrap break-words"></pre>
+            <p class="mt-2 text-xs text-slate-400">The policy is named and fingerprinted. Your wording is not in it.</p>
+          </div>
         </div>
-        <div class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
-          <h3 class="text-sm font-mono text-slate-400 mb-2">WHAT THE VERIFIER AND RECEIPT CAN SEE</h3>
-          <pre id="verifier-json" class="text-xs text-slate-300 whitespace-pre-wrap break-words"></pre>
-          <p class="mt-2 text-xs text-slate-400">The policy is named and fingerprinted. Your wording is not in it.</p>
-        </div>
-      </div>
+      </details>
     </section>
 
-    <section id="how" class="max-w-6xl mx-auto px-4 py-10 scroll-mt-20" aria-labelledby="how-h">
+    <section id="how" class="max-w-6xl mx-auto px-4 py-8 scroll-mt-20" aria-labelledby="how-h">
       <h2 id="how-h" class="text-xl font-bold text-white mb-5">How it works</h2>
-      <div class="grid md:grid-cols-3 gap-5">
-        <div class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
+      <ol class="grid md:grid-cols-3 gap-5">
+        <li class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
           <p class="text-xs font-mono text-accent-cyan">1. YOU SET THE RULE</p>
           <p class="mt-2 text-slate-300">A rule names the agent, the tool, the resource and what must be true first. It expires, you can edit it, and revoking it blocks the next attempt.</p>
-        </div>
-        <div class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
+        </li>
+        <li class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
           <p class="text-xs font-mono text-accent-cyan">2. OTHER SYSTEMS PROVE IT</p>
-          <p class="mt-2 text-slate-300">The backup system signs "backup validated". The owner signs an approval for one exact action. The agent cannot sign either, and saying it did changes nothing.</p>
-        </div>
-        <div class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
+          <p class="mt-2 text-slate-300">The backup system signs "backup validated". You sign an approval for one exact action. The agent cannot sign either, and saying it did changes nothing.</p>
+        </li>
+        <li class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
           <p class="text-xs font-mono text-accent-cyan">3. THE EXECUTOR CHECKS</p>
           <p class="mt-2 text-slate-300">On ALLOW, Joltrin signs a receipt for that action and policy. The system holding the credentials runs the action only with a valid, unused receipt.</p>
-        </div>
-      </div>
-      <div class="mt-5 rounded-2xl border border-amber-400/30 bg-amber-400/5 p-5 text-sm text-slate-300">
-        <p class="font-semibold text-amber-300">What this does not do</p>
-        <p class="mt-1">It cannot stop an agent that has its own route to the target system. It only protects actions that run through the executor's check. A receipt shows a decision was made. It does not show the action ran. Preferences are sealed on disk and kept out of decisions and receipts, but the owner's machine and the engine still see them, so this is data minimization and not a zero-knowledge system.</p>
-      </div>
+        </li>
+      </ol>
 
-      <details class="mt-6 rounded-2xl border border-dark-700 bg-dark-850 p-5" id="dev">
+      <details class="mt-5 rounded-2xl border border-amber-400/30 bg-amber-400/5 p-5 text-sm text-slate-300">
+        <summary class="cursor-pointer font-semibold text-amber-300">What this does not do</summary>
+        <p class="mt-2">It cannot stop an agent that has its own route to the target system. It only protects actions that run through the executor's check. A receipt shows a decision was made. It does not show the action ran. Preferences are sealed on disk and kept out of decisions and receipts, but the owner's machine and the engine still see them, so this is data minimization and not a zero-knowledge system.</p>
+      </details>
+
+      <details class="mt-5 rounded-2xl border border-dark-700 bg-dark-850 p-5" id="dev">
         <summary class="cursor-pointer font-semibold text-white">Developer view</summary>
         <div class="mt-4 space-y-4">
           <p class="text-sm text-slate-300">This page runs the same Go package you can import. Try to cheat the executor:</p>
@@ -177,25 +197,25 @@ go run ./examples/private_intent approve ./pi orders</pre>
       </details>
     </section>
 
-    <section id="pro" class="max-w-6xl mx-auto px-4 py-10 scroll-mt-20" aria-labelledby="pro-h">
-      <h2 id="pro-h" class="text-xl font-bold text-white mb-2">One person's rules are not a team's rules</h2>
-      <p class="text-slate-300 max-w-3xl">The rule above lives with one owner on one machine. When a platform team needs the same rule enforced for every agent and every engineer, with approvals from the right people and a record the team can audit, that is the team layer.</p>
+    <section id="pro" class="max-w-6xl mx-auto px-4 py-8 scroll-mt-20" aria-labelledby="pro-h">
+      <h2 id="pro-h" class="text-xl font-bold text-white mb-2">For teams</h2>
+      <p class="text-slate-300 max-w-3xl">The rule above lives with one owner on one machine. A platform team needs the same rule enforced for every agent and every engineer, with approvals from the right people and a record it can audit.</p>
       <div class="mt-5 grid md:grid-cols-3 gap-5">
         <div class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
           <p class="font-semibold text-white">Free, MIT</p>
           <p class="text-xs font-mono text-brand-300 mt-1">AVAILABLE NOW</p>
-          <p class="mt-3 text-sm text-slate-300">The engine, the vault, signed evidence and approvals, receipts, the executor check, the MCP example and this demo. A single owner and local files.</p>
+          <p class="mt-3 text-sm text-slate-300">The engine, signed evidence and approvals, receipts, the executor check, the MCP example and this demo, for one owner with local files.</p>
         </div>
         <div class="rounded-2xl border border-brand-500/40 bg-dark-850 p-5">
           <p class="font-semibold text-white">Pro, $49/month per team</p>
           <p class="text-xs font-mono text-amber-300 mt-1">DESIGN PARTNERS, NOT SELF-SERVE YET</p>
-          <p class="mt-3 text-sm text-slate-300">Planned: shared team rules, approval routing, revocable agent grants, policy history, signed evidence exports and a team view. Delivery today is manual and set up with you.</p>
+          <p class="mt-3 text-sm text-slate-300">Planned: shared team rules, approval routing, revocable agent grants, policy history and signed evidence exports. Set up with you by hand today.</p>
           <a href="../#pricing" onclick="track('pro_click'); track('intent_pro_click')" class="mt-4 inline-block px-4 py-2 rounded-lg bg-brand-500 text-black font-semibold hover:bg-brand-400 transition">Request team enforcement</a>
         </div>
         <div class="rounded-2xl border border-dark-700 bg-dark-850 p-5">
           <p class="font-semibold text-white">Enterprise</p>
           <p class="text-xs font-mono text-slate-400 mt-1">NOT BUILT</p>
-          <p class="mt-3 text-sm text-slate-300">Planned: identity provider sign-in, key management service integration, retention policies and compliance exports. <a class="text-brand-300 underline" href="../#pricing">Talk to us</a> if this is your blocker.</p>
+          <p class="mt-3 text-sm text-slate-300">Planned: identity provider sign-in, key management integration, retention policies and compliance exports. <a class="text-brand-300 underline" href="../#pricing">Talk to us</a> if this is your blocker.</p>
         </div>
       </div>
     </section>
@@ -206,6 +226,7 @@ go run ./examples/private_intent approve ./pi orders</pre>
       <span>Joltrin core is MIT licensed.</span>
       <ul class="flex gap-4">
         <li><a class="hover:text-slate-200" href="../">Home</a></li>
+        <li><a class="hover:text-slate-200" href="../agents/">Agents</a></li>
         <li><a class="hover:text-slate-200" href="../docs/">Docs</a></li>
         <li><a class="hover:text-slate-200" href="https://github.com/SharedCode/joltrin" onclick="track('github_click')">GitHub</a></li>
       </ul>
@@ -222,7 +243,6 @@ go run ./examples/private_intent approve ./pi orders</pre>
         ALLOW: ['border-brand-500/60 bg-brand-500/10', 'text-brand-300', 'ALLOW']
       };
       var kindClass = { ok: 'text-brand-300', block: 'text-rose-300', ask: 'text-amber-300', info: 'text-slate-300' };
-      var lastDecisionVerdict = null;
 
       function esc(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
       function mark(el, on) {
@@ -242,6 +262,16 @@ go run ./examples/private_intent approve ./pi orders</pre>
         $('verifier-json').textContent = JSON.stringify(s.verifier_view, null, 2);
         $('decision-json').textContent = JSON.stringify(s.decision, null, 2);
         if (s.receipt) $('receipt-json').textContent = JSON.stringify(s.receipt, null, 2);
+
+        var lastV = s.log.filter(function (l) { return l.verdict; }).pop();
+        var verdict = lastV ? lastV.verdict : null;
+        var nx = !verdict ? ['b-attempt', 'Start here: the agent asks to delete the database.']
+          : !s.has_backup ? ['b-backup', 'Blocked, as expected. Next the backup system proves a backup exists.']
+          : (!s.has_approval && verdict !== 'REQUIRE_APPROVAL') ? ['b-attempt', verdict === 'ALLOW' ? 'Allowed once. The approval was single use, so ask again to see it refused.' : 'Ask again. The backup is now on record.']
+          : !s.has_approval ? ['b-approve', 'It now needs your approval for this exact delete.']
+          : ['b-attempt', 'Approved. Ask once more.'];
+        ['b-attempt', 'b-backup', 'b-approve'].forEach(function (id) { $(id).classList.toggle('is-next', id === nx[0] && !$(id).disabled); });
+        $('next-hint').textContent = nx[1];
 
         var logEl = $('log');
         var shown = logEl.children.length;
@@ -285,7 +315,7 @@ go run ./examples/private_intent approve ./pi orders</pre>
           $('banner').className = 'banner rounded-2xl border border-dark-700 bg-dark-850 p-5 mb-5';
           $('banner-title').className = 'font-mono text-sm text-slate-400';
           $('banner-title').textContent = 'READY';
-          $('banner-text').textContent = 'Press the first button to send the agent’s request.';
+          $('banner-text').textContent = 'Press step 1 to send the agent’s request.';
           render(window.joltrinIntentReset());
         });
         $('banner-title').textContent = 'READY';
@@ -306,6 +336,7 @@ go run ./examples/private_intent approve ./pi orders</pre>
       }).catch(function (e) {
         $('banner-title').textContent = 'COULD NOT LOAD';
         $('banner-text').textContent = 'The engine did not load in this browser. The Developer view below shows how to run the same code locally.';
+        $('next-hint').textContent = '';
         console.error(e);
       });
     })();
