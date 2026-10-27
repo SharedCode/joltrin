@@ -119,30 +119,44 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
-      # The OS package mirror sometimes stops answering and this step then sits for the rest of the job.
-      # Each attempt is cut off after four minutes and tried again, so a stall costs minutes, not a run.
+      # The Azure package mirror sometimes stops sending one file, and apt then waits for minutes.
+      # Install system packages only for the browser this job uses (a fraction of the download), cut each
+      # attempt off after four minutes, and move to the main Ubuntu archive from the second attempt on.
       - name: Install Playwright Browsers & OS Dependencies
-        timeout-minutes: 15
+        timeout-minutes: 20
+        env:
+          PROJECT: ${{ matrix.project }}
+          CACHE_HIT: ${{ steps.playwright-cache.outputs.cache-hit }}
         run: |
-          if [ "${{ steps.playwright-cache.outputs.cache-hit }}" != "true" ]; then
-            install="npx playwright install --with-deps"
-          else
-            install="npx playwright install-deps"
-          fi
-          # A stalled package download otherwise waits forever. Give each connection 20 seconds and let apt
-          # retry the file itself, so a hung mirror connection is dropped in seconds instead of minutes.
+          case "$PROJECT" in
+            firefox) engine=firefox ;;
+            webkit|mobile-safari) engine=webkit ;;
+            *) engine=chromium ;;
+          esac
+          sudo cp /etc/apt/apt-mirrors.txt /etc/apt/apt-mirrors.txt.orig || true
           printf 'Acquire::Retries "5";\nAcquire::http::Timeout "20";\nAcquire::https::Timeout "20";\n' | sudo tee /etc/apt/apt.conf.d/99ci-retries >/dev/null
           for attempt in 1 2 3; do
-            if timeout 240 $install; then exit 0; fi
+            if [ "$attempt" -ge 2 ]; then
+              # Attempt 2 uses the main archive. Attempt 3 goes back to the runner's own mirror list, so a
+              # bad fallback can never be the only thing left. apt wants a tab before the priority.
+              if [ "$attempt" -eq 2 ]; then
+                printf 'http://archive.ubuntu.com/ubuntu/\tpriority:1\n' | sudo tee /etc/apt/apt-mirrors.txt >/dev/null
+              else
+                sudo cp /etc/apt/apt-mirrors.txt.orig /etc/apt/apt-mirrors.txt || true
+              fi
+              sudo pkill -9 -x apt-get || true
+              sudo pkill -9 -x apt || true
+              sudo pkill -9 -x dpkg || true
+              sudo rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/lib/apt/lists/lock /var/cache/apt/archives/lock
+              sudo dpkg --configure -a || true
+              sleep 5
+            fi
+            # install-deps adds system packages only. Plain "playwright install" downloads browser binaries
+            # only (system packages need --with-deps), so the two steps do not repeat each other.
+            if timeout 240 npx playwright install-deps "$engine" && { [ "$CACHE_HIT" = "true" ] || timeout 300 npx playwright install; }; then
+              exit 0
+            fi
             echo "Install attempt $attempt failed or timed out."
-            # Killing the timed out attempt leaves its apt-get running and holding the dpkg lock,
-            # which would fail every later attempt. Stop it and put dpkg back in a clean state.
-            sudo pkill -9 -x apt-get || true
-            sudo pkill -9 -x apt || true
-            sudo pkill -9 -x dpkg || true
-            sudo rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/lib/apt/lists/lock /var/cache/apt/archives/lock
-            sudo dpkg --configure -a || true
-            sleep 10
           done
           exit 1
 
