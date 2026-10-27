@@ -158,14 +158,20 @@ test.describe('Private Intent walkthrough', () => {
   });
 
   test('it plays itself when in view, and can be paused', async ({ page }) => {
-    await page.clock.install();
+    // The clock is paused after load, so autoplay only moves when this test moves time. A clock left running would
+    // keep ticking while the test waits on a slow machine, and the walkthrough would move on by itself.
+    await page.clock.install({ time: 0 });
     await page.goto('/private-intent/', { waitUntil: 'domcontentloaded' });
+    await page.clock.pauseAt(60_000);
     await page.evaluate(() => document.getElementById('how-stage')!.scrollIntoView({ block: 'center' }));
     await expect(page.locator('#how-stage')).toHaveClass(/playing/);
     await page.mouse.move(0, 0);
     await page.clock.runFor(7100);
     await expect(page.locator('#how-stage')).toHaveAttribute('data-step', '2');
-    await page.locator('#how-toggle').click();
+    // This test is about what Pause does. The fake clock hides the section's reveal transition from Playwright's own
+    // check that an element has stopped moving, so a real pointer click can land a few pixels off. Click the element
+    // itself instead. Real pointer clicks on this button are covered by the other walkthrough tests.
+    await page.locator('#how-toggle').evaluate((el) => (el as HTMLElement).click());
     await expect(page.locator('#how-toggle')).toHaveText('Play');
     await page.clock.runFor(15000);
     await expect(page.locator('#how-stage')).toHaveAttribute('data-step', '2');
