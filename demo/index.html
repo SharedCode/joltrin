@@ -36,9 +36,13 @@
   <link rel="stylesheet" href="./tailwind.css" />
 
   <!-- Google Fonts & Lucide Icons -->
+  <script>
+    // Set before first paint so the scroll story is laid out once. Adding it at the end of the page rewraps the story text and shifts the layout.
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('js-story');
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=optional" rel="stylesheet">
   <script>window.lucide = { createIcons: function () {} };</script>
   <script src="https://unpkg.com/lucide@1.52.0/dist/umd/lucide.min.js" integrity="sha384-SSRIJfpvnhji4rCcULgpNXRJjQ9P/odU9OaWxSumsZiokvJ7zAu4PGQVWyWxTG3u" crossorigin="anonymous" defer></script>
 
@@ -306,10 +310,14 @@
       .glow-cyan { box-shadow: 0 10px 35px -10px rgba(6, 182, 212, 0.28); }
       header.sticky, section.rounded-2xl { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 30px -14px rgba(0, 0, 0, 0.12); }
     }
+    /* Local fallbacks sized to match Inter and JetBrains Mono. With display=optional the page never reflows when the web fonts arrive. */
+    @font-face { font-family: 'Inter Fallback'; src: local('Arial'); font-weight: 100 599; size-adjust: 107.12%; ascent-override: 90.49%; descent-override: 22.56%; line-gap-override: 0%; }
+    @font-face { font-family: 'Inter Fallback'; src: local('Arial Bold'), local('Arial-BoldMT'); font-weight: 600 900; size-adjust: 105%; ascent-override: 92%; descent-override: 23%; line-gap-override: 0%; }
+    @font-face { font-family: 'JetBrains Fallback'; src: local('Courier New'); size-adjust: 100%; ascent-override: 102%; descent-override: 30%; line-gap-override: 0%; }
     body {
       background-color: rgb(var(--c-dark-950));
       color: rgb(var(--c-slate-200));
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', 'Inter Fallback', sans-serif;
     }
     .bg-grid {
       background-size: 32px 32px;
@@ -376,7 +384,7 @@
     .story-words, .story-end h2 { font-weight: 700; letter-spacing: -0.035em; line-height: 1.06; font-size: clamp(2rem, 6.2vw, 4.75rem); }
     .story-intro { min-height: 100svh; display: flex; align-items: center; justify-content: center; padding: 6rem 1.5rem; }
     .story-intro p { max-width: 58rem; margin: 0; }
-    .story-eyebrow { font: 500 0.75rem/1 'JetBrains Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: rgb(var(--c-slate-400)); margin: 0 0 1.5rem; }
+    .story-eyebrow { font: 500 0.75rem/1 'JetBrains Mono', 'JetBrains Fallback', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: rgb(var(--c-slate-400)); margin: 0 0 1.5rem; }
     .story-words .w { color: rgb(var(--c-fg)); transition: color 0.25s linear; }
     .story-pin { position: relative; }
     .story-stage { min-height: 100svh; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2.5rem; align-items: center; align-content: center; max-width: 72rem; margin: 0 auto; padding: 5rem 1.5rem; }
@@ -386,7 +394,7 @@
     .story-verdict .v-block { color: #f43f5e; }
     .story-verdict .v-allow { color: #10b981; }
     .story-note { color: rgb(var(--c-slate-300)); font-size: clamp(1rem, 1.6vw, 1.25rem); max-width: 30rem; margin: 0; min-height: 4.8em; }
-    .story-card { border: 1px solid rgb(var(--c-dark-700)); background: rgb(var(--c-dark-900)); border-radius: 1.25rem; padding: 1.25rem 1.25rem 1rem; font-family: 'JetBrains Mono', monospace; font-size: clamp(0.78rem, 1.5vw, 0.95rem); box-shadow: 0 30px 80px -30px rgba(16, 185, 129, 0.25); }
+    .story-card { border: 1px solid rgb(var(--c-dark-700)); background: rgb(var(--c-dark-900)); border-radius: 1.25rem; padding: 1.25rem 1.25rem 1rem; font-family: 'JetBrains Mono', 'JetBrains Fallback', monospace; font-size: clamp(0.78rem, 1.5vw, 0.95rem); box-shadow: 0 30px 80px -30px rgba(16, 185, 129, 0.25); }
     .story-card .hd { color: rgb(var(--c-slate-500)); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 0.9rem; }
     .story-row { display: flex; justify-content: space-between; gap: 1rem; padding: 0.7rem 0; border-top: 1px solid rgb(var(--c-dark-800)); color: rgb(var(--c-slate-300)); }
     .story-row:first-of-type { border-top: 0; }
@@ -408,7 +416,7 @@
     .js-story .story-pin { height: 420vh; }
     .js-story .story-stage { position: sticky; top: 0; height: 100svh; min-height: 0; padding-top: 5.5rem; padding-bottom: 2rem; }
     .story-hint { display: none; }
-    .js-story .story-hint { display: flex; align-items: center; gap: 0.5rem; margin: 2rem 0 0; font: 500 0.8rem/1 'JetBrains Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(var(--c-slate-400)); transition: opacity 0.4s; }
+    .js-story .story-hint { display: flex; align-items: center; gap: 0.5rem; margin: 2rem 0 0; font: 500 0.8rem/1 'JetBrains Mono', 'JetBrains Fallback', monospace; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(var(--c-slate-400)); transition: opacity 0.4s; }
     .js-story .story-hint.gone { opacity: 0; pointer-events: none; }
     .story-hint span { display: inline-block; animation: story-nudge 1.6s ease-in-out infinite; }
     @keyframes story-nudge { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(0, 5px, 0); } }
@@ -423,7 +431,7 @@
     .story-note span { display: inline; }
     .story-verdict span.v-final { }
     @media (prefers-color-scheme: light) { .story-row .no { color: #be123c; } .story-row .ok { color: #047857; } .story-cta .primary { color: #fff; background: #047857; } .story-card { box-shadow: 0 30px 80px -34px rgba(0, 0, 0, 0.25); } }
-    .sound-toggle { position: fixed; left: 16px; bottom: 16px; z-index: 40; padding: 0.45rem 0.85rem; border-radius: 999px; border: 1px solid rgb(var(--c-dark-700)); background: rgb(var(--c-dark-900) / 0.85); backdrop-filter: blur(8px); color: rgb(var(--c-slate-300)); font: 600 0.72rem 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
+    .sound-toggle { position: fixed; left: 16px; bottom: 16px; z-index: 40; padding: 0.45rem 0.85rem; border-radius: 999px; border: 1px solid rgb(var(--c-dark-700)); background: rgb(var(--c-dark-900) / 0.85); backdrop-filter: blur(8px); color: rgb(var(--c-slate-300)); font: 600 0.72rem 'JetBrains Mono', 'JetBrains Fallback', monospace; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
     .sound-toggle:hover, .sound-toggle:focus-visible { color: rgb(var(--c-fg)); border-color: rgb(var(--c-slate-500)); }
     .sound-toggle[aria-pressed="true"] { color: #10b981; border-color: #10b981; }
     @media (prefers-reduced-motion: reduce) { .story-row, .story-verdict span, .story-words .w { transition: none !important; } }
@@ -2981,26 +2989,43 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'sound-toggle';
-      btn.setAttribute('aria-pressed', 'true');
+      // "on" is what the visitor wants. The label only says "Sound on" once the browser has actually let audio run.
+      function live() { return !!(on && ctx && ctx.state === 'running'); }
       function paint() {
-        btn.setAttribute('aria-pressed', String(on));
-        btn.textContent = on ? 'Sound on' : 'Sound off';
+        btn.setAttribute('aria-pressed', String(live()));
+        btn.textContent = !on ? 'Sound off' : live() ? 'Sound on' : 'Tap for sound';
       }
       function audio() {
-        if (!ctx) ctx = new AC();
+        if (!ctx) {
+          ctx = new AC();
+          ctx.addEventListener('statechange', paint);
+        }
         // resume() rejects when the page is already navigating away, which is not an error worth reporting.
-        if (ctx.state === 'suspended') ctx.resume().catch(function () {});
+        if (ctx.state !== 'running') ctx.resume().then(paint, function () {});
         return ctx;
       }
       // A suspended context queues sounds and then plays them all at once, so skip them until the browser allows audio.
       function ready() {
         return on && audio().state === 'running';
       }
-      ['pointerdown', 'click', 'keydown', 'touchend'].forEach(function (ev) {
-        window.addEventListener(ev, function () { if (on) audio(); }, { passive: true });
+      // Mouse, touch and keyboard presses all unlock audio. Capture phase, so the toggle's stopPropagation cannot hide them.
+      // livePress remembers whether sound was already playing when this press began, because the unlock below can finish before click fires.
+      var livePress = null;
+      ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) {
+        window.addEventListener(ev, function () { livePress = live(); }, { passive: true, capture: true });
+      });
+      ['pointerdown', 'pointerup', 'click', 'keydown', 'touchend'].forEach(function (ev) {
+        window.addEventListener(ev, function () { if (on) audio(); }, { passive: true, capture: true });
       });
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
+        var wasLive = livePress === null ? live() : livePress;
+        livePress = null;
+        // The press that first unlocks audio only unlocks it. It must not flip the sound off.
+        if (on && !wasLive) {
+          audio().resume().then(function () { paint(); tone(660, 0.09, 'sine', 0.05, 990); }, function () {});
+          return;
+        }
         on = !on;
         paint();
         if (on) tone(660, 0.09, 'sine', 0.05, 990);
