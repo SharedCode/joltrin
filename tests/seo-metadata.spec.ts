@@ -49,3 +49,19 @@ test.describe('Search and link-preview metadata', () => {
     });
   }
 });
+
+test.describe('Page weight', () => {
+  for (const path of PAGES) {
+    test(`${path} does not ship an oversized header logo`, async ({ page, request }) => {
+      await page.goto(path, { waitUntil: 'domcontentloaded' });
+      const logo = page.locator('header img[src$="logo-mark.png"], nav img[src$="logo-mark.png"]').first();
+      if ((await logo.count()) === 0) test.skip(true, 'this page has no header logo');
+      const src = new URL((await logo.getAttribute('src')) ?? '', page.url()).pathname;
+      const res = await request.get(src);
+      expect(res.status()).toBe(200);
+      // The logo is drawn at 24 to 36 pixels, so a 72 pixel image is enough for a sharp 2x screen.
+      expect((await res.body()).length, `${src} is a small image`).toBeLessThan(20_000);
+    });
+  }
+});
+
