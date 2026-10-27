@@ -316,3 +316,32 @@ test.describe('Fingerprint lab', () => {
   });
 });
 
+test.describe('Deep links and the command palette', () => {
+  for (const id of ['receipt-check', 'fingerprint-lab', 'dev']) {
+    test(`/private-intent/#${id} opens that section`, async ({ page }) => {
+      await page.goto(`/private-intent/#${id}`, { waitUntil: 'domcontentloaded' });
+      await expect(page.locator(`#${id}`)).toHaveAttribute('open', '');
+      await expect(page.locator(`#${id} summary`)).toBeInViewport();
+    });
+  }
+
+  test('a hash change on the page opens the section too', async ({ page }) => {
+    await page.goto('/private-intent/', { waitUntil: 'domcontentloaded' });
+    await page.evaluate(() => { location.hash = '#receipt-check'; });
+    await expect(page.locator('#receipt-check')).toHaveAttribute('open', '');
+  });
+
+  test('the homepage palette finds Private Intent and its tools', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'the palette trigger is desktop-only');
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.getByRole('button', { name: /open command palette/i }).click();
+    await page.locator('#cmdk-input').fill('private intent');
+    await expect(page.locator('#cmdk-list')).toContainText('check a signed receipt');
+    await expect(page.locator('#cmdk-list')).toContainText('edit a rule');
+    await page.locator('#cmdk-input').fill('receipt');
+    await page.locator('#cmdk-input').press('Enter');
+    await expect(page).toHaveURL(/\/private-intent\/#receipt-check$/);
+    await expect(page.locator('#receipt-check')).toHaveAttribute('open', '');
+  });
+});
+

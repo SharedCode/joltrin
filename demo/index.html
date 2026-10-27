@@ -158,6 +158,9 @@
     }
 
     const CMDK_COMMANDS = [
+      { label: 'Private Intent', hint: 'go to', action: () => location.href = './private-intent/' },
+      { label: 'Private Intent: edit a rule, see the fingerprint', hint: 'go to', action: () => location.href = './private-intent/#fingerprint-lab' },
+      { label: 'Private Intent: check a signed receipt', hint: 'go to', action: () => location.href = './private-intent/#receipt-check' },
       { label: 'Verification Barrier', hint: 'section', action: () => location.hash = '#verification-barrier' },
       { label: 'Durable Memory', hint: 'section', action: () => location.hash = '#durable-memory' },
       { label: 'Under the Hood', hint: 'section', action: () => location.hash = '#under-the-hood' },
