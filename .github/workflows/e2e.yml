@@ -133,10 +133,17 @@ jobs:
             webkit|mobile-safari) engine=webkit ;;
             *) engine=chromium ;;
           esac
+          sudo cp /etc/apt/apt-mirrors.txt /etc/apt/apt-mirrors.txt.orig || true
           printf 'Acquire::Retries "5";\nAcquire::http::Timeout "20";\nAcquire::https::Timeout "20";\n' | sudo tee /etc/apt/apt.conf.d/99ci-retries >/dev/null
           for attempt in 1 2 3; do
             if [ "$attempt" -ge 2 ]; then
-              echo "http://archive.ubuntu.com/ubuntu/ priority:1" | sudo tee /etc/apt/apt-mirrors.txt >/dev/null
+              # Attempt 2 uses the main archive. Attempt 3 goes back to the runner's own mirror list, so a
+              # bad fallback can never be the only thing left. apt wants a tab before the priority.
+              if [ "$attempt" -eq 2 ]; then
+                printf 'http://archive.ubuntu.com/ubuntu/\tpriority:1\n' | sudo tee /etc/apt/apt-mirrors.txt >/dev/null
+              else
+                sudo cp /etc/apt/apt-mirrors.txt.orig /etc/apt/apt-mirrors.txt || true
+              fi
               sudo pkill -9 -x apt-get || true
               sudo pkill -9 -x apt || true
               sudo pkill -9 -x dpkg || true
@@ -144,6 +151,8 @@ jobs:
               sudo dpkg --configure -a || true
               sleep 5
             fi
+            # install-deps adds system packages only. Plain "playwright install" downloads browser binaries
+            # only (system packages need --with-deps), so the two steps do not repeat each other.
             if timeout 240 npx playwright install-deps "$engine" && { [ "$CACHE_HIT" = "true" ] || timeout 300 npx playwright install; }; then
               exit 0
             fi
