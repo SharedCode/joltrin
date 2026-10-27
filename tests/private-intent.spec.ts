@@ -345,3 +345,47 @@ test.describe('Deep links and the command palette', () => {
   });
 });
 
+test.describe('Try to cheat it', () => {
+  async function ready(page: import('@playwright/test').Page) {
+    await page.goto('/private-intent/', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#b-attempt')).toBeEnabled({ timeout: 30_000 });
+  }
+
+  test('an agent cannot vouch for its own backup, and the delete stays blocked', async ({ page }) => {
+    await ready(page);
+    await page.locator('#b-cheat-claim').click();
+    await expect(page.locator('#log')).toContainText('signs "backup validated" with its own key');
+    await expect(page.locator('#log')).toContainText('refused');
+    await expect(page.locator('#chk-backup-t')).toHaveText('(missing)');
+    await page.locator('#b-attempt').click();
+    await expect(page.locator('#banner-title')).toHaveText('BLOCK');
+  });
+
+  test('an agent cannot approve its own delete', async ({ page }) => {
+    await ready(page);
+    await page.locator('#b-backup').click();
+    await page.locator('#b-cheat-approve').click();
+    await expect(page.locator('#log')).toContainText('approves its own delete');
+    await expect(page.locator('#log')).toContainText('refused');
+    await expect(page.locator('#chk-approval-t')).toHaveText('(missing)');
+    await page.locator('#b-attempt').click();
+    await expect(page.locator('#banner-title')).toHaveText('REQUIRE APPROVAL');
+  });
+
+  test('an approval for one database does not cover another', async ({ page }) => {
+    await ready(page);
+    await page.locator('#b-cheat-other').click();
+    await expect(page.locator('#log')).toContainText('Press step 3 first');
+    await page.locator('#b-backup').click();
+    await page.locator('#b-approve').click();
+    await page.locator('#b-cheat-other').click();
+    await expect(page.locator('#log')).toContainText('prod/users');
+    // The approval and the backup proof both name prod/orders, so the other database gets neither.
+    await expect(page.locator('#banner-title')).not.toHaveText('ALLOW');
+    await expect(page.locator('#banner-title')).toHaveText('BLOCK');
+    // The real delete of orders is still allowed with the approval it was given for.
+    await page.locator('#b-attempt').click();
+    await expect(page.locator('#banner-title')).toHaveText('ALLOW');
+  });
+});
+

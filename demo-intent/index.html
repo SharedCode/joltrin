@@ -208,6 +208,15 @@
           </div>
         </div>
 
+        <div class="mt-6 text-center">
+          <p class="text-xs text-slate-500">NOW TRY TO CHEAT</p>
+          <div class="mt-2 flex flex-wrap justify-center gap-2">
+            <button id="b-cheat-claim" type="button" class="px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 text-sm text-slate-100 transition disabled:opacity-45" disabled>Agent signs its own backup proof</button>
+            <button id="b-cheat-approve" type="button" class="px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 text-sm text-slate-100 transition disabled:opacity-45" disabled>Agent approves itself</button>
+            <button id="b-cheat-other" type="button" class="px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 text-sm text-slate-100 transition disabled:opacity-45" disabled>Reuse my approval on another database</button>
+          </div>
+        </div>
+
         <div class="mt-8 rounded-3xl bg-[#0b0b0f] p-5 min-h-[9rem]">
           <h3 class="text-xs text-slate-500 mb-3">WHAT HAPPENED</h3>
           <ol id="log" class="space-y-2 text-sm font-mono" aria-live="polite"></ol>
@@ -492,7 +501,7 @@ go run ./examples/private_intent approve ./pi orders</pre>
   </script>
   <script>
     (function () {
-      var ids = ['b-attempt', 'b-backup', 'b-approve', 'b-revoke', 'b-reset', 'b-tamper', 'b-replay', 'rc-load', 'rc-check', 'rc-flip'];
+      var ids = ['b-attempt', 'b-backup', 'b-approve', 'b-revoke', 'b-reset', 'b-tamper', 'b-replay', 'rc-load', 'rc-check', 'rc-flip', 'b-cheat-claim', 'b-cheat-approve', 'b-cheat-other'];
       var $ = function (id) { return document.getElementById(id); };
       var tone = {
         BLOCK: ['bg-accent-rose/10', 'text-rose-300', 'BLOCK'],
@@ -640,6 +649,9 @@ go run ./examples/private_intent approve ./pi orders</pre>
         wire('b-revoke', 'joltrinIntentRevoke', 'intent_revoke');
         wire('b-tamper', 'joltrinIntentTamper');
         wire('b-replay', 'joltrinIntentReplay');
+        wire('b-cheat-claim', 'joltrinIntentCheatClaim', 'intent_cheat_claim');
+        wire('b-cheat-approve', 'joltrinIntentCheatApprove', 'intent_cheat_approve');
+        wire('b-cheat-other', 'joltrinIntentCheatOther', 'intent_cheat_other');
         $('b-reset').addEventListener('click', function () {
           $('log').innerHTML = '';
           $('receipt-json').textContent = 'None yet. Get an ALLOW first.';
