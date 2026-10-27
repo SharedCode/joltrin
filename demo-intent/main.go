@@ -136,7 +136,7 @@ func fingerprint(pref string, backup, approval, second bool) string {
 	}
 	sess, err := newSessionFor(pref, reqs)
 	if err != nil {
-		return out(result{Error: "That rule could not be built: " + err.Error()})
+		return out(result{Error: "That rule could not be built. Try different wording."})
 	}
 	return out(result{Digest: sess.eng.Evaluate(sess.action).PolicyDigest})
 }
