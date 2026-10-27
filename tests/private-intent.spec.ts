@@ -519,6 +519,21 @@ test.describe('Touch targets on the homepage', () => {
     expect(small, small.join(', ')).toEqual([]);
   });
 
+  test('the Copy button is a full size target that stays inside its code box', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await settled(page);
+    const copy = page.locator('#quickstart-copy');
+    await copy.scrollIntoViewIfNeeded();
+    const size = await copy.evaluate((e) => [(e as HTMLElement).offsetWidth, (e as HTMLElement).offsetHeight]);
+    expect(size[1], 'the button is at least 44 pixels tall').toBeGreaterThanOrEqual(44);
+    const inside = await page.evaluate(() => {
+      const b = document.getElementById('quickstart-copy')!;
+      const c = document.getElementById('quickstart-cmd')!;
+      return b.offsetTop >= 0 && b.offsetTop + b.offsetHeight <= c.offsetTop + c.offsetHeight + 1;
+    });
+    expect(inside, 'the button ends inside the code box').toBe(true);
+  });
+
   test('bigger targets do not make the homepage scroll sideways', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await settled(page);
