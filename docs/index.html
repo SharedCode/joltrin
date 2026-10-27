@@ -70,6 +70,7 @@
       <nav aria-label="Main">
         <a href="../">Overview</a>
         <a href="../agents/">Agents</a>
+        <a href="../private-intent/">Private Intent</a>
         <a href="../arena/">Arena</a>
         <a href="../btree/">B-tree game</a>
         <span class="current" aria-current="page">Docs</span>
@@ -87,6 +88,7 @@
       <a class="path" href="#local-demo"><b>I build with Go.</b><span>Run the barrier example without cloning the repository.</span><em>Run the local demo</em></a>
       <a class="path" href="#mcp"><b>I run AI agents and want a guardrail.</b><span>One command installs it for the agents on your machine.</span><em>Go to section 5</em></a>
       <a class="path" href="../agents/"><b>Show me before I install anything.</b><span>Try to drop a database in your browser and watch the barrier refuse.</span><em>Open the live demo</em></a>
+      <a class="path" href="#private-intent"><b>I want agents to follow my rules.</b><span>Your own rules, signed approvals and a receipt for each allowed action.</span><em>Go to section 9</em></a>
       <a class="path" href="#kubernetes"><b>I run Kubernetes.</b><span>The same check can sit in front of kubectl as an admission webhook.</span><em>Go to section 7</em></a>
       <a class="path" href="https://github.com/SharedCode/joltrin/blob/master/docs/WHO_IS_IT_FOR.md" target="_blank" rel="noopener noreferrer"><b>I am deciding if this fits my team.</b><span>Who it is for, and who it is not for.</span><em>Read it on GitHub</em></a>
     </div>
@@ -170,11 +172,24 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request:
     <p><b>Testing without a live model.</b> The Gemma example's tests run against a scripted Ollama server, the real vector store, and the real barrier. The test against gemma3:4b runs only when <code>JOLTRIN_OLLAMA_LIVE=1</code> is set.</p>
     <p>Joltrin does not train models, and it does not ship a model registry or drift monitoring. The examples are in <a href="https://github.com/SharedCode/joltrin/blob/master/examples/README.md" target="_blank" rel="noopener noreferrer">examples/README.md</a>.</p>
 
+    <h2 id="private-intent">9. Private Intent</h2>
+    <p>The barrier answers whether the earlier steps happened. Private Intent answers whether the person who owns the system said this agent may do this, and keeps that person's wording out of what anyone else sees.</p>
+    <p>You write a rule that names the agent, the tool, the resource and what must be true first, such as a validated backup and the owner's approval. Other systems sign the proof: the backup system signs that the backup exists, and a named person signs an approval for one exact action. The agent cannot sign either. When everything is in place the engine signs a receipt for that action and policy, and the system that holds the credentials runs the action only with a valid, unused receipt.</p>
+    <p>You can try each part in the browser, with a real engine compiled to WebAssembly and nothing sent anywhere:</p>
+    <ul>
+      <li><a href="../private-intent/#try">Block, approve and allow a delete</a><span>Then try to cheat it, and share the run as a link.</span></li>
+      <li><a href="../private-intent/#fingerprint-lab">Edit a rule and watch the fingerprint</a><span>Reword it and the fingerprint holds still. Change what is required and it moves.</span></li>
+      <li><a href="../private-intent/#receipt-check">Check a signed receipt</a><span>Change one character and the signature fails.</span></li>
+    </ul>
+    <p>To run it with an MCP agent on your own machine, clone the repository and use the example: <code>go run ./examples/private_intent demo</code> for a scripted run, or <code>init</code>, <code>attest</code> and <code>approve</code> to wire it to your client. The example gives the agent one tool, <code>delete_database</code>, and the delete is simulated.</p>
+    <p>What it does not do: it cannot stop an agent that has its own route to the target system, because it only protects actions that run through the executor's check. A receipt shows that a decision was made, not that the action ran. Your wording is sealed on disk and kept out of decisions and receipts, but your machine and the engine still see it, so this is data minimization and not a zero-knowledge system. Shared team rules and approval routing are planned and set up with design partners. They are not built as a product yet.</p>
+
     <h2>Limits</h2>
     <p>The barrier only answers, so whatever performs the action must wait for it. It cannot see facts the trace does not contain. A backup in another cloud account has to be represented by a step you trust, such as one that checks that account and records the result. The browser demos run the real checks against stub tools. A hosted instance of the Joltrin server, which handles the site's billing requests, runs on Azure Container Apps with a health check and alerts. The barrier itself is not run as a hosted service. No customers or third-party benchmarks are claimed. Hosting the barrier as a remote service is assessed in <a href="https://github.com/SharedCode/joltrin/blob/master/docs/HOSTED_BARRIER_ASSESSMENT.md">the hosting assessment</a> and is not built.</p>
 
     <h2>Reference</h2>
     <ul>
+      <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/PRIVATE_INTENT.md" target="_blank" rel="noopener noreferrer">Private Intent</a><span>Design, threat model and limits.</span></li>
       <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/AGENT_BARRIER_TESTS.md" target="_blank" rel="noopener noreferrer">Barrier test results</a><span>Runs with real agents, what they show, and what they do not.</span></li>
       <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/AGENT_PROTOCOLS.md" target="_blank" rel="noopener noreferrer">Agent protocols</a><span>MCP, A2A, memory, and your own runbooks.</span></li>
       <li><a href="https://github.com/SharedCode/joltrin/blob/master/docs/KUBERNETES_GATE.md" target="_blank" rel="noopener noreferrer">Kubernetes admission gate</a><span>The barrier in front of kubectl delete, with manifests and limits.</span></li>

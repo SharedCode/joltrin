@@ -184,8 +184,8 @@ test.describe('Homepage', () => {
     const hrefs = await page.$$eval('main a[href]', (as) => as.map((a) => (a as HTMLAnchorElement).href));
     expect(hrefs.length).toBeGreaterThanOrEqual(15);
     for (const h of hrefs) {
-      // Documentation opens on GitHub. Exceptions are the official Go installer, the live demo, and sections of this page.
-      expect(h, 'documentation links go to the repository, official Go install guide, live demo, or a section of this page').toMatch(/^(https:\/\/github\.com\/SharedCode\/joltrin[\/#]|https:\/\/go\.dev\/doc\/install$|https?:\/\/[^/]+\/agents\/$|https?:\/\/[^/]+\/docs\/#[a-z0-9-]+$)/);
+      // Documentation opens on GitHub. Exceptions are the official Go installer, the live demos, and sections of this page.
+      expect(h, 'documentation links go to the repository, official Go install guide, a live demo, or a section of this page').toMatch(/^(https:\/\/github\.com\/SharedCode\/joltrin[\/#]|https:\/\/go\.dev\/doc\/install$|https?:\/\/[^/]+\/agents\/$|https?:\/\/[^/]+\/private-intent\/#[a-z-]+$|https?:\/\/[^/]+\/docs\/#[a-z0-9-]+$)/);
     }
     for (const h of ['What it protects against', 'The independent verifier model', 'The blocked-result payload', 'Five-minute local demo', 'MCP integration', 'A2A integration']) {
       await expect(page.getByRole('heading', { level: 2, name: new RegExp(h, 'i') })).toBeVisible();
