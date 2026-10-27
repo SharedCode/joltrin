@@ -91,6 +91,15 @@
     .team-cta { overflow: hidden; max-height: 0; opacity: 0; transition: max-height .5s ease, opacity .5s ease, margin .5s ease; }
     .team-cta.show { max-height: 14rem; opacity: 1; }
     @media (prefers-reduced-motion: reduce) { .pkt, .bounce { animation: none !important; opacity: 1; } }
+    [hidden] { display: none !important; }
+    /* Touch screens get 44 pixel targets. Desktop sizes are unchanged. */
+    @media (pointer: coarse) {
+      main button:not(.how-tab), header nav a, header nav span, footer ul a, #team-cta a { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+      .step-btn { min-height: 44px; }
+      label:has(> input[type="checkbox"]) { min-height: 44px; align-items: center; }
+      input[type="checkbox"] { width: 22px; height: 22px; }
+      summary { min-height: 44px; }
+    }
     footer ul a { display: inline-block; padding-block: .3rem; }
     button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px solid #34d399; outline-offset: 3px; border-radius: 8px; }
   </style>
