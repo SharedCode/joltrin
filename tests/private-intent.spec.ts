@@ -460,6 +460,8 @@ test.describe('Private Intent in the docs', () => {
     expect(text).toContain('not a zero-knowledge system');
     expect(text).toContain('not that the action ran');
     expect(text).toContain('planned and set up with design partners');
+  });
+});
 
 test.describe('Touch targets', () => {
   test.use({ hasTouch: true, isMobile: true, viewport: { width: 375, height: 800 } });
