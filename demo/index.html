@@ -480,35 +480,35 @@
         </div>
       </div>
 
-      <!-- Funnel Navigation Links -->
-      <nav class="hidden lg:flex items-center space-x-1 text-xs font-mono">
-        <a href="#verification-barrier" class="px-2.5 py-1 rounded-lg hover:bg-dark-800 text-slate-300 hover:text-brand-400 transition flex items-center space-x-1">
-          <span>Barrier</span>
+      <!-- Primary navigation: the flagship pages first, the section anchors under More. -->
+      <nav class="hidden xl:flex items-center space-x-1 text-xs font-mono" aria-label="Main">
+        <a href="./private-intent/" class="px-2.5 py-1 rounded-lg bg-accent-cyan/10 hover:bg-accent-cyan/20 text-accent-cyan border border-accent-cyan/30 transition flex items-center space-x-1">
+          <span>Private Intent</span>
         </a>
-        <a href="#durable-memory" class="px-2.5 py-1 rounded-lg hover:bg-dark-800 text-slate-300 hover:text-brand-400 transition flex items-center space-x-1">
-          <span>Memory</span>
-        </a>
-        <a href="#under-the-hood" class="px-2.5 py-1 rounded-lg hover:bg-dark-800 text-slate-300 hover:text-brand-400 transition flex items-center space-x-1">
-          <span>Engine</span>
-        </a>
-        <a href="./arena/" class="px-2.5 py-1 rounded-lg bg-dark-800 hover:bg-dark-700 text-slate-300 border border-dark-700 transition flex items-center space-x-1">
-          <span>Arena</span>
-        </a>
-        <a href="./btree/" class="px-2.5 py-1 rounded-lg bg-dark-800 hover:bg-dark-700 text-slate-300 border border-dark-700 transition flex items-center space-x-1">
-          <span>B-tree game</span>
-        </a>
-        <a href="./agents/" class="px-2.5 py-1 rounded-lg bg-dark-800 hover:bg-dark-700 text-slate-300 border border-dark-700 transition flex items-center space-x-1">
+        <a href="./agents/" class="px-2.5 py-1 rounded-lg hover:bg-dark-800 text-slate-300 hover:text-brand-400 transition">
           <span>Agents</span>
         </a>
-        <a href="./docs/" class="px-2.5 py-1 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">
+        <a href="./arena/" class="px-2.5 py-1 rounded-lg hover:bg-dark-800 text-slate-300 hover:text-brand-400 transition">
+          <span>Arena</span>
+        </a>
+        <a href="./docs/" class="px-2.5 py-1 rounded-lg hover:bg-dark-800 text-slate-300 hover:text-brand-400 transition">
           <span>Docs</span>
         </a>
-        <a href="#pricing" class="px-2.5 py-1 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">
+        <a href="#pricing" class="px-2.5 py-1 rounded-lg hover:bg-dark-800 text-slate-300 hover:text-brand-400 transition">
           <span>Pricing</span>
         </a>
-        <a href="#enterprise" class="px-2.5 py-1 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">
-          <span>Enterprise</span>
-        </a>
+        <details id="nav-more" class="relative">
+          <summary class="list-none cursor-pointer select-none px-2.5 py-1 rounded-lg hover:bg-dark-800 text-slate-300 hover:text-brand-400 transition flex items-center space-x-1">
+            <span>More</span><span aria-hidden="true" class="text-[9px]">&#9662;</span>
+          </summary>
+          <div class="absolute right-0 top-full mt-2 w-44 rounded-xl border border-dark-700 bg-dark-900 p-1 shadow-xl z-50">
+            <a href="#verification-barrier" class="block px-3 py-2 rounded-lg hover:bg-dark-800 text-slate-300 hover:text-brand-400 transition">Barrier</a>
+            <a href="#durable-memory" class="block px-3 py-2 rounded-lg hover:bg-dark-800 text-slate-300 hover:text-brand-400 transition">Memory</a>
+            <a href="#under-the-hood" class="block px-3 py-2 rounded-lg hover:bg-dark-800 text-slate-300 hover:text-brand-400 transition">Engine</a>
+            <a href="./btree/" class="block px-3 py-2 rounded-lg hover:bg-dark-800 text-slate-300 hover:text-brand-400 transition">B-tree game</a>
+            <a href="#enterprise" class="block px-3 py-2 rounded-lg hover:bg-dark-800 text-slate-300 hover:text-brand-400 transition">Enterprise</a>
+          </div>
+        </details>
       </nav>
 
       <!-- Live Engine Telemetry Pill & GitHub CTA -->
@@ -554,26 +554,26 @@
           <span class="hidden sm:inline">GitHub</span>
         </a>
 
-        <!-- Mobile Menu Toggle: the Funnel Navigation Links above are lg:flex-only,
+        <!-- Mobile Menu Toggle: the primary navigation above is xl:flex-only,
              this is the only way to reach Arena, Agents, Pricing, or Enterprise below that breakpoint. -->
         <button onclick="toggleMobileMenu()" aria-label="Toggle navigation menu" aria-expanded="false" id="mobile-menu-btn"
-                class="lg:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-slate-300 transition">
+                class="xl:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-slate-300 transition">
           <span id="mobile-menu-icon" class="text-lg leading-none">☰</span>
         </button>
       </div>
     </div>
 
     <!-- Mobile Nav Panel: same destinations as the Funnel Navigation Links above, stacked for a narrow viewport. -->
-    <nav id="mobile-menu-panel" class="hidden lg:hidden border-t border-dark-800 bg-dark-900 px-4 py-3 space-y-1 text-sm font-mono">
+    <nav id="mobile-menu-panel" class="hidden xl:hidden border-t border-dark-800 bg-dark-900 px-4 py-3 space-y-1 text-sm font-mono">
       <a href="#demo-video" onclick="closeMobileMenu()" class="block px-3 py-2 rounded-lg text-brand-400 hover:text-white hover:bg-dark-800 transition">Watch demo</a>
       <button onclick="closeMobileMenu(); openCommandPalette();" class="block w-full text-left px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-800 transition">🔍 Search</button>
+      <a href="./private-intent/" class="block px-3 py-2 rounded-lg text-accent-cyan hover:text-white hover:bg-dark-800 transition">Private Intent</a>
       <a href="#verification-barrier" onclick="closeMobileMenu()" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-800 transition">Barrier</a>
       <a href="#durable-memory" onclick="closeMobileMenu()" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-800 transition">Memory</a>
       <a href="#under-the-hood" onclick="closeMobileMenu()" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-800 transition">Engine</a>
       <a href="./arena/" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-800 transition">Arena</a>
       <a href="./btree/" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-800 transition">B-tree game</a>
       <a href="./agents/" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-800 transition">Agents</a>
-      <a href="./private-intent/" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-800 transition">Private Intent</a>
       <a href="./docs/" class="block px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition">Docs</a>
       <a href="#pricing" onclick="closeMobileMenu()" class="block px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition">Pricing</a>
       <button type="button" onclick="closeMobileMenu(); track('pro_click'); openProCheckoutModal()" class="w-full text-left block px-3 py-2 rounded-lg text-brand-400 font-semibold hover:bg-dark-800 transition">Get Pro, $49/mo</button>
@@ -2938,6 +2938,14 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         if (!ticking) { ticking = true; requestAnimationFrame(frame); }
       }, { passive: true });
       frame();
+    })();
+  </script>
+  <script>
+    (function () {
+      var more = document.getElementById('nav-more');
+      if (!more) return;
+      document.addEventListener('click', function (e) { if (!more.contains(e.target) || e.target.closest('a')) more.removeAttribute('open'); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') more.removeAttribute('open'); });
     })();
   </script>
   <script>

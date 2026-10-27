@@ -124,6 +124,14 @@ export const Header: React.FC<HeaderProps> = ({
             <span>🔌 Barrier</span>
           </a>
 
+          <a
+            href="../private-intent/"
+            className="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 text-slate-400 hover:text-white transition"
+            title="Private Intent: agents that respect your rules"
+          >
+            <span>Private Intent</span>
+          </a>
+
           <button
             onClick={() => onOpenEnterprise('enterprise')}
             className="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 text-brand-400 hover:text-brand-300 transition"
@@ -261,6 +269,12 @@ export const Header: React.FC<HeaderProps> = ({
             className="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-900 transition"
           >
             🔌 Barrier
+          </a>
+          <a
+            href="../private-intent/"
+            className="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-900 transition"
+          >
+            Private Intent
           </a>
           <button
             onClick={() => { onOpenEnterprise('enterprise'); setMobileMenuOpen(false); }}
