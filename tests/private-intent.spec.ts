@@ -490,12 +490,18 @@ test.describe('Touch targets', () => {
   });
 });
 
+// The page is ready to measure when it has loaded and its fonts are in. This replaces a fixed sleep.
+async function settled(page: import('@playwright/test').Page) {
+  await page.waitForLoadState('load');
+  await page.evaluate(() => document.fonts.ready);
+}
+
 test.describe('Touch targets on the homepage', () => {
   test.use({ hasTouch: true, isMobile: true, viewport: { width: 375, height: 800 } });
 
   test('header controls, form fields and buttons are at least 44 pixels', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(800);
+    await settled(page);
     const small = await page.evaluate(() => {
       const out: string[] = [];
       const check = (e: Element, what: string) => {
@@ -515,7 +521,7 @@ test.describe('Touch targets on the homepage', () => {
 
   test('bigger targets do not make the homepage scroll sideways', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(800);
+    await settled(page);
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
   });
 });
@@ -525,7 +531,7 @@ test.describe('Homepage on narrow phones', () => {
     test(`the homepage does not scroll sideways at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 800 });
       await page.goto('/', { waitUntil: 'domcontentloaded' });
-      await page.waitForTimeout(800);
+      await settled(page);
       expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
     });
   }
