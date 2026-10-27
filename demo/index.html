@@ -483,6 +483,9 @@
       /* WebKit draws a native dropdown at its own height, so it is drawn by the page here, with its own arrow. */
       select { -webkit-appearance: none; appearance: none; min-height: 44px; padding: 0.5rem 2.25rem 0.5rem 0.75rem; background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1rem; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E"); }
       main button, main summary, .sound-toggle { min-height: 44px; }
+      /* The Copy button is a full 44 pixel target, so its code box is tall enough to hold it. */
+      #quickstart-cmd { min-height: 3.5rem; display: flex; align-items: center; }
+      #quickstart-copy { top: 0.375rem; right: 0.375rem; display: flex; }
       main button:not(.tab-btn):not(.team-tab):not([role="tab"]) { display: inline-flex; align-items: center; justify-content: center; }
       main a:where(.flex, .inline-flex, .block, .inline-block):not(.hidden) { min-height: 44px; align-items: center; }
       main a:where(.block, .inline-block) { display: inline-flex; }
