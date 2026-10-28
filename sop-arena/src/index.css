@@ -40,3 +40,9 @@
 
 /* Footer links are standalone targets, keep them at least 24px tall. */
 footer ul a { display: inline-block; padding-block: 0.3rem; }
+
+/* Touch screens: the header controls reach the 44px minimum target size. */
+@media (pointer: coarse) {
+  header button, header a { min-height: 44px; min-width: 44px; }
+  main button { min-height: 44px; }
+}
