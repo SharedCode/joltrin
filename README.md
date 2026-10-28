@@ -81,7 +81,7 @@ Or skip the install. These run in your browser with no backend:
 
 ## Connect it to an MCP agent
 
-Any agent that supports MCP can use the barrier. One command downloads a binary of about 6 MB (no Go needed), checks its checksum, and registers it with Claude Code, Codex, and the Gemini CLI, whichever are installed. It takes a few seconds and does not use `sudo`:
+Any agent that supports MCP can use the barrier. One command downloads a binary of about 9 MB (no Go needed), checks its checksum, and registers it with Claude Code, Codex, and the Gemini CLI, whichever are installed. It takes a few seconds and does not use `sudo`:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/SharedCode/joltrin/master/scripts/install.sh | sh
