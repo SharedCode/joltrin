@@ -779,6 +779,9 @@ curl localhost:8087/.well-known/agent-card.json</pre>
     };
     const displayOrder = ['take_backup', 'validate_backup', 'drop_prod_db'];
 
+    // Anything a visitor typed goes through this before it is placed in markup.
+    function escapeHtml(v) { return String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }
+
     function log(html) {
       const el = document.getElementById('exec-log');
       const line = document.createElement('div');
@@ -1100,16 +1103,19 @@ curl localhost:8087/.well-known/agent-card.json</pre>
         localStorage.setItem('joltrin_inquiries', JSON.stringify(stored));
       } catch (err) {}
 
+      let serverSuccess = false;
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3500);
-        await fetch('/api/billing/enterprise-contact', {
+        const apiBase = ['joltrinhq.com', 'www.joltrinhq.com'].includes(location.hostname) ? 'https://joltrin-app.livelybay-0f85ed7b.eastus.azurecontainerapps.io' : '';
+        const res = await fetch(apiBase + '/api/billing/enterprise-contact', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
           signal: controller.signal
         });
         clearTimeout(timeoutId);
+        serverSuccess = res.ok;
       } catch (netErr) {}
 
       submitBtn.disabled = false;
@@ -1123,15 +1129,18 @@ curl localhost:8087/.well-known/agent-card.json</pre>
       const mailtoLink = `mailto:gerardrecinto@gmail.com?subject=${mailtoSubject}&body=${mailtoBody}`;
 
       if (statusAlert) {
-        statusAlert.className = 'mb-6 p-5 rounded-xl text-xs bg-brand-500/10 border border-brand-500/30 text-slate-200 block space-y-3';
+        statusAlert.className = serverSuccess
+          ? 'mb-6 p-5 rounded-xl text-xs bg-brand-500/10 border border-brand-500/30 text-slate-200 block space-y-3'
+          : 'mb-6 p-5 rounded-xl text-xs bg-amber-500/10 border border-amber-500/30 text-slate-200 block space-y-3';
         statusAlert.innerHTML = `
-          <div class="flex items-center space-x-2 text-brand-400 font-bold text-sm">
-            <i data-lucide="check-circle" class="w-4 h-4"></i>
-            <span>Thank you, ${payload.name}! Your inquiry has been received.</span>
+          <div class="flex items-center space-x-2 ${serverSuccess ? 'text-brand-400' : 'text-amber-300'} font-bold text-sm">
+            <i data-lucide="${serverSuccess ? 'check-circle' : 'alert-triangle'}" class="w-4 h-4"></i>
+            <span>${serverSuccess ? `Thank you, ${escapeHtml(payload.name)}! Your inquiry has been received.` : `${escapeHtml(payload.name)}, this form can't reach our server right now.`}</span>
           </div>
           <p class="text-slate-300 leading-relaxed">
-            Our engineering team will review your AI agent deployment requirements and contact you at <strong class="text-white font-mono">${payload.email}</strong> within 1 business day.
-            ${payload.tier === 'pro' ? 'For team onboarding, we will send you the workspace provisioning access and Stripe subscription billing setup.' : ''}
+            ${serverSuccess
+              ? `We read every inquiry personally and will follow up at <strong class="text-white font-mono">${escapeHtml(payload.email)}</strong> as soon as we can.${payload.tier === 'pro' ? " If Pro is the right fit, we'll walk you through workspace setup and billing." : ''}`
+              : 'Nothing was sent yet. Click below to email it directly instead. Your answers are saved on this device either way.'}
           </p>
           <div class="pt-2 flex flex-wrap items-center gap-3">
             <a href="${mailtoLink}" class="px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-brand-400 font-mono text-[11px] flex items-center space-x-1.5 transition">
