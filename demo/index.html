@@ -617,7 +617,7 @@
 
         <button type="button" id="top-pro-btn" onclick="track('pro_click'); openProCheckoutModal()"
                 class="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-black text-xs font-bold whitespace-nowrap shadow-lg shadow-brand-500/20 transition cursor-pointer">
-          <span>Request Pro</span><span class="hidden sm:inline font-mono font-medium">$49/mo</span>
+          <span class="sm:hidden" aria-hidden="true">Pro</span><span class="hidden sm:inline">Request Pro</span><span class="sr-only sm:hidden">Request Pro</span><span class="hidden sm:inline font-mono font-medium">$49/mo</span>
         </button>
 
         <button onclick="openCommandPalette()" aria-label="Open command palette"
