@@ -127,7 +127,7 @@
       </div>
 
       <!-- Funnel Navigation Links -->
-      <nav class="hidden xl:flex items-center space-x-1 text-xs font-mono">
+      <nav class="hidden min-[1200px]:flex items-center space-x-1 text-xs font-mono">
         <a href="../" class="px-2.5 py-1.5 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">
           <span>Overview</span>
         </a>
@@ -180,17 +180,17 @@
           <span class="hidden sm:inline">GitHub</span>
         </a>
 
-        <!-- Mobile Menu Toggle: the Funnel Navigation Links above are xl:flex-only,
+        <!-- Mobile Menu Toggle: the Funnel Navigation Links above are 1200px-and-up only,
              this is the only way to reach Overview, Arena, Docs, Pricing, or Enterprise below that breakpoint. -->
         <button onclick="toggleMobileMenu()" aria-label="Toggle navigation menu" aria-expanded="false" id="mobile-menu-btn"
-                class="xl:hidden w-11 h-11 flex items-center justify-center rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-slate-300 transition">
+                class="min-[1200px]:hidden w-11 h-11 flex items-center justify-center rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-slate-300 transition">
           <span id="mobile-menu-icon" class="text-lg leading-none">☰</span>
         </button>
       </div>
     </div>
 
     <!-- Mobile Nav Panel: same destinations as the Funnel Navigation Links above, stacked for a narrow viewport. -->
-    <nav id="mobile-menu-panel" class="hidden xl:hidden border-t border-dark-800 bg-dark-900 px-4 py-3 space-y-1 text-sm font-mono">
+    <nav id="mobile-menu-panel" class="hidden min-[1200px]:hidden border-t border-dark-800 bg-dark-900 px-4 py-3 space-y-1 text-sm font-mono">
       <button onclick="openCommandPalette()" class="w-full text-left block px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition">🔍 Search</button>
       <a href="../" class="block px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition">Overview</a>
       <a href="../arena/" class="block px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition">Arena</a>
