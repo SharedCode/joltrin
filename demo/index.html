@@ -2740,7 +2740,8 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3500);
-        const res = await fetch('/api/billing/enterprise-contact', {
+        const apiBase = ['joltrinhq.com', 'www.joltrinhq.com'].includes(location.hostname) ? 'https://joltrin-app.livelybay-0f85ed7b.eastus.azurecontainerapps.io' : '';
+        const res = await fetch(apiBase + '/api/billing/enterprise-contact', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
@@ -2751,7 +2752,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
           serverSuccess = true;
         }
       } catch (netErr) {
-        // Expected when running on static GitHub Pages with no active Go backend daemon
+        // The server was unreachable or slow. The email fallback below covers it.
       }
 
       submitBtn.disabled = false;
@@ -2792,7 +2793,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
             <span>${payload.name}, this form can't reach our server right now.</span>
           </div>
           <p class="text-slate-300 leading-relaxed">
-            This is the static GitHub Pages demo, so nothing was sent yet. Click below to email it directly instead. Your answers are saved on this device either way.
+            Nothing was sent yet. Click below to email it directly instead. Your answers are saved on this device either way.
           </p>
           <div class="pt-2 flex flex-wrap items-center gap-3">
             <a href="${mailtoLink}" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-bold font-mono text-[11px] flex items-center space-x-1.5 transition">

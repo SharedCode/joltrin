@@ -137,4 +137,19 @@ test.describe('Agents page inquiry form', () => {
     expect(events).toContainEqual(['inquiry_submit', { props: { tier: 'pro' } }]);
     expect(JSON.stringify(events)).not.toContain('test@example.com');
   });
+
+  test('a failed submission says nothing was sent instead of claiming receipt', async ({ page }) => {
+    await page.route('**/plausible.io/**', (route) => route.abort());
+    await page.route('**/api/billing/enterprise-contact', (route) => route.fulfill({ status: 500, body: '{}' }));
+    await page.goto('/agents/', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(1500);
+    await page.fill('#interest-form-agents [name="name"]', 'Test Person');
+    await page.fill('#interest-form-agents [name="email"]', 'test@example.com');
+    await page.fill('#interest-form-agents [name="company"]', 'Test Co');
+    await page.selectOption('#inq-tier-agents', 'pro');
+    await page.click('#inq-submit-btn-agents');
+    const alert = page.locator('#agents-form-status-alert');
+    await expect(alert).toContainText('Nothing was sent yet');
+    await expect(alert).not.toContainText('inquiry has been received');
+  });
 });
