@@ -57,7 +57,8 @@ echo "Downloading $name"
 # Newer releases also carry a gzipped copy, about 60% smaller. Older releases only have the raw file.
 file=$name.gz
 curl -fsSL -O "$base/sop-mcp-server-SHA256SUMS" || fail "download failed from $base"
-if ! curl -fsSL -O "$base/$file" 2>/dev/null; then
+# Without gzip there is nothing to unpack the smaller file with, so take the raw binary.
+if ! command -v gzip >/dev/null 2>&1 || ! curl -fsSL -O "$base/$file" 2>/dev/null; then
   file=$name
   curl -fsSL -O "$base/$file" || fail "download failed from $base"
 fi
