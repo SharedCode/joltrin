@@ -185,7 +185,7 @@ The engine, vector search, agent memory, and the verification barrier are MIT li
 
 ## Documentation
 
-- The barrier: [Agent protocols (MCP, A2A, memory, runbooks)](docs/AGENT_PROTOCOLS.md), [Barrier test results](docs/AGENT_BARRIER_TESTS.md), [Verification engine](docs/MCP_A2A_AND_VERIFICATION_ENGINE.md), [Kubernetes admission gate](docs/KUBERNETES_GATE.md)
+- The barrier: [Agent protocols (MCP, A2A, memory, runbooks)](docs/AGENT_PROTOCOLS.md), [Barrier test results](docs/AGENT_BARRIER_TESTS.md), [Verification engine](docs/MCP_A2A_AND_VERIFICATION_ENGINE.md), [Kubernetes admission gate](docs/KUBERNETES_GATE.md), [How it compares to OPA, Kyverno, Cedar and workflow tools](docs/COMPARISON.md)
 - Start here: [Getting started](docs/GETTING_STARTED.md), [Examples](docs/EXAMPLES.md), [What is Joltrin](docs/WHAT_IS_SOP.md)
 - Concepts: [Why Joltrin](docs/WHY_JOLTRIN.md), [Architecture](docs/SOP_ARCHITECTURE_WHITEPAPER.md), [Scalability](docs/SCALABILITY.md)
 - Operating it: [Operations and failover](docs/OPERATIONS.md), [Data Manager and tools](docs/SOP_PLATFORM_TOOLS.md), [Azure deployment](infra/azure/README.md), [Kubernetes with Argo CD](deploy/aks/README.md)
