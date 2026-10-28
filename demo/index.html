@@ -414,9 +414,9 @@
     .story-cta .primary { background: #10b981; color: #000; }
     .story-cta .ghost { border: 1px solid rgb(var(--c-dark-700)); color: rgb(var(--c-fg)); background: rgb(var(--c-dark-900) / 0.6); }
     /* Scripted mode: the pin track is tall and the stage sticks while scroll drives the steps. */
-    .js-story .story-intro { display: block; height: 230vh; padding: 0; }
+    .js-story .story-intro { display: block; height: 150vh; padding: 0; }
     .js-story .story-intro > div { position: sticky; top: 0; height: 100svh; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; max-width: 58rem; margin: 0 auto; padding: 5rem 1.5rem 2rem; }
-    .js-story .story-pin { height: 420vh; }
+    .js-story .story-pin { height: 340vh; }
     .js-story .story-stage { position: sticky; top: 0; height: 100svh; min-height: 0; padding-top: 5.5rem; padding-bottom: 2rem; }
     .story-hint { display: none; }
     .js-story .story-hint { display: flex; align-items: center; gap: 0.5rem; margin: 2rem 0 0; font: 500 0.8rem/1 'JetBrains Mono', 'JetBrains Fallback', monospace; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(var(--c-slate-400)); transition: opacity 0.4s; }
@@ -437,6 +437,7 @@
     .sound-toggle { position: fixed; left: 16px; bottom: 16px; z-index: 40; padding: 0.45rem 0.85rem; border-radius: 999px; border: 1px solid rgb(var(--c-dark-700)); background: rgb(var(--c-dark-900) / 0.85); backdrop-filter: blur(8px); color: rgb(var(--c-slate-300)); font: 600 0.72rem 'JetBrains Mono', 'JetBrains Fallback', monospace; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
     .sound-toggle:hover, .sound-toggle:focus-visible { color: rgb(var(--c-fg)); border-color: rgb(var(--c-slate-500)); }
     .sound-toggle[aria-pressed="true"] { color: #10b981; border-color: #10b981; }
+    @media (prefers-color-scheme: light) { .sound-toggle[aria-pressed="true"] { color: #047857; border-color: #047857; } }
     @media (prefers-reduced-motion: reduce) { .story-row, .story-verdict span, .story-words .w { transition: none !important; } }
   </style>
   <style>
@@ -683,7 +684,7 @@
       <div>
         <p class="story-eyebrow">Independent verification</p>
         <p class="story-words" id="story-line"><span class="w">An</span> <span class="w">agent</span> <span class="w">says</span> <span class="w">it</span> <span class="w">backed</span> <span class="w">up</span> <span class="w">the</span> <span class="w">database.</span> <span class="w">Joltrin</span> <span class="w">checks</span> <span class="w">the</span> <span class="w">record,</span> <span class="w">not</span> <span class="w">the</span> <span class="w">claim.</span></p>
-        <p class="story-hint" id="story-hint">Scroll down to continue <span aria-hidden="true">&darr;</span></p>
+        <p class="story-hint" id="story-hint">Scroll down to continue <span aria-hidden="true">&darr;</span> <a href="#start" class="underline text-brand-400 hover:text-brand-300 ml-3">Skip to the demo</a></p>
       </div>
     </section>
 
@@ -704,11 +705,11 @@
         </div>
         <div class="story-card" role="img" aria-label="Runbook decisions: drop_prod_db blocked, validate_backup blocked, take_backup allowed, validate_backup allowed, drop_prod_db allowed">
           <p class="hd">// db-maintenance runbook</p>
-          <div class="story-row"><b>drop_prod_db</b><span><b class="no">BLOCKED</b> <span class="why">backup_validated missing</span></span></div>
-          <div class="story-row"><b>validate_backup</b><span><b class="no">BLOCKED</b> <span class="why">backup_taken missing</span></span></div>
-          <div class="story-row"><b>take_backup</b><span><b class="ok">ALLOWED</b></span></div>
-          <div class="story-row"><b>validate_backup</b><span><b class="ok">ALLOWED</b></span></div>
-          <div class="story-row"><b>drop_prod_db</b><span><b class="ok">ALLOWED</b></span></div>
+          <div class="story-row" aria-hidden="true"><b>drop_prod_db</b><span><b class="no">BLOCKED</b> <span class="why">backup_validated missing</span></span></div>
+          <div class="story-row" aria-hidden="true"><b>validate_backup</b><span><b class="no">BLOCKED</b> <span class="why">backup_taken missing</span></span></div>
+          <div class="story-row" aria-hidden="true"><b>take_backup</b><span><b class="ok">ALLOWED</b></span></div>
+          <div class="story-row" aria-hidden="true"><b>validate_backup</b><span><b class="ok">ALLOWED</b></span></div>
+          <div class="story-row" aria-hidden="true"><b>drop_prod_db</b><span><b class="ok">ALLOWED</b></span></div>
         </div>
       </div>
     </section>
@@ -725,7 +726,7 @@
   <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     <!-- Hero -->
-    <section class="hero-calm relative mb-16 pt-6 sm:pt-14">
+    <section id="start" class="hero-calm relative mb-16 pt-6 sm:pt-14">
       <div class="relative z-10 flex flex-col gap-12 min-w-0">
         <div class="min-w-0 w-full text-center max-w-3xl mx-auto">
           <p class="text-sm font-medium text-brand-300 mb-5">For teams letting AI agents change infrastructure</p>
@@ -752,7 +753,13 @@
               <i data-lucide="play" class="w-4 h-4 text-brand-400"></i>
               <span>Watch the short demo</span>
             </a>
+            <a href="#pricing"
+               class="text-slate-300 hover:text-white font-medium text-sm flex items-center space-x-2 transition">
+              <i data-lucide="sparkles" class="w-4 h-4 text-accent-violet"></i>
+              <span>See Pro</span>
+            </a>
           </div>
+          <p class="mt-6 text-[11px] font-mono uppercase tracking-wider text-slate-400">MIT licensed &middot; Go &middot; 500+ test files &middot; runs in your browser, no signup</p>
           <div class="mt-10 min-w-0 w-full text-left max-w-xl mx-auto">
             <p class="text-[11px] font-mono uppercase tracking-wider text-slate-500 mb-1.5">Or run it now (Go 1.26.10 or newer)</p>
             <div class="relative">
@@ -3041,15 +3048,21 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
       var rows = story.querySelectorAll('.story-row');
       var tagged = story.querySelectorAll('[data-for]');
       var hint = document.getElementById('story-hint');
-      var step = -1, ticking = false;
+      var step = -1, ticking = false, timed = 0;
+      // The line also lights on a timer, so a fast scroll cannot skip it and nobody has to scroll to read it.
+      var timer = setTimeout(function tick() {
+        timed++;
+        frame();
+        if (timed < words.length) timer = setTimeout(tick, 110);
+      }, 600);
       function frame() {
         ticking = false;
         if (hint) hint.classList.toggle('gone', window.scrollY > 40);
         var vh = window.innerHeight;
         // Words: lit across the pinned intro track.
         var r = intro.getBoundingClientRect();
-        var p = Math.min(1, Math.max(0, (-r.top - vh * 0.1) / (r.height - vh * 1.4)));
-        var lit = Math.round(p * words.length);
+        var p = Math.min(1, Math.max(0, (-r.top - vh * 0.05) / (vh * 0.5)));
+        var lit = Math.max(Math.round(p * words.length), timed);
         words.forEach(function (w, i) { w.classList.toggle('lit', i < lit); });
         // Stage: five steps across the pinned track.
         var pr = pin.getBoundingClientRect();
@@ -3098,8 +3111,9 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         return ctx;
       }
       // A suspended context queues sounds and then plays them all at once, so skip them until the browser allows audio.
+      // It never creates the context itself. Only a click, tap or key press does, so timed motion cannot start audio on its own.
       function ready() {
-        return on && audio().state === 'running';
+        return on && !!ctx && ctx.state === 'running';
       }
       // Mouse, touch and keyboard presses all unlock audio. Capture phase, so the toggle's stopPropagation cannot hide them.
       // livePress remembers whether sound was already playing when this press began, because the unlock below can finish before click fires.

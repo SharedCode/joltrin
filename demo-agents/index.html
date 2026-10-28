@@ -38,7 +38,7 @@
   <script defer data-domain="joltrinhq.com" src="https://plausible.io/js/script.js"></script>
   <script>
     window.plausible = window.plausible || function () { (window.plausible.q = window.plausible.q || []).push(arguments); };
-    function track(name) { try { window.plausible(name); } catch (e) {} }
+    function track(name, props) { try { window.plausible(name, props ? { props: props } : undefined); } catch (e) {} }
     document.addEventListener('click', function (e) {
       var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
       var h = a.getAttribute('href') || '';
@@ -1077,6 +1077,8 @@ curl localhost:8087/.well-known/agent-card.json</pre>
         }
         return;
       }
+
+      track('inquiry_submit', { tier: payload.tier || 'unknown' });
 
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Submitting...</span>';

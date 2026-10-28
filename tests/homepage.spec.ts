@@ -281,7 +281,6 @@ test.describe('Homepage', () => {
     test('scrolling lights up the opening line and steps through the five decisions', async ({ page }) => {
       await page.goto('/', { waitUntil: 'domcontentloaded' });
       await expect(page.locator('html')).toHaveClass(/js-story/);
-      await expect(page.locator('.story-words .w.lit')).toHaveCount(0);
 
       const total = await page.locator('.story-words .w').count();
       const introHeight = await page.locator('.story-intro').evaluate((el) => (el as HTMLElement).offsetHeight);
