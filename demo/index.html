@@ -2262,11 +2262,18 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
   <script>
     let selectedBenchOps = 5000;
 
-    // The intro video player is about 5 MB of scripts. It starts after the page
-    // has loaded, so it never delays the first paint or the load event.
+    // The intro video player is about 5 MB of scripts. It starts once the video is
+    // within a screen of the viewport, so a visitor who never scrolls to it never
+    // downloads it. Without IntersectionObserver it starts after the page loads.
     window.addEventListener("load", () => {
       const frame = document.querySelector('#demo-video iframe[data-src]');
-      if (frame) frame.src = frame.dataset.src;
+      if (!frame) return;
+      const start = () => { frame.src = frame.dataset.src; };
+      if (!('IntersectionObserver' in window)) return start();
+      const io = new IntersectionObserver((entries) => {
+        if (entries.some((e) => e.isIntersecting)) { io.disconnect(); start(); }
+      }, { rootMargin: '600px 0px' });
+      io.observe(frame);
     });
 
     // Initialize Lucide Icons
