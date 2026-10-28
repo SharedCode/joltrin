@@ -1,6 +1,9 @@
 # Only objects labelled joltrin.dev/gate=enabled reach the gate, so an outage of
 # the gate cannot block deletes of anything else. failurePolicy Fail means a
-# protected object cannot be deleted while the gate is down.
+# protected object cannot be deleted while the gate is down. UPDATE is routed
+# too, only so the gate can refuse removing the label or the trace id annotation,
+# which would otherwise let the next delete skip the check. A protected object
+# therefore cannot be updated while the gate is down either.
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
@@ -19,7 +22,7 @@ webhooks:
     rules:
       - apiGroups: [""]
         apiVersions: ["v1"]
-        operations: ["DELETE"]
+        operations: ["DELETE", "UPDATE"]
         resources: ["persistentvolumeclaims"]
     clientConfig:
       service:

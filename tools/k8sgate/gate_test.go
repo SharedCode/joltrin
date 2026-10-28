@@ -312,3 +312,57 @@ func TestOverlongTraceIDIsRefused(t *testing.T) {
 		t.Error("DELETE allowed with an overlong trace id")
 	}
 }
+
+func updateReview(oldLabels, newLabels, oldAnn, newAnn map[string]string) string {
+	meta := func(l, a map[string]string) map[string]any {
+		return map[string]any{"metadata": map[string]any{"labels": l, "annotations": a}}
+	}
+	r := map[string]any{
+		"apiVersion": "admission.k8s.io/v1",
+		"kind":       "AdmissionReview",
+		"request": map[string]any{
+			"uid":       "uid-1",
+			"operation": "UPDATE",
+			"resource":  map[string]any{"group": "", "version": "v1", "resource": "persistentvolumeclaims"},
+			"oldObject": meta(oldLabels, oldAnn),
+			"object":    meta(newLabels, newAnn),
+		},
+	}
+	b, _ := json.Marshal(r)
+	return string(b)
+}
+
+func TestUpdateCannotRemoveTheGateLabelOrTheTraceID(t *testing.T) {
+	on := map[string]string{GateLabel: "enabled"}
+	trace := map[string]string{TraceAnnotation: "run-1"}
+	cases := []struct {
+		name                   string
+		oldL, newL, oldA, newA map[string]string
+		allowed                bool
+	}{
+		{"label removed", on, nil, trace, trace, false},
+		{"label changed", on, map[string]string{GateLabel: "disabled"}, trace, trace, false},
+		{"trace id removed", on, on, trace, nil, false},
+		{"trace id changed to another run", on, on, trace, map[string]string{TraceAnnotation: "run-2"}, false},
+		{"unrelated update keeps protection", on, on, trace, trace, true},
+		{"protection added to an unlabelled object", nil, on, nil, trace, true},
+		{"trace id set where none existed", on, on, nil, trace, true},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			g, _ := newGate(t)
+			v := validate(t, g, updateReview(c.oldL, c.newL, c.oldA, c.newA))
+			if v.Allowed != c.allowed {
+				t.Fatalf("allowed = %v, want %v (%s)", v.Allowed, c.allowed, v.Message)
+			}
+		})
+	}
+}
+
+func TestUpdateOnAnUncoveredResourceIsNotTouched(t *testing.T) {
+	g, _ := newGate(t)
+	body := strings.Replace(updateReview(map[string]string{GateLabel: "enabled"}, nil, nil, nil), "persistentvolumeclaims", "configmaps", 1)
+	if v := validate(t, g, body); !v.Allowed {
+		t.Fatalf("an update on a resource the policy does not cover was refused: %s", v.Message)
+	}
+}
