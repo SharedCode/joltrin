@@ -152,4 +152,22 @@ test.describe('Agents page inquiry form', () => {
     await expect(alert).toContainText('Nothing was sent yet');
     await expect(alert).not.toContainText('inquiry has been received');
   });
+
+  test('a name with markup is shown as text and never runs', async ({ page }) => {
+    await page.route('**/plausible.io/**', (route) => route.abort());
+    await page.route('**/api/billing/enterprise-contact', (route) => route.fulfill({ status: 200, body: '{}' }));
+    await page.goto('/agents/', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(1500);
+    const name = '<img src=x onerror="window.__xss=1">';
+    await page.fill('#interest-form-agents [name="name"]', name);
+    await page.fill('#interest-form-agents [name="email"]', 'test@example.com');
+    await page.fill('#interest-form-agents [name="company"]', 'Test Co');
+    await page.selectOption('#inq-tier-agents', 'pro');
+    await page.click('#inq-submit-btn-agents');
+    const alert = page.locator('#agents-form-status-alert');
+    await expect(alert).toContainText('inquiry has been received');
+    await expect(alert).toContainText(name);
+    await expect(alert.locator('img')).toHaveCount(0);
+    expect(await page.evaluate(() => (window as any).__xss)).toBeUndefined();
+  });
 });

@@ -779,6 +779,9 @@ curl localhost:8087/.well-known/agent-card.json</pre>
     };
     const displayOrder = ['take_backup', 'validate_backup', 'drop_prod_db'];
 
+    // Anything a visitor typed goes through this before it is placed in markup.
+    function escapeHtml(v) { return String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }
+
     function log(html) {
       const el = document.getElementById('exec-log');
       const line = document.createElement('div');
@@ -1132,11 +1135,11 @@ curl localhost:8087/.well-known/agent-card.json</pre>
         statusAlert.innerHTML = `
           <div class="flex items-center space-x-2 ${serverSuccess ? 'text-brand-400' : 'text-amber-300'} font-bold text-sm">
             <i data-lucide="${serverSuccess ? 'check-circle' : 'alert-triangle'}" class="w-4 h-4"></i>
-            <span>${serverSuccess ? `Thank you, ${payload.name}! Your inquiry has been received.` : `${payload.name}, this form can't reach our server right now.`}</span>
+            <span>${serverSuccess ? `Thank you, ${escapeHtml(payload.name)}! Your inquiry has been received.` : `${escapeHtml(payload.name)}, this form can't reach our server right now.`}</span>
           </div>
           <p class="text-slate-300 leading-relaxed">
             ${serverSuccess
-              ? `We read every inquiry personally and will follow up at <strong class="text-white font-mono">${payload.email}</strong> as soon as we can.${payload.tier === 'pro' ? " If Pro is the right fit, we'll walk you through workspace setup and billing." : ''}`
+              ? `We read every inquiry personally and will follow up at <strong class="text-white font-mono">${escapeHtml(payload.email)}</strong> as soon as we can.${payload.tier === 'pro' ? " If Pro is the right fit, we'll walk you through workspace setup and billing." : ''}`
               : 'Nothing was sent yet. Click below to email it directly instead. Your answers are saved on this device either way.'}
           </p>
           <div class="pt-2 flex flex-wrap items-center gap-3">

@@ -2262,6 +2262,9 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
   <script>
     let selectedBenchOps = 5000;
 
+    // Anything a visitor typed goes through this before it is placed in markup.
+    function escapeHtml(v) { return String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }
+
     // The intro video player is about 5 MB of scripts. It starts once the video is
     // within a screen of the viewport, so a visitor who never scrolls to it never
     // downloads it. Without IntersectionObserver it starts after the page loads.
@@ -2772,10 +2775,10 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         statusAlert.innerHTML = serverSuccess ? `
           <div class="flex items-center space-x-2 text-brand-400 font-bold text-sm">
             <i data-lucide="check-circle" class="w-4 h-4"></i>
-            <span>Thank you, ${payload.name}! Your inquiry has been received.</span>
+            <span>Thank you, ${escapeHtml(payload.name)}! Your inquiry has been received.</span>
           </div>
           <p class="text-slate-300 leading-relaxed">
-            We read every inquiry personally and will follow up at <strong class="text-white font-mono">${payload.email}</strong> as soon as we can.
+            We read every inquiry personally and will follow up at <strong class="text-white font-mono">${escapeHtml(payload.email)}</strong> as soon as we can.
             ${payload.tier === 'pro' ? "If Pro is the right fit, we'll walk you through workspace setup and billing." : ''}
           </p>
           <div class="pt-2 flex flex-wrap items-center gap-3">
@@ -2790,7 +2793,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         ` : `
           <div class="flex items-center space-x-2 text-amber-400 font-bold text-sm">
             <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-            <span>${payload.name}, this form can't reach our server right now.</span>
+            <span>${escapeHtml(payload.name)}, this form can't reach our server right now.</span>
           </div>
           <p class="text-slate-300 leading-relaxed">
             Nothing was sent yet. Click below to email it directly instead. Your answers are saved on this device either way.
@@ -2915,7 +2918,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
             <span>Online checkout isn't available on this site yet</span>
           </div>
           <p class="text-slate-300 leading-relaxed">
-            This site is hosted on GitHub Pages, which can't run the billing backend. Email us your workspace name and we'll set up <strong class="text-white font-mono">${workspace}</strong> on the $49/month plan directly.
+            Pro is design-partner access today, and self-serve checkout is not open yet. Email us your workspace name and we'll set up <strong class="text-white font-mono">${escapeHtml(workspace)}</strong> on the $49/month plan directly.
           </p>
           <div class="pt-1 flex items-center justify-between">
             <a href="${mailtoLink}" class="px-3 py-1.5 rounded-lg bg-brand-500 text-black font-bold text-[11px] flex items-center space-x-1.5">
