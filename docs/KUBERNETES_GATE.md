@@ -73,6 +73,16 @@ The package has unit tests for each behavior above. The manifests and the webhoo
 - removing the `joltrin.dev/gate` label, and changing or removing the trace id annotation, on a labelled PVC were each refused, while an unrelated annotation was accepted
 - with the gate scaled to zero, an annotation change on a labelled PVC also failed
 
+## Reproduce the checks
+
+`scripts/k8s-gate-e2e.sh` creates a disposable kind cluster, installs cert-manager, builds and loads the gate image, applies `deploy/k8s-gate`, and runs the checks above, printing PASS or FAIL for each. It needs docker, kind, kubectl, openssl and curl, and network access for cert-manager, and it deletes the cluster when it finishes.
+
+```bash
+scripts/k8s-gate-e2e.sh
+```
+
+A clean run ends with `14 passed, 0 failed`. It was run this way against kind and cert-manager v1.15.3. It is not part of CI.
+
 ## What it does not do
 
 - **Whoever holds the commit token can record a step.** The gate does not check that a backup happened. It checks that something with the token said so. Give the token to the job that takes and validates backups, and not to the agent or workload being controlled. That separation is the control.
