@@ -3130,12 +3130,12 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         livePress = null;
         // The press that first unlocks audio only unlocks it. It must not flip the sound off.
         if (on && !wasLive) {
-          audio().resume().then(function () { paint(); tone(660, 0.09, 'sine', 0.05, 990); }, function () {});
+          audio().resume().then(function () { paint(); voice(660, 0, 0.12, 0.05, 'sine', 990); }, function () {});
           return;
         }
         on = !on;
         paint();
-        if (on) tone(660, 0.09, 'sine', 0.05, 990);
+        if (on) voice(660, 0, 0.12, 0.05, 'sine', 990);
       });
       paint();
       var dock = document.createElement('aside');
@@ -3150,42 +3150,67 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         last[name] = now;
         return true;
       }
-      function tone(from, dur, type, vol, to) {
-        if (!ready()) return;
-        var c = audio(), t = c.currentTime, o = c.createOscillator(), g = c.createGain();
-        o.type = type;
-        o.frequency.setValueAtTime(from, t);
-        if (to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
-        g.gain.setValueAtTime(0.0001, t);
-        g.gain.exponentialRampToValueAtTime(vol, t + 0.012);
-        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-        o.connect(g).connect(c.destination);
-        o.start(t);
-        o.stop(t + dur + 0.02);
+      // One shared bus: a limiter so nothing clips, and a short filtered echo for air.
+      var bus = null;
+      function out(c) {
+        if (bus) return bus;
+        var comp = c.createDynamicsCompressor(), dry = c.createGain(), wet = c.createGain();
+        comp.threshold.value = -18; comp.ratio.value = 8; comp.attack.value = 0.003; comp.release.value = 0.2;
+        dry.gain.value = 0.9; wet.gain.value = 0.28;
+        var delay = c.createDelay(0.5), fb = c.createGain(), lp = c.createBiquadFilter();
+        delay.delayTime.value = 0.17; fb.gain.value = 0.32; lp.type = 'lowpass'; lp.frequency.value = 2400;
+        dry.connect(comp);
+        wet.connect(delay); delay.connect(lp); lp.connect(fb); fb.connect(delay); lp.connect(comp);
+        comp.connect(c.destination);
+        bus = { dry: dry, wet: wet };
+        return bus;
       }
+      // A soft pluck: two slightly detuned oscillators, a quick attack and an exponential decay.
+      function voice(freq, at, dur, vol, type, glideTo) {
+        if (!ready()) return;
+        var c = audio(), b = out(c), t = c.currentTime + at;
+        [-4, 4].forEach(function (cents) {
+          var o = c.createOscillator(), g = c.createGain();
+          o.type = type || 'sine';
+          o.detune.value = cents;
+          o.frequency.setValueAtTime(freq, t);
+          if (glideTo) o.frequency.exponentialRampToValueAtTime(glideTo, t + dur);
+          g.gain.setValueAtTime(0.0001, t);
+          g.gain.exponentialRampToValueAtTime(vol / 2, t + 0.008);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+          o.connect(g); g.connect(b.dry); g.connect(b.wet);
+          o.start(t);
+          o.stop(t + dur + 0.03);
+        });
+      }
+      // A smooth, quiet rise of filtered air.
       function sweep(dur, vol) {
         if (!ready()) return;
-        var c = audio(), t = c.currentTime, n = Math.floor(c.sampleRate * dur);
+        var c = audio(), b = out(c), t = c.currentTime, n = Math.floor(c.sampleRate * dur);
         var buf = c.createBuffer(1, n, c.sampleRate), d = buf.getChannelData(0);
         for (var i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
         var src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
         src.buffer = buf;
         f.type = 'bandpass';
-        f.Q.value = 1.4;
-        f.frequency.setValueAtTime(300, t);
-        f.frequency.exponentialRampToValueAtTime(3200, t + dur);
+        f.Q.value = 0.7;
+        f.frequency.setValueAtTime(500, t);
+        f.frequency.exponentialRampToValueAtTime(2600, t + dur);
         g.gain.setValueAtTime(0.0001, t);
-        g.gain.exponentialRampToValueAtTime(vol, t + dur * 0.35);
+        g.gain.exponentialRampToValueAtTime(vol, t + dur * 0.5);
         g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-        src.connect(f).connect(g).connect(c.destination);
+        src.connect(f); f.connect(g); g.connect(b.dry);
         src.start(t);
       }
+      // A minor pentatonic ladder, so rapid word ticks always sound consonant.
+      var LADDER = [880, 1046.5, 1175, 1318.5, 1568, 1760, 2093];
       var play = {
-        reveal: function () { if (gate('reveal', 700)) sweep(0.55, 0.06); },
-        word: function (i) { if (gate('word', 90)) tone(520 + (i % 12) * 38, 0.05, 'square', 0.012); },
-        step: function () { if (gate('step', 250)) { tone(280, 0.12, 'triangle', 0.05, 420); tone(840, 0.07, 'sine', 0.025); } },
-        block: function () { tone(110, 0.38, 'sawtooth', 0.07, 48); },
-        allow: function () { tone(523, 0.14, 'sine', 0.06); setTimeout(function () { tone(784, 0.22, 'sine', 0.06); }, 110); }
+        reveal: function () { if (gate('reveal', 700)) sweep(0.5, 0.025); },
+        word: function (i) { if (gate('word', 90)) voice(LADDER[i % LADDER.length], 0, 0.09, 0.02); },
+        step: function () { if (gate('step', 250)) { voice(660, 0, 0.16, 0.045); voice(990, 0.05, 0.2, 0.03); } },
+        // Two short falling taps, muffled: reads as "no" without a harsh buzz.
+        block: function () { voice(311, 0, 0.14, 0.07, 'triangle'); voice(233, 0.1, 0.24, 0.07, 'triangle'); },
+        // A quick rising major arpeggio with a soft tail.
+        allow: function () { voice(523.25, 0, 0.18, 0.05); voice(659.25, 0.07, 0.18, 0.05); voice(783.99, 0.14, 0.34, 0.055); }
       };
 
       // Watch for the classes the existing scripts add: section reveals, lit words, story rows, and the verdict.
