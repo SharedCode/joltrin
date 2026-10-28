@@ -437,6 +437,7 @@
     .sound-toggle { position: fixed; left: 16px; bottom: 16px; z-index: 40; padding: 0.45rem 0.85rem; border-radius: 999px; border: 1px solid rgb(var(--c-dark-700)); background: rgb(var(--c-dark-900) / 0.85); backdrop-filter: blur(8px); color: rgb(var(--c-slate-300)); font: 600 0.72rem 'JetBrains Mono', 'JetBrains Fallback', monospace; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
     .sound-toggle:hover, .sound-toggle:focus-visible { color: rgb(var(--c-fg)); border-color: rgb(var(--c-slate-500)); }
     .sound-toggle[aria-pressed="true"] { color: #10b981; border-color: #10b981; }
+    @media (prefers-color-scheme: light) { .sound-toggle[aria-pressed="true"] { color: #047857; border-color: #047857; } }
     @media (prefers-reduced-motion: reduce) { .story-row, .story-verdict span, .story-words .w { transition: none !important; } }
   </style>
   <style>
@@ -704,11 +705,11 @@
         </div>
         <div class="story-card" role="img" aria-label="Runbook decisions: drop_prod_db blocked, validate_backup blocked, take_backup allowed, validate_backup allowed, drop_prod_db allowed">
           <p class="hd">// db-maintenance runbook</p>
-          <div class="story-row"><b>drop_prod_db</b><span><b class="no">BLOCKED</b> <span class="why">backup_validated missing</span></span></div>
-          <div class="story-row"><b>validate_backup</b><span><b class="no">BLOCKED</b> <span class="why">backup_taken missing</span></span></div>
-          <div class="story-row"><b>take_backup</b><span><b class="ok">ALLOWED</b></span></div>
-          <div class="story-row"><b>validate_backup</b><span><b class="ok">ALLOWED</b></span></div>
-          <div class="story-row"><b>drop_prod_db</b><span><b class="ok">ALLOWED</b></span></div>
+          <div class="story-row" aria-hidden="true"><b>drop_prod_db</b><span><b class="no">BLOCKED</b> <span class="why">backup_validated missing</span></span></div>
+          <div class="story-row" aria-hidden="true"><b>validate_backup</b><span><b class="no">BLOCKED</b> <span class="why">backup_taken missing</span></span></div>
+          <div class="story-row" aria-hidden="true"><b>take_backup</b><span><b class="ok">ALLOWED</b></span></div>
+          <div class="story-row" aria-hidden="true"><b>validate_backup</b><span><b class="ok">ALLOWED</b></span></div>
+          <div class="story-row" aria-hidden="true"><b>drop_prod_db</b><span><b class="ok">ALLOWED</b></span></div>
         </div>
       </div>
     </section>
@@ -3110,8 +3111,9 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         return ctx;
       }
       // A suspended context queues sounds and then plays them all at once, so skip them until the browser allows audio.
+      // It never creates the context itself. Only a click, tap or key press does, so timed motion cannot start audio on its own.
       function ready() {
-        return on && audio().state === 'running';
+        return on && !!ctx && ctx.state === 'running';
       }
       // Mouse, touch and keyboard presses all unlock audio. Capture phase, so the toggle's stopPropagation cannot hide them.
       // livePress remembers whether sound was already playing when this press began, because the unlock below can finish before click fires.
