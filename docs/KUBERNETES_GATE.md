@@ -70,11 +70,13 @@ The package has unit tests for each behavior above. The manifests and the webhoo
 - `/commit` with a wrong token returned 401, and `validate_backup` before `take_backup` returned 409
 - after `take_backup` and `validate_backup` were recorded, the same delete succeeded
 - with the gate scaled to zero, a delete of a labelled PVC failed, because the webhook uses `failurePolicy: Fail`
+- removing the `joltrin.dev/gate` label, and changing or removing the trace id annotation, on a labelled PVC were each refused, while an unrelated annotation was accepted
+- with the gate scaled to zero, an annotation change on a labelled PVC also failed
 
 ## What it does not do
 
 - **Whoever holds the commit token can record a step.** The gate does not check that a backup happened. It checks that something with the token said so. Give the token to the job that takes and validates backups, and not to the agent or workload being controlled. That separation is the control.
-- **Removing the label or the trace id is refused, but only through this webhook.** The webhook also receives `UPDATE` for protected objects and denies any update that removes or changes the `joltrin.dev/gate` label or changes or clears the trace id annotation. That closes the path of patching the label off and then deleting. It does not stop anyone who can edit or delete the `ValidatingWebhookConfiguration` itself, so restrict that with RBAC. This was covered by unit tests only. It has not been run against a real API server yet, and because `UPDATE` now reaches the gate, a protected object cannot be updated while the gate is down.
+- **Removing the label or the trace id is refused, but only through this webhook.** The webhook also receives `UPDATE` for protected objects and denies any update that removes or changes the `joltrin.dev/gate` label or changes or clears the trace id annotation. That closes the path of patching the label off and then deleting. It does not stop anyone who can edit or delete the `ValidatingWebhookConfiguration` itself, so restrict that with RBAC. Because `UPDATE` now reaches the gate, a protected object cannot be updated while the gate is down.
 - **The trace id is an annotation, so it is only as trustworthy as who can write it.** The gate cannot stop someone who can edit the object from pointing it at a trace that is complete. Use RBAC to limit who can set the annotation.
 - **It covers what the policy lists and what the webhook configuration routes to it.** Only objects with the `joltrin.dev/gate` label reach it, and only for the operations and resources in `webhook.yaml`. Anything else is not gated.
 - **State is in memory and the gate runs as one replica.** A restart empties the recorded steps, so steps have to be recorded again before a protected delete is allowed. Two replicas would each hold their own state.
