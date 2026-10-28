@@ -28,6 +28,11 @@ const (
 // TraceAnnotation names the annotation that carries a trace id.
 const TraceAnnotation = "joltrin.dev/trace-id"
 
+// GateLabel is the label that routes an object to the gate. The webhook
+// configuration selects on it, so removing it would take the object out of
+// the gate's reach.
+const GateLabel = "joltrin.dev/gate"
+
 // Rule maps one Kubernetes operation to a runbook step.
 type Rule struct {
 	Group     string `json:"group"`
@@ -113,11 +118,15 @@ type admissionRequest struct {
 		Group    string `json:"group"`
 		Resource string `json:"resource"`
 	} `json:"resource"`
-	OldObject struct {
-		Metadata struct {
-			Annotations map[string]string `json:"annotations"`
-		} `json:"metadata"`
-	} `json:"oldObject"`
+	OldObject objectMeta `json:"oldObject"`
+	Object    objectMeta `json:"object"`
+}
+
+type objectMeta struct {
+	Metadata struct {
+		Annotations map[string]string `json:"annotations"`
+		Labels      map[string]string `json:"labels"`
+	} `json:"metadata"`
 }
 
 type admissionResult struct {
@@ -139,6 +148,16 @@ func (g *Gate) validate(w http.ResponseWriter, r *http.Request) {
 	req := in.Request
 	res := &admissionResult{UID: req.UID, Allowed: true}
 	var traceID string
+	if req.Operation == "UPDATE" {
+		if msg := g.protectionRemoved(req); msg != "" {
+			traceID = req.OldObject.Metadata.Annotations[TraceAnnotation]
+			g.deny(res, msg)
+			g.finish(w, in, res, traceID, true)
+			return
+		}
+		g.finish(w, in, res, traceID, false)
+		return
+	}
 	rule, ok := g.match(req)
 	if !ok {
 		g.finish(w, in, res, traceID, false)
@@ -226,6 +245,32 @@ func (g *Gate) finish(w http.ResponseWriter, in admissionReview, res *admissionR
 func (g *Gate) respond(w http.ResponseWriter, in admissionReview, res *admissionResult) {
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(admissionReview{APIVersion: in.APIVersion, Kind: in.Kind, Response: res})
+}
+
+// covers reports whether the policy has a rule for the request's resource.
+func (g *Gate) covers(req *admissionRequest) bool {
+	for _, r := range g.policy.Rules {
+		if r.Group == req.Resource.Group && r.Resource == req.Resource.Resource {
+			return true
+		}
+	}
+	return false
+}
+
+// protectionRemoved explains why an UPDATE must be refused: it takes the gate
+// label off a protected object, or changes or clears its trace id. Either one
+// would let the next DELETE skip the check. It returns "" for any other update.
+func (g *Gate) protectionRemoved(req *admissionRequest) string {
+	if !g.covers(req) || req.OldObject.Metadata.Labels[GateLabel] != "enabled" {
+		return ""
+	}
+	if req.Object.Metadata.Labels[GateLabel] != "enabled" {
+		return "the " + GateLabel + " label cannot be removed or changed from a protected object, because that takes it out of the gate's reach"
+	}
+	if old := req.OldObject.Metadata.Annotations[TraceAnnotation]; old != "" && req.Object.Metadata.Annotations[TraceAnnotation] != old {
+		return "the " + TraceAnnotation + " annotation cannot be changed or removed from a protected object, because it names the run the gate checks"
+	}
+	return ""
 }
 
 func (g *Gate) match(req *admissionRequest) (Rule, bool) {
