@@ -55,6 +55,12 @@ jobs:
             CGO_ENABLED=0 GOOS="$os" GOARCH="$arch" \
               go build -trimpath -ldflags="-s -w" -o "dist/sop-mcp-server-${os}-${arch}${ext}" ./cmd/sop-mcp-server
           done
+          # A gzipped copy of each Unix binary, about 60% smaller to download. The raw
+          # binaries stay, so installers from earlier releases keep working. -n leaves
+          # the file name and time out of the archive, so the same binary gives the same gzip.
+          for f in dist/sop-mcp-server-darwin-* dist/sop-mcp-server-linux-*; do
+            gzip -9 -n -k "$f"
+          done
           (cd dist && sha256sum sop-mcp-server-* > sop-mcp-server-SHA256SUMS)
           ls -lh dist
 

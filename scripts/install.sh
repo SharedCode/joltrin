@@ -54,19 +54,28 @@ trap 'rm -rf "$tmp"' EXIT
 cd "$tmp"
 
 echo "Downloading $name"
-curl -fsSL -O "$base/$name" -O "$base/sop-mcp-server-SHA256SUMS" || fail "download failed from $base"
+# Newer releases also carry a gzipped copy, about 60% smaller. Older releases only have the raw file.
+file=$name.gz
+curl -fsSL -O "$base/sop-mcp-server-SHA256SUMS" || fail "download failed from $base"
+if ! curl -fsSL -O "$base/$file" 2>/dev/null; then
+  file=$name
+  curl -fsSL -O "$base/$file" || fail "download failed from $base"
+fi
 
 if command -v shasum >/dev/null 2>&1; then sum="shasum -a 256"; else sum=sha256sum; fi
-grep " $name\$" sop-mcp-server-SHA256SUMS > want || fail "$name is not in the checksum file"
+grep " $file\$" sop-mcp-server-SHA256SUMS > want || fail "$file is not in the checksum file"
 $sum -c want >/dev/null 2>&1 || fail "checksum does not match, nothing was installed"
 
 if [ "${JOLTRIN_VERIFY:-}" = 1 ]; then
   command -v gh >/dev/null 2>&1 || fail "JOLTRIN_VERIFY=1 needs the GitHub CLI (gh), signed in with gh auth login"
   echo "Verifying build provenance"
-  gh attestation verify "$name" --repo SharedCode/joltrin >/dev/null 2>&1 ||
+  gh attestation verify "$file" --repo SharedCode/joltrin >/dev/null 2>&1 ||
     fail "build provenance could not be verified, nothing was installed. It needs gh signed in and a release from v5.11.0 on"
 fi
 
+if [ "$file" != "$name" ]; then
+  gzip -dc "$file" > "$name" || fail "could not unpack $file, nothing was installed"
+fi
 mkdir -p "$dest"
 mv "$name" "$dest/sop-mcp-server"
 chmod +x "$dest/sop-mcp-server"
