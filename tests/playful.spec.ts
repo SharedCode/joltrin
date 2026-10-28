@@ -116,3 +116,25 @@ test.describe('Agents page Pro link', () => {
     expect(await page.evaluate(() => (window as any).__events)).toContain('pro_click');
   });
 });
+
+test.describe('Agents page inquiry form', () => {
+  test('a submitted inquiry records inquiry_submit with the tier and no personal data', async ({ page }) => {
+    await page.route('**/plausible.io/**', (route) => route.abort());
+    await page.route('**/api/billing/enterprise-contact', (route) => route.fulfill({ status: 200, body: '{}' }));
+    await page.addInitScript(() => {
+      (window as any).__events = [];
+      (window as any).plausible = (name: string, opts?: unknown) => (window as any).__events.push([name, opts]);
+    });
+    await page.goto('/agents/', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(1500);
+    await page.fill('#interest-form-agents [name="name"]', 'Test Person');
+    await page.fill('#interest-form-agents [name="email"]', 'test@example.com');
+    await page.fill('#interest-form-agents [name="company"]', 'Test Co');
+    await page.selectOption('#inq-tier-agents', 'pro');
+    await page.click('#inq-submit-btn-agents');
+    await expect(page.locator('#agents-form-status-alert')).toContainText('inquiry has been received');
+    const events = await page.evaluate(() => (window as any).__events);
+    expect(events).toContainEqual(['inquiry_submit', { props: { tier: 'pro' } }]);
+    expect(JSON.stringify(events)).not.toContain('test@example.com');
+  });
+});
