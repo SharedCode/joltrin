@@ -6,6 +6,7 @@
   X-Frame-Options: SAMEORIGIN
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   Strict-Transport-Security: max-age=31536000
+  Content-Security-Policy: base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'
 
 # Preview and workers.dev hostnames must never be indexed.
 https://:name.:account.workers.dev/*
