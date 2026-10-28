@@ -40,6 +40,13 @@
   <meta property="twitter:title" content="Joltrin Arena: B-Tree Challenge | Joltrin" />
   <meta property="twitter:description" content="Guess, run, and see where Joltrin's B-tree speeds up, slows down, and where it stops. Measured on your device." />
   <meta property="twitter:image" content="https://joltrinhq.com/btree/og-image.png" />
+  <style>
+    /* Touch screens: header and menu controls reach the 44px minimum target size. */
+    @media (pointer: coarse) {
+      header a, header button, header summary, #mobile-menu-panel a, #mobile-menu-panel button { min-height: 44px; }
+      header a, header button { min-width: 44px; justify-content: center; }
+    }
+  </style>
 </head>
 <body class="bg-dark-950 text-slate-300 font-sans antialiased">
   <a href="#game" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-dark-900 focus:text-white focus:px-4 focus:py-2 focus:rounded-lg">Skip to the game</a>

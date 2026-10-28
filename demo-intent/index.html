@@ -128,6 +128,13 @@
   "description": "Give agents your operating rules without handing over your private context. A risky action is blocked until signed evidence and the right approval exist, then a signed receipt is issued."
 }
   </script>
+  <style>
+    /* Touch screens: header and menu controls reach the 44px minimum target size. */
+    @media (pointer: coarse) {
+      header a, header button, header summary, #mobile-menu-panel a, #mobile-menu-panel button { min-height: 44px; }
+      header a, header button { min-width: 44px; justify-content: center; }
+    }
+  </style>
 </head>
 <body class="font-sans antialiased selection:bg-brand-500 selection:text-black min-h-screen flex flex-col">
 

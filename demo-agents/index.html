@@ -99,6 +99,14 @@
     footer ul a { display: inline-block; padding-block: .3rem; }
     footer ul a.flex { display: flex; }
   </style>
+  <style>
+    /* Touch screens: header and menu controls reach the 44px minimum target size. */
+    @media (pointer: coarse) {
+      header a, header button, header summary, #mobile-menu-panel a, #mobile-menu-panel button { min-height: 44px; }
+      header a, header button { min-width: 44px; justify-content: center; }
+      main button, main a[class*="rounded-"][class*="px-"] { min-height: 44px; }
+    }
+  </style>
 </head>
 <body class="font-sans antialiased selection:bg-brand-500 selection:text-black min-h-screen flex flex-col">
 
@@ -119,7 +127,7 @@
       </div>
 
       <!-- Funnel Navigation Links -->
-      <nav class="hidden md:flex items-center space-x-1 text-xs font-mono">
+      <nav class="hidden min-[1200px]:flex items-center space-x-1 text-xs font-mono">
         <a href="../" class="px-2.5 py-1.5 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-slate-200 transition">
           <span>Overview</span>
         </a>
@@ -147,7 +155,7 @@
       </nav>
 
       <!-- WASM Telemetry Pill -->
-      <div class="hidden lg:flex items-center space-x-3 bg-dark-850 px-3 py-1.5 rounded-full border border-dark-700 text-xs font-mono">
+      <div class="hidden 2xl:flex items-center space-x-3 bg-dark-850 px-3 py-1.5 rounded-full border border-dark-700 text-xs font-mono">
         <div class="flex items-center space-x-1.5">
           <span id="wasm-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
           <span id="wasm-status-text" class="text-amber-300 font-medium">Loading WASM...</span>
@@ -172,17 +180,17 @@
           <span class="hidden sm:inline">GitHub</span>
         </a>
 
-        <!-- Mobile Menu Toggle: the Funnel Navigation Links above are md:flex-only,
+        <!-- Mobile Menu Toggle: the Funnel Navigation Links above are 1200px-and-up only,
              this is the only way to reach Overview, Arena, Docs, Pricing, or Enterprise below that breakpoint. -->
         <button onclick="toggleMobileMenu()" aria-label="Toggle navigation menu" aria-expanded="false" id="mobile-menu-btn"
-                class="md:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-slate-300 transition">
+                class="min-[1200px]:hidden w-11 h-11 flex items-center justify-center rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-slate-300 transition">
           <span id="mobile-menu-icon" class="text-lg leading-none">☰</span>
         </button>
       </div>
     </div>
 
     <!-- Mobile Nav Panel: same destinations as the Funnel Navigation Links above, stacked for a narrow viewport. -->
-    <nav id="mobile-menu-panel" class="hidden md:hidden border-t border-dark-800 bg-dark-900 px-4 py-3 space-y-1 text-sm font-mono">
+    <nav id="mobile-menu-panel" class="hidden min-[1200px]:hidden border-t border-dark-800 bg-dark-900 px-4 py-3 space-y-1 text-sm font-mono">
       <button onclick="openCommandPalette()" class="w-full text-left block px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition">🔍 Search</button>
       <a href="../" class="block px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition">Overview</a>
       <a href="../arena/" class="block px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition">Arena</a>
@@ -314,7 +322,7 @@
             <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/10 text-rose-300 border border-rose-500/20">No barrier</span>
           </div>
           <div class="p-4 rounded-lg bg-dark-900/60 border border-dark-800 font-mono text-xs text-slate-300 space-y-2 mb-3">
-            <div class="flex items-center space-x-2 text-slate-400">
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-slate-400">
               <span>Agent</span>
               <span>──────►</span>
               <span class="text-amber-400">Tool / API</span>
