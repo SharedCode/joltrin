@@ -274,6 +274,11 @@
       --aurora-c: rgba(6, 182, 212, 0.11);
       --scroll-thumb: #22304E;
     }
+    @media (prefers-color-scheme: dark) {
+      /* Separate text and filled-control shades so both keep a contrast margin. */
+      .text-accent-violet { color: #c4b5fd; }
+      .bg-accent-violet { background-color: #6d28d9; }
+    }
     @media (prefers-color-scheme: light) {
       :root {
         color-scheme: light;
