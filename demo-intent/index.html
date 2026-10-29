@@ -44,7 +44,8 @@
     .no-js .rise { opacity: 1; transform: none; }
     .step-card { transition: background-color .25s ease, box-shadow .25s ease; }
     .step-card.is-next { background: #16161c; box-shadow: 0 0 0 1px rgba(52, 211, 153, .55); }
-    .step-btn { transition: background-color .2s ease, opacity .2s ease; }
+    /* A control becomes fully readable as soon as it becomes actionable. */
+    .step-btn { transition: background-color .2s ease; }
     .step-btn:disabled { opacity: .45; cursor: not-allowed; }
     .list-row summary { list-style: none; }
     .list-row summary::-webkit-details-marker { display: none; }
