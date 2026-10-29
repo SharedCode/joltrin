@@ -24,7 +24,7 @@ on:
       - '.node-version'
   pull_request:
     branches: [master]
-    paths: ['.github/workflows/deploy-site.yml', '.node-version']
+    paths: ['.github/workflows/deploy-site.yml', '.node-version', 'scripts/check-deploy-runtime*']
   workflow_dispatch:
     inputs:
       mode:
@@ -43,7 +43,7 @@ concurrency:
 
 jobs:
   deploy-preflight:
-    name: Pinned Wrangler starts on the deploy runtime
+    name: Deploy runtime meets pinned Wrangler requirements
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -51,8 +51,14 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: '.node-version'
-      - name: Start the exact deploy CLI without cloud credentials
-        run: npx --yes wrangler@4.151.3 --version
+      - name: Test the runtime compatibility guard
+        run: node --test scripts/check-deploy-runtime.test.mjs
+      - name: Check registry metadata without executing package code
+        shell: bash
+        run: |
+          set -euo pipefail
+          requirement="$(npm view wrangler@4.151.3 engines.node)"
+          node scripts/check-deploy-runtime.mjs "$requirement"
 
   build-and-package:
     if: github.event_name != 'pull_request'
