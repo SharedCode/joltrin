@@ -22,6 +22,7 @@ on:
       - 'wrangler.jsonc'
       - '.github/workflows/deploy-site.yml'
       - '.node-version'
+      - 'scripts/check-deploy-runtime*'
   pull_request:
     branches: [master]
     paths: ['.github/workflows/deploy-site.yml', '.node-version', 'scripts/check-deploy-runtime*']
@@ -67,10 +68,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup Go Toolchain
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
         with:
           go-version-file: 'go.mod'
           cache: true
@@ -135,7 +136,7 @@ jobs:
           ls -lh intent.wasm wasm_exec.js index.html
 
       - name: Setup Node.js Toolchain
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: '.node-version'
           cache: 'npm'
@@ -158,7 +159,7 @@ jobs:
           ls -lh _site _site/arena _site/agents _site/assets
 
       - name: Upload the assembled site
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: site
           path: _site
@@ -171,14 +172,14 @@ jobs:
     outputs:
       url: ${{ steps.deploy.outputs.url }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: site
           path: _site
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: '.node-version'
           cache: 'npm'
@@ -209,9 +210,9 @@ jobs:
     env:
       SITE_URL: ${{ needs.deploy.outputs.url }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: '.node-version'
           cache: 'npm'
@@ -280,9 +281,9 @@ jobs:
     if: ${{ always() && needs.verify-live.result == 'failure' && (github.event_name != 'workflow_dispatch' || inputs.mode == 'production') }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: '.node-version'
           cache: 'npm'
