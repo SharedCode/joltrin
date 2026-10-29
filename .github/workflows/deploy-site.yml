@@ -21,6 +21,10 @@ on:
       - 'deploy/cloudflare/**'
       - 'wrangler.jsonc'
       - '.github/workflows/deploy-site.yml'
+      - '.node-version'
+  pull_request:
+    branches: [master]
+    paths: ['.github/workflows/deploy-site.yml', '.node-version']
   workflow_dispatch:
     inputs:
       mode:
@@ -38,7 +42,21 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  deploy-preflight:
+    name: Pinned Wrangler starts on the deploy runtime
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version-file: '.node-version'
+      - name: Start the exact deploy CLI without cloud credentials
+        run: npx --yes wrangler@4.151.3 --version
+
   build-and-package:
+    if: github.event_name != 'pull_request'
+    needs: deploy-preflight
     name: Build WASM Demo + SOP Arena, Package Site
     runs-on: ubuntu-latest
     steps:
@@ -113,7 +131,7 @@ jobs:
       - name: Setup Node.js Toolchain
         uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version-file: '.node-version'
           cache: 'npm'
           cache-dependency-path: 'sop-arena/package-lock.json'
 
@@ -156,7 +174,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version-file: '.node-version'
           cache: 'npm'
 
       - name: Deploy
@@ -189,7 +207,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version-file: '.node-version'
           cache: 'npm'
 
       - name: Install test dependencies and browsers
@@ -224,8 +242,8 @@ jobs:
 
       - name: Wait for the live site to answer
         run: |
-          for i in $(seq 1 24); do
-            [ "$(curl -s -o /dev/null -w '%{http_code}' ${SITE_URL}/)" = 200 ] && exit 0
+          for _ in $(seq 1 24); do
+            [ "$(curl -s -o /dev/null -w '%{http_code}' "${SITE_URL}/")" = 200 ] && exit 0
             sleep 5
           done
           echo "Error: ${SITE_URL}/ did not answer 200 within two minutes" >&2
@@ -260,7 +278,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version-file: '.node-version'
           cache: 'npm'
 
       - name: Roll back to the previous version
