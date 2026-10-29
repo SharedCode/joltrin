@@ -2289,7 +2289,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
     const BILLING_API = ['joltrinhq.com', 'www.joltrinhq.com'].includes(location.hostname) ? BILLING_API_HOST : '';
 
     // POSTs JSON and resolves { ok, status, data }. status 0 means the request never got an answer (offline, blocked or timed out).
-    // A network failure, a timeout or a 5xx is tried once more. A 4xx is an answer and is not retried.
+    // A lost response leaves delivery unconfirmed, so POSTs are not retried. A 4xx is an answer and is not retried.
     async function postJson(path, body, timeoutMs) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
