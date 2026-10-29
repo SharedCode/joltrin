@@ -3,6 +3,9 @@ name: ARC smoke test
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   smoke:
     runs-on: [joltrin-bindings-runners]
