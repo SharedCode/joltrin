@@ -193,7 +193,10 @@ test.describe('Homepage', () => {
       await expect(page.getByRole('heading', { level: 2, name: new RegExp(h, 'i') })).toBeVisible();
     }
     await expect(page.locator('main pre').first()).toContainText('missing_state');
-    const unsafe = await page.$$eval('main a[target="_blank"]', (as) => as.filter((a) => !/noopener/.test(a.rel) || !/noreferrer/.test(a.rel)).length);
+    const unsafe = await page.$$eval('main a[target="_blank"]', (as) => as.filter((a) => {
+      const rel = a.getAttribute('rel') ?? '';
+      return !/noopener/.test(rel) || !/noreferrer/.test(rel);
+    }).length);
     expect(unsafe, 'external links must carry rel="noopener noreferrer"').toBe(0);
   });
 
@@ -262,7 +265,7 @@ test.describe('Homepage', () => {
     expect(home).toContain('It checks the recorded trace, not the world.');
     const agents = await (await request.get('/agents/')).text();
     const og = agents.match(/property="og:title" content="([^"]+)"/)?.[1];
-    const tw = agents.match(/property="twitter:title" content="([^"]+)"/)?.[1];
+    const tw = agents.match(/name="twitter:title" content="([^"]+)"/)?.[1];
     expect(tw).toBe(og);
   });
 
