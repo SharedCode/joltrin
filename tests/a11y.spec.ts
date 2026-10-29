@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { createRequire } from 'node:module';
+import { waitForWasmReady } from './helpers/wasm-lifecycle';
 
 /**
  * Every page passes the automated WCAG 2 A and AA checks, in the dark and the
@@ -17,7 +18,7 @@ for (const scheme of ['dark', 'light'] as const) {
     for (const path of PAGES) {
       test(`${path} has no WCAG A or AA violations`, async ({ page }) => {
         await page.goto(path, { waitUntil: 'load' });
-        await page.waitForTimeout(1200);
+        await waitForWasmReady(page);
         await page.addScriptTag({ path: axePath });
         const result = await page.evaluate(async () =>
           // @ts-expect-error axe is injected above

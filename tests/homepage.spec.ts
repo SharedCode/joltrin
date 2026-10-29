@@ -22,6 +22,26 @@ test.describe('Homepage', () => {
     expect(fits, 'the headline fits the viewport').toBe(true);
   });
 
+  test('headline and the one primary action are in the first screen, and the engine is not preloaded', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const vh = page.viewportSize()!.height;
+    const h1 = await page.getByRole('heading', { level: 1 }).boundingBox();
+    expect(h1!.y + h1!.height, 'the headline ends inside the first screen').toBeLessThan(vh);
+    const cta = await page.getByRole('link', { name: /try to make an agent drop a database/i }).boundingBox();
+    expect(cta!.y + cta!.height, 'the primary action ends inside the first screen').toBeLessThan(vh);
+    await expect(page.locator('link[rel="preload"][href$="sop.wasm"]')).toHaveCount(0);
+  });
+
+  test('the 6 MB engine downloads only after the visitor interacts', async ({ page }) => {
+    let fetched = 0;
+    await page.route('**/sop.wasm', (route) => { fetched++; route.continue(); });
+    await page.goto('/', { waitUntil: 'load' });
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    expect(fetched, 'no engine download before any interaction').toBe(0);
+    await page.getByRole('link', { name: /try to make an agent drop a database/i }).hover();
+    await expect.poll(() => fetched).toBeGreaterThan(0);
+  });
+
   test('nothing covers the hero when the icon CDN is unreachable', async ({ page }) => {
     // The boot overlay once stayed up for good after the icon script failed to load,
     // and the homepage was a black screen that still answered 200.
@@ -29,8 +49,6 @@ test.describe('Homepage', () => {
     await page.goto('/', { waitUntil: 'load' });
     const h1 = page.getByRole('heading', { level: 1 });
     await expect(h1).toBeAttached();
-    // The scroll story sits above the hero, so bring the headline into view first.
-    await h1.scrollIntoViewIfNeeded();
     await expect(h1).toBeVisible();
     await expect
       .poll(
@@ -81,21 +99,26 @@ test.describe('Homepage', () => {
 
   test('the page does not lead with database or infrastructure claims', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
-    const hero = (await page.locator('main section').first().innerText()).toLowerCase();
+    const hero = (await page.locator('#start').innerText()).toLowerCase();
     for (const phrase of ['future of databases', 'ai-native', 'autonomous agent platform']) {
       expect(hero).not.toContain(phrase);
     }
   });
 
-  test('intro video sits below the hero and autoplays muted', async ({ page }) => {
+  test('intro video is a click-to-play thumbnail that loads YouTube only on click', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const play = page.locator('#demo-video-play');
+    await expect(page.locator('#demo-video iframe')).toHaveCount(0);
+    await play.scrollIntoViewIfNeeded();
+    await expect(page.locator('#demo-video iframe')).toHaveCount(0);
+    const playY = (await play.boundingBox())!.y + (await page.evaluate(() => window.scrollY));
+    const heroY = (await page.getByRole('heading', { level: 1 }).boundingBox())!.y + (await page.evaluate(() => window.scrollY));
+    expect(playY).toBeGreaterThan(heroY);
+    await page.route('**/youtube-nocookie.com/**', (route) => route.fulfill({ status: 200, contentType: 'text/html', body: '' }));
+    await play.click();
     const frame = page.locator('iframe[title="Joltrin intro video"]');
-    await expect(frame).not.toHaveAttribute('src', /./);
-    await frame.scrollIntoViewIfNeeded();
-    await expect(frame).toHaveAttribute('src', /youtube-nocookie\.com\/embed\/WZbz868nTi4\?.*autoplay=1.*mute=1/);
-    const frameY = (await frame.boundingBox())!.y;
-    const heroY = (await page.getByRole('heading', { level: 1 }).boundingBox())!.y;
-    expect(frameY).toBeGreaterThan(heroY);
+    await expect(frame).toHaveAttribute('src', /youtube-nocookie\.com\/embed\/WZbz868nTi4\?.*autoplay=1/);
+    expect(await frame.getAttribute('src')).not.toMatch(/loop=1/);
   });
 
   test('header has a Watch demo button that jumps to the video', async ({ page }) => {
@@ -103,7 +126,7 @@ test.describe('Homepage', () => {
     const btn = page.locator('#watch-demo-btn');
     await expect(btn).toBeVisible();
     await expect(btn).toHaveAttribute('href', '#demo-video');
-    await expect(page.locator('#demo-video iframe')).toHaveCount(1);
+    await expect(page.locator('#demo-video-play')).toHaveCount(1);
   });
 
   test('explains how to test the barrier with your own AI agent', async ({ page }) => {
@@ -258,11 +281,11 @@ test.describe('Homepage', () => {
   test('share preview text matches the hero on the homepage and the agents page', async ({ request }) => {
     const home = await (await request.get('/')).text();
     expect(home).toContain('property="og:title" content="Your AI agent wants to delete production.');
-    expect(home).toContain('property="twitter:title" content="Your AI agent wants to delete production.');
+    expect(home).toContain('name="twitter:title" content="Your AI agent wants to delete production.');
     expect(home).toContain('It checks the recorded trace, not the world.');
     const agents = await (await request.get('/agents/')).text();
     const og = agents.match(/property="og:title" content="([^"]+)"/)?.[1];
-    const tw = agents.match(/property="twitter:title" content="([^"]+)"/)?.[1];
+    const tw = agents.match(/name="twitter:title" content="([^"]+)"/)?.[1];
     expect(tw).toBe(og);
   });
 
@@ -285,8 +308,12 @@ test.describe('Homepage', () => {
       await expect(page.locator('html')).toHaveClass(/js-story/);
 
       const total = await page.locator('.story-words .w').count();
-      const introHeight = await page.locator('.story-intro').evaluate((el) => (el as HTMLElement).offsetHeight);
-      await page.evaluate((y) => window.scrollTo(0, y), introHeight * 0.9);
+      // The story sits below the hero, so scroll relative to where it starts.
+      const [storyTop, introHeight] = await page.locator('.story-intro').evaluate((el) => [
+        el.getBoundingClientRect().top + window.scrollY,
+        (el as HTMLElement).offsetHeight,
+      ]);
+      await page.evaluate((y) => window.scrollTo(0, y), storyTop + introHeight * 0.9);
       await expect.poll(() => page.locator('.story-words .w.lit').count()).toBe(total);
 
       const pin = page.locator('.story-pin');
@@ -313,9 +340,10 @@ test.describe('Homepage', () => {
       const hint = page.locator('#story-hint');
       await expect(hint).toBeVisible();
       await expect(hint).toContainText('Scroll down to continue');
-      await page.evaluate(() => window.scrollTo(0, 200));
+      const storyTop = await page.locator('.story-intro').evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
+      await page.evaluate((y) => window.scrollTo(0, y), storyTop + 200);
       await expect(hint).toHaveClass(/gone/);
-      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.evaluate((y) => window.scrollTo(0, y), storyTop);
       await expect(hint).not.toHaveClass(/gone/);
     });
 
@@ -333,9 +361,9 @@ test.describe('Homepage', () => {
     });
   });
 
-  test('hero is fully opaque when it first comes into view below the scroll story', async ({ page }) => {
+  test('the first section after the scroll story is fully opaque when it comes into view', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
-    await page.locator('h1').scrollIntoViewIfNeeded();
+    await page.locator('main > section').first().scrollIntoViewIfNeeded();
     await page.evaluate(() => window.scrollBy(0, -100));
     await expect
       .poll(() => page.locator('main > section').first().evaluate((el) => Number(getComputedStyle(el).opacity)))

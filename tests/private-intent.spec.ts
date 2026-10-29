@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { nextFrames } from './helpers/wasm-lifecycle';
 
 /**
  * The Private Intent demo runs the real intent package in WebAssembly.
@@ -432,7 +433,7 @@ test.describe('Share a run', () => {
   for (const [label, hash] of [['unknown letters', '#run=QQQ'], ['markup', '#run=A%3Cscript%3E'], ['lower case', '#run=aba'], ['too many steps', '#run=' + 'A'.repeat(41)]]) {
     test(`a link with ${label} is ignored`, async ({ page }) => {
       await ready(page, hash);
-      await page.waitForTimeout(1500);
+      await nextFrames(page, 30);
       await expect(page.locator('#replay-note')).toBeHidden();
       await expect(page.locator('#log li')).toHaveCount(0);
       await expect(page.locator('#banner-title')).toHaveText('READY');

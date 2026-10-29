@@ -17,20 +17,23 @@
   <meta property="og:title" content="Your AI agent wants to delete production. Who is stopping it?" />
   <meta property="og:description" content="Joltrin refuses an AI agent's risky step, like dropping a database, until the steps before it are recorded, and tells the agent what to run first. It checks the recorded trace, not the world. Open source Go. Try it in your browser." />
   <meta property="og:image" content="https://joltrinhq.com/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Joltrin blocks an AI agent from dropping a production database until the backup steps are recorded." />
 
   <!-- Twitter / X -->
-  <meta property="twitter:card" content="summary_large_image" />
-  <meta property="twitter:url" content="https://joltrinhq.com/" />
-  <meta property="twitter:title" content="Your AI agent wants to delete production. Who is stopping it?" />
-  <meta property="twitter:description" content="Joltrin refuses an AI agent's risky step, like dropping a database, until the steps before it are recorded, and tells the agent what to run first. It checks the recorded trace, not the world. Open source Go. Try it in your browser." />
-  <meta property="twitter:image" content="https://joltrinhq.com/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://joltrinhq.com/" />
+  <meta name="twitter:title" content="Your AI agent wants to delete production. Who is stopping it?" />
+  <meta name="twitter:description" content="Joltrin refuses an AI agent's risky step, like dropping a database, until the steps before it are recorded, and tells the agent what to run first. It checks the recorded trace, not the world. Open source Go. Try it in your browser." />
+  <meta name="twitter:image" content="https://joltrinhq.com/og-image.png" />
+  <meta name="twitter:image:alt" content="Joltrin blocks an AI agent from dropping a production database until the backup steps are recorded." />
 
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
   <link rel="alternate icon" href="./favicon.ico" />
 
-  <!-- Start the icon CDN connection and the 6 MB engine download while the HTML is still parsing -->
+  <!-- Start the icon CDN connection while the HTML is still parsing. The 6 MB engine is fetched on first interaction, see startWasmEngine() -->
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
-  <link rel="preload" href="sop.wasm" as="fetch" type="application/wasm" crossorigin>
 
   <!-- Built by scripts/build-css.sh from this page; replaces the Tailwind CDN script -->
   <link rel="stylesheet" href="./tailwind.css" />
@@ -68,7 +71,7 @@
   </script>
 
   <!-- Go WebAssembly Runtime Support -->
-  <script src="wasm_exec.js"></script>
+  <script src="wasm_exec.js" defer></script>
 
   <!--
     OPFS (Origin Private File System) bridge, called from Go via js.Global().Call(...).
@@ -483,13 +486,13 @@
       input:not([type="checkbox"]):not([type="radio"]), select, textarea { min-height: 44px; }
       /* WebKit draws a native dropdown at its own height, so it is drawn by the page here, with its own arrow. */
       select { -webkit-appearance: none; appearance: none; min-height: 44px; padding: 0.5rem 2.25rem 0.5rem 0.75rem; background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1rem; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E"); }
-      main button, main summary, .sound-toggle { min-height: 44px; }
+      main button, main summary, :where(#hero-wrap) button, .sound-toggle { min-height: 44px; }
       /* The Copy button is a full 44 pixel target, so its code box is tall enough to hold it. */
       #quickstart-cmd { min-height: 3.5rem; display: flex; align-items: center; }
       #quickstart-copy { top: 0.375rem; right: 0.375rem; display: flex; }
-      main button:not(.tab-btn):not(.team-tab):not([role="tab"]) { display: inline-flex; align-items: center; justify-content: center; }
-      main a:where(.flex, .inline-flex, .block, .inline-block):not(.hidden) { min-height: 44px; align-items: center; }
-      main a:where(.block, .inline-block) { display: inline-flex; }
+      main button:not(.tab-btn):not(.team-tab):not([role="tab"]), :where(#hero-wrap) button { display: inline-flex; align-items: center; justify-content: center; }
+      main a:where(.flex, .inline-flex, .block, .inline-block):not(.hidden), :where(#hero-wrap) a:where(.flex, .inline-flex, .block, .inline-block):not(.hidden) { min-height: 44px; align-items: center; }
+      main a:where(.block, .inline-block), :where(#hero-wrap) a:where(.block, .inline-block) { display: inline-flex; }
       footer ul a { display: inline-flex; align-items: center; min-height: 44px; }
     }
   </style>
@@ -610,14 +613,14 @@
         </div>
 
         <a href="#demo-video" id="watch-demo-btn"
-           class="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-brand-500 hover:bg-brand-400 text-black text-xs font-bold whitespace-nowrap transition">
+           class="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-xs font-medium text-slate-200 whitespace-nowrap transition">
           <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
           <span class="sm:hidden">Demo</span><span class="hidden sm:inline">Watch demo</span>
         </a>
 
         <button type="button" id="top-pro-btn" onclick="track('pro_click'); openProCheckoutModal()"
-                class="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-black text-xs font-bold whitespace-nowrap shadow-lg shadow-brand-500/20 transition cursor-pointer">
-          <span class="sm:hidden" aria-hidden="true">Pro</span><span class="hidden sm:inline">Request Pro</span><span class="sr-only sm:hidden">Request Pro</span><span class="hidden sm:inline font-mono font-medium">$49/mo</span>
+                class="flex items-center space-x-1.5 px-2 py-1.5 text-slate-300 hover:text-white underline underline-offset-4 decoration-dark-600 text-xs font-medium whitespace-nowrap transition cursor-pointer">
+          <span class="sm:hidden" aria-hidden="true">Pro</span><span class="hidden sm:inline">Request Pro</span><span class="sr-only sm:hidden">Request Pro</span><span class="hidden sm:inline font-mono text-slate-400">$49/mo</span>
         </button>
 
         <button onclick="openCommandPalette()" aria-label="Open command palette"
@@ -677,6 +680,84 @@
     </div>
   </div>
 
+  <!-- Hero: first thing on the page, ahead of the scroll story, so the headline and the one primary action load in the first screen -->
+  <div id="hero-wrap" role="region" aria-label="Introduction" class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 relative z-[2]">
+    <!-- Hero -->
+    <section id="start" class="hero-calm relative mb-16 pt-6 sm:pt-14 scroll-mt-20">
+      <div class="relative z-10 flex flex-col gap-12 min-w-0">
+        <div class="min-w-0 w-full text-center max-w-3xl mx-auto">
+          <p class="text-sm font-medium text-brand-300 mb-5">For teams letting AI agents change infrastructure</p>
+
+          <h1 class="display text-[clamp(2.4rem,6.5vw,4.5rem)] text-white mb-6">
+            Your AI agent wants to delete production.
+            <span class="text-brand-300">Who's stopping it?</span>
+          </h1>
+
+          <p class="text-white font-medium text-lg sm:text-xl leading-relaxed mb-3">
+            Joltrin blocks a risky step, like dropping a database, until the steps before it are recorded, and tells the agent what to do first.</p>
+          <p class="text-slate-400 text-base leading-relaxed mb-8">
+            You put it in front of the one tool you want protected. Your agent asks Joltrin before it acts. Open source and free to try in your browser.
+          </p>
+
+          <div class="flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+            <a href="./agents/"
+               class="px-6 py-3 rounded-full bg-brand-500 hover:bg-brand-400 font-semibold text-sm text-black flex items-center space-x-2 transition">
+              <i data-lucide="shield-check" class="w-4 h-4"></i>
+              <span>Try to make an agent drop a database</span>
+            </a>
+            <a href="#demo-video"
+               class="text-brand-300 hover:text-brand-200 font-medium text-sm flex items-center space-x-2 transition">
+              <i data-lucide="play" class="w-4 h-4 text-brand-400"></i>
+              <span>Watch the short demo</span>
+            </a>
+            <a href="#pricing"
+               class="text-slate-400 hover:text-white underline underline-offset-4 decoration-dark-600 text-sm transition">
+              <span>See Pro</span>
+            </a>
+          </div>
+          <p class="mt-6 text-[11px] font-mono uppercase tracking-wider text-slate-400">MIT licensed &middot; Go &middot; 500+ test files &middot; runs in your browser, no signup</p>
+          <div class="mt-10 min-w-0 w-full text-left max-w-xl mx-auto">
+            <p class="text-xs font-mono uppercase tracking-wider text-slate-400 mb-1.5">Or run it now (Go 1.26.10 or newer)</p>
+            <div class="relative">
+              <pre id="quickstart-cmd" tabindex="0" class="rounded-lg bg-dark-950 border border-dark-700 pl-3 pr-16 py-2 font-mono text-xs text-slate-200 overflow-x-auto"><code>go run github.com/sharedcode/joltrin/v5/examples/verify_barrier@latest</code></pre>
+              <button type="button" id="quickstart-copy" onclick="copyQuickstart(this)" class="absolute right-1.5 top-1.5 px-2 py-0.5 rounded-md bg-dark-800 hover:bg-dark-700 border border-dark-700 text-[11px] font-mono text-slate-300 transition cursor-pointer">Copy</button>
+            </div>
+            <p class="text-xs text-slate-400 mt-1.5">It checks the recorded trace, not the world. <a href="#limits" class="underline text-brand-400 hover:text-brand-300">What this does not prove</a></p>
+            <p class="text-xs text-slate-400 mt-1">No Go installed? <a href="#start-here" class="underline text-brand-400 hover:text-brand-300">Install the MCP server with one command</a> for Claude Code, Codex or Gemini CLI.</p>
+          </div>
+        </div>
+
+        <div class="min-w-0 grid grid-cols-1 md:grid-cols-2 gap-4 items-start max-w-5xl mx-auto w-full">
+        <div id="hero-example" class="min-w-0 rounded-xl bg-dark-950 border border-dark-700 p-4 font-mono text-xs sm:text-sm" aria-label="A blocked, then allowed, sequence">
+          <div class="text-[11px] text-slate-500 uppercase tracking-wider mb-3">// db-maintenance runbook</div>
+          <div class="space-y-1.5 overflow-x-auto" tabindex="0" role="group" aria-label="Runbook decisions">
+            <div class="sm:whitespace-nowrap"><span class="text-white">drop_prod_db</span>     <span class="text-rose-400 font-bold">BLOCKED</span> <span class="text-slate-400">backup_validated missing</span></div>
+            <div class="sm:whitespace-nowrap"><span class="text-white">validate_backup</span>  <span class="text-rose-400 font-bold">BLOCKED</span> <span class="text-slate-400">backup_taken missing</span></div>
+            <div class="sm:whitespace-nowrap"><span class="text-white">take_backup</span>      <span class="text-brand-400 font-bold">ALLOWED</span></div>
+            <div class="sm:whitespace-nowrap"><span class="text-white">validate_backup</span>  <span class="text-brand-400 font-bold">ALLOWED</span></div>
+            <div class="sm:whitespace-nowrap"><span class="text-white">drop_prod_db</span>     <span class="text-brand-400 font-bold">ALLOWED</span></div>
+          </div>
+          <p class="text-xs text-slate-400 mt-3 leading-relaxed font-sans">The order is enforced by the barrier, whatever the agent says it already did.</p>
+        </div>
+
+        <div id="hero-play" class="min-w-0 rounded-xl bg-dark-950 border border-dark-700 p-4">
+          <p class="font-semibold text-white text-sm">Be the agent. Try to drop the database.</p>
+          <p class="text-xs text-slate-400 mt-1">Pick a step. The barrier answers every time, and it does not take your word for anything.</p>
+          <div class="flex flex-wrap gap-2 mt-3">
+            <button type="button" data-step="drop_prod_db" class="min-h-[44px] px-3 rounded-lg bg-rose-950/60 hover:bg-rose-900/60 border border-rose-800/60 text-xs font-mono text-rose-200 font-semibold">drop_prod_db</button>
+            <button type="button" data-step="validate_backup" class="min-h-[44px] px-3 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-xs font-mono text-slate-200">validate_backup</button>
+            <button type="button" data-step="take_backup" class="min-h-[44px] px-3 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-xs font-mono text-slate-200">take_backup</button>
+            <button type="button" data-reset class="min-h-[44px] px-3 rounded-lg text-xs text-slate-400 hover:text-white underline underline-offset-2">Start over</button>
+          </div>
+          <ol id="hero-play-log" aria-live="polite" class="mt-3 font-mono text-xs space-y-1 min-h-[2.5rem]"></ol>
+          <p id="hero-play-score" class="mt-2 text-[11px] text-slate-400"></p>
+          <p class="mt-2 text-xs text-slate-400">These are the same rules, replayed in the page. For the real compiled check, <a href="./agents/" class="underline text-brand-400 hover:text-brand-300">use the agents page</a>.</p>
+        </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
   <!-- Main Container -->
   <!-- Scroll story: the barrier decision sequence, played by scrolling -->
   <div class="story" id="story">
@@ -684,7 +765,7 @@
       <div>
         <p class="story-eyebrow">Independent verification</p>
         <p class="story-words" id="story-line"><span class="w">An</span> <span class="w">agent</span> <span class="w">says</span> <span class="w">it</span> <span class="w">backed</span> <span class="w">up</span> <span class="w">the</span> <span class="w">database.</span> <span class="w">Joltrin</span> <span class="w">checks</span> <span class="w">the</span> <span class="w">record,</span> <span class="w">not</span> <span class="w">the</span> <span class="w">claim.</span></p>
-        <p class="story-hint" id="story-hint">Scroll down to continue <span aria-hidden="true">&darr;</span> <a href="#start" class="underline text-brand-400 hover:text-brand-300 ml-3">Skip to the demo</a></p>
+        <p class="story-hint" id="story-hint">Scroll down to continue <span aria-hidden="true">&darr;</span> <a href="#demo-video" class="underline text-brand-400 hover:text-brand-300 ml-3">Skip to the demo</a></p>
       </div>
     </section>
 
@@ -725,90 +806,20 @@
 
   <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- Hero -->
-    <section id="start" class="hero-calm relative mb-16 pt-6 sm:pt-14 scroll-mt-20">
-      <div class="relative z-10 flex flex-col gap-12 min-w-0">
-        <div class="min-w-0 w-full text-center max-w-3xl mx-auto">
-          <p class="text-sm font-medium text-brand-300 mb-5">For teams letting AI agents change infrastructure</p>
-
-          <h1 class="display text-[clamp(2.4rem,6.5vw,4.5rem)] text-white mb-6">
-            Your AI agent wants to delete production.
-            <span class="text-brand-300">Who's stopping it?</span>
-          </h1>
-
-          <p class="text-white font-medium text-lg sm:text-xl leading-relaxed mb-3">
-            Joltrin blocks a risky step, like dropping a database, until the steps before it are recorded, and tells the agent what to do first.</p>
-          <p class="text-slate-400 text-base leading-relaxed mb-8">
-            You put it in front of the one tool you want protected. Your agent asks Joltrin before it acts. Open source and free to try in your browser.
-          </p>
-
-          <div class="flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
-            <a href="./agents/"
-               class="px-6 py-3 rounded-full bg-brand-500 hover:bg-brand-400 font-semibold text-sm text-black flex items-center space-x-2 transition">
-              <i data-lucide="shield-check" class="w-4 h-4"></i>
-              <span>Try to make an agent drop a database</span>
-            </a>
-            <a href="#demo-video"
-               class="text-brand-300 hover:text-brand-200 font-medium text-sm flex items-center space-x-2 transition">
-              <i data-lucide="play" class="w-4 h-4 text-brand-400"></i>
-              <span>Watch the short demo</span>
-            </a>
-            <a href="#pricing"
-               class="text-slate-300 hover:text-white font-medium text-sm flex items-center space-x-2 transition">
-              <i data-lucide="sparkles" class="w-4 h-4 text-accent-violet"></i>
-              <span>See Pro</span>
-            </a>
-          </div>
-          <p class="mt-6 text-[11px] font-mono uppercase tracking-wider text-slate-400">MIT licensed &middot; Go &middot; 500+ test files &middot; runs in your browser, no signup</p>
-          <div class="mt-10 min-w-0 w-full text-left max-w-xl mx-auto">
-            <p class="text-[11px] font-mono uppercase tracking-wider text-slate-500 mb-1.5">Or run it now (Go 1.26.10 or newer)</p>
-            <div class="relative">
-              <pre id="quickstart-cmd" tabindex="0" class="rounded-lg bg-dark-950 border border-dark-700 pl-3 pr-16 py-2 font-mono text-xs text-slate-200 overflow-x-auto"><code>go run github.com/sharedcode/joltrin/v5/examples/verify_barrier@latest</code></pre>
-              <button type="button" id="quickstart-copy" onclick="copyQuickstart(this)" class="absolute right-1.5 top-1.5 px-2 py-0.5 rounded-md bg-dark-800 hover:bg-dark-700 border border-dark-700 text-[11px] font-mono text-slate-300 transition cursor-pointer">Copy</button>
-            </div>
-            <p class="text-[11px] text-slate-500 mt-1.5">It checks the recorded trace, not the world. <a href="#limits" class="underline text-brand-400 hover:text-brand-300">What this does not prove</a></p>
-            <p class="text-[11px] text-slate-500 mt-1">No Go installed? <a href="#start-here" class="underline text-brand-400 hover:text-brand-300">Install the MCP server with one command</a> for Claude Code, Codex or Gemini CLI.</p>
-          </div>
-        </div>
-
-        <div class="min-w-0 grid grid-cols-1 md:grid-cols-2 gap-4 items-start max-w-5xl mx-auto w-full">
-        <div id="hero-example" class="min-w-0 rounded-xl bg-dark-950 border border-dark-700 p-4 font-mono text-xs sm:text-sm" aria-label="A blocked, then allowed, sequence">
-          <div class="text-[11px] text-slate-500 uppercase tracking-wider mb-3">// db-maintenance runbook</div>
-          <div class="space-y-1.5 overflow-x-auto" tabindex="0" role="group" aria-label="Runbook decisions">
-            <div class="sm:whitespace-nowrap"><span class="text-white">drop_prod_db</span>     <span class="text-rose-400 font-bold">BLOCKED</span> <span class="text-slate-400">backup_validated missing</span></div>
-            <div class="sm:whitespace-nowrap"><span class="text-white">validate_backup</span>  <span class="text-rose-400 font-bold">BLOCKED</span> <span class="text-slate-400">backup_taken missing</span></div>
-            <div class="sm:whitespace-nowrap"><span class="text-white">take_backup</span>      <span class="text-brand-400 font-bold">ALLOWED</span></div>
-            <div class="sm:whitespace-nowrap"><span class="text-white">validate_backup</span>  <span class="text-brand-400 font-bold">ALLOWED</span></div>
-            <div class="sm:whitespace-nowrap"><span class="text-white">drop_prod_db</span>     <span class="text-brand-400 font-bold">ALLOWED</span></div>
-          </div>
-          <p class="text-[11px] text-slate-500 mt-3 leading-relaxed font-sans">The order is enforced by the barrier, whatever the agent says it already did.</p>
-        </div>
-
-        <div id="hero-play" class="min-w-0 rounded-xl bg-dark-950 border border-dark-700 p-4">
-          <p class="font-semibold text-white text-sm">Be the agent. Try to drop the database.</p>
-          <p class="text-xs text-slate-400 mt-1">Pick a step. The barrier answers every time, and it does not take your word for anything.</p>
-          <div class="flex flex-wrap gap-2 mt-3">
-            <button type="button" data-step="drop_prod_db" class="min-h-[44px] px-3 rounded-lg bg-rose-950/60 hover:bg-rose-900/60 border border-rose-800/60 text-xs font-mono text-rose-200 font-semibold">drop_prod_db</button>
-            <button type="button" data-step="validate_backup" class="min-h-[44px] px-3 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-xs font-mono text-slate-200">validate_backup</button>
-            <button type="button" data-step="take_backup" class="min-h-[44px] px-3 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-xs font-mono text-slate-200">take_backup</button>
-            <button type="button" data-reset class="min-h-[44px] px-3 rounded-lg text-xs text-slate-400 hover:text-white underline underline-offset-2">Start over</button>
-          </div>
-          <ol id="hero-play-log" aria-live="polite" class="mt-3 font-mono text-xs space-y-1 min-h-[2.5rem]"></ol>
-          <p id="hero-play-score" class="mt-2 text-[11px] text-slate-400"></p>
-          <p class="mt-2 text-[11px] text-slate-500">These are the same rules, replayed in the page. For the real compiled check, <a href="./agents/" class="underline text-brand-400 hover:text-brand-300">use the agents page</a>.</p>
-        </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Intro video (muted so browsers allow autoplay) -->
+    <!-- Intro video: a click-to-play thumbnail. The YouTube player (about 5 MB of scripts) loads only when the visitor presses play. -->
     <section id="demo-video" aria-label="Joltrin intro video" class="scroll-mt-20 mb-8 rounded-2xl overflow-hidden border border-dark-700/80 bg-dark-900">
       <div class="relative w-full" style="aspect-ratio:16/9">
-        <iframe class="absolute inset-0 w-full h-full"
-          data-src="https://www.youtube-nocookie.com/embed/WZbz868nTi4?autoplay=1&mute=1&loop=1&playlist=WZbz868nTi4&playsinline=1&rel=0"
-          title="Joltrin intro video"
-          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-          referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        <button type="button" id="demo-video-play" data-embed="https://www.youtube-nocookie.com/embed/WZbz868nTi4?autoplay=1&playsinline=1&rel=0"
+          aria-label="Play the Joltrin intro video"
+          class="absolute inset-0 w-full h-full group cursor-pointer bg-dark-950">
+          <img src="https://i.ytimg.com/vi/WZbz868nTi4/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"
+            class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition" />
+          <span class="absolute inset-0 flex items-center justify-center">
+            <span class="w-16 h-16 rounded-full bg-brand-500 group-hover:bg-brand-400 text-black flex items-center justify-center transition">
+              <svg viewBox="0 0 24 24" fill="currentColor" class="w-7 h-7" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            </span>
+          </span>
+        </button>
       </div>
     </section>
 
@@ -2264,30 +2275,86 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
   <script>
     let selectedBenchOps = 5000;
 
+    // The one place the billing API host is named. Only the production site calls it cross-origin.
+    const BILLING_API_HOST = 'https://joltrin-app.livelybay-0f85ed7b.eastus.azurecontainerapps.io';
+    const BILLING_API = ['joltrinhq.com', 'www.joltrinhq.com'].includes(location.hostname) ? BILLING_API_HOST : '';
+
+    // POSTs JSON and resolves { ok, status, data }. status 0 means the request never got an answer (offline, blocked or timed out).
+    // A network failure, a timeout or a 5xx is tried once more. A 4xx is an answer and is not retried.
+    async function postJson(path, body, timeoutMs, retries) {
+      let last = { ok: false, status: 0, data: null };
+      for (let attempt = 0; attempt <= retries; attempt++) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+          const res = await fetch(BILLING_API + path, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+            signal: controller.signal
+          });
+          let data = null;
+          try { data = await res.json(); } catch (_) {}
+          last = { ok: res.ok, status: res.status, data };
+          if (res.ok || res.status < 500) return last;
+        } catch (_) {
+          last = { ok: false, status: 0, data: null };
+        } finally {
+          clearTimeout(timer);
+        }
+      }
+      return last;
+    }
+
     // Anything a visitor typed goes through this before it is placed in markup.
     function escapeHtml(v) { return String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }
 
-    // The intro video player is about 5 MB of scripts. It starts once the video is
-    // within a screen of the viewport, so a visitor who never scrolls to it never
-    // downloads it. Without IntersectionObserver it starts after the page loads.
-    window.addEventListener("load", () => {
-      const frame = document.querySelector('#demo-video iframe[data-src]');
-      if (!frame) return;
-      const start = () => { frame.src = frame.dataset.src; };
-      if (!('IntersectionObserver' in window)) return start();
-      const io = new IntersectionObserver((entries) => {
-        if (entries.some((e) => e.isIntersecting)) { io.disconnect(); start(); }
-      }, { rootMargin: '600px 0px' });
-      io.observe(frame);
+    // The intro video player is about 5 MB of scripts. It loads only when the visitor presses play.
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest && e.target.closest('#demo-video-play');
+      if (!btn) return;
+      const frame = document.createElement('iframe');
+      frame.className = 'absolute inset-0 w-full h-full';
+      frame.src = btn.dataset.embed;
+      frame.title = 'Joltrin intro video';
+      frame.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+      frame.referrerPolicy = 'strict-origin-when-cross-origin';
+      frame.setAttribute('allowfullscreen', '');
+      btn.replaceWith(frame);
+      frame.focus();
+      track('demo_video_play');
     });
 
     // Initialize Lucide Icons
     document.addEventListener("DOMContentLoaded", () => {
-      // Start the engine first so a slow icon CDN cannot hold it up.
-      initWasmEngine();
+      // The engine (about 6 MB) starts on the first interaction, or when a section that needs it scrolls near. Hovering a call to action counts.
+      armWasmEngine();
       if (window.lucide) lucide.createIcons();
       else console.error('Lucide icon library failed to load from unpkg.com; icons will not render.');
     });
+
+    // Starts the engine once. Triggers: first pointer, key or touch input, hover or focus on a call to action,
+    // or the live engine sections scrolling within a screen of the viewport. Without IntersectionObserver it starts on load.
+    let wasmStarted = false;
+    function startWasmEngine() {
+      if (wasmStarted) return;
+      wasmStarted = true;
+      initWasmEngine();
+    }
+    function armWasmEngine() {
+      ['pointerdown', 'keydown', 'touchstart', 'wheel'].forEach((ev) => {
+        document.addEventListener(ev, startWasmEngine, { once: true, passive: true });
+      });
+      ['pointerover', 'focusin'].forEach((ev) => {
+        document.addEventListener(ev, (e) => { if (e.target.closest && e.target.closest('a, button')) startWasmEngine(); }, { passive: true });
+      });
+      const live = document.getElementById('under-the-hood') || document.getElementById('durable-memory');
+      if (!('IntersectionObserver' in window) || !live) return startWasmEngine();
+      const io = new IntersectionObserver((entries) => {
+        if (entries.some((e) => e.isIntersecting)) { io.disconnect(); startWasmEngine(); }
+      }, { rootMargin: '800px 0px' });
+      io.observe(live);
+    }
 
     // WASM Engine Initializer
     async function initWasmEngine() {
@@ -2741,27 +2808,13 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         // local storage may be restricted in some iframe contexts
       }
 
-      let serverSuccess = false;
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3500);
-        const apiBase = ['joltrinhq.com', 'www.joltrinhq.com'].includes(location.hostname) ? 'https://joltrin-app.livelybay-0f85ed7b.eastus.azurecontainerapps.io' : '';
-        const res = await fetch(apiBase + '/api/billing/enterprise-contact', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        if (res.ok) {
-          serverSuccess = true;
-        }
-      } catch (netErr) {
-        // The server was unreachable or slow. The email fallback below covers it.
-      }
+      const result = await postJson('/api/billing/enterprise-contact', payload, 8000, 1);
+      const serverSuccess = result.ok;
 
       submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>Inquiry Sent</span>';
+      submitBtn.innerHTML = serverSuccess
+        ? '<i data-lucide="check" class="w-4 h-4"></i><span>Inquiry Sent</span>'
+        : '<i data-lucide="alert-triangle" class="w-4 h-4"></i><span>Not Sent, Try Again</span>';
       lucide.createIcons();
 
       const mailtoSubject = encodeURIComponent(`Joltrin ${payload.tier.toUpperCase()} Inquiry - ${payload.company}`);
@@ -2795,7 +2848,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         ` : `
           <div class="flex items-center space-x-2 text-amber-400 font-bold text-sm">
             <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-            <span>${escapeHtml(payload.name)}, this form can't reach our server right now.</span>
+            <span>${escapeHtml(payload.name)}, ${result.status === 0 ? "this form can't reach our server right now." : 'our server rejected this inquiry (error ' + result.status + ').'}</span>
           </div>
           <p class="text-slate-300 leading-relaxed">
             Nothing was sent yet. Click below to email it directly instead. Your answers are saved on this device either way.
@@ -2814,7 +2867,8 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         statusAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
 
-      form.reset();
+      // Keep the answers in the form when nothing was sent, so a retry does not mean typing it all again.
+      if (serverSuccess) form.reset();
     }
 
     // ===== Joltrin Pro Checkout & Modal Handlers =====
@@ -2864,41 +2918,25 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
       btnText.innerText = 'Creating Checkout Session...';
 
       let redirectUrl = null;
-      let sessionData = null;
-
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000);
-        const apiBase = ['joltrinhq.com', 'www.joltrinhq.com'].includes(location.hostname) ? 'https://joltrin-app.livelybay-0f85ed7b.eastus.azurecontainerapps.io' : '';
-        const res = await fetch(apiBase + '/api/billing/public-checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            tier: 'pro',
-            workspace_name: workspace,
-            email: email,
-            billing_cycle: cycle
-          }),
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data.checkout_url) {
-            redirectUrl = data.checkout_url;
-          } else if (data.session_id) {
-            sessionData = data;
-          }
-        }
-      } catch (err) {
-        // Backend offline or static site environment fallback
-      }
+      const result = await postJson('/api/billing/public-checkout', {
+        tier: 'pro',
+        workspace_name: workspace,
+        email: email,
+        billing_cycle: cycle
+      }, 15000, 0);
+      if (result.ok && result.data && result.data.checkout_url) redirectUrl = result.data.checkout_url;
 
       if (redirectUrl) {
         window.location.href = redirectUrl;
         return;
       }
+
+      // Say why there is no checkout: the service did not answer, it answered with an error, or it answered with no checkout link.
+      const reason = result.status === 0
+        ? 'The billing service did not respond.'
+        : result.ok
+          ? 'The billing service did not return a checkout link.'
+          : 'The billing service returned an error (' + result.status + ').';
 
       // No billing backend reachable from this static site (e.g. this is the
       // GitHub Pages deployment, which serves static files only). Be honest
@@ -2920,7 +2958,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
             <span>Online checkout isn't available on this site yet</span>
           </div>
           <p class="text-slate-300 leading-relaxed">
-            Pro is design-partner access today, and self-serve checkout is not open yet. Email us your workspace name and we'll set up <strong class="text-white font-mono">${escapeHtml(workspace)}</strong> on the $49/month plan directly.
+            ${reason} Pro is design-partner access today, and self-serve checkout is not open yet. Email us your workspace name and we'll set up <strong class="text-white font-mono">${escapeHtml(workspace)}</strong> on the $49/month plan directly.
           </p>
           <div class="pt-1 flex items-center justify-between">
             <a href="${mailtoLink}" class="px-3 py-1.5 rounded-lg bg-brand-500 text-black font-bold text-[11px] flex items-center space-x-1.5">
@@ -2939,7 +2977,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
       // instead of emailing.
       try {
         const stored = JSON.parse(localStorage.getItem('joltrin_pro_orders') || '[]');
-        stored.push({ workspace, email, cycle, date: new Date().toISOString(), backendReached: false });
+        stored.push({ workspace, email, cycle, date: new Date().toISOString(), backendReached: result.status !== 0, status: result.status });
         localStorage.setItem('joltrin_pro_orders', JSON.stringify(stored));
       } catch (_) {}
     }
@@ -3008,7 +3046,6 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         });
       }, { threshold: 0.06, rootMargin: '0px 0px -8% 0px' });
       targets.forEach(function (el, i) {
-        if (i === 0) return; // the hero moves with scroll instead
         el.classList.add('reveal');
         io.observe(el);
       });
@@ -3019,7 +3056,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         card.style.setProperty('--reveal-delay', (i * 90) + 'ms');
       });
 
-      var hero = document.querySelector('main > section');
+      var hero = document.getElementById('start');
       var bar = document.querySelector('.scroll-progress');
       var ticking = false;
       function frame() {
@@ -3070,10 +3107,10 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
       }, 600);
       function frame() {
         ticking = false;
-        if (hint) hint.classList.toggle('gone', window.scrollY > 40);
         var vh = window.innerHeight;
         // Words: lit across the pinned intro track.
         var r = intro.getBoundingClientRect();
+        if (hint) hint.classList.toggle('gone', r.top < -40);
         var p = Math.min(1, Math.max(0, (-r.top - vh * 0.05) / (vh * 0.5)));
         var lit = Math.max(Math.round(p * words.length), timed);
         words.forEach(function (w, i) { w.classList.toggle('lit', i < lit); });

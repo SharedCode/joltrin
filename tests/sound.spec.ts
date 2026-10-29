@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { nextFrames } from './helpers/wasm-lifecycle';
 
 /**
  * The homepage sound layer is on by default and can be turned off. It plays
@@ -58,16 +59,15 @@ test.describe('Homepage sound toggle', () => {
     await expect(toggle).toHaveText('Sound off');
     await page.evaluate(() => { (window as any).__oscillators = 0; });
     await page.evaluate(() => window.scrollBy(0, 4000));
-    await page.waitForTimeout(600);
+    await nextFrames(page);
     expect(await page.evaluate(() => (window as any).__oscillators)).toBe(0);
 
     await toggle.click();
     await page.evaluate(() => { (window as any).__oscillators = 0; });
     await page.evaluate(() => window.scrollTo(0, 0));
-    await page.waitForTimeout(200);
+    await nextFrames(page);
     await page.evaluate(() => window.scrollBy(0, 4000));
-    await page.waitForTimeout(800);
-    expect(await page.evaluate(() => (window as any).__oscillators)).toBeGreaterThan(0);
+    await expect.poll(() => page.evaluate(() => (window as any).__oscillators)).toBeGreaterThan(0);
   });
 });
 
@@ -104,16 +104,15 @@ test.describe('Homepage sound under the browser autoplay policy', () => {
     await expect(toggle).toHaveText('Tap for sound');
     // Scrolling is not a click, tap or key press, so the browser keeps audio locked.
     await page.evaluate(() => window.scrollBy(0, 4000));
-    await page.waitForTimeout(600);
+    await nextFrames(page);
     expect(await page.evaluate(() => (window as any).__oscillators)).toBe(0);
     await toggle.click();
     await expect(toggle).toHaveText('Sound on');
     await page.evaluate(() => { (window as any).__oscillators = 0; });
     await page.evaluate(() => window.scrollTo(0, 0));
-    await page.waitForTimeout(200);
+    await nextFrames(page);
     await page.evaluate(() => window.scrollBy(0, 4000));
-    await page.waitForTimeout(800);
-    expect(await page.evaluate(() => (window as any).__oscillators)).toBeGreaterThan(0);
+    await expect.poll(() => page.evaluate(() => (window as any).__oscillators)).toBeGreaterThan(0);
   });
 
   test('a click anywhere on the page unlocks audio and the banner follows', async ({ page }) => {
@@ -170,7 +169,7 @@ test.describe('Homepage sound when the browser refuses audio', () => {
     await page.locator('.sound-toggle').click();
     await page.locator('.sound-toggle').click();
     await page.evaluate(() => window.scrollBy(0, 4000));
-    await page.waitForTimeout(600);
+    await nextFrames(page);
     expect(errors).toEqual([]);
     expect(await page.evaluate(() => (window as any).__oscillators)).toBe(0);
   });
