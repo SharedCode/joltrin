@@ -10,6 +10,10 @@ on:
       - 'demo-btree/**'
       - 'demo-intent/**'
       - 'intent/**'
+      - 'verify/**'
+      - 'inmemory/**'
+      - 'go.mod'
+      - 'go.sum'
       - 'docs/assets/**'
       - 'docs/index.html'
       - 'scripts/assemble-site.sh'
@@ -153,6 +157,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Deploy
         id: deploy
@@ -162,12 +167,12 @@ jobs:
           MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'production' }}
         run: |
           if [ "$MODE" = production ]; then
-            npx --yes wrangler@4 deploy
+            npx --yes wrangler@4.151.3 deploy
             echo "url=https://joltrinhq.com" >> "$GITHUB_OUTPUT"
           else
             # Wrangler writes a JSON line per event to this file, so the URL is read as a field.
             export WRANGLER_OUTPUT_FILE_PATH="$RUNNER_TEMP/wrangler-output.json"
-            npx --yes wrangler@4 versions upload
+            npx --yes wrangler@4.151.3 versions upload
             url=$(jq -r 'select(.type == "version-upload") | .preview_url // empty' "$WRANGLER_OUTPUT_FILE_PATH" | head -1)
             [ -n "$url" ] || { echo "Error: no preview_url in wrangler output" >&2; exit 1; }
             echo "url=$url" >> "$GITHUB_OUTPUT"
@@ -238,3 +243,31 @@ jobs:
           curl -fsS "${SITE_URL}/" -o /tmp/live-index.html
           mkdir -p /tmp/live && cp /tmp/live-index.html /tmp/live/index.html
           scripts/check-youtube.sh /tmp/live
+
+  # Rollback. If the live site fails its smoke run right after a production deploy, put the
+  # previous Cloudflare version back so visitors are not left on a broken page. Preview
+  # uploads never reach production, so they are not rolled back. Run history shows which
+  # version came back; to do the same by hand: npx --yes wrangler@4.151.3 rollback --message "reason"
+  # (needs CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID). After a rollback, fix forward
+  # in a new commit. This job leaves the workflow red so the failure is not missed.
+  rollback:
+    name: Roll back a failed production deploy
+    needs: [deploy, verify-live]
+    if: ${{ always() && needs.verify-live.result == 'failure' && (github.event_name != 'workflow_dispatch' || inputs.mode == 'production') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Roll back to the previous version
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx --yes wrangler@4.151.3 rollback --message "verify-live failed for ${GITHUB_SHA::7}" --yes
+          echo "Rolled back. Production serves the previous version; fix forward in a new commit." >> "$GITHUB_STEP_SUMMARY"
+          exit 1
