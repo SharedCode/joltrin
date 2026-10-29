@@ -1,0 +1,6 @@
+Contact: https://github.com/SharedCode/joltrin/security/advisories/new
+Contact: mailto:gerardrecinto@gmail.com
+Expires: 2027-10-28T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://joltrinhq.com/.well-known/security.txt
+Policy: https://github.com/SharedCode/joltrin/blob/master/.github/SECURITY.md

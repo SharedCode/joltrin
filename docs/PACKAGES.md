@@ -5,8 +5,8 @@
 | Language | Installation | Description |
 | :--- | :--- | :--- |
 | **Go** | `go get github.com/sharedcode/joltrin/v5` | Native high-performance core engine. |
-| **Python** | `pip install sop4py` | Python bindings with Data Manager and AI scripts. |
-| **C#** | `dotnet add package Sop` | Complete .NET Core integration. |
+| **Python** | `pip install sop4py` (PyPI has 2.3.3, which predates v5) | Python bindings with Data Manager and AI scripts. |
+| **C#** | `dotnet add package Sop` (NuGet has 4.5.0, which predates v5) | Complete .NET Core integration. |
 | **WebAssembly** | `GOOS=js GOARCH=wasm go build` | Browser-sandboxed zero-server execution. |
 | **HTTP Data Manager** | `sop-httpserver` | Standalone UI console and AI Copilot interface. |
 | **Java** *(in progress)* | source in `bindings/java`, not yet on Maven Central | `sop4j` bindings and tests are complete; publishing is blocked on Central Portal credential setup, tracked in [`docs/RELEASE_PROCESS_JAVA_STATUS.md`](RELEASE_PROCESS_JAVA_STATUS.md). |
@@ -27,9 +27,9 @@ When integrating Joltrin into your stack, choose between official versioned rele
 
 #### 1. Official Tagged Releases (Recommended for Production)
 For production deployments, pin your dependency to a tagged release. This guarantees reproducible builds, backward-compatible API guarantees, and security-scanned transitive dependencies:
-- **Go**: `go get github.com/sharedcode/joltrin/v5@v5.8.1` (see [tags](https://github.com/sharedcode/joltrin/tags) for the latest)
-- **Python**: `pip install sop4py==2.3.3`
-- **C# / .NET**: `dotnet add package Sop --version 4.5.0`
+- **Go**: `go get github.com/sharedcode/joltrin/v5@v5.12.1` (see [tags](https://github.com/sharedcode/joltrin/tags) for the latest)
+- **Python**: PyPI has `sop4py` 2.3.3 only, which predates v5. For v5, install the wheel from the [latest release](https://github.com/sharedcode/joltrin/releases/latest) (currently `sop4py-5.11.1-py3-none-any.whl`).
+- **C# / .NET**: NuGet has `Sop` 4.5.0 only, which predates v5. For v5, use the `Sop4CS.5.11.1.nupkg` file from the latest release as a local package source.
 
 #### 2. In-Repo Source / Submodule (Prototyping & Contribution)
 If you are extending storage engine internals (`btree/`, `fs/`), modifying protocol servers (`verify`, `cmd/sop-mcp-server`, `cmd/sop-a2a-agent`), or benchmarking performance enhancements, consuming from source is recommended:

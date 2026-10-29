@@ -301,7 +301,11 @@
         --scroll-thumb: #cbd2dc;
       }
       /* Accent text and tints need more weight on a light surface to stay readable. */
-      .text-brand-300, .text-brand-400, .text-emerald-400 { color: #047857; }
+      .text-brand-300, .text-brand-400, .text-emerald-400 { color: #065f46; }
+      .text-accent-cyan { color: #155e75; }
+      .text-accent-violet { color: #6d28d9; }
+      .bg-accent-violet { background-color: #7c3aed; }
+      .bg-brand-500.text-dark-950 { background-color: #047857; }
       .text-brand-500\/80 { color: rgba(4, 120, 87, 0.85); }
       .text-rose-200, .text-rose-300, .text-rose-400 { color: #be123c; }
       .text-amber-300, .text-amber-400 { color: #b45309; }
@@ -436,7 +440,12 @@
     .js-story .story-row.on { opacity: 1; transform: none; }
     .story-note span { display: inline; }
     .story-verdict span.v-final { }
-    @media (prefers-color-scheme: light) { .story-row .no { color: #be123c; } .story-row .ok { color: #047857; } .story-cta .primary { color: #fff; background: #047857; } .story-card { box-shadow: 0 30px 80px -34px rgba(0, 0, 0, 0.25); } }
+    @media (prefers-color-scheme: light) { .story-verdict .v-allow { color: #047857; } .story-row .no { color: #be123c; } .story-row .ok { color: #047857; } .story-cta .primary { color: #fff; background: #047857; } .story-card { box-shadow: 0 30px 80px -34px rgba(0, 0, 0, 0.25); } }
+    #hero-wrap { padding-top: 1rem; z-index: 2; }
+    .pro-link-decoration { text-decoration-color: rgb(var(--c-dark-600)); }
+    #demo-video-play img { object-fit: cover; opacity: 0.8; }
+    #demo-video-play:hover img { opacity: 1; }
+    #demo-video-play:hover .video-play-disc { background-color: #34d399; }
     .sound-toggle { position: fixed; left: 16px; bottom: 16px; z-index: 40; padding: 0.45rem 0.85rem; border-radius: 999px; border: 1px solid rgb(var(--c-dark-700)); background: rgb(var(--c-dark-900) / 0.85); backdrop-filter: blur(8px); color: rgb(var(--c-slate-300)); font: 600 0.72rem 'JetBrains Mono', 'JetBrains Fallback', monospace; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
     .sound-toggle:hover, .sound-toggle:focus-visible { color: rgb(var(--c-fg)); border-color: rgb(var(--c-slate-500)); }
     .sound-toggle[aria-pressed="true"] { color: #10b981; border-color: #10b981; }
@@ -619,7 +628,7 @@
         </a>
 
         <button type="button" id="top-pro-btn" onclick="track('pro_click'); openProCheckoutModal()"
-                class="flex items-center space-x-1.5 px-2 py-1.5 text-slate-300 hover:text-white underline underline-offset-4 decoration-dark-600 text-xs font-medium whitespace-nowrap transition cursor-pointer">
+                class="flex items-center space-x-1.5 px-2 py-1.5 text-slate-300 hover:text-white underline underline-offset-4 pro-link-decoration text-xs font-medium whitespace-nowrap transition cursor-pointer">
           <span class="sm:hidden" aria-hidden="true">Pro</span><span class="hidden sm:inline">Request Pro</span><span class="sr-only sm:hidden">Request Pro</span><span class="hidden sm:inline font-mono text-slate-400">$49/mo</span>
         </button>
 
@@ -681,7 +690,7 @@
   </div>
 
   <!-- Hero: first thing on the page, ahead of the scroll story, so the headline and the one primary action load in the first screen -->
-  <div id="hero-wrap" role="region" aria-label="Introduction" class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 relative z-[2]">
+  <div id="hero-wrap" role="region" aria-label="Introduction" class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative">
     <!-- Hero -->
     <section id="start" class="hero-calm relative mb-16 pt-6 sm:pt-14 scroll-mt-20">
       <div class="relative z-10 flex flex-col gap-12 min-w-0">
@@ -711,7 +720,7 @@
               <span>Watch the short demo</span>
             </a>
             <a href="#pricing"
-               class="text-slate-400 hover:text-white underline underline-offset-4 decoration-dark-600 text-sm transition">
+               class="text-slate-400 hover:text-white underline underline-offset-4 pro-link-decoration text-sm transition">
               <span>See Pro</span>
             </a>
           </div>
@@ -813,9 +822,9 @@
           aria-label="Play the Joltrin intro video"
           class="absolute inset-0 w-full h-full group cursor-pointer bg-dark-950">
           <img src="https://i.ytimg.com/vi/WZbz868nTi4/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"
-            class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition" />
+            class="absolute inset-0 w-full h-full transition" />
           <span class="absolute inset-0 flex items-center justify-center">
-            <span class="w-16 h-16 rounded-full bg-brand-500 group-hover:bg-brand-400 text-black flex items-center justify-center transition">
+            <span class="w-16 h-16 rounded-full bg-brand-500 video-play-disc text-black flex items-center justify-center transition">
               <svg viewBox="0 0 24 24" fill="currentColor" class="w-7 h-7" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
             </span>
           </span>
@@ -2281,29 +2290,25 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
 
     // POSTs JSON and resolves { ok, status, data }. status 0 means the request never got an answer (offline, blocked or timed out).
     // A network failure, a timeout or a 5xx is tried once more. A 4xx is an answer and is not retried.
-    async function postJson(path, body, timeoutMs, retries) {
-      let last = { ok: false, status: 0, data: null };
-      for (let attempt = 0; attempt <= retries; attempt++) {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), timeoutMs);
-        try {
-          const res = await fetch(BILLING_API + path, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-            signal: controller.signal
-          });
-          let data = null;
-          try { data = await res.json(); } catch (_) {}
-          last = { ok: res.ok, status: res.status, data };
-          if (res.ok || res.status < 500) return last;
-        } catch (_) {
-          last = { ok: false, status: 0, data: null };
-        } finally {
-          clearTimeout(timer);
-        }
+    async function postJson(path, body, timeoutMs) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        // A lost response does not prove a POST failed. Let the visitor choose whether to resubmit.
+        const res = await fetch(BILLING_API + path, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          signal: controller.signal
+        });
+        let data = null;
+        try { data = await res.json(); } catch (_) {}
+        return { ok: res.ok, status: res.status, data };
+      } catch (_) {
+        return { ok: false, status: 0, data: null };
+      } finally {
+        clearTimeout(timer);
       }
-      return last;
     }
 
     // Anything a visitor typed goes through this before it is placed in markup.
@@ -2808,13 +2813,13 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         // local storage may be restricted in some iframe contexts
       }
 
-      const result = await postJson('/api/billing/enterprise-contact', payload, 8000, 1);
+      const result = await postJson('/api/billing/enterprise-contact', payload, 8000);
       const serverSuccess = result.ok;
 
       submitBtn.disabled = false;
       submitBtn.innerHTML = serverSuccess
         ? '<i data-lucide="check" class="w-4 h-4"></i><span>Inquiry Sent</span>'
-        : '<i data-lucide="alert-triangle" class="w-4 h-4"></i><span>Not Sent, Try Again</span>';
+        : '<i data-lucide="alert-triangle" class="w-4 h-4"></i><span>Submission Unconfirmed</span>';
       lucide.createIcons();
 
       const mailtoSubject = encodeURIComponent(`Joltrin ${payload.tier.toUpperCase()} Inquiry - ${payload.company}`);
@@ -2848,10 +2853,10 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         ` : `
           <div class="flex items-center space-x-2 text-amber-400 font-bold text-sm">
             <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-            <span>${escapeHtml(payload.name)}, ${result.status === 0 ? "this form can't reach our server right now." : 'our server rejected this inquiry (error ' + result.status + ').'}</span>
+            <span>${escapeHtml(payload.name)}, ${result.status === 0 ? "we could not confirm delivery to our server." : 'our server returned an error (' + result.status + ').'}</span>
           </div>
           <p class="text-slate-300 leading-relaxed">
-            Nothing was sent yet. Click below to email it directly instead. Your answers are saved on this device either way.
+            We could not confirm this submission. Your answers are saved on this device. You can email us below.
           </p>
           <div class="pt-2 flex flex-wrap items-center gap-3">
             <a href="${mailtoLink}" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-bold font-mono text-[11px] flex items-center space-x-1.5 transition">
@@ -2867,7 +2872,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         statusAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
 
-      // Keep the answers in the form when nothing was sent, so a retry does not mean typing it all again.
+      // Keep the answers until the server confirms receipt.
       if (serverSuccess) form.reset();
     }
 
@@ -2923,7 +2928,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         workspace_name: workspace,
         email: email,
         billing_cycle: cycle
-      }, 15000, 0);
+      }, 15000);
       if (result.ok && result.data && result.data.checkout_url) redirectUrl = result.data.checkout_url;
 
       if (redirectUrl) {

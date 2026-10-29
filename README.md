@@ -10,7 +10,6 @@
 
 [![CI](https://github.com/SharedCode/joltrin/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/SharedCode/joltrin/actions/workflows/ci.yml)
 [![Go Tests](https://github.com/SharedCode/joltrin/actions/workflows/go.yml/badge.svg?event=push&branch=master)](https://github.com/SharedCode/joltrin/actions/workflows/go.yml)
-[![codecov](https://codecov.io/gh/SharedCode/joltrin/branch/master/graph/badge.svg)](https://app.codecov.io/github/SharedCode/joltrin)
 [![Go Reference](https://pkg.go.dev/badge/github.com/sharedcode/joltrin/v5.svg)](https://pkg.go.dev/github.com/sharedcode/joltrin/v5)
 [![License](https://img.shields.io/github/license/SharedCode/joltrin)](LICENSE)
 
@@ -177,7 +176,7 @@ The verifier sits on an embedded, ACID-compliant B-Tree storage engine, so the t
 | C# | `dotnet add package Sop` |
 | Container | `docker run ghcr.io/sharedcode/joltrin-quickstart:stable` |
 
-Java and Rust bindings exist in the repo and are not published yet. Joltrin was formerly called SOP. Version pinning, the note on the old SOP package names, and the full list are in [docs/PACKAGES.md](docs/PACKAGES.md).
+The published Python and C# packages are old: `sop4py` on PyPI is 2.3.3 and `Sop` on NuGet is 4.5.0, both from before v5. The v5 builds are on the [releases page](https://github.com/SharedCode/joltrin/releases) as a wheel and a `.nupkg`. Java and Rust bindings exist in the repo and are not published yet. Version pinning, the note on the old SOP package names, and the full list are in [docs/PACKAGES.md](docs/PACKAGES.md).
 
 ## Open core and plans
 
@@ -190,6 +189,8 @@ The engine, vector search, agent memory, and the verification barrier are MIT li
 - Concepts: [Why Joltrin](docs/WHY_JOLTRIN.md), [Architecture](docs/SOP_ARCHITECTURE_WHITEPAPER.md), [Scalability](docs/SCALABILITY.md)
 - Operating it: [Operations and failover](docs/OPERATIONS.md), [Data Manager and tools](docs/SOP_PLATFORM_TOOLS.md), [Azure deployment](infra/azure/README.md), [Kubernetes with Argo CD](deploy/aks/README.md)
 - Reference: [Benchmarks](docs/BENCHMARKS.md), [Live demos](docs/LIVE_DEMOS.md), [Roadmap and platform support](docs/ROADMAP.md), [Who it is for](docs/WHO_IS_IT_FOR.md), [Investor notes](docs/INVESTORS.md)
+
+Optional paid help: [scoped reviews and setup](SUPPORT.md).
 
 ## Contributing
 

@@ -283,3 +283,9 @@ playwright-report/
 test-results/
 
 ai/agent/agent
+
+# Local working files that are not part of the project
+.playwright-mcp/
+linkedin-assets/
+LINKEDIN_JOLTRIN_LAUNCH.md
+STRIPE_SETUP_PROGRESS.md

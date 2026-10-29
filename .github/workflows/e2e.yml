@@ -41,6 +41,9 @@ concurrency:
   group: "e2e-${{ github.ref }}"
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   e2e-matrix:
     name: Run E2E Matrix (${{ matrix.project }})

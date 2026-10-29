@@ -29,6 +29,9 @@ cp demo-btree/index.html demo-btree/tailwind.css demo-btree/arena.wasm demo-btre
 cp demo-intent/index.html demo-intent/tailwind.css demo-intent/intent.wasm demo-intent/wasm_exec.js demo-intent/favicon.svg demo-intent/favicon.ico demo-intent/og-image.png demo-intent/logo-mark.png "$SITE/private-intent/"
 # Response headers for the Cloudflare deployment.
 cp deploy/cloudflare/_headers deploy/cloudflare/_redirects "$SITE/"
+# Security contact for researchers (RFC 9116).
+mkdir -p "$SITE/.well-known"
+cp demo/.well-known/security.txt "$SITE/.well-known/"
 
 fail=0
 

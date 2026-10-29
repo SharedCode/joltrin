@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { waitForWasmReady } from './helpers/wasm-lifecycle';
+import { waitForWasmReady, waitForFormReady } from './helpers/wasm-lifecycle';
 
 /**
  * Homepage positioning, pricing honesty, and metadata.
@@ -216,7 +216,10 @@ test.describe('Homepage', () => {
       await expect(page.getByRole('heading', { level: 2, name: new RegExp(h, 'i') })).toBeVisible();
     }
     await expect(page.locator('main pre').first()).toContainText('missing_state');
-    const unsafe = await page.$$eval('main a[target="_blank"]', (as) => as.filter((a) => !/noopener/.test(a.rel) || !/noreferrer/.test(a.rel)).length);
+    const unsafe = await page.$$eval('main a[target="_blank"]', (as) => as.filter((a) => {
+      const rel = a.getAttribute('rel') ?? '';
+      return !/noopener/.test(rel) || !/noreferrer/.test(rel);
+    }).length);
     expect(unsafe, 'external links must carry rel="noopener noreferrer"').toBe(0);
   });
 
@@ -285,7 +288,7 @@ test.describe('Homepage', () => {
     expect(home).toContain('It checks the recorded trace, not the world.');
     const agents = await (await request.get('/agents/')).text();
     const og = agents.match(/property="og:title" content="([^"]+)"/)?.[1];
-    const tw = agents.match(/name="twitter:title" content="([^"]+)"/)?.[1];
+    const tw = agents.match(/property="twitter:title" content="([^"]+)"/)?.[1];
     expect(tw).toBe(og);
   });
 
@@ -295,6 +298,31 @@ test.describe('Homepage', () => {
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow).toBeLessThanOrEqual(0);
   });
+
+  for (const outcome of ['accepted', 'server error', 'lost response'] as const) {
+    test(`an inquiry is posted once and reports ${outcome} accurately`, async ({ page }) => {
+      let posts = 0;
+      await page.route('**/api/billing/enterprise-contact', route => {
+        posts++;
+        return outcome === 'lost response' ? route.abort('failed')
+          : route.fulfill({ status: outcome === 'accepted' ? 200 : 503, body: '{}' });
+      });
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      await waitForFormReady(page, 'interest-ts');
+      await page.fill('#inq-name', 'Test Person');
+      await page.fill('#inq-email', 'test@example.test');
+      await page.fill('#inq-company', 'Test Company');
+      await page.click('#inq-submit-btn');
+      const status = page.locator('#form-status-alert');
+      await expect(status).toContainText(outcome === 'accepted' ? 'inquiry has been received' : 'We could not confirm this submission');
+      expect(posts).toBe(1);
+      await expect(page.locator('#inq-name')).toHaveValue(outcome === 'accepted' ? '' : 'Test Person');
+      if (outcome !== 'accepted') {
+        await expect(page.locator('#inq-submit-btn')).toContainText('Submission Unconfirmed');
+        await expect(status).not.toContainText('Nothing was sent');
+      }
+    });
+  }
 
   test('enterprise inquiry status is announced to screen readers', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });

@@ -19,6 +19,17 @@ for (const scheme of ['dark', 'light'] as const) {
       test(`${path} has no WCAG A or AA violations`, async ({ page }) => {
         await page.goto(path, { waitUntil: 'load' });
         await waitForWasmReady(page);
+        if (path === '/private-intent/') {
+          await expect(page.locator('#b-attempt')).toBeEnabled({ timeout: 30_000 });
+        }
+        // Scan the settled text, rather than a partially transparent entrance frame.
+        await page.evaluate(async () => {
+          await document.fonts.ready;
+          await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+          await Promise.all(document.getAnimations()
+            .filter(animation => Number.isFinite(animation.effect?.getComputedTiming().endTime))
+            .map(animation => animation.finished.catch(() => {})));
+        });
         await page.addScriptTag({ path: axePath });
         const result = await page.evaluate(async () =>
           // @ts-expect-error axe is injected above
@@ -28,5 +39,24 @@ for (const scheme of ['dark', 'light'] as const) {
         expect(summary, `${path}\n${summary.join('\n')}`).toEqual([]);
       });
     }
+  });
+}
+
+// Explicit widths cover the first-run homepage rather than relying on device presets.
+for (const width of [375, 1440]) {
+  test.describe(`Homepage light theme at ${width}px`, () => {
+    test.use({ colorScheme: 'light', viewport: { width, height: 900 }, reducedMotion: 'reduce' });
+    test('accent labels and action buttons meet AA contrast', async ({ page }) => {
+      await page.goto('/', { waitUntil: 'load' });
+      await page.addScriptTag({ path: axePath });
+      const violations = await page.evaluate(async () => {
+        // @ts-expect-error axe is injected above
+        const result = await axe.run(document, { runOnly: ['color-contrast'] });
+        return result.violations.map((violation: { nodes: { target: string[]; failureSummary: string }[] }) =>
+          violation.nodes.map(node => `${node.target.join(' ')}: ${node.failureSummary}`),
+        ).flat();
+      });
+      expect(violations).toEqual([]);
+    });
   });
 }

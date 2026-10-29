@@ -18,8 +18,10 @@ jobs:
     # Only PR comments (issue_comment fires for both issues and PRs) that
     # contain the trigger phrase. This workflow never runs on a bare scan
     # failure - a maintainer has to ask for it explicitly.
+    # Only the owner, members and collaborators can trigger it, so a stranger's comment cannot spend the API key.
     if: >
       github.event.issue.pull_request != null &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association) &&
       (contains(github.event.comment.body, '/remediate') ||
        contains(github.event.comment.body, '/claude fix'))
     runs-on: ubuntu-latest
