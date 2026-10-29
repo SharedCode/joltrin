@@ -21,7 +21,7 @@ This means products will be grouped by category, and within each category, the m
 This version uses `map[string]any` for keys, which is useful for dynamic schemas.
 
 ```bash
-go run examples/interop_secondary_indexes/main.go
+go run ./interop_indexes
 ```
 *Data is stored in: `./data/interop_indexes`*
 
@@ -40,7 +40,7 @@ type ProductKey struct {
 
 Run the struct-based example to populate the database:
 ```bash
-go run examples/interop_secondary_indexes/struct_key_example/main.go
+go run ./interop_indexes/struct_key_example
 ```
 
 ## Verifying with Data Management Suite
