@@ -1,0 +1,41 @@
+name: Arena dependency checks
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'sop-arena/**'
+      - '.github/workflows/arena-dependencies.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'sop-arena/**'
+      - '.github/workflows/arena-dependencies.yml'
+  schedule:
+    - cron: '35 8 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  arena-dependencies:
+    name: Arena clean install, dependency audit, and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: sop-arena
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: sop-arena/package-lock.json
+      - name: Install exactly the lockfile
+        run: npm ci
+      - name: Check runtime and development dependencies
+        run: npm audit --audit-level=moderate
+      - name: Run CSS regression tests, TypeScript, and production build
+        run: npm run build
