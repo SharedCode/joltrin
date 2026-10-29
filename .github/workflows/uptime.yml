@@ -2,8 +2,10 @@
 # /api/health (liveness) and /api/ready (readiness) and fails the run if either
 # does not return 200 with the expected body after three tries. Run history is the availability record:
 #   gh run list --workflow uptime.yml --limit 500 --json conclusion
-# GitHub's scheduler can delay or skip runs, so treat the history as a
-# sample, not a complete measurement. It uses no secrets and changes nothing.
+# It also opens https://joltrinhq.com/ (the marketing site on Cloudflare), which the Azure
+# health endpoints do not cover. GitHub's scheduler can delay or skip runs, so this is not
+# an SLO and the history is a sample, not a complete measurement. For a real availability
+# target use an external monitor. It uses no secrets and changes nothing.
 name: Live app check
 
 on:
@@ -47,4 +49,14 @@ jobs:
             echo "| $path | $code | $secs |" >> "$GITHUB_STEP_SUMMARY"
             [ "$ok" = yes ] || { echo "$path failed: status $code, expected body with $want" >&2; fail=1; }
           done
+          # The marketing site is served by Cloudflare, so it is probed separately from the Azure app.
+          code=000; secs=0; ok=no
+          for try in 1 2 3; do
+            out=$(curl -s -o /tmp/site --max-time 20 -w '%{http_code} %{time_total}' https://joltrinhq.com/ || true)
+            code=${out%% *}; secs=${out##* }
+            if [ "$code" = 200 ] && grep -q '<h1' /tmp/site; then ok=yes; break; fi
+            sleep 5
+          done
+          echo "| https://joltrinhq.com/ | $code | $secs |" >> "$GITHUB_STEP_SUMMARY"
+          [ "$ok" = yes ] || { echo "https://joltrinhq.com/ failed: status $code or no headline in the page" >&2; fail=1; }
           exit $fail
