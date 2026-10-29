@@ -6,6 +6,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   # Fast PR validation: format, vet, build, and the plain (non-integration,
   # non-stress) unit tests, across every OS a developer or CI consumer is
