@@ -190,6 +190,8 @@ The engine, vector search, agent memory, and the verification barrier are MIT li
 - Operating it: [Operations and failover](docs/OPERATIONS.md), [Data Manager and tools](docs/SOP_PLATFORM_TOOLS.md), [Azure deployment](infra/azure/README.md), [Kubernetes with Argo CD](deploy/aks/README.md)
 - Reference: [Benchmarks](docs/BENCHMARKS.md), [Live demos](docs/LIVE_DEMOS.md), [Roadmap and platform support](docs/ROADMAP.md), [Who it is for](docs/WHO_IS_IT_FOR.md), [Investor notes](docs/INVESTORS.md)
 
+Optional paid help: [scoped reviews and setup](SUPPORT.md).
+
 ## Contributing
 
 Run `go test ./...` and `gofmt` before opening a pull request, and include tests with your change. See [CONTRIBUTING.md](.github/CONTRIBUTING.md) and [SECURITY.md](.github/SECURITY.md). Questions and ideas go to [GitHub Discussions](https://github.com/SharedCode/joltrin/discussions).
