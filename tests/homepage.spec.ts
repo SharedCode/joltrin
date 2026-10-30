@@ -288,7 +288,7 @@ test.describe('Homepage', () => {
     expect(home).toContain('It checks the recorded trace, not the world.');
     const agents = await (await request.get('/agents/')).text();
     const og = agents.match(/property="og:title" content="([^"]+)"/)?.[1];
-    const tw = agents.match(/property="twitter:title" content="([^"]+)"/)?.[1];
+    const tw = agents.match(/name="twitter:title" content="([^"]+)"/)?.[1];
     expect(tw).toBe(og);
   });
 
