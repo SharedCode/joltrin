@@ -3143,6 +3143,10 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         if (pr.top <= vh * 0.4 && pr.bottom >= vh * 0.6) {
           if (auto < 4 && !autoTimer) autoTimer = setTimeout(function () { autoTimer = 0; auto++; frame(); }, auto < 0 ? 700 : 1100);
           n = Math.max(n, auto);
+        } else if (autoTimer) {
+          // Off the stage: drop a pending tick so it cannot advance the rows while nobody is looking at them.
+          clearTimeout(autoTimer);
+          autoTimer = 0;
         }
         if (n === step) return;
         step = n;
