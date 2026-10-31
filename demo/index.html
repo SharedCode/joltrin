@@ -2996,7 +2996,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
       // instead of emailing.
       try {
         const stored = JSON.parse(localStorage.getItem('joltrin_pro_orders') || '[]');
-        stored.push({ workspace, email, cycle, date: new Date().toISOString(), backendReached: result.status !== 0, status: result.status });
+        stored.push({ workspace, email, cycle, date: new Date().toISOString(), backendResponded: result.status !== 0, status: result.status });
         localStorage.setItem('joltrin_pro_orders', JSON.stringify(stored));
       } catch (_) {}
     }
