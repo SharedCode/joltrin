@@ -1,4 +1,4 @@
-package main
+package agentmemory
 
 import (
 	"encoding/json"
