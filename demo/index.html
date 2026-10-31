@@ -426,9 +426,9 @@
     .story-cta .primary { background: #10b981; color: #000; }
     .story-cta .ghost { border: 1px solid rgb(var(--c-dark-700)); color: rgb(var(--c-fg)); background: rgb(var(--c-dark-900) / 0.6); }
     /* Scripted mode: the pin track is tall and the stage sticks while scroll drives the steps. */
-    .js-story .story-intro { display: block; height: 150vh; padding: 0; }
+    .js-story .story-intro { display: block; height: 120vh; padding: 0; }
     .js-story .story-intro > div { position: sticky; top: 0; height: 100svh; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; max-width: 58rem; margin: 0 auto; padding: 5rem 1.5rem 2rem; }
-    .js-story .story-pin { height: 340vh; }
+    .js-story .story-pin { height: 250vh; }
     .js-story .story-stage { position: sticky; top: 0; height: 100svh; min-height: 0; padding-top: 5.5rem; padding-bottom: 2rem; }
     .story-hint { display: none; }
     .js-story .story-hint { display: flex; align-items: center; gap: 0.5rem; margin: 2rem 0 0; font: 500 0.8rem/1 'JetBrains Mono', 'JetBrains Fallback', monospace; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(var(--c-slate-400)); transition: opacity 0.4s; }
@@ -3117,7 +3117,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
       var rows = story.querySelectorAll('.story-row');
       var tagged = story.querySelectorAll('[data-for]');
       var hint = document.getElementById('story-hint');
-      var step = -1, ticking = false, timed = 0;
+      var step = -1, ticking = false, timed = 0, auto = -1, autoTimer = 0;
       // The line also lights on a timer, so a fast scroll cannot skip it and nobody has to scroll to read it.
       var timer = setTimeout(function tick() {
         timed++;
@@ -3137,6 +3137,13 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         var pr = pin.getBoundingClientRect();
         var t = Math.min(0.9999, Math.max(0, -pr.top / (pr.height - vh)));
         var n = pr.top > vh * 0.4 ? -1 : Math.floor(t * 5);
+        // Once the stage is on screen the rows also play on a timer, so nobody has to keep scrolling to see the whole runbook.
+        // Scrolling still wins whenever the visitor is ahead of the timer.
+        if (pr.top > vh * 0.9) auto = -1;
+        if (pr.top <= vh * 0.4 && pr.bottom >= vh * 0.6) {
+          if (auto < 4 && !autoTimer) autoTimer = setTimeout(function () { autoTimer = 0; auto++; frame(); }, auto < 0 ? 700 : 1100);
+          n = Math.max(n, auto);
+        }
         if (n === step) return;
         step = n;
         rows.forEach(function (row, i) { row.classList.toggle('on', i <= n); });
