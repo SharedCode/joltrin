@@ -363,6 +363,15 @@ test.describe('Homepage', () => {
       await expect(page.locator('.story-verdict .v-block')).not.toHaveClass(/show/);
     });
 
+    test('the runbook rows play on their own once the stage is on screen', async ({ page }) => {
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      const [top, vh] = await page.locator('.story-pin').evaluate((el) => [el.getBoundingClientRect().top + window.scrollY, window.innerHeight]);
+      // Park just inside the stage and do not scroll again.
+      await page.evaluate((y) => window.scrollTo(0, y), top - vh * 0.3);
+      await expect(page.locator('.story-row.on')).toHaveCount(5, { timeout: 8_000 });
+      await expect(page.locator('.story-verdict .v-allow')).toHaveClass(/show/);
+    });
+
     test('a scroll hint shows at the top and goes away once the visitor scrolls', async ({ page }) => {
       await page.goto('/', { waitUntil: 'domcontentloaded' });
       const hint = page.locator('#story-hint');
