@@ -21,9 +21,9 @@ require (
 	github.com/hailocab/go-hostpool v0.0.0-20160125115350-e80d13ce29ed // indirect
 	github.com/kelindar/iostream v1.4.0 // indirect
 	github.com/kelindar/search v0.4.1 // indirect
-	github.com/klauspost/compress v1.20.1 // indirect
+	github.com/klauspost/compress v1.20.3 // indirect
 	github.com/klauspost/cpuid/v2 v2.4.0 // indirect
-	github.com/nats-io/nats-server/v2 v2.15.1 // indirect
+	github.com/nats-io/nats-server/v2 v2.15.2 // indirect
 	github.com/nats-io/nkeys v0.4.16 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/redis/go-redis/v9 v9.23.0 // indirect
