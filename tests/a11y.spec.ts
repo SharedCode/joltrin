@@ -26,9 +26,14 @@ for (const scheme of ['dark', 'light'] as const) {
         await page.evaluate(async () => {
           await document.fonts.ready;
           await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
-          await Promise.all(document.getAnimations()
+          // Poll playState: WebKit can leave animation.finished unresolved for animations that have already finished.
+          const settled = () => document.getAnimations()
             .filter(animation => Number.isFinite(animation.effect?.getComputedTiming().endTime))
-            .map(animation => animation.finished.catch(() => {})));
+            .every(animation => animation.playState !== 'running');
+          const deadline = performance.now() + 5_000;
+          while (!settled() && performance.now() < deadline) {
+            await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+          }
         });
         await page.addScriptTag({ path: axePath });
         const result = await page.evaluate(async () =>
