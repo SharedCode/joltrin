@@ -46,7 +46,7 @@ require (
 
 require (
 	github.com/gocql/gocql v1.7.0
-	github.com/nats-io/nats.go v1.54.0
+	github.com/nats-io/nats.go v1.55.0
 	github.com/ncw/directio v1.0.5
 	github.com/sethvargo/go-retry v0.5.0
 	github.com/sharedcode/joltrin/adapters/cassandra v0.1.0
