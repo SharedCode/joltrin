@@ -67,6 +67,9 @@ test.describe('Visual, Animation & Layout Stability Suite', () => {
     const overlay = page.locator('#wasm-loader-overlay');
     await expect(overlay).toBeAttached();
 
+    // The engine starts on the first interaction, so make one.
+    await page.evaluate(() => (window as any).startWasmEngine());
+
     // Overlay transitions to opacity-0 and pointer-events-none without being indefinitely stuck
     await expect(overlay).toHaveClass(/opacity-0/, { timeout: 25_000 });
     await expect(overlay).toHaveClass(/pointer-events-none/, { timeout: 25_000 });

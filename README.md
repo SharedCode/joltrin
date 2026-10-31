@@ -15,7 +15,7 @@
 
 </div>
 
-Joltrin (formerly SOP) is an open-source Go library that checks an AI agent's action against the recorded trace before the action commits. The agent proposes. A separate verifier decides, using fixed preconditions and the steps the server has actually recorded. It does not use the agent's claims, its prompt context, its self-evaluation, or its confidence.
+Joltrin blocks an AI agent's risky step, like dropping a database, until the steps before it are recorded, and tells the agent what to do first. It is an open-source Go library that checks the action against the recorded trace before it commits. The agent proposes. A separate verifier decides, using fixed preconditions and the steps the server has actually recorded. It does not use the agent's claims, its prompt context, its self-evaluation, or its confidence.
 
 **The problem.** An agent can propose a destructive action and report success from its own context. If the same agent also judges the action safe, both judgments can fail for the same reason. That correlated failure is the production risk, and asking the agent to be careful does not remove it.
 

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { waitForFormReady } from './helpers/wasm-lifecycle';
 
 /**
  * The playful parts: the homepage "Be the agent" panel, the agent barrier
@@ -126,7 +127,7 @@ test.describe('Agents page inquiry form', () => {
       (window as any).plausible = (name: string, opts?: unknown) => (window as any).__events.push([name, opts]);
     });
     await page.goto('/agents/', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(1500);
+    await waitForFormReady(page, 'interest-ts-agents');
     await page.fill('#interest-form-agents [name="name"]', 'Test Person');
     await page.fill('#interest-form-agents [name="email"]', 'test@example.com');
     await page.fill('#interest-form-agents [name="company"]', 'Test Co');
@@ -142,7 +143,7 @@ test.describe('Agents page inquiry form', () => {
     await page.route('**/plausible.io/**', (route) => route.abort());
     await page.route('**/api/billing/enterprise-contact', (route) => route.fulfill({ status: 500, body: '{}' }));
     await page.goto('/agents/', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(1500);
+    await waitForFormReady(page, 'interest-ts-agents');
     await page.fill('#interest-form-agents [name="name"]', 'Test Person');
     await page.fill('#interest-form-agents [name="email"]', 'test@example.com');
     await page.fill('#interest-form-agents [name="company"]', 'Test Co');
@@ -157,7 +158,7 @@ test.describe('Agents page inquiry form', () => {
     await page.route('**/plausible.io/**', (route) => route.abort());
     await page.route('**/api/billing/enterprise-contact', (route) => route.fulfill({ status: 200, body: '{}' }));
     await page.goto('/agents/', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(1500);
+    await waitForFormReady(page, 'interest-ts-agents');
     const name = '<img src=x onerror="window.__xss=1">';
     await page.fill('#interest-form-agents [name="name"]', name);
     await page.fill('#interest-form-agents [name="email"]', 'test@example.com');

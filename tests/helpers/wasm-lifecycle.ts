@@ -7,6 +7,9 @@ import { Page, expect } from '@playwright/test';
  * and WebAssembly execution boundary listeners.
  */
 export async function waitForWasmReady(page: Page): Promise<void> {
+  // The homepage downloads its engine on the first interaction. Tests that wait for it start it here.
+  await page.evaluate(() => (window as any).startWasmEngine?.());
+
   // Wait for the loader overlay to hide (opacity-0 class added upon WASM instantiation)
   const overlay = page.locator('#wasm-loader-overlay');
   if (await overlay.count() > 0) {
@@ -51,4 +54,30 @@ export async function waitForCanvasRendered(page: Page, canvasSelector = 'canvas
       });
     });
   });
+}
+
+/**
+ * Lets the page run a few animation frames, so scroll handlers and timers that react to the
+ * last action have run. Use it before asserting that something did NOT happen.
+ */
+export async function nextFrames(page: Page, frames = 5): Promise<void> {
+  await page.evaluate(
+    (n) =>
+      new Promise<void>((resolve) => {
+        const step = (left: number) => (left <= 0 ? resolve() : requestAnimationFrame(() => step(left - 1)));
+        step(n);
+      }),
+    frames,
+  );
+}
+
+/** Waits until the page's form-velocity guard (render timestamp older than 1.2 s) lets a submit through. */
+export async function waitForFormReady(page: Page, tsId: string): Promise<void> {
+  await page.waitForFunction(
+    (id) => {
+      const el = document.getElementById(id) as HTMLInputElement | null;
+      return !!el && el.value !== '' && Date.now() - Number(el.value) > 1300;
+    },
+    tsId,
+  );
 }

@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { createRequire } from 'node:module';
+import { waitForWasmReady } from './helpers/wasm-lifecycle';
 
 /**
  * Every page passes the automated WCAG 2 A and AA checks, in the dark and the
@@ -17,7 +18,23 @@ for (const scheme of ['dark', 'light'] as const) {
     for (const path of PAGES) {
       test(`${path} has no WCAG A or AA violations`, async ({ page }) => {
         await page.goto(path, { waitUntil: 'load' });
-        await page.waitForTimeout(1200);
+        await waitForWasmReady(page);
+        if (path === '/private-intent/') {
+          await expect(page.locator('#b-attempt')).toBeEnabled({ timeout: 30_000 });
+        }
+        // Scan the settled text, rather than a partially transparent entrance frame.
+        await page.evaluate(async () => {
+          await document.fonts.ready;
+          await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+          // Poll playState: WebKit can leave animation.finished unresolved for animations that have already finished.
+          const settled = () => document.getAnimations()
+            .filter(animation => Number.isFinite(animation.effect?.getComputedTiming().endTime))
+            .every(animation => animation.playState !== 'running');
+          const deadline = performance.now() + 5_000;
+          while (!settled() && performance.now() < deadline) {
+            await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+          }
+        });
         await page.addScriptTag({ path: axePath });
         const result = await page.evaluate(async () =>
           // @ts-expect-error axe is injected above

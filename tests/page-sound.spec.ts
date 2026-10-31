@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { waitForWasmReady } from './helpers/wasm-lifecycle';
+import { waitForWasmReady, nextFrames } from './helpers/wasm-lifecycle';
 
 /**
  * The Private Intent and Agents pages share one sound layer (assets/site-sound.js).
@@ -38,7 +38,7 @@ test.describe('Sound on the Private Intent page', () => {
   test('stays locked until a press, and the first press does not switch it off', async ({ page }) => {
     const toggle = page.locator('.site-sound');
     await expect(toggle).toHaveText('Tap for sound');
-    await page.waitForTimeout(800);
+    await nextFrames(page);
     expect(await oscillators(page)).toBe(0);
     await toggle.click();
     await expect(toggle).toHaveText('Sound on');
@@ -56,7 +56,7 @@ test.describe('Sound on the Private Intent page', () => {
     const muted = await oscillators(page);
     await page.locator('#b-reset').click();
     await page.locator('#b-attempt').click();
-    await page.waitForTimeout(500);
+    await nextFrames(page);
     expect(await oscillators(page)).toBe(muted);
   });
 });
