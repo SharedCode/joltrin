@@ -4,7 +4,7 @@ go 1.26.10
 
 require (
 	github.com/nats-io/nats-server/v2 v2.15.1
-	github.com/nats-io/nats.go v1.54.0
+	github.com/nats-io/nats.go v1.55.0
 	github.com/sharedcode/joltrin/v5 v5.8.1
 )
 
