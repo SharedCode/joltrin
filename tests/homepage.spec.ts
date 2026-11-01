@@ -432,4 +432,18 @@ test.describe('Homepage', () => {
     await expect(buy).toContainText('no self-serve checkout yet');
     await expect(buy).toContainText('not charged');
   });
+
+  // iOS shrinks or pins the page when anything is wider than the screen, which is what a phone
+  // looks like after it rotates. Width alone is not enough: the header overflowed at 440 and 664.
+  for (const path of ['/', '/arena/']) {
+    test(`${path} never scrolls sideways at phone and landscape widths`, async ({ page }) => {
+      await page.goto(path, { waitUntil: 'domcontentloaded' });
+      for (const width of [360, 390, 430, 440, 460, 500, 568, 664, 740, 844, 932, 1024, 1180]) {
+        await page.setViewportSize({ width, height: 800 });
+        await page.evaluate(() => new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+        expect(overflow, `${path} is ${overflow}px wider than a ${width}px screen`).toBeLessThanOrEqual(0);
+      }
+    });
+  }
 });
