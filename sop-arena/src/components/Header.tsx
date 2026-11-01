@@ -147,7 +147,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Command Palette Trigger */}
           <button
             onClick={onOpenPalette}
-            className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-dark-900 hover:bg-dark-850 text-slate-400 hover:text-white border border-dark-800 text-xs font-mono transition"
+            className="hidden min-[1500px]:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-dark-900 hover:bg-dark-850 text-slate-400 hover:text-white border border-dark-800 text-xs font-mono transition"
             title="Open command palette"
           >
             <Search className="w-3.5 h-3.5" />
@@ -157,7 +157,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Enterprise Inquiry Trigger */}
           <button
             onClick={() => onOpenEnterprise('enterprise')}
-            className="hidden sm:flex xl:hidden min-[1700px]:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-dark-900 hover:bg-dark-850 text-brand-400 border border-brand-500/30 text-xs font-semibold shadow-sm transition"
+            className="hidden md:flex xl:hidden min-[1700px]:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-dark-900 hover:bg-dark-850 text-brand-400 border border-brand-500/30 text-xs font-semibold shadow-sm transition"
             title="Deploy Joltrin in Production"
           >
             <Building2 className="w-3.5 h-3.5" />
@@ -179,7 +179,7 @@ export const Header: React.FC<HeaderProps> = ({
             title="Ask Joltrin Copilot"
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Copilot</span>
+            <span className="hidden md:inline">Copilot</span>
           </button>
 
           {/* Sound Toggle */}
@@ -209,10 +209,10 @@ export const Header: React.FC<HeaderProps> = ({
             href="https://github.com/sharedcode/joltrin"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-brand-500 hover:bg-brand-400 text-black font-semibold text-xs transition shadow-md shadow-brand-500/20"
+            className="hidden md:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-brand-500 hover:bg-brand-400 text-black font-semibold text-xs transition shadow-md shadow-brand-500/20"
           >
             <GithubIcon className="w-4 h-4 text-black" />
-            <span className="hidden sm:inline">GitHub</span>
+            <span className="hidden md:inline xl:hidden min-[1500px]:inline">GitHub</span>
           </a>
 
           {/* Mobile Menu Toggle: the nav switcher above is xl:flex-only, this is
