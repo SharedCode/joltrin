@@ -63,7 +63,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Azure login (OIDC, no stored secret)
-        uses: azure/login@v3
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
@@ -125,7 +125,7 @@ jobs:
           format: table
 
       - name: Azure login (OIDC, no stored secret)
-        uses: azure/login@v3
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
@@ -141,7 +141,7 @@ jobs:
           echo "digest=${digest}" >> "$GITHUB_OUTPUT"
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3
+        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3
 
       # Keyless signing, tied to this workflow's own GitHub Actions OIDC
       # identity. No signing key to generate, rotate, or leak. Container
@@ -169,7 +169,7 @@ jobs:
       id-token: write
     steps:
       - name: Azure login (OIDC, no stored secret)
-        uses: azure/login@v3
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
