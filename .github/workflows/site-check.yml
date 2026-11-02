@@ -59,6 +59,9 @@ jobs:
           scripts/build-css.sh
           git diff --exit-code demo/tailwind.css demo-agents/tailwind.css demo-btree/tailwind.css demo-intent/tailwind.css
 
+      - name: Test the contact form Worker
+        run: node --test worker/contact.test.mjs
+
       - name: Assemble the site and check every referenced file
         run: scripts/assemble-site.sh _site
 

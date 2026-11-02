@@ -42,7 +42,8 @@ export const EnterpriseInterestModal: React.FC<EnterpriseInterestModalProps> = (
   const [renderTs, setRenderTs] = useState(Date.now());
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
-  const [copiedEmail, setCopiedEmail] = useState(false);
+  const [ticketId, setTicketId] = useState('');
+  const [receiptSent, setReceiptSent] = useState(false);
   const [copiedSummary, setCopiedSummary] = useState(false);
 
   useEffect(() => {
@@ -50,6 +51,8 @@ export const EnterpriseInterestModal: React.FC<EnterpriseInterestModalProps> = (
       setRenderTs(Date.now());
       setStatus('idle');
       setErrorMessage('');
+      setTicketId('');
+      setReceiptSent(false);
       setFormData(prev => ({
         ...prev,
         tier: initialTier || prev.tier
@@ -97,42 +100,40 @@ export const EnterpriseInterestModal: React.FC<EnterpriseInterestModalProps> = (
       // ignore localStorage quota/iframe issues
     }
 
-    // Backend submission attempt
+    // On joltrinhq.com the form posts to the site's own /api/contact, which opens a ticket.
+    const onSite = ['joltrinhq.com', 'www.joltrinhq.com'].includes(window.location.hostname);
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500);
-      await fetch('/api/billing/enterprise-contact', {
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const res = await fetch(onSite ? '/api/contact' : '/api/billing/enterprise-contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, hp_check: honeypot, source: 'arena' }),
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
+      if (!res.ok) throw new Error(String(res.status));
+      try {
+        const data = await res.json();
+        setTicketId(String(data.ticket || data.id || ''));
+        setReceiptSent(!!data.receipt);
+      } catch {
+        // The inquiry was accepted even if the reply could not be read.
+      }
     } catch {
-      // Expected fallback on static GitHub Pages
+      setStatus('error');
+      setErrorMessage('We could not send this. No ticket was opened. Your answers are still here, please try again in a minute.');
+      return;
     }
 
     setStatus('success');
   };
-
-  const mailtoSubject = encodeURIComponent(`Joltrin ${formData.tier.toUpperCase()} Inquiry - ${formData.company || 'Direct Contact'}`);
-  const mailtoBody = encodeURIComponent(
-    `Name: ${formData.name}\nEmail: ${formData.email}\nCompany: ${formData.company}\nRole: ${formData.role}\nTier: ${formData.tier}\nUse Cases: ${formData.use_cases}\nApprox Agents: ${formData.approx_agents}\nDeployment: ${formData.deployment}\nIdP: ${formData.idp}\nWebsite: ${formData.website}\n\nRequirements / Notes:\n${formData.message}`
-  );
-  const mailtoUrl = `mailto:gerardrecinto@gmail.com?subject=${mailtoSubject}&body=${mailtoBody}`;
 
   const copySummaryText = () => {
     const text = `Joltrin ${formData.tier.toUpperCase()} Inquiry\nName: ${formData.name}\nEmail: ${formData.email}\nCompany: ${formData.company}\nRole: ${formData.role}\nUse Cases: ${formData.use_cases}\nAgents: ${formData.approx_agents}\nDeployment: ${formData.deployment}\nRequirements: ${formData.message}`;
     navigator.clipboard.writeText(text).then(() => {
       setCopiedSummary(true);
       setTimeout(() => setCopiedSummary(false), 2500);
-    });
-  };
-
-  const copySalesEmail = () => {
-    navigator.clipboard.writeText('gerardrecinto@gmail.com').then(() => {
-      setCopiedEmail(true);
-      setTimeout(() => setCopiedEmail(false), 2000);
     });
   };
 
@@ -166,8 +167,17 @@ export const EnterpriseInterestModal: React.FC<EnterpriseInterestModalProps> = (
               <span>Inquiry Received! Thank you, {formData.name}.</span>
             </div>
             <p className="text-sm text-slate-300 leading-relaxed">
-              Our engineering team will review your deployment requirements and get back to you at{' '}
-              <strong className="text-white font-mono">{formData.email}</strong> within 1 business day.
+              {ticketId && (
+                <>
+                  Your ticket ID is <strong className="text-white font-mono">{ticketId}</strong>.{' '}
+                  {receiptSent ? (
+                    <>We sent a receipt to <strong className="text-white font-mono">{formData.email}</strong>.</>
+                  ) : (
+                    <>Please save it in case you write to us again.</>
+                  )}{' '}
+                </>
+              )}
+              Our engineering team will review your deployment requirements and reply at that address within 1 business day.
             </p>
 
             <div className="bg-dark-950 p-4 rounded-xl border border-dark-800 text-xs font-mono space-y-1 text-slate-400">
@@ -178,27 +188,12 @@ export const EnterpriseInterestModal: React.FC<EnterpriseInterestModalProps> = (
             </div>
 
             <div className="flex flex-wrap items-center gap-3 pt-2">
-              <a
-                href={mailtoUrl}
-                className="px-4 py-2 rounded-xl bg-brand-500 hover:bg-brand-400 text-black font-semibold text-xs flex items-center space-x-2 transition"
-              >
-                <Mail className="w-4 h-4" />
-                <span>Open Direct Email Backup</span>
-              </a>
-
               <button
                 onClick={copySummaryText}
                 className="px-4 py-2 rounded-xl bg-dark-850 hover:bg-dark-800 border border-dark-700 text-slate-300 font-mono text-xs flex items-center space-x-2 transition"
               >
                 {copiedSummary ? <Check className="w-3.5 h-3.5 text-brand-400" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copiedSummary ? 'Copied Summary!' : 'Copy Summary'}</span>
-              </button>
-
-              <button
-                onClick={copySalesEmail}
-                className="px-4 py-2 rounded-xl bg-dark-850 hover:bg-dark-800 border border-dark-700 text-slate-400 hover:text-white font-mono text-xs transition"
-              >
-                {copiedEmail ? 'gerardrecinto@gmail.com copied' : 'Copy gerardrecinto@gmail.com'}
               </button>
             </div>
 
