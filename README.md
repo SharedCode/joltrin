@@ -33,6 +33,8 @@ go run github.com/sharedcode/joltrin/v5/examples/verify_barrier@latest
 
 Prefer video? [Full demo](https://www.youtube.com/watch?v=WZbz868nTi4) or [short](https://www.youtube.com/shorts/oS1bfq_ZDkg).
 
+Just want to stop obviously dangerous commands first? [agent-guardrails](https://github.com/gerardrecinto/agent-guardrails) is a small Claude Code hook that blocks things like `terraform destroy` by command text. Joltrin goes further and checks that the steps before a risky action really happened.
+
 ## A blocked step, then the safe order
 
 A production database drop is blocked until the backup is taken and validated:
