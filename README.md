@@ -22,17 +22,16 @@ Joltrin blocks an AI agent's risky step, like dropping a database, until the ste
 **What Joltrin does.** The agent emits intent. Joltrin checks the intent against the trace and the runbook's rules, outside the agent's context window. The check and the commit are one call, so a step is recorded only if it passed. A step whose required state is missing is refused. A claim that something happened is not evidence that it happened.
 
 <p align="center">
-  <a href="https://youtu.be/WZbz868nTi4">
-    <img src="https://img.youtube.com/vi/WZbz868nTi4/maxresdefault.jpg" alt="Joltrin demo video. Click to watch it on YouTube." width="760" />
-  </a>
+  <img src="docs/assets/ltl-barrier.gif" alt="Terminal recording of go run ./examples/verify_barrier. The agent tries drop_prod_db and is blocked, takes and validates a backup, then the drop is allowed." width="760" />
 </p>
 
-<table align="center">
-  <tr>
-    <td align="center"><a href="https://www.youtube.com/watch?v=WZbz868nTi4"><img src="https://img.youtube.com/vi/WZbz868nTi4/hqdefault.jpg" alt="Joltrin full demo on YouTube" width="360" /></a><br /><sub>Full demo</sub></td>
-    <td align="center"><a href="https://www.youtube.com/shorts/oS1bfq_ZDkg"><img src="https://img.youtube.com/vi/oS1bfq_ZDkg/hqdefault.jpg" alt="Joltrin short on YouTube" width="200" /></a><br /><sub>Short</sub></td>
-  </tr>
-</table>
+Try it now, no clone needed (Go 1.26.10 or newer):
+
+```bash
+go run github.com/sharedcode/joltrin/v5/examples/verify_barrier@latest
+```
+
+Prefer video? [Full demo](https://www.youtube.com/watch?v=WZbz868nTi4) or [short](https://www.youtube.com/shorts/oS1bfq_ZDkg).
 
 ## A blocked step, then the safe order
 
