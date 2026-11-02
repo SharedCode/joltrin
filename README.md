@@ -77,6 +77,16 @@ Or skip the install. These run in your browser with no backend:
 | [Joltrin Arena, B-tree challenge](https://joltrinhq.com/btree/) | Guess, then run four short scenarios on the real in-memory B-tree compiled to WebAssembly. Numbers are measured on your device, and the page states what they do not show. |
 | [Arena](https://joltrinhq.com/arena/) | Crash storage nodes and spike load in a cluster simulation. It illustrates the concepts, it is not a live cluster. |
 
+## How it compares
+
+| If you need | Use | Joltrin's place |
+| :--- | :--- | :--- |
+| Run steps, retry them, resume after a crash | Temporal, Argo Workflows | Joltrin runs nothing. Put it in front of the steps an agent picks. |
+| Decide who may do what | OPA, Kyverno, Cedar | Joltrin answers "did the earlier steps happen", with the trace and the agent-readable refusal built in. |
+| Refuse a step until earlier ones are recorded, for an AI agent | Joltrin | Embedded Go library with MCP and A2A, no extra server. |
+
+Joltrin is young. These tools are mature, and some are the right choice. See [the full comparison](docs/COMPARISON.md), including where Joltrin is weaker.
+
 ## Connect it to an MCP agent
 
 Any agent that supports MCP can use the barrier. One command downloads a binary of about 9 MB (no Go needed), checks its checksum, and registers it with Claude Code, Codex, and the Gemini CLI, whichever are installed. It takes a few seconds and does not use `sudo`:
