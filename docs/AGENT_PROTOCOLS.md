@@ -171,6 +171,20 @@ With a file, the server serves exactly those runbooks. It refuses a file with a 
 
 What this catches: an agent that skips a required step, breaks a safety rule, or names a step that does not exist. What it does not do: judge whether an agent's own claim is true. That needs evidence from a tool the agent cannot fake, so it is not something a runbook file can add.
 
+## Pick a way in
+
+The barrier is one Go binary. You do not need Go, or a binding for your language, to use it.
+
+| You are | Use | Needs |
+| :--- | :--- | :--- |
+| An agent client (Claude Code, Codex, Gemini CLI, any MCP client) | `sop-mcp-server` over MCP stdio, or `sop-mcp-server http` for one team | The binary |
+| A script or hook in any language | `sop-mcp-server gate --json`, read the exit code (0 allowed, 1 blocked, 2 usage) | The binary |
+| A service in any language | `sop-mcp-server http`, which speaks MCP over HTTP | The binary and an HTTP client |
+| A Rust program | The `joltrin-gate` crate in `bindings/rust-gate`, which wraps `gate` | The binary on `PATH` or `JOLTRIN_BIN` |
+| A Go program | The `verify` package directly | Go |
+
+The binary builds for Linux, macOS and Windows. The CLI route is the one that works the same everywhere, so a binding for another language is a thin wrapper over it, which is how the Rust crate works. Python, C# and Java bindings for the storage engine exist separately under `bindings/`. They do not cover the barrier.
+
 ## Command reference
 
 `sop-mcp-server help` prints this list. With no arguments it serves MCP over stdio, which is how an agent launches it.
