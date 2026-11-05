@@ -244,6 +244,8 @@ bindings/java/test_btree_*/
 
 # Rust
 bindings/rust/target/
+bindings/rust-gate/target/
+bindings/rust-gate/Cargo.lock
 
 # Generated Binaries
 *.dylib

@@ -1,0 +1,53 @@
+name: Rust gate client
+
+on:
+  pull_request:
+    paths:
+      - "bindings/rust-gate/**"
+      - "cmd/sop-mcp-server/**"
+      - "verify/**"
+      - ".github/workflows/rust-gate.yml"
+  push:
+    branches: [ master, main ]
+    paths:
+      - "bindings/rust-gate/**"
+      - "cmd/sop-mcp-server/**"
+      - "verify/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: joltrin-gate (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: Build the binary the crate talks to
+        run: go build -o "$RUNNER_TEMP/sop-mcp-server${{ runner.os == 'Windows' && '.exe' || '' }}" ./cmd/sop-mcp-server
+      - name: Format and lint
+        if: runner.os == 'Linux'
+        working-directory: bindings/rust-gate
+        run: |
+          cargo fmt --check
+          cargo clippy --all-targets -- -D warnings
+      - name: Test against the real binary
+        working-directory: bindings/rust-gate
+        env:
+          JOLTRIN_BIN_DIR: ${{ runner.temp }}
+        run: |
+          bin="$JOLTRIN_BIN_DIR/sop-mcp-server"
+          [ -f "$bin.exe" ] && bin="$bin.exe"
+          JOLTRIN_BIN="$bin" cargo test

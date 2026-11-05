@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `joltrin-gate`, a Rust crate in `bindings/rust-gate`, asks `sop-mcp-server gate` whether a step may run and returns `Allowed` or `Blocked` with the steps to run first. It starts the binary for each question, so it needs no native library and no Go on the machine, and it runs on Linux, macOS and Windows. It is not published to crates.io yet, so use it as a path dependency. It only checks ordering, like `gate`. `docs/AGENT_PROTOCOLS.md` now says which way in to use for each language.
 - `sop-mcp-server gate` asks the barrier about one step and remembers the allowed steps between calls in a per-session file, so a hook that runs once per command can use the same ordering rules as an agent. Exit 0 allowed, 1 blocked, 2 usage error; `--reset` clears a session.
 - `intent.Receipt.VerifySignature` checks that a key signed a receipt without needing the action, for parties such as a receipt log that never see the action. `Receipt.Verify` uses it.
 - The homepage plays short synthesized sounds on the scroll reveals, the word-by-word story and the Blocked and Allowed verdicts. Sound is on by default and starts at the visitor's first click, tap or key press, because browsers block audio before that. A toggle turns it off, and it stays silent for visitors who ask for reduced motion. There are no audio files.

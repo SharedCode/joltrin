@@ -1,0 +1,12 @@
+[package]
+name = "joltrin-gate"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.70"
+description = "Rust client for the Joltrin gate: ask whether an agent step is allowed, with the answer remembered between calls"
+license = "MIT"
+repository = "https://github.com/SharedCode/joltrin"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
