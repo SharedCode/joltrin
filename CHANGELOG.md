@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `sop-mcp-server gate` asks the barrier about one step and remembers the allowed steps between calls in a per-session file, so a hook that runs once per command can use the same ordering rules as an agent. Exit 0 allowed, 1 blocked, 2 usage error; `--reset` clears a session.
 - `intent.Receipt.VerifySignature` checks that a key signed a receipt without needing the action, for parties such as a receipt log that never see the action. `Receipt.Verify` uses it.
 - The homepage plays short synthesized sounds on the scroll reveals, the word-by-word story and the Blocked and Allowed verdicts. Sound is on by default and starts at the visitor's first click, tap or key press, because browsers block audio before that. A toggle turns it off, and it stays silent for visitors who ask for reduced motion. There are no audio files.
 - Private Intent now has per-agent task contracts for agent swarms. The owner signs a `Contract` (tools, resources, environment, action budget, expiry). `ScopeLock.Check` blocks any action outside it and records the attempt, `ScopeLock.CheckClaim` rejects findings that cite nothing, cite files the agent was not given or quote text that is not in the source, and `Summarize` lists the agents that drifted. It stops only actions routed through the lock, and it proves a quote exists, not that the conclusion is right. See `docs/PRIVATE_INTENT.md`.
