@@ -18,6 +18,8 @@ Usage:
                                        show rules; --diagnose finds runnable order and blocked steps
   sop-mcp-server try [--json] FILE WORKFLOW STEP...
                                        replay steps against a runbook and see which the barrier blocks
+  sop-mcp-server gate [--json] [--state-dir DIR] [--reset] FILE WORKFLOW SESSION [STEP]
+                                       ask about one step and remember it between calls, for hooks and scripts
   sop-mcp-server demo [--json]         watch the barrier block a database drop until a backup is validated
   sop-mcp-server version               print the version
   sop-mcp-server help                  print this text
@@ -79,6 +81,8 @@ func dispatch(args []string, out, errw io.Writer) (code int, serve bool) {
 		return runCheck(args[1:], out, errw), false
 	case "try":
 		return runTry(args[1:], out, errw), false
+	case "gate":
+		return runGate(args[1:], out, errw), false
 	case "demo":
 		return runDemoArgs(args[1:], out, errw), false
 	}
