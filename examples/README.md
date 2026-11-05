@@ -97,6 +97,12 @@ Stores agent memory and its metadata in one atomic commit, then recalls it by ve
 Jira, Grafana, AWS, and PagerDuty agents finish a task by passing work to each other. Each call passes a scope check (the agent's own allowlist and limits), a grounding check (a claim must match evidence a tool returned), and the verification barrier.
 - **Run**: `go run ./examples/agent_team`
 
+### 17. Data center failover: stop the primary last (`failover_barrier`)
+An agent running a "pull the plug" failover tries to stop the primary site first. The barrier blocks it until the standby is verified, traffic is on the standby and the error rate is confirmed there, then the same agent finishes the runbook in the safe order.
+- **Run**: `go run ./examples/failover_barrier`
+- **Check**: `go test ./internal/examplecmd/failover_barrier -race -count=1`
+- **Note**: the same barrier as `verify_barrier` on an operations runbook that is not a database. It orders steps; it does not move traffic or talk to a load balancer.
+
 ---
 
 ## ▶️ Running the Examples
