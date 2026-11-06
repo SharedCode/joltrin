@@ -25,7 +25,17 @@ Joltrin blocks an AI agent's risky step, like dropping a database, until the ste
   <img src="docs/assets/ltl-barrier.gif" alt="Terminal recording of go run ./examples/verify_barrier. The agent tries drop_prod_db and is blocked, takes and validates a backup, then the drop is allowed." width="760" />
 </p>
 
-Try it now, no clone needed (Go 1.26.10 or newer):
+**See it work in your browser, no install:** [joltrinhq.com/agents](https://joltrinhq.com/agents/).
+
+**Or add it to your AI agent, no Go needed** (macOS and Linux, about 9 MB, checks its checksum; Windows and other options are [below](#connect-it-to-an-mcp-agent)):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/SharedCode/joltrin/master/scripts/install.sh | sh
+```
+
+Then restart your agent and ask it to run `drop_prod_db` on workflow `db-maintenance`. The server refuses until the backup steps have run.
+
+**Have Go (1.26.10 or newer)?** Run the demo from source, no clone needed:
 
 ```bash
 go run github.com/sharedcode/joltrin/v5/examples/verify_barrier@latest
