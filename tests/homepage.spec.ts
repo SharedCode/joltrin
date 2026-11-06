@@ -160,13 +160,21 @@ test.describe('Homepage', () => {
   test('agent team demo replays blocked and allowed calls for both scenarios', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const log = page.locator('#team-log');
-    await page.locator('#team-run').click();
+    // This section is far down a long page that is still loading images and reflowing, so the first
+    // click can miss. The replay writes its first line at once, so retry the click until that line shows.
+    const startReplay = async () => {
+      await expect(async () => {
+        await page.locator('#team-run').click();
+        await expect(log).not.toBeEmpty({ timeout: 1500 });
+      }).toPass({ timeout: 20000 });
+    };
+    await startReplay();
     await expect(log).toContainText('BLOCKED grounding: claimed cpu_pct=97', { timeout: 10000 });
     await expect(log).toContainText('BLOCKED scope: aws.terminate_instances');
     await expect(log).toContainText('checkout-asg scaled 4 -> 6', { timeout: 10000 });
     await page.getByRole('tab', { name: 'PagerDuty incident' }).click();
     await expect(log).toBeEmpty();
-    await page.locator('#team-run').click();
+    await startReplay();
     await expect(log).toContainText('BLOCKED grounding: claimed error_rate_pct=40', { timeout: 10000 });
     await expect(log).toContainText('PD-77 resolved', { timeout: 10000 });
     await expect(log).toContainText('"missing_state":"recovery_confirmed"');
