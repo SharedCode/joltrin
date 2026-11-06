@@ -448,3 +448,22 @@ test.describe('Homepage', () => {
     });
   }
 });
+
+test.describe('About the founder in the top navigation', () => {
+  test('desktop nav links straight to the founder page', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const link = page.locator('header nav[aria-label="Main"] a[href="./about/"]');
+    await expect(link).toBeVisible();
+    await link.click();
+    await expect(page).toHaveURL(/\/about\/$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Gerard Louis Recinto' })).toBeVisible();
+  });
+
+  test('phone menu lists the founder page', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.locator('#mobile-menu-btn').click();
+    await expect(page.locator('#mobile-menu-panel a[href="./about/"]')).toBeVisible();
+  });
+});
