@@ -54,22 +54,30 @@
   <script>
     window.plausible = window.plausible || function () { (window.plausible.q = window.plausible.q || []).push(arguments); };
     function track(name) { try { window.plausible(name); } catch (e) {} }
-    function copyInstall(btn) {
-      var cmd = document.getElementById('install-cmd').innerText.trim();
-      track('copy_install');
-      navigator.clipboard.writeText(cmd).then(
-        function () { btn.innerText = 'Copied'; },
-        function () { btn.innerText = 'Select and copy'; }
-      );
+    // Copies a command and says what happened. navigator.clipboard is missing on plain http and can be
+    // denied, so the fallback selects the text and tells the visitor to copy it themselves.
+    function copyCommand(btn, id, eventName, label) {
+      var el = document.getElementById(id);
+      var status = document.getElementById('copy-status');
+      track(eventName);
+      function say(text) { if (status) status.textContent = text; }
+      function done() {
+        btn.innerText = 'Copied'; say(label + ' copied.');
+        setTimeout(function () { btn.innerText = 'Copy'; }, 2000);
+      }
+      function select() {
+        try {
+          var r = document.createRange(); r.selectNodeContents(el);
+          var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+        } catch (e) {}
+        btn.innerText = 'Select and copy'; say('Copy is not available here. The command is selected, press Ctrl or Command C.');
+        setTimeout(function () { btn.innerText = 'Copy'; }, 4000);
+      }
+      if (!navigator.clipboard || !navigator.clipboard.writeText) { select(); return; }
+      navigator.clipboard.writeText(el.innerText.trim()).then(done, select);
     }
-    function copyQuickstart(btn) {
-      var cmd = document.getElementById('quickstart-cmd').innerText.trim();
-      track('copy_quickstart');
-      navigator.clipboard.writeText(cmd).then(
-        function () { btn.innerText = 'Copied'; },
-        function () { btn.innerText = 'Select and copy'; }
-      );
-    }
+    function copyInstall(btn) { copyCommand(btn, 'install-cmd', 'copy_install', 'Install command'); }
+    function copyQuickstart(btn) { copyCommand(btn, 'quickstart-cmd', 'copy_quickstart', 'Go command'); }
     document.addEventListener('click', function (e) {
       var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
       var h = a.getAttribute('href') || '';
@@ -758,6 +766,7 @@
           <p class="mt-6 text-[11px] font-mono uppercase tracking-wider text-slate-400">MIT licensed &middot; no Go needed to install &middot; 500+ test files &middot; runs in your browser, no signup</p>
           <div class="mt-10 min-w-0 w-full text-left max-w-xl mx-auto">
             <p class="text-xs font-mono uppercase tracking-wider text-slate-400 mb-1.5">Install in one line, no Go needed (macOS and Linux)</p>
+            <span id="copy-status" class="sr-only" role="status" aria-live="polite"></span>
             <div class="relative">
               <pre id="install-cmd" tabindex="0" class="rounded-lg bg-dark-950 border border-dark-700 pl-3 pr-16 py-2 font-mono text-xs text-slate-200 overflow-x-auto"><code>curl -fsSL https://raw.githubusercontent.com/SharedCode/joltrin/master/scripts/install.sh | sh</code></pre>
               <button type="button" id="install-copy" onclick="copyInstall(this)" class="absolute right-1.5 top-1.5 px-2 py-0.5 rounded-md bg-dark-800 hover:bg-dark-700 border border-dark-700 text-[11px] font-mono text-slate-300 transition cursor-pointer">Copy</button>

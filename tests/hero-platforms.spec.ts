@@ -103,3 +103,36 @@ test.describe('on a touch screen', () => {
     }
   });
 });
+
+test.describe('copy buttons say what happened', () => {
+  test('success is announced and the label resets', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'clipboard', { value: { writeText: async () => {} } });
+    });
+    await page.goto('/');
+    await page.locator('#install-copy').click();
+    await expect(page.locator('#copy-status')).toHaveText('Install command copied.');
+    await expect(page.locator('#install-copy')).toHaveText('Copied');
+    await expect(page.locator('#install-copy')).toHaveText('Copy', { timeout: 5000 });
+  });
+
+  test('without a clipboard the command is selected and the visitor is told', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'clipboard', { value: undefined });
+    });
+    await page.goto('/');
+    await page.locator('#install-copy').click();
+    await expect(page.locator('#copy-status')).toContainText('The command is selected');
+    expect(await page.evaluate(() => window.getSelection()?.toString())).toContain('install.sh | sh');
+  });
+
+  test('a denied clipboard falls back the same way', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'clipboard', { value: { writeText: async () => { throw new Error('denied'); } } });
+    });
+    await page.goto('/');
+    await page.locator('#quickstart-copy').click();
+    await expect(page.locator('#copy-status')).toContainText('The command is selected');
+    expect(await page.evaluate(() => window.getSelection()?.toString())).toContain('go run github.com');
+  });
+});
