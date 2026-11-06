@@ -503,3 +503,13 @@ test.describe('Founder page is visible on the first screen', () => {
     await expect(page).toHaveURL(/\/about\/$/);
   });
 });
+
+test('About is one tab stop in the header at every desktop width', async ({ page }) => {
+  for (const width of [1024, 1100, 1279, 1280, 1440, 1920]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const visible = await page.locator('header a[href="./about/"]').evaluateAll((els) =>
+      els.filter((e) => { const r = e.getBoundingClientRect(); const s = getComputedStyle(e); return r.width > 0 && r.height > 0 && s.visibility !== 'hidden'; }).length);
+    expect(visible, `${width}px shows About ${visible} times in the header`).toBe(1);
+  }
+});
