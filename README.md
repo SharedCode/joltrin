@@ -27,13 +27,15 @@ Joltrin blocks an AI agent's risky step, like dropping a database, until the ste
 
 **See it work in your browser, no install:** [joltrinhq.com/agents](https://joltrinhq.com/agents/).
 
-**Or add it to your AI agent, no Go needed** (macOS and Linux, about 9 MB, checks its checksum; Windows and other options are [below](#connect-it-to-an-mcp-agent)):
+**Or add it to your AI agent, no Go needed** (macOS and Linux, about 9 MB; Windows and other options are [below](#connect-it-to-an-mcp-agent)):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/SharedCode/joltrin/master/scripts/install.sh | sh
 ```
 
 Then restart your agent and ask it to run `drop_prod_db` on workflow `db-maintenance`. The server refuses until the backup steps have run.
+
+Piping a script into a shell trusts that script. [Read it first](scripts/install.sh): it does not use sudo, and it compares the binary with the release checksum, which catches a damaged download but not a compromised release. For build provenance set `JOLTRIN_VERIFY=1` (needs the GitHub CLI), or pin a version, or build from source. The [trust notes below](#connect-it-to-an-mcp-agent) explain each.
 
 **Have Go (1.26.10 or newer)?** Run the demo from source, no clone needed:
 
