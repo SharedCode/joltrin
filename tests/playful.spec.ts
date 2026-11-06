@@ -139,6 +139,21 @@ test.describe('Agents page inquiry form', () => {
     expect(JSON.stringify(events)).not.toContain('test@example.com');
   });
 
+  test('a received inquiry shows the ticket ID and no personal email address', async ({ page }) => {
+    await page.route('**/plausible.io/**', (route) => route.abort());
+    await page.route('**/api/billing/enterprise-contact', (route) => route.fulfill({ status: 200, body: JSON.stringify({ ticket: 'JTR-20261101-ABCDEF' }) }));
+    await page.goto('/agents/', { waitUntil: 'domcontentloaded' });
+    await waitForFormReady(page, 'interest-ts-agents');
+    await page.fill('#interest-form-agents [name="name"]', 'Test Person');
+    await page.fill('#interest-form-agents [name="email"]', 'test@example.com');
+    await page.fill('#interest-form-agents [name="company"]', 'Test Co');
+    await page.selectOption('#inq-tier-agents', 'pro');
+    await page.click('#inq-submit-btn-agents');
+    const alert = page.locator('#agents-form-status-alert');
+    await expect(alert).toContainText('JTR-20261101-ABCDEF');
+    expect((await page.content()).toLowerCase()).not.toContain("gmail.com");
+  });
+
   test('a failed submission says nothing was sent instead of claiming receipt', async ({ page }) => {
     await page.route('**/plausible.io/**', (route) => route.abort());
     await page.route('**/api/billing/enterprise-contact', (route) => route.fulfill({ status: 500, body: '{}' }));
@@ -150,7 +165,7 @@ test.describe('Agents page inquiry form', () => {
     await page.selectOption('#inq-tier-agents', 'pro');
     await page.click('#inq-submit-btn-agents');
     const alert = page.locator('#agents-form-status-alert');
-    await expect(alert).toContainText('Nothing was sent yet');
+    await expect(alert).toContainText('Nothing was sent');
     await expect(alert).not.toContainText('inquiry has been received');
   });
 

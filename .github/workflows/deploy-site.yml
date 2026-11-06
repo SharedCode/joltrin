@@ -9,6 +9,7 @@ on:
       - 'demo-agents/**'
       - 'demo-btree/**'
       - 'demo-intent/**'
+      - 'about/**'
       - 'intent/**'
       - 'verify/**'
       - 'inmemory/**'

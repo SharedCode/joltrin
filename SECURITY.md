@@ -4,8 +4,7 @@
 
 If you discover a security issue or vulnerability in Joltrin, please report it responsibly.
 
-Do not open a public GitHub issue. Instead, email:
-gerardrecinto@gmail.com
+Do not open a public GitHub issue. Instead, report it privately through [GitHub Security Advisories](https://github.com/SharedCode/joltrin/security/advisories/new).
 
 Please include:
 - A description of the issue and potential impact
