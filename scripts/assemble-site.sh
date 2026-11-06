@@ -11,7 +11,7 @@ cd "$REPO_ROOT"
 SITE="${1:-_site}"
 
 rm -rf "$SITE"
-mkdir -p "$SITE/arena" "$SITE/agents" "$SITE/btree" "$SITE/private-intent" "$SITE/docs" "$SITE/assets"
+mkdir -p "$SITE/arena" "$SITE/agents" "$SITE/btree" "$SITE/private-intent" "$SITE/about" "$SITE/docs" "$SITE/assets"
 
 # Technical demo (WASM) lives at the site root: joltrinhq.com/
 cp demo/index.html demo/tailwind.css demo/sop.wasm demo/wasm_exec.js demo/404.html demo/favicon.svg demo/favicon.ico demo/og-image.png demo/logo-mark.png demo/robots.txt demo/sitemap.xml "$SITE/"
@@ -27,6 +27,8 @@ cp demo-agents/index.html demo-agents/tailwind.css demo-agents/sop-agents.wasm d
 cp demo-btree/index.html demo-btree/tailwind.css demo-btree/arena.wasm demo-btree/wasm_exec.js demo-btree/favicon.svg demo-btree/favicon.ico demo-btree/og-image.png demo-btree/logo-mark.png "$SITE/btree/"
 # Private Intent (the intent package in WASM) lives at joltrinhq.com/private-intent/
 cp demo-intent/index.html demo-intent/tailwind.css demo-intent/intent.wasm demo-intent/wasm_exec.js demo-intent/favicon.svg demo-intent/favicon.ico demo-intent/og-image.png demo-intent/logo-mark.png "$SITE/private-intent/"
+# About the Founder lives at joltrinhq.com/about/
+cp about/index.html about/tailwind.css about/favicon.svg about/favicon.ico about/og-image.png about/logo-mark.png "$SITE/about/"
 # Response headers for the Cloudflare deployment.
 cp deploy/cloudflare/_headers deploy/cloudflare/_redirects "$SITE/"
 # Security contact for researchers (RFC 9116).
@@ -38,7 +40,7 @@ fail=0
 # Every ./ path a page names must exist. This covers src, href and poster
 # attributes and ./assets/ paths written inside scripts, which is how the demo
 # video is loaded.
-for page in index.html agents/index.html btree/index.html private-intent/index.html docs/index.html; do
+for page in index.html agents/index.html btree/index.html private-intent/index.html about/index.html docs/index.html; do
   dir="$(dirname "$page")"
   refs=$(grep -oE "(src|href|poster)=[\"']\./[^\"'#?]+[\"']|['\"]\./assets/[^\"'#?]+['\"]" "$SITE/$page" \
     | grep -oE '\./[^"'"'"'#?]+' | sed -E 's/^\.\///' | sort -u || true)
@@ -53,7 +55,7 @@ done
 
 # Videos are YouTube embeds only. A local video file or a <video> tag on a page
 # once shipped without its files and showed a black box, so neither is allowed.
-if grep -nE '<video|\.(mp4|webm|mov)' "$SITE/index.html" "$SITE/agents/index.html" "$SITE/btree/index.html" "$SITE/private-intent/index.html" "$SITE/docs/index.html"; then
+if grep -nE '<video|\.(mp4|webm|mov)' "$SITE/index.html" "$SITE/agents/index.html" "$SITE/btree/index.html" "$SITE/private-intent/index.html" "$SITE/about/index.html" "$SITE/docs/index.html"; then
   echo "Error: pages must embed videos from YouTube, not a local video file or <video> tag" >&2
   fail=1
 fi

@@ -10,7 +10,7 @@ import { waitForWasmReady } from './helpers/wasm-lifecycle';
 const require = createRequire(import.meta.url);
 const axePath: string = process.env.AXE_PATH || require.resolve('axe-core/axe.min.js');
 
-const PAGES = ['/', '/private-intent/', '/agents/', '/btree/', '/docs/'];
+const PAGES = ['/', '/private-intent/', '/agents/', '/btree/', '/about/', '/docs/'];
 
 for (const scheme of ['dark', 'light'] as const) {
   test.describe(`Accessibility, ${scheme} theme`, () => {
