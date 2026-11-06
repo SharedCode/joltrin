@@ -457,7 +457,7 @@ test.describe('About the founder in the top navigation', () => {
     await expect(link).toBeVisible();
     await link.click();
     await expect(page).toHaveURL(/\/about\/$/);
-    await expect(page.getByRole('heading', { level: 1, name: 'Gerard Louis Recinto' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'The people behind Joltrin' })).toBeVisible();
   });
 
   test('phone menu lists the founder page', async ({ page }) => {
@@ -482,8 +482,8 @@ test.describe('Founder page is visible on the first screen', () => {
     });
   }
 
-  test('header shows an About button from tablet width up', async ({ page }) => {
-    await page.setViewportSize({ width: 768, height: 1024 });
+  test('header shows an About button from laptop width up', async ({ page }) => {
+    await page.setViewportSize({ width: 1100, height: 800 });
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const link = page.locator('#header-about-link');
     await expect(link).toBeVisible();

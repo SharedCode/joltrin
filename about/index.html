@@ -3,22 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>About the Founder | Joltrin</title>
-  <meta name="description" content="Gerard Louis Recinto, founder of Joltrin, is a Senior DevOps and platform engineer in San Diego. Read about the experience behind Joltrin and how it shapes the product." />
+  <title>About the Founders | Joltrin</title>
+  <meta name="description" content="Meet the founders of Joltrin: Gerardo Recinto, the main author of the code, and Gerard Louis Recinto, a Senior DevOps and platform engineer in San Diego." />
   <link rel="canonical" href="https://joltrinhq.com/about/" />
 
-  <meta property="og:type" content="profile" />
+  <meta property="og:type" content="website" />
   <meta property="og:url" content="https://joltrinhq.com/about/" />
-  <meta property="og:title" content="About the Founder | Joltrin" />
-  <meta property="og:description" content="Gerard Louis Recinto, founder of Joltrin, is a Senior DevOps and platform engineer in San Diego. Read about the experience behind Joltrin." />
+  <meta property="og:title" content="About the Founders | Joltrin" />
+  <meta property="og:description" content="Meet the founders of Joltrin, Gerardo Recinto and Gerard Louis Recinto." />
   <meta property="og:image" content="https://joltrinhq.com/about/og-image.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="Joltrin" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:url" content="https://joltrinhq.com/about/" />
-  <meta name="twitter:title" content="About the Founder | Joltrin" />
-  <meta name="twitter:description" content="Gerard Louis Recinto, founder of Joltrin, is a Senior DevOps and platform engineer in San Diego." />
+  <meta name="twitter:title" content="About the Founders | Joltrin" />
+  <meta name="twitter:description" content="Meet the founders of Joltrin, Gerardo Recinto and Gerard Louis Recinto." />
   <meta name="twitter:image" content="https://joltrinhq.com/about/og-image.png" />
   <meta name="twitter:image:alt" content="Joltrin" />
 
@@ -32,14 +32,13 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "ProfilePage",
-    "mainEntity": {
-      "@type": "Person",
-      "name": "Gerard Louis Recinto",
-      "jobTitle": "Founder of Joltrin",
-      "url": "https://joltrinhq.com/about/",
-      "homeLocation": { "@type": "Place", "name": "San Diego, California" }
-    }
+    "@type": "AboutPage",
+    "name": "About the Founders",
+    "url": "https://joltrinhq.com/about/",
+    "about": [
+      { "@type": "Person", "name": "Gerardo Recinto", "jobTitle": "Founder of Joltrin", "homeLocation": { "@type": "Place", "name": "Union City, California" }, "sameAs": ["https://github.com/grecinto"] },
+      { "@type": "Person", "name": "Gerard Louis Recinto", "jobTitle": "Founder of Joltrin", "homeLocation": { "@type": "Place", "name": "San Diego, California" } }
+    ]
   }
   </script>
 
@@ -71,9 +70,15 @@
   </header>
 
   <main id="about" class="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-    <section aria-labelledby="name" class="mb-12">
-      <p class="font-mono text-xs uppercase tracking-widest text-brand-400 mb-4">About the Founder</p>
-      <h1 id="name" class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">Gerard Louis Recinto</h1>
+    <section aria-labelledby="page-title" class="mb-14">
+      <p class="font-mono text-xs uppercase tracking-widest text-brand-400 mb-4">About the Founders</p>
+      <h1 id="page-title" class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">The people behind Joltrin</h1>
+      <p class="mt-6 text-lg leading-relaxed text-slate-300">Joltrin has two founders. Gerardo Recinto wrote the first commit in 2015 and is the main author of the code. Gerard Louis Recinto is a DevOps and platform engineer who builds the delivery side.</p>
+      <p class="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm"><a class="text-brand-400 underline hover:text-white py-1" href="#gerardo-recinto">Gerardo Recinto</a><a class="text-brand-400 underline hover:text-white py-1" href="#gerard-louis-recinto">Gerard Louis Recinto</a></p>
+    </section>
+
+    <section id="gerard-louis-recinto" aria-labelledby="name" class="mb-12 scroll-mt-6">
+      <h2 id="name" class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Gerard Louis Recinto</h2>
       <p class="mt-2 text-lg text-slate-400">Founder of Joltrin</p>
       <p class="mt-8 text-xl sm:text-2xl leading-relaxed text-slate-200">
         I have spent my career building the automation that engineering teams depend on. Joltrin brings the same habits to AI agents: check the step before it runs, and say what to do first.
@@ -81,7 +86,7 @@
     </section>
 
     <section aria-labelledby="bio" class="mb-12">
-      <h2 id="bio" class="text-xl font-bold text-white mb-4">Background</h2>
+      <h3 id="bio" class="text-xl font-bold text-white mb-4">Background</h3>
       <div class="space-y-4 leading-relaxed">
         <p>I am a Senior DevOps and platform engineer based in San Diego, California. I build the pipelines, cloud infrastructure and Kubernetes platforms that other engineers ship on, and I spend a lot of time troubleshooting them in production.</p>
         <p>At Qualcomm that work has included supporting more than 475 Jenkins pipelines, cutting one CI build from 6 hours 59 minutes to about 15 minutes by moving binary artifacts from Git LFS to Artifactory, and implementing an S3 lifecycle change that saved about $26 million a year, a figure reported by our AWS technical account manager.</p>
@@ -91,7 +96,7 @@
     </section>
 
     <section aria-labelledby="facts" class="mb-12">
-      <h2 id="facts" class="sr-only">At a glance</h2>
+      <h3 id="facts" class="sr-only">At a glance</h3>
       <dl class="grid grid-cols-1 sm:grid-cols-2 gap-px bg-dark-800 border border-dark-800 rounded-xl overflow-hidden text-sm">
         <div class="bg-dark-900 p-4"><dt class="font-mono text-xs uppercase text-slate-400">Based in</dt><dd class="mt-1 text-slate-200">San Diego, California</dd></div>
         <div class="bg-dark-900 p-4"><dt class="font-mono text-xs uppercase text-slate-400">Role</dt><dd class="mt-1 text-slate-200">Senior DevOps and platform engineer</dd></div>
@@ -101,12 +106,29 @@
     </section>
 
     <section aria-labelledby="principles" class="mb-12">
-      <h2 id="principles" class="text-xl font-bold text-white mb-4">How that shapes Joltrin</h2>
+      <h3 id="principles" class="text-xl font-bold text-white mb-4">How that shapes Joltrin</h3>
       <ul class="space-y-5 leading-relaxed">
-        <li><h3 class="font-semibold text-white">Stop the risky step, then say what comes first.</h3><p class="mt-1">A release pipeline does not just fail a bad deploy. It tells you which check to run. Joltrin works the same way: it blocks a risky agent step, like dropping a database, until the steps before it are recorded, and tells the agent what to do first.</p></li>
-        <li><h3 class="font-semibold text-white">Let people try it before they trust it.</h3><p class="mt-1">You can run the barrier in your browser, and the core is open source under the MIT license, so you can read exactly what it does.</p></li>
-        <li><h3 class="font-semibold text-white">Keep the workflow readable.</h3><p class="mt-1">The automation I have seen last is the kind a new engineer can follow in an afternoon. I try to keep Joltrin's rules and checks that plain.</p></li>
+        <li><h4 class="font-semibold text-white">Stop the risky step, then say what comes first.</h4><p class="mt-1">A release pipeline does not just fail a bad deploy. It tells you which check to run. Joltrin works the same way: it blocks a risky agent step, like dropping a database, until the steps before it are recorded, and tells the agent what to do first.</p></li>
+        <li><h4 class="font-semibold text-white">Let people try it before they trust it.</h4><p class="mt-1">You can run the barrier in your browser, and the core is open source under the MIT license, so you can read exactly what it does.</p></li>
+        <li><h4 class="font-semibold text-white">Keep the workflow readable.</h4><p class="mt-1">The automation I have seen last is the kind a new engineer can follow in an afternoon. I try to keep Joltrin's rules and checks that plain.</p></li>
       </ul>
+    </section>
+
+    <section id="gerardo-recinto" aria-labelledby="gerardo" class="mb-12 border-t border-dark-800 pt-10 scroll-mt-6">
+      <h2 id="gerardo" class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Gerardo Recinto</h2>
+      <p class="mt-2 text-lg text-slate-400">Founder of Joltrin</p>
+      <h3 class="mt-8 text-xl font-bold text-white mb-4">Background</h3>
+      <div class="space-y-4 leading-relaxed">
+        <p>Gerardo is a software engineer based in Union City, California. He made the first commit of this project in April 2015, when the repository was named SOP, for Scalable Objects Persistence, and he has written most of the code since. As of November 2026 that is more than 1,900 of the repository's roughly 2,400 commits.</p>
+        <p>The project began as a Go library for storing objects durably, built around a transactional B-tree. It is now durable memory and a verification barrier for AI agents in one embedded Go library, and the B-tree is still at its core. You can try the B-tree yourself in the <a class="text-brand-400 underline hover:text-white" href="../btree/">B-tree game</a>.</p>
+        <p>Gerardo also publishes <a class="text-brand-400 underline hover:text-white" href="https://github.com/grecinto/tensortree" rel="noopener noreferrer">TensorTree</a>, a vector database in Go built on the same B-tree.</p>
+      </div>
+      <dl class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-px bg-dark-800 border border-dark-800 rounded-xl overflow-hidden text-sm">
+        <div class="bg-dark-900 p-4"><dt class="font-mono text-xs uppercase text-slate-400">Based in</dt><dd class="mt-1 text-slate-200">Union City, California</dd></div>
+        <div class="bg-dark-900 p-4"><dt class="font-mono text-xs uppercase text-slate-400">Role</dt><dd class="mt-1 text-slate-200">Founder and main author of the code</dd></div>
+        <div class="bg-dark-900 p-4 sm:col-span-2"><dt class="font-mono text-xs uppercase text-slate-400">On GitHub</dt><dd class="mt-1"><a class="text-brand-400 underline hover:text-white" href="https://github.com/grecinto" rel="noopener noreferrer">github.com/grecinto</a></dd></div>
+      </dl>
+      <p class="mt-6 text-sm text-slate-400 border-l-2 border-dark-700 pl-4">Everything above comes from the public commit history and Gerardo's public GitHub profile.</p>
     </section>
 
     <section aria-labelledby="next" class="border-t border-dark-800 pt-10">
