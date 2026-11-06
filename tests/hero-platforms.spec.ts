@@ -44,3 +44,21 @@ for (const width of [375, 1440]) {
     });
   });
 }
+
+test.describe('Hero install order', () => {
+  test('the no-Go installer comes before the Go command and copies by keyboard', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'clipboard', { value: {
+        writeText: async (value: string) => { (window as Window & { copiedInstall?: string }).copiedInstall = value; },
+      } });
+    });
+    await page.goto('/');
+    await expect(page.locator('#install-cmd')).toHaveText(shell);
+    const installTop = (await page.locator('#install-cmd').boundingBox())!.y;
+    const goTop = (await page.locator('#quickstart-cmd').boundingBox())!.y;
+    expect(installTop).toBeLessThan(goTop);
+    await page.locator('#install-copy').focus();
+    await page.keyboard.press('Enter');
+    expect(await page.evaluate(() => (window as Window & { copiedInstall?: string }).copiedInstall)).toBe(shell);
+  });
+});
