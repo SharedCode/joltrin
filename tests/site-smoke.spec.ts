@@ -105,3 +105,11 @@ for (const blockThirdParty of [false, true]) {
     });
   }
 }
+
+test('security.txt is published for researchers (RFC 9116)', async ({ request }) => {
+  const res = await request.get('/.well-known/security.txt');
+  expect(res.status()).toBe(200);
+  const text = await res.text();
+  expect(text).toMatch(/^Contact: https:\/\/github\.com\/SharedCode\/joltrin\/security\/advisories\/new$/m);
+  expect(text).toMatch(/^Expires: /m);
+});
