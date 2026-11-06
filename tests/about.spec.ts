@@ -35,4 +35,11 @@ test.describe('About the founders', () => {
     await page.goto('/about/', { waitUntil: 'domcontentloaded' });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   });
+
+  test('lists what Gerard built beyond delivery', async ({ page }) => {
+    await page.goto('/about/', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 3, name: 'What I built in Joltrin' })).toBeVisible();
+    const text = await page.locator('main').innerText();
+    for (const word of ['MCP server', 'A2A agent and bridge', 'Kubernetes admission gate']) expect(text).toContain(word);
+  });
 });

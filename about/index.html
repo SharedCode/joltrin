@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About the Founders | Joltrin</title>
-  <meta name="description" content="Meet the founders of Joltrin: Gerardo Recinto, the main author of the code, and Gerard Louis Recinto, a Senior DevOps and platform engineer in San Diego." />
+  <meta name="description" content="Meet the founders of Joltrin: Gerardo Recinto, the main author of the code, and Gerard Louis Recinto, a Senior DevOps and platform engineer in San Diego who built the MCP and A2A servers and the Kubernetes admission gate." />
   <link rel="canonical" href="https://joltrinhq.com/about/" />
 
   <meta property="og:type" content="website" />
@@ -73,7 +73,7 @@
     <section aria-labelledby="page-title" class="mb-14">
       <p class="font-mono text-xs uppercase tracking-widest text-brand-400 mb-4">About the Founders</p>
       <h1 id="page-title" class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">The people behind Joltrin</h1>
-      <p class="mt-6 text-lg leading-relaxed text-slate-300">Joltrin has two founders. Gerardo Recinto wrote the first commit in 2015 and is the main author of the code. Gerard Louis Recinto is a DevOps and platform engineer who builds the delivery side.</p>
+      <p class="mt-6 text-lg leading-relaxed text-slate-300">Joltrin has two founders. Gerardo Recinto wrote the first commit in 2015 and is the main author of the code. Gerard Louis Recinto is a DevOps and platform engineer who built the MCP and A2A servers, the Kubernetes admission gate and the delivery pipeline.</p>
       <p class="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm"><a class="text-brand-400 underline hover:text-white py-1" href="#gerardo-recinto">Gerardo Recinto</a><a class="text-brand-400 underline hover:text-white py-1" href="#gerard-louis-recinto">Gerard Louis Recinto</a></p>
     </section>
 
@@ -93,6 +93,19 @@
         <p>I studied Mathematics and Computer Science at UC San Diego and hold the AWS Certified Solutions Architect Associate certification. My day-to-day tools are Python, Terraform, Kubernetes, AWS and CI/CD systems.</p>
       </div>
       <p class="mt-6 text-sm text-slate-400 border-l-2 border-dark-700 pl-4">Those results come from my professional work. They are not Joltrin customer results, and no employer or vendor endorses Joltrin.</p>
+    </section>
+
+    <section aria-labelledby="built" class="mb-12">
+      <h3 id="built" class="text-xl font-bold text-white mb-4">What I built in Joltrin</h3>
+      <p class="leading-relaxed mb-4">Since July 2026 I have written about 445 commits in this repository. It is not only the pipeline around the code. These are the parts that agents and clusters actually talk to:</p>
+      <ul class="space-y-4 leading-relaxed list-disc pl-5">
+        <li><strong class="text-white">MCP server.</strong> <code class="font-mono text-sm">sop-mcp-server</code> exposes the verification engine to agents over the Model Context Protocol, with one-line install, prebuilt binaries on every release, a setup command that registers it by full path, and structured, actionable errors for blocked and malformed requests.</li>
+        <li><strong class="text-white">A2A agent and bridge.</strong> An Agent2Agent endpoint over the same engine, an agent card, and an MCP-to-A2A bridge with setup docs.</li>
+        <li><strong class="text-white">Kubernetes admission gate.</strong> <code class="font-mono text-sm">sop-k8s-gate</code> is a validating admission webhook. The API server refuses a delete until the steps before it are recorded for that trace. It ships with cert-manager manifests, Prometheus counters, an audit log, a deny-egress network policy, a signed and scanned image build, a Kyverno image check in the AKS demo, and a script that reproduces the checks on a real kind cluster.</li>
+        <li><strong class="text-white">Agent examples and clients.</strong> A LangGraph agent over MCP that recovers from a block, with its own CI run, and a Rust client for the gate command.</li>
+        <li><strong class="text-white">Delivery.</strong> The CI gates, release pipeline, site deploy and rollback that ship all of the above.</li>
+      </ul>
+      <p class="mt-4 text-sm text-slate-400 border-l-2 border-dark-700 pl-4">The commit history is public in the repository, so you can check each of these. Gerardo wrote most of the core storage code these sit on.</p>
     </section>
 
     <section aria-labelledby="facts" class="mb-12">
