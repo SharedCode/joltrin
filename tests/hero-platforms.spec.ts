@@ -66,4 +66,13 @@ test.describe('Hero install order', () => {
     await page.goto('/');
     await expect(page.getByText('no Go needed to install')).toBeVisible();
   });
+
+  test('the first screen says what to ask the agent after installing', async ({ page }) => {
+    await page.goto('/');
+    const next = page.locator('#after-install');
+    await expect(next).toBeVisible();
+    await expect(next).toContainText('drop_prod_db');
+    await expect(next).toContainText('db-maintenance');
+    await expect(next.getByRole('link', { name: 'the browser demo' })).toHaveAttribute('href', './agents/');
+  });
 });
