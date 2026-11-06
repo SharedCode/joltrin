@@ -482,8 +482,8 @@ test.describe('Founder page is visible on the first screen', () => {
     });
   }
 
-  test('header shows an About button from tablet width up', async ({ page }) => {
-    await page.setViewportSize({ width: 768, height: 1024 });
+  test('header shows an About button from laptop width up', async ({ page }) => {
+    await page.setViewportSize({ width: 1100, height: 800 });
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const link = page.locator('#header-about-link');
     await expect(link).toBeVisible();
