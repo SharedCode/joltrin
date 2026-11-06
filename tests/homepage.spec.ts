@@ -266,7 +266,7 @@ test.describe('Homepage', () => {
     await modal.getByRole('button', { name: /^request pro$/i }).click();
     await expect(page.locator('#pro-checkout-status')).toContainText(/isn't available on this site yet/i, { timeout: 10_000 });
     await expect(page.locator('#pro-checkout-status a[href="#enterprise"]')).toBeVisible();
-    expect(await page.content()).not.toMatch(/gmail\.com/i);
+    expect((await page.content()).toLowerCase()).not.toContain("gmail.com");
   });
 
   test('canonical and social metadata point at joltrinhq.com on all three pages', async ({ request }) => {

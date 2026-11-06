@@ -151,7 +151,7 @@ test.describe('Agents page inquiry form', () => {
     await page.click('#inq-submit-btn-agents');
     const alert = page.locator('#agents-form-status-alert');
     await expect(alert).toContainText('JTR-20261101-ABCDEF');
-    expect(await page.content()).not.toMatch(/gmail\.com/i);
+    expect((await page.content()).toLowerCase()).not.toContain("gmail.com");
   });
 
   test('a failed submission says nothing was sent instead of claiming receipt', async ({ page }) => {
