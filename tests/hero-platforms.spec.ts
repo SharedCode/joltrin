@@ -61,4 +61,9 @@ test.describe('Hero install order', () => {
     await page.keyboard.press('Enter');
     expect(await page.evaluate(() => (window as Window & { copiedInstall?: string }).copiedInstall)).toBe(shell);
   });
+
+  test('the line under the buttons tells a first-time visitor they do not need Go', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByText('no Go needed to install')).toBeVisible();
+  });
 });
