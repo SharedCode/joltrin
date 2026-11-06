@@ -586,8 +586,9 @@
   <header class="border-b border-dark-800 bg-dark-900/80 backdrop-blur-xl backdrop-saturate-150 sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <a href="./" class="w-9 h-9 flex items-center justify-center">
-          <img src="./logo-mark.png" alt="Joltrin" class="w-9 h-9 object-contain" width="36" height="36" />
+        <!-- The text link next to it is the keyboard and screen reader link home, so the icon is not a second stop. -->
+        <a href="./" tabindex="-1" aria-hidden="true" class="w-9 h-9 flex items-center justify-center">
+          <img src="./logo-mark.png" alt="" class="w-9 h-9 object-contain" width="36" height="36" />
         </a>
         <div>
           <div class="flex items-center space-x-2">
