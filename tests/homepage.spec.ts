@@ -513,3 +513,10 @@ test('About is one tab stop in the header at every desktop width', async ({ page
     expect(visible, `${width}px shows About ${visible} times in the header`).toBe(1);
   }
 });
+
+test('the header has one keyboard link home, not two', async ({ page }) => {
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  const stops = await page.locator('header a[href="./"]').evaluateAll((els) =>
+    els.filter((e) => e.getAttribute('tabindex') !== '-1' && e.getAttribute('aria-hidden') !== 'true').map((e) => e.textContent?.trim()));
+  expect(stops).toEqual(['Joltrin']);
+});
