@@ -3,6 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>html{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
+  <script>
+    // iPads and phones can keep the portrait layout width after a rotation until a reload.
+    // Re-reading the viewport tag on rotation makes the browser lay the page out again.
+    (function () {
+      var m = document.querySelector('meta[name="viewport"]');
+      if (!m) return;
+      var c = m.getAttribute('content');
+      function relayout() { m.setAttribute('content', c + ', minimum-scale=1'); setTimeout(function () { m.setAttribute('content', c); }, 60); }
+      window.addEventListener('orientationchange', relayout);
+      if (screen.orientation && screen.orientation.addEventListener) screen.orientation.addEventListener('change', relayout);
+    })();
+  </script>
   <title>Documentation | Joltrin</title>
   <meta name="description" content="Joltrin documentation: what the verifier protects against, the blocked-result payload, a local demo, and MCP, A2A and Kubernetes integration.">
   <link rel="canonical" href="https://joltrinhq.com/docs/">

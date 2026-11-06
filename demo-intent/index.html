@@ -3,6 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>html{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
+  <script>
+    // iPads and phones can keep the portrait layout width after a rotation until a reload.
+    // Re-reading the viewport tag on rotation makes the browser lay the page out again.
+    (function () {
+      var m = document.querySelector('meta[name="viewport"]');
+      if (!m) return;
+      var c = m.getAttribute('content');
+      function relayout() { m.setAttribute('content', c + ', minimum-scale=1'); setTimeout(function () { m.setAttribute('content', c); }, 60); }
+      window.addEventListener('orientationchange', relayout);
+      if (screen.orientation && screen.orientation.addEventListener) screen.orientation.addEventListener('change', relayout);
+    })();
+  </script>
   <title>Joltrin Private Intent | AI agents that respect your rules before they act</title>
   <meta name="description" content="Give agents your operating rules without handing over your private context. Joltrin blocks a risky action until signed evidence and the right approval exist, then issues a receipt. Try it in your browser." />
   <link rel="canonical" href="https://joltrinhq.com/private-intent/" />
