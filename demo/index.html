@@ -597,6 +597,9 @@
         <a href="./docs/" class="px-2.5 py-1 rounded-lg hover:bg-dark-800 text-slate-300 hover:text-brand-400 transition">
           <span>Docs</span>
         </a>
+        <a href="./about/" class="px-2.5 py-1 rounded-lg hover:bg-dark-800 text-slate-300 hover:text-brand-400 transition">
+          <span>About</span>
+        </a>
         <a href="#pricing" class="px-2.5 py-1 rounded-lg hover:bg-dark-800 text-slate-300 hover:text-brand-400 transition">
           <span>Pricing</span>
         </a>
@@ -610,7 +613,6 @@
             <a href="#under-the-hood" class="block px-3 py-2 rounded-lg hover:bg-dark-800 text-slate-300 hover:text-brand-400 transition">Engine</a>
             <a href="./btree/" class="block px-3 py-2 rounded-lg hover:bg-dark-800 text-slate-300 hover:text-brand-400 transition">B-tree game</a>
             <a href="#enterprise" class="block px-3 py-2 rounded-lg hover:bg-dark-800 text-slate-300 hover:text-brand-400 transition">Enterprise</a>
-            <a href="./about/" class="block px-3 py-2 rounded-lg hover:bg-dark-800 text-slate-300 hover:text-brand-400 transition">About</a>
           </div>
         </details>
       </nav>
@@ -634,6 +636,9 @@
             <span id="opfs-status-text" class="font-bold text-slate-500">checking...</span>
           </button>
         </div>
+
+        <a href="./about/" id="header-about-link"
+           class="hidden sm:flex items-center px-2.5 sm:px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-xs font-medium text-slate-200 whitespace-nowrap transition">About</a>
 
         <a href="#demo-video" id="watch-demo-btn"
            class="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-xs font-medium text-slate-200 whitespace-nowrap transition">
@@ -679,6 +684,7 @@
       <a href="./btree/" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-800 transition">B-tree game</a>
       <a href="./agents/" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-800 transition">Agents</a>
       <a href="./docs/" class="block px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition">Docs</a>
+      <a href="./about/" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-dark-800 transition">About the founder</a>
       <a href="#pricing" onclick="closeMobileMenu()" class="block px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition">Pricing</a>
       <button type="button" onclick="closeMobileMenu(); track('pro_click'); openProCheckoutModal()" class="w-full text-left block px-3 py-2 rounded-lg text-brand-400 font-semibold hover:bg-dark-800 transition">Request Pro, $49/mo</button>
       <a href="#enterprise" onclick="closeMobileMenu()" class="block px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition">Enterprise</a>
@@ -736,6 +742,10 @@
             <a href="#pricing"
                class="text-slate-400 hover:text-white underline underline-offset-4 pro-link-decoration text-sm transition">
               <span>See Pro</span>
+            </a>
+            <a id="hero-about-link" href="./about/"
+               class="px-4 py-2 rounded-full border border-dark-600 hover:border-brand-400 text-slate-200 hover:text-white font-medium text-sm transition">
+              <span>Meet the founder</span>
             </a>
           </div>
           <p class="mt-6 text-[11px] font-mono uppercase tracking-wider text-slate-400">MIT licensed &middot; Go &middot; 500+ test files &middot; runs in your browser, no signup</p>

@@ -448,3 +448,46 @@ test.describe('Homepage', () => {
     });
   }
 });
+
+test.describe('About the founder in the top navigation', () => {
+  test('desktop nav links straight to the founder page', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const link = page.locator('header nav[aria-label="Main"] a[href="./about/"]');
+    await expect(link).toBeVisible();
+    await link.click();
+    await expect(page).toHaveURL(/\/about\/$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Gerard Louis Recinto' })).toBeVisible();
+  });
+
+  test('phone menu lists the founder page', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.locator('#mobile-menu-btn').click();
+    await expect(page.locator('#mobile-menu-panel a[href="./about/"]')).toBeVisible();
+  });
+});
+
+test.describe('Founder page is visible on the first screen', () => {
+  for (const [width, height] of [[375, 812], [1440, 900]] as const) {
+    test(`Meet the founder button is on the first screen at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height });
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      const button = page.locator('#hero-about-link');
+      await expect(button).toBeVisible();
+      const box = (await button.boundingBox())!;
+      expect(box.y + box.height).toBeLessThanOrEqual(height);
+      await button.click();
+      await expect(page).toHaveURL(/\/about\/$/);
+    });
+  }
+
+  test('header shows an About button from tablet width up', async ({ page }) => {
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const link = page.locator('#header-about-link');
+    await expect(link).toBeVisible();
+    await link.click();
+    await expect(page).toHaveURL(/\/about\/$/);
+  });
+});
