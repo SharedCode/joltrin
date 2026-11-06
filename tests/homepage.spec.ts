@@ -457,7 +457,7 @@ test.describe('About the founder in the top navigation', () => {
     await expect(link).toBeVisible();
     await link.click();
     await expect(page).toHaveURL(/\/about\/$/);
-    await expect(page.getByRole('heading', { level: 1, name: 'Gerard Louis Recinto' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'The people behind Joltrin' })).toBeVisible();
   });
 
   test('phone menu lists the founder page', async ({ page }) => {
