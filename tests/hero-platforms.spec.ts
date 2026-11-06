@@ -76,3 +76,30 @@ test.describe('Hero install order', () => {
     await expect(next.getByRole('link', { name: 'the browser demo' })).toHaveAttribute('href', './agents/');
   });
 });
+
+const firstRunControls = ['#quickstart-platforms a', '#install-copy', '#quickstart-copy', '#hero-wrap a[href="#demo-video"]', '#hero-wrap a[href="#pricing"]'];
+
+test('first-run controls are at least 24px tall', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  for (const selector of firstRunControls) {
+    for (const el of await page.locator(selector).all()) {
+      const box = (await el.boundingBox())!;
+      expect(box.height, `${selector} is ${box.height}px tall`).toBeGreaterThanOrEqual(24);
+    }
+  }
+});
+
+test.describe('on a touch screen', () => {
+  test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } });
+  test('first-run controls are at least 44px tall', async ({ page, browserName }) => {
+    test.skip(browserName === 'firefox', 'Firefox does not support mobile emulation');
+    await page.goto('/');
+    for (const selector of firstRunControls) {
+      for (const el of await page.locator(selector).all()) {
+        const box = (await el.boundingBox())!;
+        expect(box.height, `${selector} is ${box.height}px tall`).toBeGreaterThanOrEqual(44);
+      }
+    }
+  });
+});
