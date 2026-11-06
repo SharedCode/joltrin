@@ -500,6 +500,13 @@
     /* Below 400 pixels the header cannot fit every control. The GitHub icon moves into the menu. */
     @media (max-width: 399px) { header a[aria-label="Joltrin on GitHub"] { display: none !important; } }
     @media (max-width: 359px) { #watch-demo-btn { display: none !important; } }
+    /* First-run controls are at least 24px tall for everyone (WCAG 2.2 target size) and 44px on touch screens. */
+    #quickstart-platforms a, #hero-wrap a[href="#demo-video"], #hero-wrap a[href="#pricing"] { display: inline-flex; align-items: center; min-height: 24px; }
+    #install-copy, #quickstart-copy { min-height: 24px; }
+    @media (pointer: coarse) {
+      #quickstart-platforms a, #hero-wrap a[href="#demo-video"], #hero-wrap a[href="#pricing"] { min-height: 44px; padding-inline: 6px; }
+      #install-copy, #quickstart-copy { min-height: 44px; }
+    }
     @media (pointer: coarse) {
       header a, header button, header summary, #mobile-menu-panel a, #mobile-menu-panel button { min-height: 44px; }
       header a, header button { display: inline-flex; align-items: center; justify-content: center; }
