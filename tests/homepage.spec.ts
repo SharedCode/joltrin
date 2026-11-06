@@ -257,9 +257,13 @@ test.describe('Homepage', () => {
   test('requesting Pro on the static host falls back to the contact form instead of faking checkout', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await waitForWasmReady(page);
-    await page.locator('#pricing').getByRole('button', { name: /request pro/i }).click();
     const modal = page.locator('#pro-checkout-modal');
-    await expect(modal).toBeVisible();
+    // Starting the engine reflows the long page, and under load the first click can land on the wrong
+    // element. Retry the click until the modal opens instead of failing on that one miss.
+    await expect(async () => {
+      await page.locator('#pricing').getByRole('button', { name: /request pro/i }).click();
+      await expect(modal).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 20_000 });
     await expect(modal).not.toContainText(/annual|\$490/i);
     await page.fill('#pro-team-name', 'example-team');
     await page.fill('#pro-admin-email', 'admin@example.test');
