@@ -97,13 +97,13 @@
 
     <section aria-labelledby="built" class="mb-12">
       <h3 id="built" class="text-xl font-bold text-white mb-4">What I built in Joltrin</h3>
-      <p class="leading-relaxed mb-4">Since July 2026 I have written about 445 commits in this repository. It is not only the pipeline around the code. These are the parts that agents and clusters actually talk to:</p>
+      <p class="leading-relaxed mb-4">I have written about 445 commits in this repository, and not only the pipeline around the code. These are the parts that agents and clusters actually talk to:</p>
       <ul class="space-y-4 leading-relaxed list-disc pl-5">
-        <li><strong class="text-white">MCP server.</strong> <code class="font-mono text-sm">sop-mcp-server</code> exposes the verification engine to agents over the Model Context Protocol, with one-line install, prebuilt binaries on every release, a setup command that registers it by full path, and structured, actionable errors for blocked and malformed requests.</li>
-        <li><strong class="text-white">A2A agent and bridge.</strong> An Agent2Agent endpoint over the same engine, an agent card, and an MCP-to-A2A bridge with setup docs.</li>
-        <li><strong class="text-white">Kubernetes admission gate.</strong> <code class="font-mono text-sm">sop-k8s-gate</code> is a validating admission webhook. The API server refuses a delete until the steps before it are recorded for that trace. It ships with cert-manager manifests, Prometheus counters, an audit log, a deny-egress network policy, a signed and scanned image build, a Kyverno image check in the AKS demo, and a script that reproduces the checks on a real kind cluster.</li>
-        <li><strong class="text-white">Agent examples and clients.</strong> A LangGraph agent over MCP that recovers from a block, with its own CI run, and a Rust client for the gate command.</li>
-        <li><strong class="text-white">Delivery.</strong> The CI gates, release pipeline, site deploy and rollback that ship all of the above.</li>
+        <li><strong class="text-white">MCP server.</strong> <code class="font-mono text-sm">sop-mcp-server</code> exposes the verification engine to agents over the Model Context Protocol. It installs with one line, ships as small prebuilt binaries on every release, and registers itself by full path so a missing PATH entry cannot break it. Blocked and malformed requests get structured, actionable errors.</li>
+        <li><strong class="text-white">A2A agent and bridge.</strong> An Agent2Agent endpoint over the same engine, its agent card, and an MCP-to-A2A bridge with tests and setup docs.</li>
+        <li><strong class="text-white">Kubernetes admission gate.</strong> <code class="font-mono text-sm">sop-k8s-gate</code> is a validating admission webhook written with the standard library only, so the core module gained no dependencies. The API server refuses a delete until the steps before it are recorded for that trace. It reloads its certificate on rotation and ships with cert-manager manifests, Prometheus counters, an audit log, a deny-egress network policy, a signed and scanned image build, a Kyverno image check in the AKS demo, and a script that reproduces the checks on a real kind cluster.</li>
+        <li><strong class="text-white">Clients and examples.</strong> A LangGraph agent over MCP that recovers from a block, with its own CI run, and a Rust client for the gate command.</li>
+        <li><strong class="text-white">Delivery.</strong> The race, coverage and staticcheck gates, release pipeline, site deploy and rollback that ship all of the above.</li>
       </ul>
       <p class="mt-4 text-sm text-slate-400 border-l-2 border-dark-700 pl-4">The commit history is public in the repository, so you can check each of these. Gerardo wrote most of the core storage code these sit on.</p>
     </section>
