@@ -275,7 +275,7 @@ test.describe('Homepage', () => {
     await expect(modal).not.toContainText(/annual|\$490/i);
     await page.fill('#pro-team-name', 'example-team');
     await page.fill('#pro-admin-email', 'admin@example.test');
-    await modal.getByRole('button', { name: /^request pro$/i }).click();
+    await modal.getByRole('button', { name: /^continue to payment$/i }).click();
     await expect(page.locator('#pro-checkout-status')).toContainText(/isn't available on this site yet/i, { timeout: 10_000 });
     await expect(page.locator('#pro-checkout-status a[href="#enterprise"]')).toBeVisible();
     expect((await page.content()).toLowerCase()).not.toContain("gmail.com");
@@ -437,13 +437,31 @@ test.describe('Homepage', () => {
     expect(await page.evaluate(() => (window as any).__events)).toContain('copy_quickstart');
     expect(await page.evaluate(() => (window as any).__copied)).toBe('go run github.com/sharedcode/joltrin/v5/examples/verify_barrier@latest');
   });
-  test('hero names the problem and the FAQ answers how to buy without promising checkout', async ({ page }) => {
+  test('hero names the problem and the FAQ explains that payment happens on Stripe', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/delete production/i);
     await expect(page.locator('#faq details')).toHaveCount(5);
     const buy = page.locator('#faq details').last();
-    await expect(buy).toContainText('no self-serve checkout yet');
+    await expect(buy).toContainText('Stripe');
     await expect(buy).toContainText('not charged');
+  });
+
+  test('Request Pro opens above the hero and nothing on the page paints over it', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.evaluate(() => (window as any).openProCheckoutModal());
+    const modal = page.locator('#pro-checkout-modal');
+    await expect(modal).toBeVisible();
+    // The hero headline and the form's own button must both resolve to the overlay, not the page.
+    const covered = await page.evaluate(() => {
+      const modalEl = document.getElementById('pro-checkout-modal')!;
+      const h1 = document.querySelector('h1')!.getBoundingClientRect();
+      const btn = document.getElementById('pro-submit-btn')!.getBoundingClientRect();
+      const hit = (x: number, y: number) => modalEl.contains(document.elementFromPoint(x, y));
+      return { h1: hit(h1.left + h1.width / 2, h1.top + h1.height / 2), btn: hit(btn.left + btn.width / 2, btn.top + btn.height / 2) };
+    });
+    expect(covered.h1).toBe(true);
+    expect(covered.btn).toBe(true);
+    expect(await page.evaluate(() => !!document.querySelector('main #pro-checkout-modal'))).toBe(false);
   });
 
   // iOS shrinks or pins the page when anything is wider than the screen, which is what a phone

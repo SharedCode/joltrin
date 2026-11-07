@@ -1550,7 +1550,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         </details>
         <details class="p-4 rounded-xl bg-dark-950 border border-dark-800">
           <summary class="font-bold text-white cursor-pointer">How do I buy, and what happens next?</summary>
-          <p class="mt-2">Press Request Pro in the pricing section and fill in the short form. It then shows an Email Us to Start Pro button that opens your mail app with the details filled in; the request is sent when you send that email. We reply and set it up with you. There is no self-serve checkout yet, and you are not charged by clicking.</p>
+          <p class="mt-2">Press Request Pro in the pricing section, enter your team name and work email, and you go to Stripe to pay $49 per month. You are not charged until you finish paying there. If checkout does not open, send your workspace name through the contact form and we set it up with you.</p>
         </details>
       </div>
     </section>
@@ -2348,6 +2348,9 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
 
 
     <!-- Pro Checkout & Onboarding Modal -->
+  </main>
+
+  <!-- Outside <main> so no page section can paint above the overlay -->
     <div id="pro-checkout-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
       <div class="bg-dark-900 border border-brand-500/40 rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
         
@@ -2371,7 +2374,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         <!-- What Happens Immediately -->
         <div class="mb-5 space-y-2 text-xs text-slate-300 bg-dark-950/60 p-4 rounded-xl border border-dark-800">
           <div class="font-semibold text-white font-mono text-[11px] uppercase tracking-wider mb-1">What happens next</div>
-          <p class="leading-relaxed">Send your team name and work email. We reply to confirm the plan and set up your workspace by hand. Self-serve checkout is not open yet.</p>
+          <p class="leading-relaxed">Enter your team name and work email, then pay on Stripe. Nothing is charged until you finish there. We confirm by email and set up your workspace.</p>
         </div>
 
         <!-- Pro Checkout Form -->
@@ -2397,17 +2400,15 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
           <button id="pro-submit-btn" type="submit"
                   class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-black font-bold text-xs shadow-lg shadow-brand-500/20 flex items-center justify-center space-x-2 transition transform active:scale-95 cursor-pointer">
             <i data-lucide="credit-card" class="w-4 h-4"></i>
-            <span id="pro-btn-text">Request Pro</span>
+            <span id="pro-btn-text">Continue to payment</span>
           </button>
 
           <p class="text-[11px] text-slate-500 text-center font-mono">
-            Payments, when enabled, are processed by Stripe. This page never sees card details.
+            Card details are entered on Stripe. This page never sees them.
           </p>
         </form>
       </div>
     </div>
-
-  </main>
 
   <!-- Cohesive Commercial Footer -->
   <footer class="border-t border-dark-800 bg-dark-950 py-12 text-xs text-slate-400">
@@ -3103,7 +3104,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
       // GitHub Pages deployment, which serves static files only). Be honest
       // about that instead of faking a checkout session.
       btn.disabled = false;
-      btnText.innerText = 'Request Pro';
+      btnText.innerText = 'Continue to payment';
 
       if (statusBox) {
         statusBox.className = 'p-4 rounded-xl text-xs bg-amber-500/10 border border-amber-500/30 text-slate-200 block space-y-2.5';
@@ -3113,7 +3114,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
             <span>Online checkout isn't available on this site yet</span>
           </div>
           <p class="text-slate-300 leading-relaxed">
-            ${reason} Pro is design-partner access today, and self-serve checkout is not open yet. Send us your workspace name through the contact form and we'll set up <strong class="text-white font-mono">${escapeHtml(workspace)}</strong> on the $49/month plan directly.
+            ${reason} Checkout did not open. Send us your workspace name through the contact form and we'll set up <strong class="text-white font-mono">${escapeHtml(workspace)}</strong> on the $49/month plan directly.
           </p>
           <div class="pt-1 flex items-center justify-between">
             <a href="#enterprise" onclick="closeProCheckoutModal()" class="px-3 py-1.5 rounded-lg bg-brand-500 text-black font-bold text-[11px] flex items-center space-x-1.5">
