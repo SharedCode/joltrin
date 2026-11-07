@@ -4,6 +4,28 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>html{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
+  <script>
+    // iPads and phones can keep the portrait layout width after a rotation until a reload.
+    // Re-reading the viewport tag on rotation makes the browser lay the page out again.
+    // It waits two animation frames, not a fixed time, and also reacts to resize because
+    // some browsers do not send orientationchange.
+    (function () {
+      var m = document.querySelector('meta[name="viewport"]');
+      var c = m && m.getAttribute('content');
+      if (!c) return;
+      var landscape = window.innerWidth > window.innerHeight;
+      function relayout() {
+        m.setAttribute('content', c + ', minimum-scale=1');
+        requestAnimationFrame(function () { requestAnimationFrame(function () { m.setAttribute('content', c); }); });
+      }
+      window.addEventListener('orientationchange', relayout);
+      window.addEventListener('resize', function () {
+        var now = window.innerWidth > window.innerHeight;
+        if (now !== landscape) { landscape = now; relayout(); }
+      });
+    })();
+  </script>
     
     <!-- Primary Meta Tags -->
     <title>Joltrin Arena | Distributed Systems &amp; AI Swarm Survival Simulation</title>
