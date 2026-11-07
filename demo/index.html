@@ -426,7 +426,18 @@
     @keyframes pii-out { to { opacity: 0; filter: blur(5px); } }
     @keyframes pii-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
     html:not(.js) .pii-mask { display: none; }
+    @media (prefers-reduced-motion: reduce) { .js .pii-mask { opacity: 0; } .js .in .pii-raw, .js .in .pii-mask { animation: none; } .pii-mask { display: none; } }
     @media (prefers-color-scheme: light) { .pii-raw { color: rgb(185 28 28); } .pii-mask { color: rgb(4 120 87); } }
+    .block-wrap { position: relative; min-width: 0; }
+    .block-stamp { position: absolute; top: 0.9rem; right: 1rem; padding: 0.15rem 0.6rem; border: 2px solid rgb(248 113 113); border-radius: 0.375rem; color: rgb(248 113 113); font: 700 0.75rem/1.4 'JetBrains Mono', monospace; letter-spacing: 0.14em; transform: rotate(-6deg); pointer-events: none; }
+    .block-wrap::after { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, transparent, rgb(248 113 113 / 0.7), transparent); opacity: 0; pointer-events: none; }
+    .js .block-stamp { opacity: 0; }
+    .js .in .block-stamp { animation: block-stamp 0.5s 0.9s cubic-bezier(0.2, 0.9, 0.3, 1.25) forwards; }
+    .js .in .block-wrap::after { animation: block-scan 0.9s 0.1s ease-out forwards; }
+    @keyframes block-stamp { from { opacity: 0; transform: rotate(-14deg) scale(1.7); } to { opacity: 1; transform: rotate(-6deg) scale(1); } }
+    @keyframes block-scan { 0% { opacity: 1; top: 0; } 100% { opacity: 0; top: 100%; } }
+    @media (prefers-reduced-motion: reduce) { .js .block-stamp { opacity: 1; animation: none; } .js .in .block-stamp, .js .in .block-wrap::after { animation: none; } }
+    @media (prefers-color-scheme: light) { .block-stamp { color: rgb(185 28 28); border-color: rgb(185 28 28); } .block-wrap::after { background: linear-gradient(90deg, transparent, rgb(185 28 28 / 0.6), transparent); } }
     .hero-parallax { will-change: transform, opacity; transform-origin: 50% 0; }
     .tilt-card { transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s; }
     @media (hover: hover) { .tilt-card:hover { transform: translate3d(0, -4px, 0); } }
@@ -1263,13 +1274,13 @@ barrier -&gt; ALLOWED</pre>
         </p>
       </div>
       <div class="grid gap-5 lg:grid-cols-2">
-        <pre tabindex="0" class="whitespace-pre overflow-x-auto rounded-xl bg-dark-950 border border-dark-800 p-4 text-xs sm:text-sm font-mono text-slate-200 leading-relaxed">{
+        <div class="block-wrap"><span class="block-stamp" aria-hidden="true">BLOCKED</span><pre tabindex="0" class="whitespace-pre overflow-x-auto rounded-xl bg-dark-950 border border-dark-800 p-4 text-xs sm:text-sm font-mono text-slate-200 leading-relaxed">{
   "blocked_by": "precondition",
   "missing_state": "backup_validated",
   "established_by_steps": ["validate_backup"],
   "attempts": 1,
   "next": "run_established_by_steps"
-}</pre>
+}</pre></div>
         <div class="text-sm text-slate-400 leading-relaxed space-y-3">
           <p><code class="text-slate-200">blocked_by</code> names the rule that stopped the step. <code class="text-slate-200">missing_state</code> is what has not been established in this run. <code class="text-slate-200">established_by_steps</code> lists the steps that would establish it.</p>
           <p>Read it as a replan signal. <code class="text-slate-200">attempts</code> counts how often the same step was blocked for the same reason in this run, and <code class="text-slate-200">next</code> says whether to run those steps or stop and ask. Retrying the same call with different parameters will not change the answer.</p>
