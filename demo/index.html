@@ -432,6 +432,98 @@
     }
   </style>
   <style>
+    /* Barrier scene: small agent figures walk a baseline toward a gate. Figures that already have a recorded
+       receipt pass; the figure marked risky is held until the earlier receipts are recorded, then released.
+       Decorative only. CSS drives the whole loop, and only transform and opacity animate. */
+    .bs { --bs-acc: #34d399; --bs-risk: #fbbf24; position: relative; height: 170px; margin: 1.5rem calc(50% - min(40rem, 50vw - 1rem)) 0; color: rgb(var(--c-fg)); pointer-events: none; user-select: none; -webkit-user-select: none; }
+    @media (prefers-color-scheme: light) { .bs { --bs-acc: #059669; --bs-risk: #b45309; } }
+    .bs-strip, .bs-sky { display: block; width: 100%; overflow: hidden; }
+    .bs-strip { position: absolute; inset: 0; height: 100%; -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent); mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent); }
+    .bs-sky { position: absolute; left: 0; bottom: 100%; height: 520px; z-index: -1; -webkit-mask-image: linear-gradient(180deg, transparent, #000 45%); mask-image: linear-gradient(180deg, transparent, #000 45%); }
+    .bs .bd, .bs .hd, .bs .lg, .bs .ar { fill: currentColor; }
+    .bs .an { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
+    .bs .ey { fill: rgb(var(--c-dark-950)); }
+    .bs .risk { fill: var(--bs-risk); }
+    .bs .acc { fill: var(--bs-acc); }
+    .bs .rcp { fill: var(--bs-acc); }
+    .bs .rl { fill: none; stroke: rgb(var(--c-dark-950)); stroke-width: 1.3; stroke-linecap: round; }
+    .bs .rk { fill: currentColor; opacity: .05; }
+    .bs .ly-far .f { opacity: .2; }
+    .bs .b { opacity: .34; }
+    .bs .m { opacity: .5; }
+    .bs .xw { opacity: .78; }
+    .bs .rn { opacity: .92; }
+    .bs .gt { fill: var(--bs-acc); opacity: .6; }
+    .bs .gb { opacity: .7; }
+    .bs .gf { fill: var(--bs-acc); opacity: 0; }
+    .bs .gp { fill: var(--bs-acc); opacity: .55; }
+    .bs .pip { fill: none; stroke: currentColor; stroke-width: 1.3; opacity: .5; }
+    .bs .pip.on { fill: var(--bs-acc); stroke: var(--bs-acc); opacity: 0; }
+    .bs .pip.p1 { opacity: 1; }
+    .bs .rf { opacity: 0; }
+    .bs .mkh { fill: none; stroke: var(--bs-risk); stroke-width: 1.4; }
+    .bs .mkb { stroke: var(--bs-risk); stroke-width: 1.6; stroke-linecap: round; }
+    .bs .mkd { fill: var(--bs-risk); }
+    .bs .gl { fill: none; stroke: var(--bs-acc); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; opacity: .12; }
+    .bs .bob, .bs .bob0 { transform-box: fill-box; }
+    .bs .lg, .bs .ar { transform-box: fill-box; transform-origin: 50% 0; }
+    .bs .glw { transform-box: fill-box; transform-origin: 50% 50%; }
+    /* The still frame: also what people see with reduced motion, so the poses are set here. */
+    .bs .l1, .bs .a2 { transform: rotate(16deg); }
+    .bs .l2, .bs .a1 { transform: rotate(-16deg); }
+    .bs .rn .l1, .bs .rn .a2 { transform: rotate(40deg); }
+    .bs .rn .l2, .bs .rn .a1 { transform: rotate(-40deg); }
+    .bs .rn1 { transform: rotate(-75deg); }
+    .bs .st1, .bs .st2 { transform: none; }
+    .bs .xw .wk { opacity: 0; }
+    @media (max-width: 640px) {
+      .bs { height: 140px; margin-top: 1rem; }
+      .bs-sky { height: 380px; }
+      .bs .mh { display: none; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .bs .mv { animation: bs-wx linear infinite; }
+      .bs .l1 { animation: bs-sw var(--p, .4s) ease-in-out infinite alternate; }
+      .bs .l2 { animation: bs-sw var(--p, .4s) ease-in-out infinite alternate-reverse; }
+      .bs .a1 { animation: bs-sw var(--p, .4s) ease-in-out infinite alternate-reverse; }
+      .bs .a2 { animation: bs-sw var(--p, .4s) ease-in-out infinite alternate; }
+      .bs .rn1 { animation: none; }
+      .bs .bob { animation: bs-bob var(--p, .4s) ease-in-out infinite alternate; }
+      .bs .rn { --sw: 42deg; }
+      .bs .xw { animation: bs-xm 36s linear -1.4s infinite; }
+      .bs .xw .wk { animation: bs-xwk 36s linear -1.4s infinite; }
+      .bs .xw .sd { animation: bs-xsd 36s linear -1.4s infinite; }
+      .bs .xw .mk { animation: bs-mk 36s linear -1.4s infinite; }
+      .bs .rn { animation: bs-rm 36s linear -1.4s infinite; }
+      .bs .glw { animation: bs-glp 1.5s ease-in-out infinite alternate; }
+      .bs .gt { animation: bs-go 36s linear -1.4s infinite; }
+      .bs .gb { animation: bs-go 36s linear -1.4s infinite; }
+      .bs .gf { animation: bs-gfl 36s linear -1.4s infinite; }
+      .bs .pip.p1 { animation: bs-p1 36s linear -1.4s infinite; }
+      .bs .pip.p2 { animation: bs-p2 36s linear -1.4s infinite; }
+      .bs .rf1 { animation: bs-rf1 36s linear -1.4s infinite; }
+      .bs .rf2 { animation: bs-rf2 36s linear -1.4s infinite; }
+      .bs .gl { animation: bs-dr linear infinite; }
+      .bs.off *, .bs.off ::before { animation-play-state: paused !important; }
+    }
+    @keyframes bs-wx { from { transform: translate3d(var(--a), 0, 0); } to { transform: translate3d(var(--b), 0, 0); } }
+    @keyframes bs-sw { from { transform: rotate(var(--sw, 30deg)); } to { transform: rotate(calc(var(--sw, 30deg) * -1)); } }
+    @keyframes bs-bob { to { transform: translate3d(0, -1.6px, 0); } }
+    @keyframes bs-xm { 0% { transform: translate3d(-628px, 0, 0); } 24%, 41% { transform: translate3d(0, 0, 0); } 70%, 100% { transform: translate3d(732px, 0, 0); } }
+    @keyframes bs-xwk { 0%, 23% { opacity: 1; } 24.5%, 40.5% { opacity: 0; } 42%, 100% { opacity: 1; } }
+    @keyframes bs-xsd { 0%, 23% { opacity: 0; } 24.5%, 40.5% { opacity: 1; } 42%, 100% { opacity: 0; } }
+    @keyframes bs-mk { 0%, 24% { opacity: 0; } 26%, 40% { opacity: 1; } 41.5%, 100% { opacity: 0; } }
+    @keyframes bs-rm { 0% { transform: translate3d(-400px, 0, 0); } 18%, 100% { transform: translate3d(1000px, 0, 0); } }
+    @keyframes bs-glp { from { opacity: .55; transform: scale(.9); } to { opacity: 1; transform: scale(1.15); } }
+    @keyframes bs-go { 0%, 38.5% { opacity: .6; } 40%, 47% { opacity: .06; } 51%, 100% { opacity: .6; } }
+    @keyframes bs-gfl { 0%, 39% { opacity: 0; } 40.5% { opacity: .85; } 47%, 100% { opacity: 0; } }
+    @keyframes bs-p1 { 0%, 25.5% { opacity: 0; } 26.5%, 56% { opacity: 1; } 60%, 100% { opacity: 0; } }
+    @keyframes bs-p2 { 0%, 35.5% { opacity: 0; } 36.5%, 56% { opacity: 1; } 60%, 100% { opacity: 0; } }
+    @keyframes bs-rf1 { 0%, 25.5% { opacity: 0; transform: translate3d(600px, 100px, 0); } 26.2% { opacity: 1; } 29.5%, 100% { opacity: 0; transform: translate3d(591px, 12px, 0); } }
+    @keyframes bs-rf2 { 0%, 35.5% { opacity: 0; transform: translate3d(600px, 100px, 0); } 36.2% { opacity: 1; } 39.5%, 100% { opacity: 0; transform: translate3d(609px, 12px, 0); } }
+    @keyframes bs-dr { 0% { opacity: 0; transform: translate3d(0, 0, 0) rotate(0deg); } 18%, 80% { opacity: var(--o, .3); } 100% { opacity: 0; transform: translate3d(var(--dx), var(--dy), 0) rotate(var(--r)); } }
+  </style>
+  <style>
     /* Scroll story. Default markup is the finished state, so it reads fine without scripts or with reduced motion. */
     .story { position: relative; z-index: 1; }
     .story-words, .story-end h2 { font-weight: 700; letter-spacing: -0.035em; line-height: 1.06; font-size: clamp(2rem, 6.2vw, 4.75rem); }
@@ -787,6 +879,7 @@
             </a>
           </div>
           <p class="mt-6 text-[11px] font-mono uppercase tracking-wider text-slate-400">MIT licensed &middot; no Go needed to install &middot; 500+ test files &middot; runs in your browser, no signup</p>
+          <div class="bs" aria-hidden="true"><svg class="bs-sky" viewBox="0 0 1200 520" preserveAspectRatio="xMidYMax slice" focusable="false" aria-hidden="true"><g data-px="0,0.09"><g transform="translate(70 400)"><g class="gl" style="--dx:40px;--dy:-220px;--r:40deg;--o:0.18;animation-duration:34s;animation-delay:-4s"><path d="M6 0 3 5.2-3 5.2-6 0-3-5.2 3-5.2z" transform="scale(2.17)"/></g></g><g transform="translate(190 450)"><g class="gl mh" style="--dx:-30px;--dy:-260px;--r:-25deg;--o:0.18;animation-duration:41s;animation-delay:-19s"><rect x="-6" y="-8" width="12" height="16" rx="2"/><path d="M-3-3h6M-3 1h6M-3 5h3.5"/></g></g><g transform="translate(160 250)"><g class="gl" style="--dx:30px;--dy:-160px;--r:60deg;--o:0.17;animation-duration:29s;animation-delay:-11s"><path d="M6 0 3 5.2-3 5.2-6 0-3-5.2 3-5.2z" transform="scale(1.33)"/></g></g><g transform="translate(60 150)"><g class="gl mh" style="--dx:20px;--dy:-80px;--r:30deg;--o:0.16;animation-duration:37s;animation-delay:-26s"><path d="M6 0 3 5.2-3 5.2-6 0-3-5.2 3-5.2z" transform="scale(1.00)"/></g></g><g transform="translate(110 440)"><g class="gl mh" style="--dx:30px;--dy:-250px;--r:-40deg;--o:0.15;animation-duration:45s;animation-delay:-31s"><path d="M6 0 3 5.2-3 5.2-6 0-3-5.2 3-5.2z" transform="scale(1.50)"/></g></g><g transform="translate(1010 430)"><g class="gl mh" style="--dx:40px;--dy:-230px;--r:30deg;--o:0.15;animation-duration:39s;animation-delay:-8s"><rect x="-6" y="-8" width="12" height="16" rx="2"/><path d="M-3-3h6M-3 1h6M-3 5h3.5"/></g></g><g transform="translate(1100 380)"><g class="gl" style="--dx:-40px;--dy:-210px;--r:-50deg;--o:0.18;animation-duration:33s;animation-delay:-15s"><path d="M6 0 3 5.2-3 5.2-6 0-3-5.2 3-5.2z" transform="scale(2.00)"/></g></g><g transform="translate(1060 450)"><g class="gl" style="--dx:30px;--dy:-250px;--r:40deg;--o:0.18;animation-duration:43s;animation-delay:-23s"><rect x="-6" y="-8" width="12" height="16" rx="2"/><path d="M-3-3h6M-3 1h6M-3 5h3.5"/></g></g><g transform="translate(1140 200)"><g class="gl mh" style="--dx:-30px;--dy:-140px;--r:70deg;--o:0.17;animation-duration:31s;animation-delay:-2s"><path d="M6 0 3 5.2-3 5.2-6 0-3-5.2 3-5.2z" transform="scale(1.17)"/></g></g><g transform="translate(990 260)"><g class="gl mh" style="--dx:20px;--dy:-100px;--r:-20deg;--o:0.15;animation-duration:36s;animation-delay:-28s"><path d="M6 0 3 5.2-3 5.2-6 0-3-5.2 3-5.2z" transform="scale(0.83)"/></g></g><g transform="translate(250 110)"><g class="gl mh" style="--dx:30px;--dy:-80px;--r:20deg;--o:0.12;animation-duration:35s;animation-delay:-6s"><rect x="-6" y="-8" width="12" height="16" rx="2"/><path d="M-3-3h6M-3 1h6M-3 5h3.5"/></g></g><g transform="translate(1000 100)"><g class="gl mh" style="--dx:-20px;--dy:-90px;--r:-30deg;--o:0.14;animation-duration:40s;animation-delay:-17s"><path d="M6 0 3 5.2-3 5.2-6 0-3-5.2 3-5.2z" transform="scale(1.50)"/></g></g></g></svg><svg class="bs-strip" viewBox="0 -20 1200 170" preserveAspectRatio="xMidYMax slice" focusable="false" aria-hidden="true"><defs><linearGradient id="bsg" x1="0" x2="1"><stop offset="0" stop-color="currentColor" stop-opacity="0"/><stop offset=".5" stop-color="currentColor" stop-opacity=".34"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/></linearGradient><linearGradient id="bsp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--bs-acc)" stop-opacity="0"/><stop offset="1" style="stop-color:var(--bs-acc)" stop-opacity=".09"/></linearGradient><linearGradient id="bsb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--bs-acc)" stop-opacity="0"/><stop offset=".3" style="stop-color:var(--bs-acc)" stop-opacity=".5"/><stop offset="1" style="stop-color:var(--bs-acc)" stop-opacity=".16"/></linearGradient><radialGradient id="bsr"><stop offset="0" style="stop-color:var(--bs-acc)" stop-opacity=".7"/><stop offset="1" style="stop-color:var(--bs-acc)" stop-opacity="0"/></radialGradient></defs><rect class="pl" x="0" y="112" width="1200" height="38" fill="url(#bsp)"/><g class="rk"><rect x="40" y="68" width="36" height="58" rx="3"/><rect x="92" y="86" width="26" height="40" rx="3"/><rect x="150" y="54" width="44" height="72" rx="3"/><rect x="214" y="80" width="30" height="46" rx="3"/><rect x="300" y="66" width="38" height="60" rx="3"/><rect x="370" y="90" width="24" height="36" rx="3"/><rect x="440" y="74" width="34" height="52" rx="3"/><rect x="760" y="76" width="32" height="50" rx="3"/><rect x="820" y="56" width="42" height="70" rx="3"/><rect x="890" y="84" width="26" height="42" rx="3"/><rect x="946" y="62" width="38" height="64" rx="3"/><rect x="1020" y="78" width="30" height="48" rx="3"/><rect x="1080" y="88" width="24" height="38" rx="3"/><rect x="1140" y="66" width="40" height="60" rx="3"/></g><g class="ly ly-far" data-px="0.05,0"><g class="mv f mh" style="--a:-200px;--b:1160px;animation-duration:98s;animation-delay:-14.41s;--p:0.85s"><g transform="translate(120 118) scale(0.56)"><g class="bob"><rect class="ar a2" x="-2" y="-47" width="4" height="18" rx="2"/><rect class="lg l2" x="-2.5" y="-25" width="5" height="25" rx="2.5"/><rect class="lg l1" x="-2.5" y="-25" width="5" height="25" rx="2.5"/><rect class="bd" x="-6.5" y="-49" width="13" height="27" rx="6.5"/><circle class="hd" cy="-57" r="6.5"/><rect class="ar a1" x="-2" y="-47" width="4" height="18" rx="2"/></g></g></g><g class="mv f" style="--a:-410px;--b:950px;animation-duration:112s;animation-delay:-33.76s;--p:0.85s"><g transform="translate(330 118) scale(0.56)"><g class="bob"><rect class="ar a2" x="-2" y="-47" width="4" height="18" rx="2"/><rect class="lg l2" x="-3" y="-24" width="6" height="24" rx="1.6"/><rect class="lg l1" x="-3" y="-24" width="6" height="24" rx="1.6"/><rect class="bd" x="-7" y="-49" width="14" height="26" rx="3"/><rect class="hd" x="-7" y="-62" width="14" height="11" rx="3.5"/><path class="an" d="M0-62v-5"/><circle class="hd" cy="-69" r="2"/><rect class="ey" x="1" y="-58" width="3.5" height="2.6" rx="1.2"/><rect class="ar a1" x="-2" y="-47" width="4" height="18" rx="2"/></g></g></g><g class="mv f mh" style="--a:-550px;--b:810px;animation-duration:90s;animation-delay:-36.4s;--p:0.85s"><g transform="translate(470 118) scale(0.56)"><g class="bob"><rect class="ar a2" x="-2" y="-47" width="4" height="18" rx="2"/><rect class="lg l2" x="-2.5" y="-25" width="5" height="25" rx="2.5"/><rect class="lg l1" x="-2.5" y="-25" width="5" height="25" rx="2.5"/><rect class="bd" x="-6.5" y="-49" width="13" height="27" rx="6.5"/><circle class="hd" cy="-57" r="6.5"/><rect class="ar a1" x="-2" y="-47" width="4" height="18" rx="2"/></g></g></g><g class="mv f" style="--a:-840px;--b:520px;animation-duration:104s;animation-delay:-64.24s;--p:0.85s"><g transform="translate(760 118) scale(0.56)"><g class="bob"><rect class="ar a2" x="-2" y="-47" width="4" height="18" rx="2"/><rect class="lg l2" x="-2.5" y="-25" width="5" height="25" rx="2.5"/><rect class="lg l1" x="-2.5" y="-25" width="5" height="25" rx="2.5"/><rect class="bd" x="-6.5" y="-49" width="13" height="27" rx="6.5"/><circle class="hd" cy="-57" r="6.5"/><rect class="ar a1" x="-2" y="-47" width="4" height="18" rx="2"/></g></g></g><g class="mv f" style="--a:-1020px;--b:340px;animation-duration:96s;animation-delay:-72s;--p:0.85s"><g transform="translate(940 118) scale(0.56)"><g class="bob"><rect class="ar a2" x="-2" y="-47" width="4" height="18" rx="2"/><rect class="lg l2" x="-3" y="-24" width="6" height="24" rx="1.6"/><rect class="lg l1" x="-3" y="-24" width="6" height="24" rx="1.6"/><rect class="bd" x="-7" y="-49" width="14" height="26" rx="3"/><rect class="hd" x="-7" y="-62" width="14" height="11" rx="3.5"/><path class="an" d="M0-62v-5"/><circle class="hd" cy="-69" r="2"/><rect class="ey" x="1" y="-58" width="3.5" height="2.6" rx="1.2"/><rect class="ar a1" x="-2" y="-47" width="4" height="18" rx="2"/></g></g></g><g class="mv f mh" style="--a:-1180px;--b:180px;animation-duration:118s;animation-delay:-102.38s;--p:0.85s"><g transform="translate(1100 118) scale(0.56)"><g class="bob"><rect class="ar a2" x="-2" y="-47" width="4" height="18" rx="2"/><rect class="lg l2" x="-2.5" y="-25" width="5" height="25" rx="2.5"/><rect class="lg l1" x="-2.5" y="-25" width="5" height="25" rx="2.5"/><rect class="bd" x="-6.5" y="-49" width="13" height="27" rx="6.5"/><circle class="hd" cy="-57" r="6.5"/><rect class="ar a1" x="-2" y="-47" width="4" height="18" rx="2"/></g></g></g></g><g class="ly ly-mid"><rect class="gb" x="594" y="8" width="12" height="134" fill="url(#bsb)"/><rect class="gt" x="599" y="10" width="2" height="132" rx="1"/><rect class="gf" x="596" y="10" width="8" height="132" rx="2"/><rect class="gp" x="590" y="140" width="20" height="2.4" rx="1.2"/><g class="mv b" style="--a:-720px;--b:640px;animation-duration:36s;animation-delay:-10.04s;--p:0.42s"><g transform="translate(640 126) scale(0.74)"><g class="bob"><rect class="ar a2" x="-2" y="-47" width="4" height="18" rx="2"/><rect class="lg l2" x="-2.5" y="-25" width="5" height="25" rx="2.5"/><rect class="lg l1" x="-2.5" y="-25" width="5" height="25" rx="2.5"/><rect class="bd" x="-6.5" y="-49" width="13" height="27" rx="6.5"/><circle class="hd" cy="-57" r="6.5"/><rect class="ar a1" x="-2" y="-47" width="4" height="18" rx="2"/></g></g></g><g class="mv b" style="--a:-584px;--b:776px;animation-duration:36s;animation-delay:-6.44s;--p:0.42s"><g transform="translate(504 126) scale(0.74)"><g class="bob"><rect class="ar a2" x="-2" y="-47" width="4" height="18" rx="2"/><rect class="lg l2" x="-3" y="-24" width="6" height="24" rx="1.6"/><rect class="lg l1" x="-3" y="-24" width="6" height="24" rx="1.6"/><rect class="bd" x="-7" y="-49" width="14" height="26" rx="3"/><rect class="hd" x="-7" y="-62" width="14" height="11" rx="3.5"/><path class="an" d="M0-62v-5"/><circle class="hd" cy="-69" r="2"/><rect class="ey" x="1" y="-58" width="3.5" height="2.6" rx="1.2"/><rect class="ar a1" x="-2" y="-47" width="4" height="18" rx="2"/></g></g></g><g class="mv m" style="--a:-946px;--b:414px;animation-duration:36s;animation-delay:-25.04s;--p:0.62s"><g transform="translate(866 134) scale(0.96)"><g class="bob"><rect class="ar a2" x="-2" y="-47" width="4" height="18" rx="2"/><rect class="lg l2" x="-2.5" y="-25" width="5" height="25" rx="2.5"/><rect class="lg l1" x="-2.5" y="-25" width="5" height="25" rx="2.5"/><rect class="bd" x="-6.5" y="-49" width="13" height="27" rx="6.5"/><circle class="hd" cy="-57" r="6.5"/><rect class="ar a1" x="-2" y="-47" width="4" height="18" rx="2"/></g></g></g><g class="flt"><g class="rf rf1"><g class="rcp acc" transform="translate(0 0)"><rect x="-5" y="-7" width="10" height="14" rx="1.6"/><path class="rl" d="M-2.5-3h5M-2.5 0h5M-2.5 3h3"/></g></g><g class="rf rf2"><g class="rcp acc" transform="translate(0 0)"><rect x="-5" y="-7" width="10" height="14" rx="1.6"/><path class="rl" d="M-2.5-3h5M-2.5 0h5M-2.5 3h3"/></g></g></g></g><g class="ly ly-front" data-px="-0.07,0"><g class="mv xw" style="--a:-628px;--b:732px"><g transform="translate(548 142) scale(1.2)"><g class="wk"><g class="bob"><rect class="ar a2" x="-2" y="-47" width="4" height="18" rx="2"/><rect class="lg l2" x="-2.5" y="-25" width="5" height="25" rx="2.5"/><rect class="lg l1" x="-2.5" y="-25" width="5" height="25" rx="2.5"/><rect class="bd risk" x="-6.5" y="-49" width="13" height="27" rx="6.5"/><circle class="hd risk" cy="-57" r="6.5"/><rect class="ar a1" x="-2" y="-47" width="4" height="18" rx="2"/></g></g><g class="sd"><g class="bob0"><rect class="ar st2" x="-2" y="-47" width="4" height="18" rx="2"/><rect class="lg" x="-2.5" y="-25" width="5" height="25" rx="2.5"/><rect class="lg" x="-2.5" y="-25" width="5" height="25" rx="2.5"/><rect class="bd risk" x="-6.5" y="-49" width="13" height="27" rx="6.5"/><circle class="hd risk" cy="-57" r="6.5"/><rect class="ar st1" x="-2" y="-47" width="4" height="18" rx="2"/></g></g><g class="mk"><path class="mkh" transform="translate(0 -83) scale(1.35)" d="M6 0 3 5.2-3 5.2-6 0-3-5.2 3-5.2z"/><path class="mkb" d="M0-86.5v4.2"/><circle class="mkd" cy="-79.2" r=".9"/></g></g></g><g class="mv rn" style="--p:.17s"><g transform="translate(250 142) scale(1.28)"><g class="bob"><rect class="ar a2" x="-2" y="-47" width="4" height="18" rx="2"/><rect class="lg l2" x="-2.5" y="-25" width="5" height="25" rx="2.5"/><rect class="lg l1" x="-2.5" y="-25" width="5" height="25" rx="2.5"/><rect class="bd acc" x="-6.5" y="-49" width="13" height="27" rx="6.5"/><circle class="hd acc" cy="-57" r="6.5"/><rect class="ar a1 rn1" x="-2" y="-47" width="4" height="18" rx="2"/></g><circle class="glw" cx="9" cy="-33" r="17" fill="url(#bsr)"/><g class="rcp acc rc2" transform="translate(9 -33)"><rect x="-5" y="-7" width="10" height="14" rx="1.6"/><path class="rl" d="M-2.5-3h5M-2.5 0h5M-2.5 3h3"/></g></g></g></g><path class="pip" transform="translate(591 0) scale(.8)" d="M6 0 3 5.2-3 5.2-6 0-3-5.2 3-5.2z"/><path class="pip" transform="translate(609 0) scale(.8)" d="M6 0 3 5.2-3 5.2-6 0-3-5.2 3-5.2z"/><path class="pip on p1" transform="translate(591 0) scale(.8)" d="M6 0 3 5.2-3 5.2-6 0-3-5.2 3-5.2z"/><path class="pip on p2" transform="translate(609 0) scale(.8)" d="M6 0 3 5.2-3 5.2-6 0-3-5.2 3-5.2z"/><rect class="bl" x="0" y="142" width="1200" height="1" fill="url(#bsg)"/></svg></div>
           <div class="mt-10 min-w-0 w-full text-left max-w-xl mx-auto">
             <p class="text-xs font-mono uppercase tracking-wider text-slate-400 mb-1.5">Install in one line, no Go needed (macOS and Linux)</p>
             <span id="copy-status" class="sr-only" role="status" aria-live="polite"></span>
@@ -3138,6 +3231,31 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         if (!ticking) { ticking = true; requestAnimationFrame(frame); }
       }, { passive: true });
       frame();
+    })();
+  </script>
+  <script>
+    // Barrier scene: a small scroll-linked drift and a pause while it is off screen. The scene runs without this.
+    (function () {
+      var s = document.querySelector('.bs');
+      if (!s || !('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var px = [].slice.call(s.querySelectorAll('[data-px]')).map(function (e) {
+        var k = e.getAttribute('data-px').split(',');
+        return { e: e, x: +k[0], y: +k[1] };
+      });
+      var vis = false, tick = false;
+      function upd() {
+        tick = false;
+        var d = Math.max(-600, Math.min(600, s.getBoundingClientRect().top - window.innerHeight * 0.6));
+        px.forEach(function (p) { p.e.style.transform = 'translate3d(' + (d * p.x).toFixed(1) + 'px,' + (d * p.y).toFixed(1) + 'px,0)'; });
+      }
+      function req() { if (vis && !tick) { tick = true; requestAnimationFrame(upd); } }
+      new IntersectionObserver(function (en) {
+        vis = en[0].isIntersecting;
+        s.classList.toggle('off', !vis);
+        req();
+      }, { rootMargin: '420px 0px' }).observe(s);
+      window.addEventListener('scroll', req, { passive: true });
+      document.addEventListener('visibilitychange', function () { s.classList.toggle('off', document.hidden || !vis); });
     })();
   </script>
   <script>
