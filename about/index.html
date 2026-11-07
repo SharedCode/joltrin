@@ -26,7 +26,7 @@
     })();
   </script>
   <title>About the Founders | Joltrin</title>
-  <meta name="description" content="Meet the founders of Joltrin: Gerardo Recinto, the main author of the code, and Gerard Louis Recinto, a Senior DevOps and platform engineer in San Diego." />
+  <meta name="description" content="Meet the founders of Joltrin: Gerardo Recinto, the main author of the code, and Gerard Louis Recinto, a Senior DevOps and platform engineer in San Diego who built the MCP and A2A servers and the Kubernetes admission gate." />
   <link rel="canonical" href="https://joltrinhq.com/about/" />
 
   <meta property="og:type" content="website" />
@@ -59,7 +59,7 @@
     "url": "https://joltrinhq.com/about/",
     "about": [
       { "@type": "Person", "name": "Gerardo Recinto", "jobTitle": "Founder of Joltrin", "homeLocation": { "@type": "Place", "name": "Union City, California" }, "sameAs": ["https://github.com/grecinto"] },
-      { "@type": "Person", "name": "Gerard Louis Recinto", "jobTitle": "Founder of Joltrin", "homeLocation": { "@type": "Place", "name": "San Diego, California" } }
+      { "@type": "Person", "name": "Gerard Louis Recinto", "jobTitle": "Founder of Joltrin", "homeLocation": { "@type": "Place", "name": "San Diego, California" }, "knowsAbout": ["Go", "Rust", "Python", "TypeScript", "Kubernetes", "Terraform", "AWS", "Model Context Protocol", "Agent2Agent protocol", "AI agents"] }
     ]
   }
   </script>
@@ -95,7 +95,7 @@
     <section aria-labelledby="page-title" class="mb-14">
       <p class="font-mono text-xs uppercase tracking-widest text-brand-400 mb-4">About the Founders</p>
       <h1 id="page-title" class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">The people behind Joltrin</h1>
-      <p class="mt-6 text-lg leading-relaxed text-slate-300">Joltrin has two founders. Gerardo Recinto wrote the first commit in 2015 and is the main author of the code. Gerard Louis Recinto is a DevOps and platform engineer who builds the delivery side.</p>
+      <p class="mt-6 text-lg leading-relaxed text-slate-300">Joltrin has two founders. Gerardo Recinto wrote the first commit in 2015 and is the main author of the code. Gerard Louis Recinto is a DevOps and platform engineer who built the MCP and A2A servers, the Kubernetes admission gate and the delivery pipeline.</p>
       <p class="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm"><a class="text-brand-400 underline hover:text-white py-1" href="#gerardo-recinto">Gerardo Recinto</a><a class="text-brand-400 underline hover:text-white py-1" href="#gerard-louis-recinto">Gerard Louis Recinto</a></p>
     </section>
 
@@ -111,10 +111,35 @@
       <h3 id="bio" class="text-xl font-bold text-white mb-4">Background</h3>
       <div class="space-y-4 leading-relaxed">
         <p>I am a Senior DevOps and platform engineer based in San Diego, California. I build the pipelines, cloud infrastructure and Kubernetes platforms that other engineers ship on, and I spend a lot of time troubleshooting them in production.</p>
-        <p>At Qualcomm that work has included supporting more than 475 Jenkins pipelines, cutting one CI build from 6 hours 59 minutes to about 15 minutes by moving binary artifacts from Git LFS to Artifactory, and implementing an S3 lifecycle change that saved about $26 million a year, a figure reported by our AWS technical account manager.</p>
+        <p>At Qualcomm that work has included supporting more than 475 Jenkins pipelines, cutting one CI build from 6 hours 59 minutes to about 15 minutes by moving binary artifacts from Git LFS to Artifactory and writing a Python 3 multiprocessing script as part of that change, and implementing an S3 lifecycle change that saved about $26 million a year, a figure reported by our AWS technical account manager.</p>
         <p>I studied Mathematics and Computer Science at UC San Diego and hold the AWS Certified Solutions Architect Associate certification. My day-to-day tools are Python, Terraform, Kubernetes, AWS and CI/CD systems.</p>
       </div>
       <p class="mt-6 text-sm text-slate-400 border-l-2 border-dark-700 pl-4">Those results come from my professional work. They are not Joltrin customer results, and no employer or vendor endorses Joltrin.</p>
+    </section>
+
+    <section aria-labelledby="built" class="mb-12">
+      <h3 id="built" class="text-xl font-bold text-white mb-4">What I built in Joltrin</h3>
+      <p class="leading-relaxed mb-4">I have written about 445 commits in this repository, and not only the pipeline around the code. These are the parts that agents and clusters actually talk to:</p>
+      <ul class="space-y-4 leading-relaxed list-disc pl-5">
+        <li><strong class="text-white">MCP server.</strong> <code class="font-mono text-sm">sop-mcp-server</code> exposes the verification engine to agents over the Model Context Protocol. It installs with one line, ships as small prebuilt binaries on every release, and registers itself by full path so a missing PATH entry cannot break it. Blocked and malformed requests get structured, actionable errors.</li>
+        <li><strong class="text-white">A2A agent and bridge.</strong> An Agent2Agent endpoint over the same engine, its agent card, and an MCP-to-A2A bridge with tests and setup docs.</li>
+        <li><strong class="text-white">Kubernetes admission gate.</strong> <code class="font-mono text-sm">sop-k8s-gate</code> is a validating admission webhook written with the standard library only, so the core module gained no dependencies. The API server refuses a delete until the steps before it are recorded for that trace. It reloads its certificate on rotation and ships with cert-manager manifests, Prometheus counters, an audit log, a deny-egress network policy, a signed and scanned image build, a Kyverno image check in the AKS demo, and a script that reproduces the checks on a real kind cluster.</li>
+        <li><strong class="text-white">Clients and examples.</strong> A LangGraph agent over MCP that recovers from a block, with its own CI run, and a Rust client for the gate command.</li>
+        <li><strong class="text-white">Delivery.</strong> The race, coverage and staticcheck gates, release pipeline, site deploy and rollback that ship all of the above.</li>
+      </ul>
+      <p class="mt-4 text-sm text-slate-400 border-l-2 border-dark-700 pl-4">The commit history is public in the repository, so you can check each of these. Gerardo wrote most of the core storage code these sit on.</p>
+    </section>
+
+    <section aria-labelledby="skills" class="mb-12">
+      <h3 id="skills" class="text-xl font-bold text-white mb-4">Languages and skills I use here</h3>
+      <dl class="grid grid-cols-1 sm:grid-cols-2 gap-px bg-dark-800 border border-dark-800 rounded-xl overflow-hidden text-sm">
+        <div class="bg-dark-900 p-4"><dt class="font-mono text-xs uppercase text-slate-400">Go</dt><dd class="mt-1 text-slate-200">The MCP and A2A servers, the bridge and the Kubernetes admission webhook, plus the race, coverage and staticcheck gates that test them.</dd></div>
+        <div class="bg-dark-900 p-4"><dt class="font-mono text-xs uppercase text-slate-400">Rust</dt><dd class="mt-1 text-slate-200">A Rust client for the gate command, with tests and an example. I also fixed the Rust build on Apple Silicon, where a Go toolchain running under Rosetta built the wrong architecture.</dd></div>
+        <div class="bg-dark-900 p-4"><dt class="font-mono text-xs uppercase text-slate-400">Python</dt><dd class="mt-1 text-slate-200">A LangGraph agent that talks to the MCP server and recovers from a block, with its own CI run, and the Python library loader and its test script.</dd></div>
+        <div class="bg-dark-900 p-4"><dt class="font-mono text-xs uppercase text-slate-400">AI agents</dt><dd class="mt-1 text-slate-200">Model Context Protocol, Agent2Agent, and guardrails that block a risky agent step until the steps before it are recorded.</dd></div>
+        <div class="bg-dark-900 p-4"><dt class="font-mono text-xs uppercase text-slate-400">Kubernetes and cloud</dt><dd class="mt-1 text-slate-200">Admission control with cert-manager, Prometheus metrics, network policy, Kyverno image checks on AKS, and a kind cluster test.</dd></div>
+        <div class="bg-dark-900 p-4"><dt class="font-mono text-xs uppercase text-slate-400">Delivery and testing</dt><dd class="mt-1 text-slate-200">GitHub Actions, signed and scanned container images, Cloudflare deploys with rollback, and TypeScript Playwright tests in three browsers.</dd></div>
+      </dl>
     </section>
 
     <section aria-labelledby="facts" class="mb-12">
