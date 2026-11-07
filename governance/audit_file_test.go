@@ -195,3 +195,14 @@ func TestFileAuditRecorderLeavesAForeignFileUntouched(t *testing.T) {
 		t.Fatalf("file was modified: %q", got)
 	}
 }
+
+func TestFileAuditRecorderRefusesDotDotInThePath(t *testing.T) {
+	dir := t.TempDir()
+	path := dir + string(filepath.Separator) + "sub" + string(filepath.Separator) + ".." + string(filepath.Separator) + "audit.jsonl"
+	if _, err := OpenFileAuditRecorder(path, nil); err == nil {
+		t.Fatal("path with .. was accepted")
+	}
+	if _, err := os.Stat(filepath.Join(dir, "audit.jsonl")); err == nil {
+		t.Fatal("a file was created through the .. path")
+	}
+}

@@ -8,6 +8,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 )
 
@@ -28,7 +30,8 @@ type FileAuditRecorder struct {
 // OpenFileAuditRecorder opens or creates the log at path with mode 0600 and
 // replays it line by line. The events stay in memory after the replay, like
 // MemoryAuditRecorder. The path is the caller's own configuration, as with
-// os.OpenFile, and is not sanitised. The signer, if any, signs new events only.
+// os.OpenFile. A path with a ".." element is refused as a guard against
+// traversal; resolve it yourself first if you need one. The signer, if any, signs new events only.
 func OpenFileAuditRecorder(path string, signer AuditSigner) (*FileAuditRecorder, error) {
 	return OpenFileAuditRecorderAnchored(path, signer, "")
 }
@@ -43,6 +46,11 @@ func OpenFileAuditRecorder(path string, signer AuditSigner) (*FileAuditRecorder,
 // before it is opened for writing, so a file that is not a valid audit chain,
 // such as a system log, fails to open and is left untouched.
 func OpenFileAuditRecorderAnchored(path string, signer AuditSigner, anchorHash string) (*FileAuditRecorder, error) {
+	for _, part := range strings.Split(filepath.ToSlash(path), "/") {
+		if part == ".." {
+			return nil, fmt.Errorf("governance: audit log path %q must not contain \"..\"", path)
+		}
+	}
 	if fi, err := os.Stat(path); err == nil && !fi.Mode().IsRegular() {
 		return nil, fmt.Errorf("governance: audit log %s is not a regular file", path)
 	}
