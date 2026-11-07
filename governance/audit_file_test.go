@@ -2,6 +2,7 @@ package governance
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -104,5 +105,42 @@ func TestFileAuditRecorderDeletedLineBreaksChain(t *testing.T) {
 	os.WriteFile(path, []byte(lines[0]+"\n"+lines[2]+"\n"), 0o600)
 	if _, err := OpenFileAuditRecorder(path, nil); err == nil {
 		t.Fatal("removed middle event was accepted")
+	}
+}
+
+func TestFileAuditRecorderAnchorDetectsTruncatedTail(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "audit.jsonl")
+	r, _ := OpenFileAuditRecorder(path, nil)
+	for _, a := range []string{"one", "two", "three"} {
+		r.Record(context.Background(), fileEv(a))
+	}
+	anchor := r.LastHash()
+	r.Close()
+
+	if r2, err := OpenFileAuditRecorderAnchored(path, nil, anchor); err != nil {
+		t.Fatalf("intact log with anchor: %v", err)
+	} else {
+		r2.Close()
+	}
+
+	b, _ := os.ReadFile(path)
+	lines := strings.Split(strings.TrimSpace(string(b)), "\n")
+	os.WriteFile(path, []byte(strings.Join(lines[:2], "\n")+"\n"), 0o600)
+	if _, err := OpenFileAuditRecorderAnchored(path, nil, anchor); !errors.Is(err, ErrAuditTruncated) {
+		t.Fatalf("got %v, want ErrAuditTruncated", err)
+	}
+	if r3, err := OpenFileAuditRecorder(path, nil); err != nil {
+		t.Fatalf("without an anchor the shorter chain opens: %v", err)
+	} else {
+		r3.Close()
+	}
+}
+
+func TestFileAuditRecorderRefusesNonRegularFile(t *testing.T) {
+	if _, err := OpenFileAuditRecorder(t.TempDir(), nil); err == nil {
+		t.Fatal("directory accepted")
+	}
+	if _, err := OpenFileAuditRecorder(os.DevNull, nil); err == nil {
+		t.Fatal("/dev/null accepted")
 	}
 }

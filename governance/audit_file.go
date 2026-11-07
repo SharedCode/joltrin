@@ -5,10 +5,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"sync"
 )
+
+// ErrAuditTruncated is returned when the log no longer ends at the anchor hash.
+var ErrAuditTruncated = errors.New("governance: audit log is shorter than the anchor (events removed from the end)")
 
 // FileAuditRecorder is a MemoryAuditRecorder that also appends every event to a
 // JSON Lines file, so the chain survives a restart. Open verifies the chain it
@@ -26,6 +30,20 @@ type FileAuditRecorder struct {
 // MemoryAuditRecorder. The path is the caller's own configuration, as with
 // os.OpenFile, and is not sanitised. The signer, if any, signs new events only.
 func OpenFileAuditRecorder(path string, signer AuditSigner) (*FileAuditRecorder, error) {
+	return OpenFileAuditRecorderAnchored(path, signer, "")
+}
+
+// OpenFileAuditRecorderAnchored is OpenFileAuditRecorder plus a check that the
+// log still ends at anchorHash, a value from LastHash() that you stored
+// somewhere an attacker with write access to the log cannot reach. If the
+// newest events were cut off the end of the file, the last hash no longer
+// matches and the open fails with ErrAuditTruncated. An empty anchor skips the
+// check, which is what OpenFileAuditRecorder does. Only files are opened: a
+// directory, device or pipe at path is refused.
+func OpenFileAuditRecorderAnchored(path string, signer AuditSigner, anchorHash string) (*FileAuditRecorder, error) {
+	if fi, err := os.Stat(path); err == nil && !fi.Mode().IsRegular() {
+		return nil, fmt.Errorf("governance: audit log %s is not a regular file", path)
+	}
 	mem := NewMemoryAuditRecorder(signer)
 
 	if rf, err := os.Open(path); err == nil {
@@ -55,6 +73,10 @@ func OpenFileAuditRecorder(path string, signer AuditSigner) (*FileAuditRecorder,
 		}
 	} else if !os.IsNotExist(err) {
 		return nil, err
+	}
+
+	if anchorHash != "" && mem.lastHash != anchorHash {
+		return nil, fmt.Errorf("%w: log ends at %q, anchor is %q", ErrAuditTruncated, mem.lastHash, anchorHash)
 	}
 
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
@@ -100,6 +122,14 @@ func (r *FileAuditRecorder) Record(ctx context.Context, ev *AuditEvent) error {
 		return fmt.Errorf("governance: write audit log: %w", err)
 	}
 	return nil
+}
+
+// LastHash returns the hash of the newest event, or "" for an empty log. Store
+// it outside the log's reach and pass it to OpenFileAuditRecorderAnchored.
+func (r *FileAuditRecorder) LastHash() string {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.lastHash
 }
 
 // Close closes the recorder and the file.
