@@ -11,8 +11,8 @@
     // some browsers do not send orientationchange.
     (function () {
       var m = document.querySelector('meta[name="viewport"]');
-      if (!m) return;
-      var c = m.getAttribute('content');
+      var c = m && m.getAttribute('content');
+      if (!c) return;
       var landscape = window.innerWidth > window.innerHeight;
       function relayout() {
         m.setAttribute('content', c + ', minimum-scale=1');

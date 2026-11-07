@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const pages = ['/', '/about/', '/docs/', '/demo-agents/', '/demo-btree/', '/demo-intent/'];
+const pages = ['/', '/about/', '/docs/', '/agents/', '/btree/', '/private-intent/', '/arena/', '/404.html'];
 
 test.describe('Rotating a tablet or phone', () => {
   test.use({ viewport: { width: 820, height: 1180 }, hasTouch: true });
