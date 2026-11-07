@@ -27,7 +27,7 @@ type FileAuditRecorder struct {
 	file *os.File
 }
 
-// OpenFileAuditRecorder opens or creates the log at path with mode 0600 and
+// OpenFileAuditRecorder opens or creates the log at path with mode 0600 (ignored on Windows, which has no POSIX mode bits) and
 // replays it line by line. The events stay in memory after the replay, like
 // MemoryAuditRecorder. The path is the caller's own configuration, as with
 // os.OpenFile. A path with a ".." element is refused as a guard against

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -81,6 +82,9 @@ func TestFileAuditRecorderRefusesTruncatedLine(t *testing.T) {
 }
 
 func TestFileAuditRecorderFilePermissions(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Windows does not use POSIX mode bits")
+	}
 	path := filepath.Join(t.TempDir(), "audit.jsonl")
 	r, err := OpenFileAuditRecorder(path, nil)
 	if err != nil {
