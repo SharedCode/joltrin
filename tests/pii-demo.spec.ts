@@ -13,8 +13,8 @@ test.describe('PII masking demo', () => {
   test('screen readers get a before and after sentence, not the animated spans', async ({ page }) => {
     await page.goto('/');
     const line = page.locator('#pii-demo .pii-line');
-    await expect(line).toHaveAttribute('aria-label', /Before: .* After: /);
-    await expect(line.locator('> span')).toHaveAttribute('aria-hidden', 'true');
+    await expect(line.locator('.sr-only')).toHaveText(/Before: .* After: /);
+    await expect(line.locator('.pii-visual')).toHaveAttribute('aria-hidden', 'true');
   });
 
   test('reduced motion shows the raw text and no animation', async ({ browser }) => {

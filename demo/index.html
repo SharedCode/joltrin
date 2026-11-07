@@ -426,6 +426,7 @@
     @keyframes pii-out { to { opacity: 0; filter: blur(5px); } }
     @keyframes pii-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
     html:not(.js) .pii-mask { display: none; }
+    @media (prefers-color-scheme: light) { .pii-raw { color: rgb(185 28 28); } .pii-mask { color: rgb(4 120 87); } }
     .hero-parallax { will-change: transform, opacity; transform-origin: 50% 0; }
     .tilt-card { transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s; }
     @media (hover: hover) { .tilt-card:hover { transform: translate3d(0, -4px, 0); } }
@@ -1669,8 +1670,9 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
       <div id="pii-demo" class="pii-demo bg-dark-900 border border-dark-800 rounded-2xl p-5 mb-6" role="group" aria-labelledby="pii-h">
         <h3 id="pii-h" class="text-xs font-mono font-semibold uppercase tracking-wider text-brand-400 mb-1">Privacy in the audit log</h3>
         <p class="text-xs text-slate-300 leading-relaxed mb-3">Reason text and metadata are masked before an event is hashed and signed, so the original email or number never lands in the record. Masking is pattern based and catches well-formed values only. It is a safety net, not a guarantee. The signature and the masking are in the open <code>governance</code> package with tests. Both are libraries today, not a hosted service.</p>
-        <p class="pii-line font-mono text-xs sm:text-sm text-slate-200" aria-label="Before: emailed bob@corp.io, ssn 123-45-6789. After: emailed [email], ssn [ssn].">
-          <span aria-hidden="true">emailed <span class="pii-pair"><span class="pii-raw">bob@corp.io</span><span class="pii-mask">[email]</span></span>, ssn <span class="pii-pair"><span class="pii-raw">123-45-6789</span><span class="pii-mask">[ssn]</span></span></span>
+        <p class="pii-line font-mono text-xs sm:text-sm text-slate-200">
+          <span class="sr-only">Before: emailed bob@corp.io, ssn 123-45-6789. After: emailed [email], ssn [ssn].</span>
+          <span class="pii-visual" aria-hidden="true">emailed <span class="pii-pair"><span class="pii-raw">bob@corp.io</span><span class="pii-mask">[email]</span></span>, ssn <span class="pii-pair"><span class="pii-raw">123-45-6789</span><span class="pii-mask">[ssn]</span></span></span>
         </p>
       </div>
 
