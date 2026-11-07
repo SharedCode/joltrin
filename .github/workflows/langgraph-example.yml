@@ -27,7 +27,7 @@ jobs:
           go-version-file: 'go.mod'
           cache: true
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@v7.1.0
         with:
           python-version: '3.12'
           cache: 'pip'
