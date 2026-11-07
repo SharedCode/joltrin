@@ -28,7 +28,7 @@ cp demo-btree/index.html demo-btree/tailwind.css demo-btree/arena.wasm demo-btre
 # Private Intent (the intent package in WASM) lives at joltrinhq.com/private-intent/
 cp demo-intent/index.html demo-intent/tailwind.css demo-intent/intent.wasm demo-intent/wasm_exec.js demo-intent/favicon.svg demo-intent/favicon.ico demo-intent/og-image.png demo-intent/logo-mark.png "$SITE/private-intent/"
 # About the Founder lives at joltrinhq.com/about/
-cp about/index.html about/tailwind.css about/favicon.svg about/favicon.ico about/og-image.png about/logo-mark.png "$SITE/about/"
+cp about/index.html about/tailwind.css about/favicon.svg about/favicon.ico about/og-image.png about/logo-mark.png about/gerard-louis-recinto.jpg "$SITE/about/"
 # Response headers for the Cloudflare deployment.
 cp deploy/cloudflare/_headers deploy/cloudflare/_redirects "$SITE/"
 # Security contact for researchers (RFC 9116).
