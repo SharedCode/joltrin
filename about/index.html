@@ -37,7 +37,7 @@
     "url": "https://joltrinhq.com/about/",
     "about": [
       { "@type": "Person", "name": "Gerardo Recinto", "jobTitle": "Founder of Joltrin", "homeLocation": { "@type": "Place", "name": "Union City, California" }, "sameAs": ["https://github.com/grecinto"] },
-      { "@type": "Person", "name": "Gerard Louis Recinto", "jobTitle": "Founder of Joltrin", "homeLocation": { "@type": "Place", "name": "San Diego, California" } }
+      { "@type": "Person", "name": "Gerard Louis Recinto", "jobTitle": "Founder of Joltrin", "homeLocation": { "@type": "Place", "name": "San Diego, California" }, "knowsAbout": ["Go", "Rust", "Python", "TypeScript", "Kubernetes", "Terraform", "AWS", "Model Context Protocol", "Agent2Agent protocol", "AI agents"] }
     ]
   }
   </script>
@@ -89,7 +89,7 @@
       <h3 id="bio" class="text-xl font-bold text-white mb-4">Background</h3>
       <div class="space-y-4 leading-relaxed">
         <p>I am a Senior DevOps and platform engineer based in San Diego, California. I build the pipelines, cloud infrastructure and Kubernetes platforms that other engineers ship on, and I spend a lot of time troubleshooting them in production.</p>
-        <p>At Qualcomm that work has included supporting more than 475 Jenkins pipelines, cutting one CI build from 6 hours 59 minutes to about 15 minutes by moving binary artifacts from Git LFS to Artifactory, and implementing an S3 lifecycle change that saved about $26 million a year, a figure reported by our AWS technical account manager.</p>
+        <p>At Qualcomm that work has included supporting more than 475 Jenkins pipelines, cutting one CI build from 6 hours 59 minutes to about 15 minutes by moving binary artifacts from Git LFS to Artifactory and writing a Python 3 multiprocessing script as part of that change, and implementing an S3 lifecycle change that saved about $26 million a year, a figure reported by our AWS technical account manager.</p>
         <p>I studied Mathematics and Computer Science at UC San Diego and hold the AWS Certified Solutions Architect Associate certification. My day-to-day tools are Python, Terraform, Kubernetes, AWS and CI/CD systems.</p>
       </div>
       <p class="mt-6 text-sm text-slate-400 border-l-2 border-dark-700 pl-4">Those results come from my professional work. They are not Joltrin customer results, and no employer or vendor endorses Joltrin.</p>
@@ -106,6 +106,18 @@
         <li><strong class="text-white">Delivery.</strong> The race, coverage and staticcheck gates, release pipeline, site deploy and rollback that ship all of the above.</li>
       </ul>
       <p class="mt-4 text-sm text-slate-400 border-l-2 border-dark-700 pl-4">The commit history is public in the repository, so you can check each of these. Gerardo wrote most of the core storage code these sit on.</p>
+    </section>
+
+    <section aria-labelledby="skills" class="mb-12">
+      <h3 id="skills" class="text-xl font-bold text-white mb-4">Languages and skills I use here</h3>
+      <dl class="grid grid-cols-1 sm:grid-cols-2 gap-px bg-dark-800 border border-dark-800 rounded-xl overflow-hidden text-sm">
+        <div class="bg-dark-900 p-4"><dt class="font-mono text-xs uppercase text-slate-400">Go</dt><dd class="mt-1 text-slate-200">The MCP and A2A servers, the bridge and the Kubernetes admission webhook, plus the race, coverage and staticcheck gates that test them.</dd></div>
+        <div class="bg-dark-900 p-4"><dt class="font-mono text-xs uppercase text-slate-400">Rust</dt><dd class="mt-1 text-slate-200">A Rust client for the gate command, with tests and an example. I also fixed the Rust build on Apple Silicon, where a Go toolchain running under Rosetta built the wrong architecture.</dd></div>
+        <div class="bg-dark-900 p-4"><dt class="font-mono text-xs uppercase text-slate-400">Python</dt><dd class="mt-1 text-slate-200">A LangGraph agent that talks to the MCP server and recovers from a block, with its own CI run, and the Python library loader and its test script.</dd></div>
+        <div class="bg-dark-900 p-4"><dt class="font-mono text-xs uppercase text-slate-400">AI agents</dt><dd class="mt-1 text-slate-200">Model Context Protocol, Agent2Agent, and guardrails that block a risky agent step until the steps before it are recorded.</dd></div>
+        <div class="bg-dark-900 p-4"><dt class="font-mono text-xs uppercase text-slate-400">Kubernetes and cloud</dt><dd class="mt-1 text-slate-200">Admission control with cert-manager, Prometheus metrics, network policy, Kyverno image checks on AKS, and a kind cluster test.</dd></div>
+        <div class="bg-dark-900 p-4"><dt class="font-mono text-xs uppercase text-slate-400">Delivery and testing</dt><dd class="mt-1 text-slate-200">GitHub Actions, signed and scanned container images, Cloudflare deploys with rollback, and TypeScript Playwright tests in three browsers.</dd></div>
+      </dl>
     </section>
 
     <section aria-labelledby="facts" class="mb-12">
