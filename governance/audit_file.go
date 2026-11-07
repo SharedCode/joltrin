@@ -22,12 +22,15 @@ type FileAuditRecorder struct {
 }
 
 // OpenFileAuditRecorder opens or creates the log at path with mode 0600 and
-// replays it. The signer, if any, signs new events only.
+// replays it line by line. The events stay in memory after the replay, like
+// MemoryAuditRecorder. The path is the caller's own configuration, as with
+// os.OpenFile, and is not sanitised. The signer, if any, signs new events only.
 func OpenFileAuditRecorder(path string, signer AuditSigner) (*FileAuditRecorder, error) {
 	mem := NewMemoryAuditRecorder(signer)
 
-	if data, err := os.ReadFile(path); err == nil {
-		sc := bufio.NewScanner(bytes.NewReader(data))
+	if rf, err := os.Open(path); err == nil {
+		defer rf.Close()
+		sc := bufio.NewScanner(rf)
 		sc.Buffer(make([]byte, 0, 64*1024), 8*1024*1024)
 		line := 0
 		for sc.Scan() {
