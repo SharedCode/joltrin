@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sort"
 	"sync"
 	"time"
 
@@ -63,6 +64,18 @@ func (e *AuditEvent) ComputeHash(prevHash string) string {
 		e.Reason,
 	)
 	h.Write([]byte(canonical))
+	// Metadata is part of the digest so it cannot be edited after the fact. Events with no
+	// metadata hash exactly as before, so chains recorded earlier still verify.
+	if len(e.Metadata) > 0 {
+		keys := make([]string, 0, len(e.Metadata))
+		for k := range e.Metadata {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			fmt.Fprintf(h, "|%d:%s=%d:%s", len(k), k, len(e.Metadata[k]), e.Metadata[k])
+		}
+	}
 	return hex.EncodeToString(h.Sum(nil))
 }
 
