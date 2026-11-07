@@ -108,14 +108,14 @@ The `infs` package uses the file system as the storage backend. It works on loca
     *   **Unified Data Format**: Since both ends use SOP, there is no complex ETL or serialization needed to move data from the car to the cloud. A B-Tree node on the device is compatible with the B-Tree in the cloud.
     *   **Offline Autonomy**: The device operates fully offline with ACID integrity. When connectivity is restored, it syncs the delta to the cloud.
 
-### Scenario J: Data Sovereignty & Compliance
-**Use case:** GDPR, HIPAA, government, and multi-region cloud requirements.
+### Scenario J: Data Sovereignty
+**Use case:** Data residency requirements such as regional storage rules. Placement helps with these; it does not make a deployment compliant with GDPR, HIPAA or any other regulation by itself.
 
 *   **The Challenge**: Some regulations require user data to remain in a specific country or region. Managing this in a single monolithic database cluster increases routing and sharding complexity.
 *   **The SOP Solution**: Since SOP stores data in standard file folders (or S3 buckets), you can trivially map specific Tenants or Keyspaces to specific physical storage locations.
 *   **Capabilities**:
     *   **Physical Isolation**: "German Users" get stored in `/mnt/germany_disk`, "US Users" in `/mnt/us_disk`. The application logic remains the same, but the physical storage is strictly separated.
-    *   **Portable Compliance**: Need to move a dataset to an air-gapped server for an audit? Just copy the folder. The entire database moves with it.
+    *   **Portability**: Need to move a dataset to an air-gapped server for an audit? Just copy the folder. The entire database moves with it.
     *   **Granular Encryption**: You can apply file-system level encryption to specific folders (tenants) without performance penalties on the rest of the system.
 
 ### Scenario K: DevOps, Testing & Release Management

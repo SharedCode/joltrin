@@ -427,7 +427,7 @@ export const EnterpriseInterestModal: React.FC<EnterpriseInterestModalProps> = (
                 <span>{status === 'submitting' ? 'Submitting Inquiry...' : 'Submit Commercial Inquiry'}</span>
               </button>
               <p className="text-[11px] text-slate-500 text-center font-mono mt-2">
-                🔒 Enterprise confidentiality guaranteed. No credit card or secrets required.
+                🔒 No credit card or secrets required.
               </p>
             </div>
 
