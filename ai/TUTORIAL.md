@@ -427,7 +427,7 @@ trans.Commit(ctx)
 SOP includes a flexible policy engine designed to build **Responsible, Secured, and Safe AI systems**.
 
 The kit supports a hierarchical policy model:
-*   **Global Policies**: Enforced across all agents (e.g., "No Hate Speech", "GDPR Compliance").
+*   **Global Policies**: Enforced across all agents (e.g., "No Hate Speech").
 *   **Local Policies**: Specific to a single agent (e.g., "Medical Disclaimer" for the Doctor agent).
 
 This allows software teams to easily author and manage governance at the appropriate level.

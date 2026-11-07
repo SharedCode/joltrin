@@ -559,7 +559,7 @@ Workflow:
    - **KnowledgeBase Studio**: The only visual vector database management tool
    - **AI Copilot**: Natural language queries and code generation
 
-**Why No One Else Can Do This**: Traditional vector databases **cannot offer visualization** because K-means clustering produces statistical abstractions (centroids), not human-understandable structure. SOP's relativity-based architecture makes categories and items **first-class citizens**, enabling the Mint → Refine → Vectorize lifecycle.
+**Why this is different**: Traditional vector databases **cannot offer visualization** because K-means clustering produces statistical abstractions (centroids), not human-understandable structure. SOP's relativity-based architecture makes categories and items **first-class citizens**, enabling the Mint → Refine → Vectorize lifecycle.
 
 ---
 

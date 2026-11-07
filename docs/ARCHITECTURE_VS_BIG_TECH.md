@@ -17,7 +17,7 @@ With SOP AI, the user gets a local, strict ACID-compliant 3-BTree database runni
 ## 2. Built-in PII Obfuscation (The "Immune System")
 Before SOP AI ever sends a query to an external AI model (like Gemini or ChatGPT), the system routes the prompt through its `GlobalObfuscator`. 
 
-SOP AI automatically scrubs Personally Identifiable Information (PII) from user prompts and database contexts *before* it leaves the local machine. A user can safely discuss highly sensitive medical or legal Knowledge Bases without feeding their personal secrets to Big Tech training data. Gemini natively does not do this to protect the user; SOP AI does.
+SOP AI obfuscates metadata (table and field names) and values in prompts and database contexts *before* they leave the local machine. It is not a PII detector: it does not find personal data in free text, so it does not catch everything, and it is not a privacy or compliance guarantee. Review what you send to an external model. Gemini natively does not do this to protect the user; SOP AI does.
 
 ## 3. LLM Agnosticism (The "Disposable Brain")
 SOP AI currently leverages Gemini as its generator, but by design, the platform is Omni-AI. 
@@ -43,4 +43,4 @@ SOP AI enables **Avatar Mode (Type 2 deployments)**. It performs *Stateless Imme
 
 When introducing SOP AI to developers, businesses, and end-users, this is our position:
 
-> *"Don't hand your most sensitive problems to generic cloud chatbots. SOP AI gives you a dedicated, LLM-agnostic true companion backed by an enterprise-grade local database. We obfuscate your privacy, persist your long-term memory, and let you swap out the AI brains whenever you want - all while you maintain 100% ownership of your data."*
+> *"Don't hand your most sensitive problems to generic cloud chatbots. SOP AI gives you a dedicated, LLM-agnostic true companion backed by a local ACID database. We obfuscate metadata and values, persist your long-term memory, and let you swap out the AI brains whenever you want - all while you maintain 100% ownership of your data."*

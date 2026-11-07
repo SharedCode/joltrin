@@ -410,11 +410,11 @@ export const App: React.FC = () => {
                       <span className="text-[10px] px-2 py-0.5 rounded bg-accent-cyan/10 text-accent-cyan font-mono">Custom</span>
                     </div>
                     <div className="text-2xl font-black text-white">Custom SLA</div>
-                    <p className="text-xs text-slate-400">Strict compliance, Okta / Entra ID SSO, dedicated architecture support.</p>
+                    <p className="text-xs text-slate-400">Okta / Entra ID OIDC code exists; rollout is scoped with you. Not a certified product.</p>
                     <ul className="text-xs space-y-2 text-slate-300 pt-2 border-t border-dark-850 font-mono">
-                      <li className="flex items-start space-x-2"><Check className="w-3.5 h-3.5 text-brand-400 flex-shrink-0 mt-0.5" /><span>Okta &amp; Microsoft Entra ID SSO integration</span></li>
-                      <li className="flex items-start space-x-2"><Check className="w-3.5 h-3.5 text-brand-400 flex-shrink-0 mt-0.5" /><span>Tamper-evident audit trails &amp; RBAC</span></li>
-                      <li className="flex items-start space-x-2"><Check className="w-3.5 h-3.5 text-brand-400 flex-shrink-0 mt-0.5" /><span>Custom HA topologies &amp; 99.99% uptime SLA</span></li>
+                      <li className="flex items-start space-x-2"><Check className="w-3.5 h-3.5 text-brand-400 flex-shrink-0 mt-0.5" /><span>Okta &amp; Microsoft Entra ID OIDC code (not packaged)</span></li>
+                      <li className="flex items-start space-x-2"><Check className="w-3.5 h-3.5 text-brand-400 flex-shrink-0 mt-0.5" /><span>Hash-chained audit log &amp; RBAC</span></li>
+                      <li className="flex items-start space-x-2"><Check className="w-3.5 h-3.5 text-brand-400 flex-shrink-0 mt-0.5" /><span>Custom HA topologies, SLA by contract</span></li>
                     </ul>
                   </div>
                   <button

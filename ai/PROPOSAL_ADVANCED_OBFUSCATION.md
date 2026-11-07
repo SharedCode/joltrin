@@ -1,7 +1,7 @@
 # Proposal: Semantic Obfuscation for Privacy-Preserving LLM Interaction
 
 ## 1. Problem Statement
-To comply with HIPAA and corporate data privacy policies, we must not send Protected Health Information (PHI) or sensitive PII (Personally Identifiable Information) to external LLMs. This includes:
+To support HIPAA and corporate data privacy policies, we should avoid sending Protected Health Information (PHI) or sensitive PII (Personally Identifiable Information) to external LLMs. This includes:
 1.  **Metadata**: Table names (`patients`), Field names (`ssn`, `diagnosis`).
 2.  **Dataset Values**: Literal values in queries (`"Diabetes"`, `"John Doe"`, `"123-45-6789"`).
 

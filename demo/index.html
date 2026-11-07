@@ -1527,11 +1527,11 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
               <span class="text-[10px] font-mono font-semibold uppercase tracking-wider text-black bg-brand-400 rounded-full px-2 py-0.5">For teams</span>
             </div>
             <div class="mb-2"><span class="text-3xl font-extrabold text-white font-mono">$49</span> <span class="text-xs text-slate-500 font-mono">per month, per team</span></div>
-            <p class="text-xs text-slate-300 mb-4">For teams that let agents touch real systems. Write the rules once as policy, and keep a tamper-evident record of every allow and block, so you can answer "who let the agent do that?" in minutes.</p>
+            <p class="text-xs text-slate-300 mb-4">For teams that let agents touch real systems. Write the rules once as policy, and keep a hash-chained record of every allow and block, so you can answer "who let the agent do that?" in minutes.</p>
             <ul class="space-y-2 text-xs text-slate-300 mb-6">
               <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span>Everything in open source</span></li>
               <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span>Policy-as-code: one set of rules for every agent</span></li>
-              <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span>Tamper-evident audit lineage, with signed export</span></li>
+              <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span>Hash-chained audit log with JSON export and a signing hook (no signer is shipped yet)</span></li>
               <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i><span>Team workspaces and quotas</span></li>
               <li class="flex items-start space-x-2"><i data-lucide="clock" class="w-4 h-4 text-amber-400 shrink-0"></i><span>Planned, set up with you: <a href="./private-intent/#pro" class="underline underline-offset-2 hover:text-white">Private Intent for teams</a> (shared rules, approval routing)</span></li>
             </ul>
@@ -1551,11 +1551,11 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
             <div class="mb-4"><span class="text-3xl font-extrabold text-white font-mono">Contact us</span></div>
             <ul class="space-y-2 text-xs text-slate-300 mb-6">
               <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0"></i><span>Everything in Pro</span></li>
-              <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0"></i><span>Okta and Microsoft Entra ID sign-in</span></li>
+              <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0"></i><span>Okta and Microsoft Entra ID sign-in (OIDC code exists, not packaged)</span></li>
               <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0"></i><span>Custom safety rules for your runbooks</span></li>
-              <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0"></i><span>Compliance audit exports</span></li>
+              <li class="flex items-start space-x-2"><i data-lucide="check" class="w-4 h-4 text-accent-violet shrink-0"></i><span>Compliance exports, key management and retention policies (not built)</span></li>
             </ul>
-            <p class="mt-3 text-[11px] text-slate-500 leading-relaxed">The sign-in providers and audit export are in the open repository. Rollout, hosting and support are scoped with you, not a packaged product yet.</p>
+            <p class="mt-3 text-[11px] text-slate-500 leading-relaxed">Okta and Entra ID OIDC sign-in code, with tests, and a JSON audit export are in the open repository. Compliance exports, key management integration and retention policies are not built. Rollout, hosting and support are scoped with you, not a packaged product yet. Joltrin is not certified to any compliance standard.</p>
           </div>
           <button onclick="selectTierAndScroll('enterprise')"
                   class="w-full py-2.5 px-4 rounded-xl bg-dark-800 hover:bg-dark-750 border border-dark-700 hover:border-accent-violet/50 text-slate-200 hover:text-white font-semibold text-xs flex items-center justify-center transition cursor-pointer">
@@ -1577,7 +1577,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         </div>
         <div class="bg-dark-900 border border-accent-violet/30 rounded-2xl p-5">
           <h3 class="text-xs font-mono font-semibold uppercase tracking-wider text-accent-violet mb-2">Move to Enterprise when</h3>
-          <p class="text-xs text-slate-300 leading-relaxed">Security or compliance asks for single sign-on, signed audit records, and a named owner for production approvals. Okta and Entra ID support and audit signing exist as building blocks; we scope the rollout with each team instead of promising a checklist.</p>
+          <p class="text-xs text-slate-300 leading-relaxed">Security or compliance asks for single sign-on, signed audit records, and a named owner for production approvals. Okta and Entra ID OIDC code exists as a building block. The audit log has a signing hook but no signer ships yet. We scope the rollout with each team instead of promising a checklist.</p>
           <button onclick="selectTierAndScroll('enterprise')" class="text-xs text-accent-violet hover:underline mt-3 cursor-pointer" style="padding-block:.4rem">Tell us what you need</button>
         </div>
       </div>
