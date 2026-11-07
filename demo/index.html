@@ -425,6 +425,7 @@
     .js .in .block-wrap::after { animation: block-scan 0.9s 0.1s ease-out forwards; }
     @keyframes block-stamp { from { opacity: 0; transform: rotate(-14deg) scale(1.7); } to { opacity: 1; transform: rotate(-6deg) scale(1); } }
     @keyframes block-scan { 0% { opacity: 1; top: 0; } 100% { opacity: 0; top: 100%; } }
+    @media (prefers-reduced-motion: reduce) { .js .block-stamp { opacity: 1; animation: none; } .js .in .block-stamp, .js .in .block-wrap::after { animation: none; } }
     @media (prefers-color-scheme: light) { .block-stamp { color: rgb(185 28 28); border-color: rgb(185 28 28); } .block-wrap::after { background: linear-gradient(90deg, transparent, rgb(185 28 28 / 0.6), transparent); } }
     .hero-parallax { will-change: transform, opacity; transform-origin: 50% 0; }
     .tilt-card { transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s; }
