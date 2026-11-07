@@ -144,3 +144,39 @@ func TestFileAuditRecorderRefusesNonRegularFile(t *testing.T) {
 		t.Fatal("/dev/null accepted")
 	}
 }
+
+func TestFileAuditRecorderRollsBackWhenTheWriteFails(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "audit.jsonl")
+	r, err := OpenFileAuditRecorder(path, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	if err := r.Record(ctx, fileEv("one")); err != nil {
+		t.Fatal(err)
+	}
+	before := r.LastHash()
+
+	r.file.Close() // every later write now fails
+	if err := r.Record(ctx, fileEv("two")); err == nil {
+		t.Fatal("write to a closed file reported success")
+	}
+	if r.Count() != 1 {
+		t.Fatalf("memory holds %d events, want 1 (the failed event must be removed)", r.Count())
+	}
+	if r.LastHash() != before {
+		t.Fatal("last hash moved although the event was not stored")
+	}
+	if err := r.VerifyIntegrity(); err != nil {
+		t.Fatalf("chain after a failed write: %v", err)
+	}
+
+	r2, err := OpenFileAuditRecorder(path, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer r2.Close()
+	if r2.Count() != 1 {
+		t.Fatalf("file holds %d events, want 1", r2.Count())
+	}
+}
