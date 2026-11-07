@@ -14,7 +14,7 @@ Status words:
 
 | Control | Status | Evidence | Limit |
 | --- | --- | --- | --- |
-| Hash-chained audit log, including event metadata | Implemented, tested | `governance/audit.go`, `governance/audit_test.go`, `governance/audit_security_test.go` | The only recorder in `governance` is in memory. A durable audit store is Missing. |
+| Hash-chained audit log, including event metadata | Implemented, tested | `governance/audit.go`, `governance/audit_test.go`, `governance/audit_security_test.go` | `MemoryAuditRecorder` keeps events in memory. `FileAuditRecorder` (`governance/audit_file.go`) also appends them to a local JSON Lines file and refuses to reopen a file that fails verification. Removing the newest events from the end of the file cannot be detected without a copy of the last hash kept somewhere else. No rotation, encryption or database store. |
 | Ed25519 signatures on audit events, verified offline | Implemented, tested | `governance/audit_ed25519.go`, `governance/audit_security_test.go` | Key storage, rotation and HSM or KMS signing are Missing. The caller holds the private key. |
 | JSON export of the audit log | Implemented, tested | `MemoryAuditRecorder.ExportJSON`, `governance/audit_test.go` | |
 | Streaming audit events to a SIEM | Library only | `AuditStreamer` interface in `governance/audit.go` | No connector ships. Splunk, Datadog and Kafka connectors are Missing. |
