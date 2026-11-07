@@ -180,3 +180,18 @@ func TestFileAuditRecorderRollsBackWhenTheWriteFails(t *testing.T) {
 		t.Fatalf("file holds %d events, want 1", r2.Count())
 	}
 }
+
+func TestFileAuditRecorderLeavesAForeignFileUntouched(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "auth.log")
+	original := "Nov  7 11:00:01 host sshd[42]: Accepted publickey for deploy\n"
+	if err := os.WriteFile(path, []byte(original), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := OpenFileAuditRecorder(path, nil); err == nil {
+		t.Fatal("a file that is not an audit chain was opened for writing")
+	}
+	got, _ := os.ReadFile(path)
+	if string(got) != original {
+		t.Fatalf("file was modified: %q", got)
+	}
+}

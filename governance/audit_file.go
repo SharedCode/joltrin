@@ -39,7 +39,9 @@ func OpenFileAuditRecorder(path string, signer AuditSigner) (*FileAuditRecorder,
 // newest events were cut off the end of the file, the last hash no longer
 // matches and the open fails with ErrAuditTruncated. An empty anchor skips the
 // check, which is what OpenFileAuditRecorder does. Only files are opened: a
-// directory, device or pipe at path is refused.
+// directory, device or pipe at path is refused. An existing file is replayed
+// before it is opened for writing, so a file that is not a valid audit chain,
+// such as a system log, fails to open and is left untouched.
 func OpenFileAuditRecorderAnchored(path string, signer AuditSigner, anchorHash string) (*FileAuditRecorder, error) {
 	if fi, err := os.Stat(path); err == nil && !fi.Mode().IsRegular() {
 		return nil, fmt.Errorf("governance: audit log %s is not a regular file", path)
