@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- The Agents, B-tree game, About and Docs pages now move: sections and cards rise in as they scroll into view, cards lift on hover, a thin bar shows scroll progress and a faint glow drifts behind the page. It is one script, `/assets/site-motion.js`. Content on screen at load is never hidden, only opacity and transform change, and visitors who ask for reduced motion get none of it.
 - `joltrin-gate`, a Rust crate in `bindings/rust-gate`, asks `sop-mcp-server gate` whether a step may run and returns `Allowed` or `Blocked` with the steps to run first. It starts the binary for each question, so it needs no native library and no Go on the machine, and it runs on Linux, macOS and Windows. It is not published to crates.io yet, so use it as a path dependency. It only checks ordering, like `gate`. `docs/AGENT_PROTOCOLS.md` now says which way in to use for each language.
 - `sop-mcp-server gate` asks the barrier about one step and remembers the allowed steps between calls in a per-session file, so a hook that runs once per command can use the same ordering rules as an agent. Exit 0 allowed, 1 blocked, 2 usage error; `--reset` clears a session.
 - `intent.Receipt.VerifySignature` checks that a key signed a receipt without needing the action, for parties such as a receipt log that never see the action. `Receipt.Verify` uses it.
