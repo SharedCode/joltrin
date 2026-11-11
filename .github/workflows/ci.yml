@@ -23,7 +23,7 @@ jobs:
   # below for why.
   #
   # Go version: the project pins one exact toolchain version in go.mod
-  # (currently 1.26.10, for CVE remediation, see CHANGELOG.md) rather than
+  # (currently 1.26.11, for CVE remediation, see CHANGELOG.md) rather than
   # supporting a range, so this matrix intentionally does not add a Go
   # version axis; `go-version-file: go.mod` picks up that pinned version on
   # every OS.

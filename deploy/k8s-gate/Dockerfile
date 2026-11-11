@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # Build from the repository root: docker build -f deploy/k8s-gate/Dockerfile .
-FROM golang:1.27.3-alpine AS builder
+FROM golang:1.27.4-alpine AS builder
 WORKDIR /src
 COPY . .
 RUN --mount=type=cache,target=/go/pkg/mod \

@@ -1,6 +1,6 @@
 module github.com/sharedcode/joltrin/v5
 
-go 1.26.10
+go 1.26.11
 
 require (
 	github.com/a2aproject/a2a-go v0.3.15
