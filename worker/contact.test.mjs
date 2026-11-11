@@ -97,3 +97,23 @@ test('control characters and header-injection newlines are stripped from one-lin
   const { fields } = parseSubmission({ ...good, name: 'Ada\r\nBcc: x@y.test', company: 'Acme' });
   assert.ok(!/[\r\n]/.test(fields.name));
 });
+
+test('a body over the limit is refused by declared length, by bytes, and when streamed', async () => {
+  const { sent, env, ctx } = setup();
+  // Declared length alone is enough; the body is never read.
+  const declared = post(good, { 'Content-Length': String(64 * 1024) });
+  assert.equal((await handleContact(declared, env, ctx)).status, 413);
+  // 6000 three-byte characters are under 16384 characters but over 16384 bytes.
+  assert.equal((await handleContact(post({ ...good, message: '\u20ac'.repeat(6000) }), env, ctx)).status, 413);
+  // No Content-Length at all: a stream that keeps sending is cut off.
+  let pulls = 0;
+  const stream = new ReadableStream({
+    pull(c) { pulls += 1; c.enqueue(new Uint8Array(8192).fill(120)); },
+  });
+  const streamed = new Request('https://joltrinhq.com/api/contact', {
+    method: 'POST', headers: { 'Content-Type': 'application/json', Origin: 'https://joltrinhq.com' }, body: stream, duplex: 'half',
+  });
+  assert.equal((await handleContact(streamed, env, ctx)).status, 413);
+  assert.ok(pulls < 10, `read ${pulls} chunks of an endless body`);
+  assert.equal(sent.length, 0);
+});

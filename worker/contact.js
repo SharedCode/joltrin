@@ -70,6 +70,31 @@ function receiptMessage(id, f) {
   return { subject: `We received your message [${id}]`, text, html };
 }
 
+// Returns the body as text, or null if it is larger than MAX_BODY bytes. A
+// client that declares a large Content-Length is refused before any of it is
+// read, and one that lies or sends no length is cut off at the limit.
+async function readBody(request) {
+  if (Number(request.headers.get('Content-Length')) > MAX_BODY) return null;
+  if (!request.body) return '';
+  const reader = request.body.getReader();
+  const chunks = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > MAX_BODY) {
+      await reader.cancel();
+      return null;
+    }
+    chunks.push(value);
+  }
+  const all = new Uint8Array(size);
+  let at = 0;
+  for (const c of chunks) { all.set(c, at); at += c.byteLength; }
+  return new TextDecoder().decode(all);
+}
+
 export async function handleContact(request, env) {
   const origin = request.headers.get('Origin');
   const originOk = !origin || ALLOWED_ORIGINS.includes(origin) || origin === new URL(request.url).origin;
@@ -88,8 +113,9 @@ export async function handleContact(request, env) {
     if (!success) return json({ error: 'Too many requests. Please try again in a minute.' }, 429, { ...cors, 'Retry-After': '60' });
   }
 
-  const text = await request.text();
-  if (text.length > MAX_BODY) return json({ error: 'That message is too large.' }, 413, cors);
+  // Measure bytes, not characters, and stop reading once the body is over the limit.
+  const text = await readBody(request);
+  if (text === null) return json({ error: 'That message is too large.' }, 413, cors);
   let raw;
   try { raw = JSON.parse(text); } catch { return json({ error: 'Invalid request.' }, 400, cors); }
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return json({ error: 'Invalid request.' }, 400, cors);

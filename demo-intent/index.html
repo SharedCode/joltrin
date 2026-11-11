@@ -440,9 +440,11 @@ go run ./examples/private_intent approve ./pi orders</pre>
           <a href="../#pricing" onclick="track('pro_click'); track('intent_pro_click')" class="mt-5 inline-block rounded-full bg-brand-500 hover:bg-brand-400 text-black font-semibold px-5 py-2.5 text-sm transition">Request a design-partner spot</a>
         </div>
         <div class="rise surface p-7">
-          <p class="text-xs font-semibold tracking-wide text-slate-500">NOT BUILT</p>
+          <p class="text-xs font-semibold tracking-wide text-amber-300">BUILT IN PRO</p>
           <p class="display mt-2 text-2xl text-[#f5f5f7]">Enterprise</p>
-          <p class="mt-3 text-sm text-slate-400 leading-relaxed">Planned: identity provider sign-in connected to Private Intent, key management integration, retention policies and compliance exports. Okta and Entra ID OIDC code, with tests, exists separately in the governance package of the open repository and is not connected to Private Intent. <a class="text-brand-300 hover:text-brand-200" href="../#pricing">Talk to us</a> if this is your blocker.</p>
+          <p class="mt-3 text-sm text-slate-400 leading-relaxed">Built in the private Pro repository: Okta and Entra ID sign-in that approves one specific action in a PolicyScript policy, a HashiCorp Vault signing key for the receipt witness, retention limits for the witness log, and signed audit exports. Tested against a fake identity provider and a real Vault, not yet against a live Okta or Entra tenant.</p>
+          <p class="mt-3 text-xs font-semibold tracking-wide text-slate-500">NOT BUILT</p>
+          <p class="mt-1 text-sm text-slate-400 leading-relaxed">Sign-in wired into the Private Intent engine's own approvals, AWS KMS and Azure Key Vault, SAML and SCIM. <a class="text-brand-300 hover:text-brand-200" href="../#pricing">Talk to us</a> if one of these is your blocker.</p>
         </div>
       </div>
     </section>
