@@ -215,5 +215,5 @@ Exit codes are the same everywhere: 0 for success, 1 for a failure, and 2 for a 
 - **A block you did not expect.** The result names the rule, the missing state and the steps that establish it. `sop-mcp-server check` shows the runbook's steps and what each needs.
 - **Memory is on but there are no lessons.** Lessons appear once a block has been recorded for the current runbook. A runbook that has changed starts fresh, and entries expire after 30 days.
 - **A call is refused for an id that is too long.** `trace_id`, `idempotency_key`, workflow and step names are limited to 256 bytes.
-- **The first `go install` takes minutes.** It downloads the Go modules, and a Go older than 1.26.10 also downloads a toolchain. The prebuilt binary skips both: see the install command in the README.
+- **The first `go install` takes minutes.** It downloads the Go modules, and a Go older than 1.26.11 also downloads a toolchain. The prebuilt binary skips both: see the install command in the README.
 - **Windows.** Use the `.exe` from the release page and run `setup --apply` from the folder you keep it in, because it registers that path.

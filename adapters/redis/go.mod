@@ -1,6 +1,6 @@
 module github.com/sharedcode/joltrin/adapters/redis
 
-go 1.26.10
+go 1.26.11
 
 require github.com/redis/go-redis/v9 v9.23.0
 

@@ -919,7 +919,7 @@
               <p class="mt-2 text-xs text-slate-400">It downloads one binary of about 9 MB, checks its checksum, and registers it with Claude Code, Codex or the Gemini CLI, whichever are installed. It does not use sudo.</p>
               <p id="after-install" class="mt-2 text-xs text-slate-300">Then restart your agent and ask: "Use the joltrin tools to run <code>drop_prod_db</code> on workflow <code>db-maintenance</code> with trace id <code>t1</code>." The server refuses until <code>take_backup</code> and <code>validate_backup</code> have run. Some models decline a destructive task before calling anything. That is the model, not Joltrin, and <a href="./agents/" class="underline text-brand-400 hover:text-brand-300">the browser demo</a> shows the barrier with no agent at all.</p>
             </div>
-            <p class="text-xs font-mono uppercase tracking-wider text-slate-400 mt-6 mb-1.5">Have Go? Run the demo from source (Go 1.26.10+)</p>
+            <p class="text-xs font-mono uppercase tracking-wider text-slate-400 mt-6 mb-1.5">Have Go? Run the demo from source (Go 1.26.11+)</p>
             <div class="relative">
               <pre id="quickstart-cmd" tabindex="0" class="rounded-lg bg-dark-950 border border-dark-700 pl-3 pr-16 py-2 font-mono text-xs text-slate-200 overflow-x-auto"><code>go run github.com/sharedcode/joltrin/v5/examples/verify_barrier@latest</code></pre>
               <button type="button" id="quickstart-copy" onclick="copyQuickstart(this)" class="absolute right-1.5 top-1.5 px-2 py-0.5 rounded-md bg-dark-800 hover:bg-dark-700 border border-dark-700 text-[11px] font-mono text-slate-300 transition cursor-pointer">Copy</button>

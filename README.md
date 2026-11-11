@@ -37,7 +37,7 @@ Then restart your agent and ask it to run `drop_prod_db` on workflow `db-mainten
 
 Piping a script into a shell trusts that script. [Read it first](scripts/install.sh): it does not use sudo, and it compares the binary with the release checksum, which catches a damaged download but not a compromised release. For build provenance set `JOLTRIN_VERIFY=1` (needs the GitHub CLI), or pin a version, or build from source. The [trust notes below](#connect-it-to-an-mcp-agent) explain each.
 
-**Have Go (1.26.10 or newer)?** Run the demo from source, no clone needed:
+**Have Go (1.26.11 or newer)?** Run the demo from source, no clone needed:
 
 ```bash
 go run github.com/sharedcode/joltrin/v5/examples/verify_barrier@latest
@@ -79,7 +79,7 @@ go run github.com/sharedcode/joltrin/v5/examples/agent_team@latest       # Jira,
 go run github.com/sharedcode/joltrin/v5/examples/quickstart@latest       # the embedded B-Tree that holds the state
 ```
 
-No clone needed, only Go 1.26.10 or newer. An older Go downloads 1.26.10 on its own. The first run downloads the modules and compiles, which took about 10 seconds on a MacBook Air, and later runs are quick. To read the code, or to run `./scripts/demo.sh --memory`, clone the repo.
+No clone needed, only Go 1.26.11 or newer. An older Go downloads 1.26.11 on its own. The first run downloads the modules and compiles, which took about 10 seconds on a MacBook Air, and later runs are quick. To read the code, or to run `./scripts/demo.sh --memory`, clone the repo.
 
 Or skip the install. These run in your browser with no backend:
 
@@ -147,7 +147,7 @@ go install github.com/sharedcode/joltrin/v5/cmd/sop-mcp-server@latest
 "$(go env GOPATH)/bin/sop-mcp-server" setup --apply
 ```
 
-The first `go install` downloads the Go modules, which took about 15 seconds on a MacBook Air. If your Go is older than 1.26.10, Go also downloads that toolchain once, about 240 MB.
+The first `go install` downloads the Go modules, which took about 15 seconds on a MacBook Air. If your Go is older than 1.26.11, Go also downloads that toolchain once, about 240 MB.
 
 </details>
 

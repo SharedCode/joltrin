@@ -20,6 +20,7 @@ on:
       - 'scripts/assemble-site.sh'
       - 'sop-arena/**'
       - 'deploy/cloudflare/**'
+      - 'worker/**'
       - 'wrangler.jsonc'
       - '.github/workflows/deploy-site.yml'
       - '.node-version'

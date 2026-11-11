@@ -52,7 +52,7 @@ In a large-scale enterprise environment, the SOP Data Manager shines as a statel
 ## Usage
 
 ### Prerequisites
-- Go 1.26.10+ installed.
+- Go 1.26.11+ installed.
 - Run from the root of the `sop` repository so `go run ./tools/httpserver` resolves the module correctly.
 - Either:
   - an existing SOP database folder for single-database mode, or

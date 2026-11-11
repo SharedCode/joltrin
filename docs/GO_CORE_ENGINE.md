@@ -340,7 +340,7 @@ SOP has all the bits required to be used like a golang map but which, has the fe
 Requirements:
   * Storage Drive(s) or sub-system (paths) for Blobs. Can be **Local Disk** (for standalone/dev) or **Network Mounts** (NAS/S3/Cloud) for distributed clusters.
   * User that you will use for the process which has Read/Write permissions(e.g. - 0777) to the drive(s)/storage path(s)
-  * Golang that supports generics, SOP package (go.mod) currently is set to use 1.26.10 and higher
+  * Golang that supports generics, SOP package (go.mod) currently is set to use 1.26.11 and higher
   * (Optional) Redis - required only for distributed/cluster mode or if using Redis-backed caching.
 
 ## Sample Code

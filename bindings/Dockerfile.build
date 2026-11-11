@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.26.10
+FROM golang:1.26.11
 
 # Install dependencies
 # mingw-w64 is needed for Windows builds if not using Zig for Windows (the script uses x86_64-w64-mingw32-gcc)
