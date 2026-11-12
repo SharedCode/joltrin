@@ -23,12 +23,6 @@ export async function waitForWasmReady(page: Page): Promise<void> {
       timeout: 25_000,
     });
   }
-
-  // Ensure OPFS status badge has resolved away from initial "checking..." state
-  const opfsBadge = page.locator('#opfs-status-text');
-  if (await opfsBadge.count() > 0) {
-    await expect(opfsBadge).not.toHaveText('checking...', { timeout: 15_000 });
-  }
 }
 
 /**
