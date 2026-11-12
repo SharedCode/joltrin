@@ -122,7 +122,7 @@ func main() {
 	}
 }
 
-// observability turns SOP_METRICS_ADDR, SOP_DECISION_LOG and SOP_RETRY_LIMIT
+// observability turns SOP_MODE, SOP_METRICS_ADDR, SOP_DECISION_LOG and SOP_RETRY_LIMIT
 // into server options. The decision log never goes to stdout, which carries
 // the MCP protocol.
 func observability(getenv func(string) string, errw io.Writer) ([]mcpserver.Option, func(), error) {
@@ -132,6 +132,15 @@ func observability(getenv func(string) string, errw io.Writer) ([]mcpserver.Opti
 		for _, c := range closers {
 			c()
 		}
+	}
+
+	switch v := getenv("SOP_MODE"); v {
+	case "", "enforce":
+	case "observe":
+		fmt.Fprintln(errw, "sop-mcp-server: SOP_MODE=observe, NOTHING IS BLOCKED. Steps that would be blocked run anyway and are logged as observed. Unset SOP_MODE to enforce.")
+		opts = append(opts, mcpserver.WithObserveOnly())
+	default:
+		return nil, closeAll, fmt.Errorf("SOP_MODE must be observe or enforce, got %q", v)
 	}
 
 	if v := getenv("SOP_RETRY_LIMIT"); v != "" {
