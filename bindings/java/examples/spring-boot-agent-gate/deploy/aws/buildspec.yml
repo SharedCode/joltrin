@@ -1,0 +1,19 @@
+version: 0.2
+env:
+  variables:
+    IMAGE_TAG: dev
+phases:
+  pre_build:
+    commands:
+      - aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+  build:
+    commands:
+      - ./gradlew --no-daemon test
+      - docker build -t "$ECR_REGISTRY/agent-gate:$CODEBUILD_RESOLVED_SOURCE_VERSION" .
+  post_build:
+    commands:
+      - docker push "$ECR_REGISTRY/agent-gate:$CODEBUILD_RESOLVED_SOURCE_VERSION"
+reports:
+  junit:
+    files: ["build/test-results/test/*.xml"]
+    file-format: JUNITXML

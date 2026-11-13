@@ -1,0 +1,10 @@
+# Build context: the joltrin repo root (see compose.yaml).
+FROM golang:1.26-alpine AS build
+WORKDIR /src
+COPY . .
+RUN CGO_ENABLED=0 go build -trimpath -o /out/sop-mcp-server ./cmd/sop-mcp-server
+
+FROM gcr.io/distroless/static-debian12:nonroot
+COPY --from=build /out/sop-mcp-server /sop-mcp-server
+EXPOSE 8088
+ENTRYPOINT ["/sop-mcp-server", "http", "--addr", "0.0.0.0:8088"]
