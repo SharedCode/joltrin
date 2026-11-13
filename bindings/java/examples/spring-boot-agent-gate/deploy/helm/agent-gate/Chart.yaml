@@ -1,0 +1,6 @@
+apiVersion: v2
+name: agent-gate
+description: Spring Boot agent service that runs plans through the joltrin barrier
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
