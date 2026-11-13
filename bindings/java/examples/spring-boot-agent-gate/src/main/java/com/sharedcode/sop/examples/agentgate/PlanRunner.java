@@ -42,6 +42,21 @@ public class PlanRunner {
             this.traceId = traceId;
         }
 
+        /** Try each step the barrier says establishes the state, in order, until one works. */
+        boolean pursueAny(List<String> fixes) {
+            for (String fix : fixes) {
+                if (pursue(fix)) {
+                    return true;
+                }
+                if (budgetHit) {
+                    return false;
+                }
+                stopReason = null;
+            }
+            stopReason = "none of " + fixes + " could be run";
+            return false;
+        }
+
         boolean pursue(String step) {
             while (true) {
                 if (calls++ >= maxCalls) {
@@ -62,7 +77,7 @@ public class PlanRunner {
                     stopReason = b.message();
                     return false;
                 }
-                if (!pursue(fixes.get(0))) {
+                if (!pursueAny(fixes)) {
                     return false;
                 }
             }

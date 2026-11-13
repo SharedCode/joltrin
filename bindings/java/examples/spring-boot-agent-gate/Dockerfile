@@ -13,5 +13,6 @@ WORKDIR /app
 COPY --from=build --chown=10001:0 /src/build/libs/spring-boot-agent-gate-1.0.0.jar app.jar
 USER 10001
 EXPOSE 8080
-HEALTHCHECK --interval=30s --timeout=3s CMD ["java", "-cp", "app.jar", "-version"]
+# Asks the app itself, over a plain TCP socket (the JRE image has no curl).
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s CMD ["bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /actuator/health HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
 ENTRYPOINT ["java", "-jar", "app.jar"]

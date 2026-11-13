@@ -45,6 +45,26 @@ class PlanRunnerTest {
     }
 
     @Test
+    void triesTheNextEstablishingStepWhenTheFirstOneCannotRun() {
+        List<String> done = new ArrayList<>();
+        Barrier b = (w, t, s) -> {
+            if (s.equals("manual_approval")) {
+                return new StepResult(false, null, List.copyOf(done), new StepResult.Blocked("rule", "person",
+                        "needs a person", "", List.of(), 1, "stop_and_ask"));
+            }
+            if (s.equals("deploy") && !done.contains("auto_approval")) {
+                return new StepResult(false, null, List.copyOf(done), new StepResult.Blocked("precondition", "ready",
+                        "blocked", "", List.of("manual_approval", "auto_approval"), 1, "run_established_by_steps"));
+            }
+            done.add(s);
+            return new StepResult(true, s, List.copyOf(done), null);
+        };
+        RunResult r = new PlanRunner(b, new BarrierProperties("", "", 20)).run("w", "t", "deploy");
+        assertEquals(RunResult.Status.COMPLETED, r.status());
+        assertEquals(List.of("auto_approval", "deploy"), r.trace());
+    }
+
+    @Test
     void stopsAtTheCallBudgetInsteadOfLooping() {
         Barrier loops = (w, t, s) -> new StepResult(false, null, List.of(),
                 new StepResult.Blocked("precondition", "x", "blocked", "", List.of("a"), 1, "run_established_by_steps"));
