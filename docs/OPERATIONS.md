@@ -134,11 +134,13 @@ Redis maintains locks and cached metadata with a default timeout (typically 15 m
 
 ## Watching the barrier server and capping retries
 
-Three settings, all off by default, for a server you leave running. None of them changes what the barrier allows or blocks.
+Four settings, all off by default, for a server you leave running. The first three do not change what the barrier allows or blocks. `SOP_MODE=observe` does, and is covered after them.
 
-- `SOP_METRICS_ADDR=127.0.0.1:9464` serves Prometheus metrics at `/metrics`: `joltrin_steps_total` by workflow and outcome (`allowed`, `replayed`, `blocked`, `invalid`), `joltrin_blocks_total` by the rule that blocked, and a `joltrin_step_duration_seconds` histogram. It binds where you tell it to, so keep it on localhost or behind your own access control. Only workflows the server knows become labels.
+- `SOP_METRICS_ADDR=127.0.0.1:9464` serves Prometheus metrics at `/metrics`: `joltrin_steps_total` by workflow and outcome (`allowed`, `replayed`, `blocked`, `observed`, `invalid`), `joltrin_blocks_total` by the rule that blocked, and a `joltrin_step_duration_seconds` histogram. It binds where you tell it to, so keep it on localhost or behind your own access control. Only workflows the server knows become labels.
 - `SOP_DECISION_LOG=stderr` (or a file path) writes one JSON line per `execute_step`: time, workflow, trace, step, outcome, the rule and missing state for a block, and how long the check took. It never uses stdout, which carries the MCP protocol.
 - `SOP_RETRY_LIMIT=3` is a guardrail against a retry loop. After a step has been blocked that many times for the same reason in one trace, the result says `next: stop_and_ask` with a hint to ask a person. The step stays blocked either way.
+
+`SOP_MODE=observe` is a dry run, for trying a runbook on real agent traffic before you enforce it. A step that would be blocked runs anyway. The result has `executed: true`, `would_have_blocked` with the same missing state a block would give, and a hint saying nothing is being blocked. The decision log and `joltrin_steps_total` record it as `observed`. The server prints a warning to stderr at startup. Nothing is stopped in this mode, so do not leave it on for a database you care about. Unset it, or set `SOP_MODE=enforce`, to block again. Any other value is refused at startup. The step is still recorded, so later steps in the same trace see the state it establishes.
 
 These cover `execute_step` on the MCP server. `validate_step` and the A2A server are not counted yet.
 

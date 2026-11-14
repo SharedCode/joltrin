@@ -31,6 +31,7 @@ Environment:
   SOP_DECISION_LOG "stderr" or a file path: one JSON line per execute_step decision
   SOP_MCP_TOKEN    bearer token for the http command, at least 16 characters if --addr is not loopback
   SOP_RETRY_LIMIT  after this many blocks of one step in a trace, tell the agent to stop and ask
+  SOP_MODE         "observe" runs and logs steps that would be blocked instead of blocking them (default: enforce)
 
 Exit codes: 0 success, 1 failure, 2 usage error.
 `

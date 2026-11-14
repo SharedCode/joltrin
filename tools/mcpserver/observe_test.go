@@ -138,3 +138,55 @@ func TestNoRetryLimitByDefault(t *testing.T) {
 		t.Errorf("without a limit the advice must not change: %+v hint=%q", r.Blocked, r.Hint)
 	}
 }
+
+func TestObserveOnlyLetsABlockedStepThroughAndSaysSo(t *testing.T) {
+	m := NewMetrics()
+	var logBuf bytes.Buffer
+	c := clientWith(t, WithObserveOnly(), WithMetrics(m), WithDecisionLog(&logBuf))
+
+	got := exec(t, c, "db-maintenance", "t1", "drop_prod_db")
+	if !got.Executed || got.Blocked != nil {
+		t.Fatalf("observe mode should run the step: %+v", got)
+	}
+	if got.WouldHaveBlocked == nil || got.WouldHaveBlocked.MissingState != "backup_validated" {
+		t.Fatalf("result should say what would have blocked it: %+v", got.WouldHaveBlocked)
+	}
+	if got.Hint == "" {
+		t.Error("result should carry the observe-mode hint")
+	}
+
+	// The step is recorded, so the trace moves on like a real run.
+	got = exec(t, c, "db-maintenance", "t1", "take_backup")
+	if !got.Executed || got.WouldHaveBlocked != nil {
+		t.Fatalf("a step that passes should not be flagged: %+v", got)
+	}
+
+	if !strings.Contains(logBuf.String(), `"outcome":"observed"`) || !strings.Contains(logBuf.String(), `"blocked_by":"precondition"`) {
+		t.Errorf("decision log should record the observed block, got %s", logBuf.String())
+	}
+	rec := httptest.NewRecorder()
+	m.Handler().ServeHTTP(rec, httptest.NewRequest("GET", "/metrics", nil))
+	if !strings.Contains(rec.Body.String(), `joltrin_steps_total{workflow="db-maintenance",outcome="observed"} 1`) {
+		t.Errorf("metrics should count the observed step, got %s", rec.Body.String())
+	}
+}
+
+func TestObserveOnlyReplayDoesNotCommitTwice(t *testing.T) {
+	c := clientWith(t, WithObserveOnly())
+	call := func() ExecuteStepResult {
+		res := callTool(t, c, "execute_step", map[string]any{"workflow": "db-maintenance", "trace_id": "t1", "step": "drop_prod_db", "idempotency_key": "k1"})
+		return structuredAs[ExecuteStepResult](t, res)
+	}
+	first, second := call(), call()
+	if !second.Replayed || len(second.Trace) != len(first.Trace) {
+		t.Fatalf("a replay must not add a second commit: first=%v second=%v", first.Trace, second.Trace)
+	}
+}
+
+func TestEnforcingModeIsUnchanged(t *testing.T) {
+	c := clientWith(t)
+	got := exec(t, c, "db-maintenance", "t1", "drop_prod_db")
+	if got.Executed || got.Blocked == nil || got.WouldHaveBlocked != nil {
+		t.Fatalf("default mode must still block: %+v", got)
+	}
+}

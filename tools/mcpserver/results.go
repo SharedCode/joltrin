@@ -71,6 +71,9 @@ type ExecuteStepResult struct {
 	Step     string          `json:"step,omitempty" jsonschema_description:"The step ID that executed. Empty when executed is false."`
 	Trace    []verify.StepID `json:"trace,omitempty" jsonschema_description:"Every step committed to this trace so far, in order, including this one. Empty when executed is false."`
 	Blocked  *BlockReason    `json:"blocked,omitempty" jsonschema_description:"Present only when executed is false."`
+	// WouldHaveBlocked is set only in observe mode, when the step ran even
+	// though the barrier would have refused it.
+	WouldHaveBlocked *BlockReason `json:"would_have_blocked,omitempty" jsonschema_description:"Present only in observe mode: the step ran, but enforcing mode would have blocked it for this reason."`
 	// Replayed is true when idempotency_key was supplied and had already
 	// been seen for this trace: the rest of the result is the original
 	// outcome (success or blocked), not a fresh check. Always false when no

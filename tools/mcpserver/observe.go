@@ -22,7 +22,7 @@ type decision struct {
 	workflow  string
 	trace     string
 	step      string
-	outcome   string // allowed, replayed, blocked or invalid
+	outcome   string // allowed, replayed, blocked, observed or invalid
 	blockedBy string
 	missing   verify.State
 	attempts  int
@@ -85,7 +85,7 @@ func (m *Metrics) Handler() http.Handler {
 		defer m.mu.Unlock()
 		var b strings.Builder
 		fmt.Fprintf(&b, "# HELP joltrin_barrier_uptime_seconds Seconds since the barrier server started.\n# TYPE joltrin_barrier_uptime_seconds gauge\njoltrin_barrier_uptime_seconds %d\n", int64(time.Since(m.started).Seconds()))
-		b.WriteString("# HELP joltrin_steps_total execute_step calls by workflow and outcome (allowed, replayed, blocked, invalid).\n# TYPE joltrin_steps_total counter\n")
+		b.WriteString("# HELP joltrin_steps_total execute_step calls by workflow and outcome (allowed, replayed, blocked, observed, invalid).\n# TYPE joltrin_steps_total counter\n")
 		for _, k := range sortedPairs(m.steps) {
 			fmt.Fprintf(&b, "joltrin_steps_total{workflow=%s,outcome=%s} %d\n", quote(k[0]), quote(k[1]), m.steps[k])
 		}
@@ -190,6 +190,15 @@ func WithRetryLimit(n int) Option {
 	return func(c *config) { c.retryLimit = n }
 }
 
+// WithObserveOnly turns the barrier into a dry run. A step that would have
+// been blocked is let through and committed, and the result says it would have
+// been blocked and why. The decision log and metrics record it as "observed".
+// It is for trying a runbook on real agent traffic before enforcing it, and
+// is not safe to leave on: nothing is stopped. Off by default.
+func WithObserveOnly() Option {
+	return func(c *config) { c.observeOnly = true }
+}
+
 func (c *config) observe(d decision) {
 	if c.metrics != nil {
 		c.metrics.record(d)
@@ -203,3 +212,6 @@ func (c *config) observe(d decision) {
 func retryLimitHint(attempts, limit int) string {
 	return fmt.Sprintf("This step has been blocked %d times for the same reason in this trace, past the limit of %d. Stop and ask a person.", attempts, limit)
 }
+
+// observeOnlyHint goes with every result that observe mode let through.
+const observeOnlyHint = "Observe mode is on, so nothing is blocked. This step would have been blocked in enforcing mode. Fix the order before turning enforcement on."
