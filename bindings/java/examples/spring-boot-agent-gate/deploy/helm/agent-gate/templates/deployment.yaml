@@ -36,6 +36,13 @@ spec:
             initialDelaySeconds: 30
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             capabilities: { drop: [ALL] }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
