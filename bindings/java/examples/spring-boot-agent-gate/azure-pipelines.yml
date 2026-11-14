@@ -1,0 +1,53 @@
+# Azure DevOps. Set variables acrName and acrServiceConnection in the pipeline settings.
+trigger:
+  branches: { include: [master] }
+  paths: { include: [bindings/java/examples/spring-boot-agent-gate/*] }
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  appDir: bindings/java/examples/spring-boot-agent-gate
+
+stages:
+  - stage: Test
+    jobs:
+      - job: maven
+        steps:
+          - task: Maven@4
+            inputs:
+              mavenPomFile: $(appDir)/pom.xml
+              goals: verify
+              publishJUnitResults: true
+              testResultsFiles: "**/surefire-reports/TEST-*.xml"
+              javaHomeOption: JDKVersion
+              jdkVersionOption: "1.17"
+      - job: gradle
+        steps:
+          - task: Gradle@3
+            inputs:
+              gradleWrapperFile: $(appDir)/gradlew
+              workingDirectory: $(appDir)
+              tasks: test
+              publishJUnitResults: true
+              javaHomeOption: JDKVersion
+              jdkVersionOption: "1.17"
+      - job: helm
+        steps:
+          - script: helm lint $(appDir)/deploy/helm/agent-gate
+            displayName: Lint chart
+
+  - stage: Image
+    dependsOn: Test
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    jobs:
+      - job: push
+        steps:
+          - task: Docker@2
+            inputs:
+              command: buildAndPush
+              containerRegistry: $(acrServiceConnection)
+              repository: agent-gate
+              dockerfile: $(appDir)/Dockerfile
+              buildContext: $(appDir)
+              tags: $(Build.SourceVersion)

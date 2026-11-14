@@ -1,0 +1,16 @@
+image:
+  repository: agent-gate
+  tag: dev
+  pullPolicy: IfNotPresent
+replicaCount: 2
+barrier:
+  url: http://barrier:8088/mcp
+  # Name of an existing Secret holding the key "token". Create it yourself; the chart never stores a token.
+  tokenSecret: barrier-token
+# OpenShift: set route.enabled=true. No runAsUser is set so the restricted SCC can pick one.
+route:
+  enabled: false
+  host: ""
+resources:
+  requests: { cpu: 100m, memory: 256Mi }
+  limits: { memory: 512Mi }

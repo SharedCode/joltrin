@@ -1,0 +1,18 @@
+# Two services: the barrier (Go) and the agent service (Spring Boot).
+# SOP_MCP_TOKEN must be 16+ characters because the barrier listens past loopback.
+services:
+  barrier:
+    build:
+      context: ../../../..
+      dockerfile: bindings/java/examples/spring-boot-agent-gate/Dockerfile.barrier
+    environment:
+      SOP_MCP_TOKEN: ${SOP_MCP_TOKEN:?set SOP_MCP_TOKEN to 16+ characters}
+  agent:
+    build: .
+    environment:
+      JOLTRIN_BARRIER_URL: http://barrier:8088/mcp
+      JOLTRIN_BARRIER_TOKEN: ${SOP_MCP_TOKEN}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - barrier
