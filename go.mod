@@ -58,5 +58,5 @@ require (
 	github.com/sharedcode/joltrin/jsondb v0.1.0
 	github.com/sharedcode/joltrin/search v0.1.0
 	golang.org/x/crypto v0.58.0
-	golang.org/x/sync v0.24.0
+	golang.org/x/sync v0.25.0
 )
