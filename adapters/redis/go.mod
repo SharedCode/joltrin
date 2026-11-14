@@ -11,7 +11,7 @@ require (
 	github.com/sethvargo/go-retry v0.5.0 // indirect
 	go.uber.org/atomic v1.12.0 // indirect
 	golang.org/x/sync v0.24.0 // indirect
-	golang.org/x/sys v0.49.0 // indirect
+	golang.org/x/sys v0.50.0 // indirect
 )
 
 require github.com/sharedcode/joltrin/v5 v5.8.0
