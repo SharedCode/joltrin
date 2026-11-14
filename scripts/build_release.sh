@@ -30,11 +30,13 @@ set -e
 #
 
 # Read version from version file
-if [ -f VERSION ]; then
+# An explicit SOP_VERSION (the release workflow passes the tag) wins over the file.
+if [ -z "${SOP_VERSION:-}" ] && [ -f VERSION ]; then
   SOP_VERSION=$(cat VERSION | tr -d '[:space:]')
 fi
 
 VERSION=${SOP_VERSION:-"1.0.0-beta"}
+VERSION=${VERSION#v}
 OUTPUT_DIR="release"
 #
 # ------------------------------------------
@@ -63,6 +65,7 @@ OUTPUT_DIR="release"
 
 # Configuration
 VERSION=${SOP_VERSION:-"1.0.0-beta"}
+VERSION=${VERSION#v}
 OUTPUT_DIR="release"
 SOP_ROOT="$(pwd)"
 
