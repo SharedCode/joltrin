@@ -47,7 +47,8 @@ permissions:
 jobs:
   e2e-matrix:
     name: Run E2E Matrix (${{ matrix.project }})
-    runs-on: ubuntu-latest
+    # ubuntu-latest moved to 26.04, where Playwright WebKit cannot find libicu 74 and fails to launch.
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
