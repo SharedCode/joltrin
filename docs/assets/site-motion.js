@@ -57,7 +57,7 @@
       requestAnimationFrame(function () { requestAnimationFrame(function () { el.classList.remove('sm-hide'); }); });
     }
     var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) { if (e.isIntersecting) reveal(e.target); });
+      entries.forEach(function (e) { if (e.isIntersecting || e.boundingClientRect.top < 0) reveal(e.target); });
     }, { threshold: 0.06 });
     targets.forEach(function (el) { io.observe(el); });
     // The observer can miss an element, for example one that was not rendered
@@ -67,7 +67,8 @@
       targets.forEach(function (el) {
         if (!el.classList.contains('sm-hide') || el.classList.contains('sm-move')) return;
         var r = el.getBoundingClientRect();
-        if (r.height > 0 && r.top < h && r.bottom > 0) reveal(el);
+        // Also reveal sections already scrolled past: a fast flick can skip them before the observer reports.
+        if (r.height > 0 && r.top < h) reveal(el);
       });
     }
 
