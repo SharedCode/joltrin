@@ -109,6 +109,13 @@ Any agent that supports MCP can use the barrier. One command downloads a binary 
 curl -fsSL https://raw.githubusercontent.com/SharedCode/joltrin/master/scripts/install.sh | sh
 ```
 
+Prefer Homebrew? The tap installs the same release binary and checks its checksum. Run `setup` after to register it with your agents:
+
+```bash
+brew install gerardrecinto/joltrin/joltrin
+sop-mcp-server setup --apply
+```
+
 On Windows, in PowerShell:
 
 ```powershell
