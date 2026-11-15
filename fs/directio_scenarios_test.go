@@ -108,12 +108,13 @@ func TestDirectIOAndFileDirectIO_Scenarios(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Open: %v", err)
 			}
-			blk := make([]byte, blockSize)
+			// O_DIRECT needs an aligned buffer. make() only sometimes returns one, so the test failed at random.
+			blk := directio.AlignedBlock(blockSize)
 			blk[0] = 7
 			if _, err := d.WriteAt(ctx, f, blk, 0); err != nil {
 				t.Fatalf("WriteAt: %v", err)
 			}
-			rb := make([]byte, blockSize)
+			rb := directio.AlignedBlock(blockSize)
 			if _, err := d.ReadAt(ctx, f, rb, 0); err != nil {
 				t.Fatalf("ReadAt: %v", err)
 			}

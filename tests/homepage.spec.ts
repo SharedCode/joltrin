@@ -262,7 +262,7 @@ test.describe('Homepage', () => {
     }
   });
 
-  test('requesting Pro on the static host falls back to the contact form instead of faking checkout', async ({ page }) => {
+  async function openProModal(page) {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await waitForWasmReady(page);
     const modal = page.locator('#pro-checkout-modal');
@@ -275,7 +275,25 @@ test.describe('Homepage', () => {
     await expect(modal).not.toContainText(/annual|\$490/i);
     await page.fill('#pro-team-name', 'example-team');
     await page.fill('#pro-admin-email', 'admin@example.test');
-    await modal.getByRole('button', { name: /^continue to payment$/i }).click();
+    return modal;
+  }
+
+  test('requesting Pro with no checkout opens a ticket from what the visitor typed', async ({ page }) => {
+    let sent: any = null;
+    await page.route('**/*contact', async (route) => {
+      sent = route.request().postDataJSON();
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'ok', ticket: 'JT-TEST1' }) });
+    });
+    const modal = await openProModal(page);
+    await modal.getByRole('button', { name: /^request pro$/i }).click();
+    await expect(page.locator('#pro-checkout-status')).toContainText(/JT-TEST1/, { timeout: 10_000 });
+    expect(sent).toMatchObject({ tier: 'pro', email: 'admin@example.test', company: 'example-team' });
+  });
+
+  test('requesting Pro falls back to the contact form when the ticket also fails', async ({ page }) => {
+    await page.route('**/*contact', (route) => route.fulfill({ status: 502, contentType: 'application/json', body: '{"error":"down"}' }));
+    const modal = await openProModal(page);
+    await modal.getByRole('button', { name: /^request pro$/i }).click();
     await expect(page.locator('#pro-checkout-status')).toContainText(/isn't available on this site yet/i, { timeout: 10_000 });
     await expect(page.locator('#pro-checkout-status a[href="#enterprise"]')).toBeVisible();
     expect((await page.content()).toLowerCase()).not.toContain("gmail.com");
@@ -437,13 +455,13 @@ test.describe('Homepage', () => {
     expect(await page.evaluate(() => (window as any).__events)).toContain('copy_quickstart');
     expect(await page.evaluate(() => (window as any).__copied)).toBe('go run github.com/sharedcode/joltrin/v5/examples/verify_barrier@latest');
   });
-  test('hero names the problem and the FAQ explains that payment happens on Stripe', async ({ page }) => {
+  test('hero names the problem and the FAQ says Request Pro opens a ticket and nothing is charged on the page', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/delete production/i);
     await expect(page.locator('#faq details')).toHaveCount(5);
     const buy = page.locator('#faq details').last();
-    await expect(buy).toContainText('Stripe');
-    await expect(buy).toContainText('not charged');
+    await expect(buy).toContainText('opens a ticket');
+    await expect(buy).toContainText('never charged');
   });
 
   test('Request Pro opens above the hero and nothing on the page paints over it', async ({ page }) => {
