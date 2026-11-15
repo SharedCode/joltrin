@@ -160,28 +160,6 @@
       return true;
     }
 
-    // Reflects Go's sopOPFSStatus() ("restored" | "empty" | "unsupported") in the header badge.
-    function updateOPFSStatusBadge() {
-      const el = document.getElementById('opfs-status-text');
-      if (!el || typeof sopOPFSStatus !== 'function') return;
-      const status = sopOPFSStatus();
-      const labels = {
-        restored: ['SESSION RESTORED', 'text-brand-400'],
-        empty: ['PERSISTING', 'text-slate-300'],
-        unsupported: ['UNSUPPORTED', 'text-slate-600'],
-      };
-      const [text, cls] = labels[status] || ['UNKNOWN', 'text-slate-500'];
-      el.innerText = text;
-      el.className = 'font-bold ' + cls;
-    }
-
-    // Clears the persisted OPFS snapshot and reloads with fresh seed data.
-    async function resetOPFSState() {
-      if (typeof sopOPFSReset !== 'function') return;
-      sopOPFSReset();
-      location.reload();
-    }
-
     function toggleMobileMenu() {
       const panel = document.getElementById('mobile-menu-panel');
       const btn = document.getElementById('mobile-menu-btn');
@@ -692,23 +670,6 @@
 </head>
 <body class="bg-dark-950 text-slate-200 min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-black">
 
-  <!-- Network Request Interceptor for Real-Time Zero-Server Proof -->
-  <script>
-    window.__networkCallsCount = 0;
-    const origFetch = window.fetch;
-    window.fetch = function(...args) {
-      if (!args[0].includes('.wasm') && !args[0].includes('wasm_exec.js') && !args[0].includes('unpkg') && !args[0].includes('googleapis')) {
-        window.__networkCallsCount++;
-        updateNetworkProofUI();
-      }
-      return origFetch.apply(this, args);
-    };
-    function updateNetworkProofUI() {
-      const el = document.getElementById('network-counter');
-      if (el) el.innerText = window.__networkCallsCount;
-    }
-  </script>
-
   <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="scroll-progress" aria-hidden="true"></div>
 
@@ -728,7 +689,6 @@
         <div>
           <div class="flex items-center space-x-2">
             <a href="./" class="font-extrabold tracking-tight text-white text-lg hover:text-brand-400 transition">Joltrin</a>
-            <span class="hidden min-[500px]:inline text-xs px-2 py-0.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 font-mono font-medium whitespace-nowrap">WASM demo</span>
           </div>
           <p class="text-[10px] text-slate-400 font-mono hidden xl:block">Independent verification for AI agent actions</p>
         </div>
@@ -768,25 +728,9 @@
         </details>
       </nav>
 
-      <!-- Live Engine Telemetry Pill & GitHub CTA -->
+      <!-- GitHub CTA -->
       <div class="flex items-center space-x-2 sm:space-x-4">
-        <div class="hidden 2xl:flex items-center space-x-3 bg-dark-850 px-3 py-1.5 rounded-full border border-dark-700 text-xs font-mono">
-          <div class="flex items-center space-x-1.5">
-            <span id="wasm-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
-            <span id="wasm-status-text" class="text-amber-300 font-medium">Instantiating WASM VM...</span>
-          </div>
-          <span class="text-dark-600">|</span>
-          <div class="flex items-center space-x-1 text-slate-400" title="Zero HTTP requests triggered after initial page assets load">
-            <span>HTTP Calls:</span>
-            <span id="network-counter" class="text-brand-400 font-bold">0</span>
-          </div>
-          <span class="text-dark-600">|</span>
-          <button id="opfs-status" onclick="resetOPFSState()" title="Click to clear persisted state and reload with fresh seed data"
-                  class="flex items-center space-x-1 text-slate-500 hover:text-slate-300 transition cursor-pointer">
-            <span>OPFS:</span>
-            <span id="opfs-status-text" class="font-bold text-slate-500">checking...</span>
-          </button>
-        </div>
+        <span id="wasm-status-text" class="sr-only" role="status">Engine not started</span>
 
         <a href="./about/" id="header-about-link"
            class="hidden lg:flex xl:hidden items-center px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 text-xs font-medium text-slate-200 whitespace-nowrap transition">About</a>
@@ -2594,20 +2538,16 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         // Update UI state
         setTimeout(() => {
           document.getElementById('wasm-loader-overlay').classList.add('opacity-0', 'pointer-events-none');
-          document.getElementById('wasm-status-dot').className = 'w-2.5 h-2.5 rounded-full bg-brand-400';
-          document.getElementById('wasm-status-text').className = 'text-brand-400 font-semibold';
           document.getElementById('wasm-status-text').innerText = 'WASM ENGINE: ACTIVE';
           
           refreshLedgerUI();
           triggerVectorSearch();
           refreshEngineInfo();
-          updateOPFSStatusBadge();
           lucide.createIcons();
         }, 300);
 
       } catch (err) {
         console.error("Failed to load SOP WASM engine:", err);
-        document.getElementById('wasm-status-dot').className = 'w-2.5 h-2.5 rounded-full bg-rose-500';
         document.getElementById('wasm-status-text').innerText = 'WASM LOAD ERROR';
         document.getElementById('wasm-loader-overlay').innerHTML = `
           <div class="text-center p-6 bg-dark-900 border border-rose-500/40 rounded-2xl max-w-md">
