@@ -1571,7 +1571,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         </details>
         <details class="p-4 rounded-xl bg-dark-950 border border-dark-800">
           <summary class="font-bold text-white cursor-pointer">How do I buy, and what happens next?</summary>
-          <p class="mt-2">Press Request Pro in the pricing section, enter your team name and work email, and you go to Stripe to pay $49 per month. You are not charged until you finish paying there. If checkout does not open, send your workspace name through the contact form and we set it up with you.</p>
+          <p class="mt-2">Press Request Pro in the pricing section, enter your team name and work email, and that opens a ticket. We reply by email, set up your workspace, and send the $49 per month payment link. You are never charged on this page.</p>
         </details>
       </div>
     </section>
@@ -2404,7 +2404,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         <!-- What Happens Immediately -->
         <div class="mb-5 space-y-2 text-xs text-slate-300 bg-dark-950/60 p-4 rounded-xl border border-dark-800">
           <div class="font-semibold text-white font-mono text-[11px] uppercase tracking-wider mb-1">What happens next</div>
-          <p class="leading-relaxed">Enter your team name and work email, then pay on Stripe. Nothing is charged until you finish there. We confirm by email and set up your workspace.</p>
+          <p class="leading-relaxed">Enter your team name and work email. That opens a ticket and we reply by email with a payment link. Nothing is charged here.</p>
         </div>
 
         <!-- Pro Checkout Form -->
@@ -2430,11 +2430,11 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
           <button id="pro-submit-btn" type="submit"
                   class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-black font-bold text-xs shadow-lg shadow-brand-500/20 flex items-center justify-center space-x-2 transition transform active:scale-95 cursor-pointer">
             <i data-lucide="credit-card" class="w-4 h-4"></i>
-            <span id="pro-btn-text">Continue to payment</span>
+            <span id="pro-btn-text">Request Pro</span>
           </button>
 
           <p class="text-[11px] text-slate-500 text-center font-mono">
-            Card details are entered on Stripe. This page never sees them.
+            No card details are collected on this page.
           </p>
         </form>
       </div>
@@ -3107,7 +3107,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
       track('pro_request');
 
       btn.disabled = true;
-      btnText.innerText = 'Creating Checkout Session...';
+      btnText.innerText = 'Sending...';
 
       let redirectUrl = null;
       const result = await postJson('/api/billing/public-checkout', {
@@ -3123,6 +3123,23 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         return;
       }
 
+      // Checkout is not available, so open a ticket with what the visitor already typed. They do not retype it.
+      const ticket = await postJson(CONTACT_PATH, {
+        name: workspace, company: workspace, email: email, tier: 'pro', source: 'pro-request',
+        message: 'Pro request from the homepage. Billing cycle: ' + cycle + '. Checkout was not available (' + (result.status || 'no response') + ').'
+      }, 15000);
+      if (ticket.ok) {
+        const id = ticket.data && (ticket.data.ticket);
+        btn.disabled = false;
+        btnText.innerText = 'Request Pro';
+        track('pro_ticket');
+        if (statusBox) {
+          statusBox.className = 'p-4 rounded-xl text-xs bg-emerald-500/10 border border-emerald-500/30 text-slate-200 block space-y-2';
+          statusBox.innerHTML = `<div class="font-bold text-emerald-400">Request received</div><p class="text-slate-300 leading-relaxed">${id ? 'Ticket <strong class="text-white font-mono">' + escapeHtml(id) + '</strong>. ' : ''}We will reply to <strong class="text-white font-mono">${escapeHtml(email)}</strong> with next steps and the payment link.</p>`;
+        }
+        return;
+      }
+
       // Say why there is no checkout: the service did not answer, it answered with an error, or it answered with no checkout link.
       const reason = result.status === 0
         ? 'The billing service did not respond.'
@@ -3134,7 +3151,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
       // GitHub Pages deployment, which serves static files only). Be honest
       // about that instead of faking a checkout session.
       btn.disabled = false;
-      btnText.innerText = 'Continue to payment';
+      btnText.innerText = 'Request Pro';
 
       if (statusBox) {
         statusBox.className = 'p-4 rounded-xl text-xs bg-amber-500/10 border border-amber-500/30 text-slate-200 block space-y-2.5';
