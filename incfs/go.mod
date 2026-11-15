@@ -6,7 +6,7 @@ require (
 	github.com/sharedcode/joltrin/adapters/cassandra v0.1.0
 	github.com/sharedcode/joltrin/adapters/redis v0.1.0
 	github.com/sharedcode/joltrin/v5 v5.8.0
-	golang.org/x/sync v0.24.0
+	golang.org/x/sync v0.25.0
 )
 
 require (
@@ -24,6 +24,6 @@ require (
 	github.com/sethvargo/go-retry v0.5.0 // indirect
 	github.com/sharedcode/joltrin/infs v0.1.0 // indirect
 	go.uber.org/atomic v1.12.0 // indirect
-	golang.org/x/sys v0.49.0 // indirect
+	golang.org/x/sys v0.50.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 )

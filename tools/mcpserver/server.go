@@ -221,6 +221,24 @@ func executeStepHandler(store *runbookstore.Store, cfg *config) server.ToolHandl
 			return unknownStepResult(wf, name, stepID), nil
 		}
 		blocked := blockReason(wf, v)
+		if cfg.observeOnly {
+			// Dry run: let the step through. A replay already committed it
+			// the first time, so it is not committed again.
+			if !replayed {
+				if err := wf.Commit(trace, verify.StepID(stepID)); err != nil {
+					return unknownStepResult(wf, name, stepID), nil
+				}
+			}
+			d.outcome, d.blockedBy, d.missing, d.attempts = "observed", blocked.BlockedBy, blocked.MissingState, blocked.Attempts
+			return mcp.NewToolResultStructuredOnly(ExecuteStepResult{
+				Executed:         true,
+				Step:             stepID,
+				Trace:            trace.ExecutedSteps(),
+				WouldHaveBlocked: blocked,
+				Replayed:         replayed,
+				Hint:             observeOnlyHint,
+			}), nil
+		}
 		d.outcome, d.blockedBy, d.missing, d.attempts = "blocked", blocked.BlockedBy, blocked.MissingState, blocked.Attempts
 		// The lesson comes from runs before this one, so it is read before
 		// this block is recorded. A repeat inside one run has the next

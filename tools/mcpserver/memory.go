@@ -41,9 +41,10 @@ type config struct {
 	log         *blocklog.Log
 	lessonsPath string
 
-	metrics    *Metrics
-	decisions  *decisionLog
-	retryLimit int
+	metrics     *Metrics
+	decisions   *decisionLog
+	retryLimit  int
+	observeOnly bool
 	// writeMu keeps two requests from writing the lessons file at once. They
 	// share one temporary file name, so overlapping writes could leave the
 	// file truncated or mixed.

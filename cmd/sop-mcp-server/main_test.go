@@ -67,6 +67,23 @@ func TestObservabilityEnv(t *testing.T) {
 		}
 	}
 
+	for _, bad := range []string{"off", "Observe", "dry-run"} {
+		if _, _, err := observability(env(map[string]string{"SOP_MODE": bad}), &errw); err == nil {
+			t.Errorf("SOP_MODE=%q should be refused", bad)
+		}
+	}
+	opts, closeAll, err = observability(env(map[string]string{"SOP_MODE": "enforce"}), &errw)
+	if err != nil || len(opts) != 0 {
+		t.Fatalf("SOP_MODE=enforce is the default: opts=%d err=%v", len(opts), err)
+	}
+	closeAll()
+	var modeErr bytes.Buffer
+	opts, closeAll, err = observability(env(map[string]string{"SOP_MODE": "observe"}), &modeErr)
+	if err != nil || len(opts) != 1 || !strings.Contains(modeErr.String(), "NOTHING IS BLOCKED") {
+		t.Fatalf("SOP_MODE=observe should add one option and warn: opts=%d err=%v warn=%q", len(opts), err, modeErr.String())
+	}
+	closeAll()
+
 	logPath := filepath.Join(t.TempDir(), "decisions.jsonl")
 	opts, closeAll, err = observability(env(map[string]string{
 		"SOP_RETRY_LIMIT":  "3",
