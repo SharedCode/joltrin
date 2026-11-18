@@ -416,7 +416,6 @@
     @keyframes block-scan { 0% { opacity: 1; top: 0; } 100% { opacity: 0; top: 100%; } }
     @media (prefers-reduced-motion: reduce) { .js .block-stamp { opacity: 1; animation: none; } .js .in .block-stamp, .js .in .block-wrap::after { animation: none; } }
     @media (prefers-color-scheme: light) { .block-stamp { color: rgb(185 28 28); border-color: rgb(185 28 28); } .block-wrap::after { background: linear-gradient(90deg, transparent, rgb(185 28 28 / 0.6), transparent); } }
-    .hero-parallax { will-change: transform, opacity; transform-origin: 50% 0; }
     .tilt-card { transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s; }
     @media (hover: hover) { .tilt-card:hover { transform: translate3d(0, -4px, 0); } }
     /* Calmer rhythm: larger section headings, more air between panels, softer corners, glassy header. */
@@ -3174,7 +3173,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
     })();
   </script>
   <script>
-    // Scroll motion: section reveals, hero depth, progress bar. Skipped when the user asks for less motion.
+    // Scroll motion: section reveals, progress bar. Skipped when the user asks for less motion.
     (function () {
       var calm = window.matchMedia('(prefers-reduced-motion: reduce)');
       if (calm.matches || !('IntersectionObserver' in window)) return;
@@ -3199,7 +3198,6 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         card.style.setProperty('--reveal-delay', (i * 90) + 'ms');
       });
 
-      var hero = document.getElementById('start');
       var bar = document.querySelector('.scroll-progress');
       var ticking = false;
       function frame() {
@@ -3207,13 +3205,6 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         var y = window.scrollY;
         var max = document.documentElement.scrollHeight - window.innerHeight;
         if (bar && max > 0) bar.style.transform = 'scaleX(' + Math.min(1, y / max) + ')';
-        if (hero) {
-          // Fade by how far the hero has scrolled past the top, not by page scroll, so content above it does not dim it.
-          var p = Math.min(1, Math.max(0, -hero.parentElement.getBoundingClientRect().top / (hero.offsetHeight * 0.9)));
-          hero.classList.add('hero-parallax');
-          hero.style.transform = 'translate3d(0,' + (p * 40) + 'px,0) scale(' + (1 - p * 0.04) + ')';
-          hero.style.opacity = String(1 - p * 0.55);
-        }
       }
       window.addEventListener('scroll', function () {
         if (!ticking) { ticking = true; requestAnimationFrame(frame); }
