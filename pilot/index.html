@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>html{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
+  <script>
+    // iPads and phones can keep the portrait layout width after a rotation until a reload.
+    // Re-reading the viewport tag on rotation makes the browser lay the page out again.
+    // It waits two animation frames, not a fixed time, and also reacts to resize because
+    // some browsers do not send orientationchange.
+    (function () {
+      var m = document.querySelector('meta[name="viewport"]');
+      var c = m && m.getAttribute('content');
+      if (!c) return;
+      var landscape = window.innerWidth > window.innerHeight;
+      function relayout() {
+        m.setAttribute('content', c + ', minimum-scale=1');
+        requestAnimationFrame(function () { requestAnimationFrame(function () { m.setAttribute('content', c); }); });
+      }
+      window.addEventListener('orientationchange', relayout);
+      window.addEventListener('resize', function () {
+        var now = window.innerWidth > window.innerHeight;
+        if (now !== landscape) { landscape = now; relayout(); }
+      });
+    })();
+  </script>
+  <title>Pilot Worksheet | Joltrin</title>
+  <meta name="description" content="Turn an observe-mode pilot into a number you can take to your team. Enter the counts from sop-mcp-server report and your own cost estimates. Nothing is uploaded." />
+  <link rel="canonical" href="https://joltrinhq.com/pilot/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://joltrinhq.com/pilot/" />
+  <meta property="og:title" content="Pilot Worksheet | Joltrin" />
+  <meta property="og:description" content="Turn an observe-mode pilot into a number you can take to your team." />
+  <meta property="og:image" content="https://joltrinhq.com/pilot/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Joltrin" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://joltrinhq.com/pilot/" />
+  <meta name="twitter:title" content="Pilot Worksheet | Joltrin" />
+  <meta name="twitter:description" content="Turn an observe-mode pilot into a number you can take to your team." />
+  <meta name="twitter:image" content="https://joltrinhq.com/pilot/og-image.png" />
+  <meta name="twitter:image:alt" content="Joltrin" />
+
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <link rel="alternate icon" href="./favicon.ico" />
+  <link rel="stylesheet" href="./tailwind.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=optional" rel="stylesheet">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Pilot Worksheet",
+    "url": "https://joltrinhq.com/pilot/",
+    "description": "A worksheet that turns observe-mode pilot counts and the reader's own cost estimates into a monthly figure."
+  }
+  </script>
+
+  <style>
+    body { background: #07090E; }
+    a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid #34d399; outline-offset: 2px; }
+    .field { display: block; }
+    .field span { display: block; font-size: 0.875rem; color: #e2e8f0; margin-bottom: 0.25rem; }
+    .field small { display: block; font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem; }
+    .field input { width: 100%; background: #0B0F17; border: 1px solid #334155; border-radius: 0.5rem; padding: 0.625rem 0.75rem; color: #fff; font: inherit; min-height: 44px; }
+    .field input[aria-invalid="true"] { border-color: #f43f5e; }
+    .steps { list-style: decimal; }
+    .err { color: #fb7185; }
+    #result[hidden] { display: none; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+  </style>
+  <script src="/assets/site-motion.js" defer></script>
+</head>
+<body class="bg-dark-950 text-slate-300 font-sans antialiased">
+  <a href="#pilot" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-dark-900 focus:text-white focus:px-4 focus:py-2 focus:rounded-lg">Skip to the page</a>
+
+  <header class="border-b border-dark-800">
+    <nav class="max-w-5xl mx-auto px-4 sm:px-6 min-h-14 py-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1" aria-label="Main">
+      <a href="../" class="flex items-center gap-2 text-white font-bold">
+        <img src="./logo-mark.png" alt="" width="24" height="24" class="rounded" />
+        <span>Joltrin</span>
+      </a>
+      <div class="flex flex-wrap items-center gap-x-4 text-sm">
+        <a href="../" class="text-slate-400 hover:text-white py-2">Home</a>
+        <a href="../agents/" class="text-slate-400 hover:text-white py-2">Agent barrier</a>
+        <a href="../docs/" class="text-slate-400 hover:text-white py-2">Docs</a>
+        <a href="../about/" class="text-slate-400 hover:text-white py-2">About</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="pilot" class="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+    <section aria-labelledby="page-title" class="mb-12">
+      <p class="font-mono text-xs uppercase tracking-widest text-brand-400 mb-4">Pilot worksheet</p>
+      <h1 id="page-title" class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">What would the pilot have stopped?</h1>
+      <p class="mt-6 text-lg leading-relaxed text-slate-300">Run the barrier in observe mode on real agent traffic, then enter what it logged. The page multiplies your counts by your own cost estimates. It has no built-in numbers, and nothing you type leaves your browser.</p>
+    </section>
+
+    <section aria-labelledby="scope" class="mb-12">
+      <h2 id="scope" class="text-xl font-bold text-white mb-4">Scope the pilot first</h2>
+      <ol class="space-y-4 leading-relaxed pl-5 steps">
+        <li>Pick one runbook for one agent. A pilot that covers everything proves nothing.</li>
+        <li>Write the success number down before you start, for example "fewer than N would-have-blocked steps a week by day 14".</li>
+        <li>Set <code class="font-mono text-sm">SOP_MODE=observe</code> and <code class="font-mono text-sm">SOP_DECISION_LOG=/path/decisions.log</code>. Nothing is blocked; steps that would be are logged.</li>
+        <li>After the pilot, run <code class="font-mono text-sm">sop-mcp-server report /path/decisions.log</code> and copy the counts below.</li>
+        <li>Decide who signs off, and what result means enforce mode, a longer pilot, or stop.</li>
+      </ol>
+    </section>
+
+    <section aria-labelledby="inputs" class="mb-12">
+      <h2 id="inputs" class="text-xl font-bold text-white mb-4">Your numbers</h2>
+      <form id="worksheet" novalidate class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <label class="field"><span>Decisions logged</span><input id="decisions" type="number" inputmode="numeric" min="1" step="1" /><small>"Decisions" line of the report</small></label>
+        <label class="field"><span>Would have been blocked</span><input id="blocked" type="number" inputmode="numeric" min="0" step="1" /><small>"would have been blocked" line of the report</small></label>
+        <label class="field"><span>Pilot length in days</span><input id="days" type="number" inputmode="numeric" min="1" step="1" /><small>Calendar days the log covers</small></label>
+        <label class="field"><span>Share that would have done real damage, %</span><input id="share" type="number" inputmode="decimal" min="0" max="100" step="any" /><small>Your judgment after reading the blocked steps</small></label>
+        <label class="field"><span>Cost of one such incident, $</span><input id="cost" type="number" inputmode="decimal" min="0" step="any" /><small>Recovery time, lost data, customer impact: your estimate</small></label>
+        <label class="field"><span>Monthly cost of adopting it, $</span><input id="adopt" type="number" inputmode="decimal" min="0" step="any" /><small>Engineer time to write runbooks and review blocks</small></label>
+      </form>
+      <p id="error" role="alert" class="mt-4 text-sm err" hidden></p>
+    </section>
+
+    <section id="result" aria-labelledby="out" class="mb-12" hidden>
+      <h2 id="out" class="text-xl font-bold text-white mb-4">What your numbers say</h2>
+      <dl class="grid grid-cols-1 sm:grid-cols-2 gap-px bg-dark-800 border border-dark-800 rounded-xl overflow-hidden text-sm">
+        <div class="bg-dark-900 p-4"><dt class="font-mono text-xs uppercase text-slate-400">Would-have-blocked rate</dt><dd id="o-rate" class="mt-1 text-slate-200"></dd></div>
+        <div class="bg-dark-900 p-4"><dt class="font-mono text-xs uppercase text-slate-400">Would-have-blocked per 30 days</dt><dd id="o-month" class="mt-1 text-slate-200"></dd></div>
+        <div class="bg-dark-900 p-4"><dt class="font-mono text-xs uppercase text-slate-400">Damaging incidents avoided per 30 days</dt><dd id="o-inc" class="mt-1 text-slate-200"></dd></div>
+        <div class="bg-dark-900 p-4"><dt class="font-mono text-xs uppercase text-slate-400">Exposure avoided per 30 days</dt><dd id="o-usd" class="mt-1 text-slate-200"></dd></div>
+        <div class="bg-dark-900 p-4 sm:col-span-2"><dt class="font-mono text-xs uppercase text-slate-400">Against the monthly cost of adopting it</dt><dd id="o-net" class="mt-1 text-slate-200"></dd></div>
+      </dl>
+      <p class="mt-4 text-sm text-slate-400 border-l-2 border-dark-700 pl-4">This is your own estimate multiplied out. It is not a measured result, and it counts only what the log recorded, not steps an agent ran outside the server. A short pilot may not show rare incidents.</p>
+      <p class="mt-4"><button id="copy" type="button" class="btn inline-flex items-center px-5 py-3 rounded-lg bg-brand-500 hover:bg-brand-400 text-black font-bold transition">Copy as text</button> <span id="copied" role="status" class="text-sm text-slate-400" style="margin-left:0.75rem"></span></p>
+    </section>
+
+    <section aria-labelledby="next" class="border-t border-dark-800 pt-10">
+      <h2 id="next" class="text-xl font-bold text-white mb-3">Need the counts?</h2>
+      <p class="mb-6">Watch the barrier block a database drop, then see how observe mode and the report work.</p>
+      <div class="flex flex-wrap items-center gap-4">
+        <a href="../agents/" class="btn inline-flex items-center px-5 py-3 rounded-lg bg-brand-500 hover:bg-brand-400 text-black font-bold transition">Try the agent barrier</a>
+        <a href="https://github.com/SharedCode/joltrin/blob/master/docs/OPERATIONS.md" class="text-brand-400 underline hover:text-white py-2" rel="noopener noreferrer">Observe mode and the report</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-dark-800 py-8 text-center text-xs text-slate-400">
+    <p>Open source. <a class="underline hover:text-white" href="https://github.com/SharedCode/joltrin">github.com/SharedCode/joltrin</a> &middot; <a class="underline hover:text-white" href="../">Back to joltrinhq.com</a></p>
+  </footer>
+
+  <script>
+    (function () {
+      var ids = ['decisions', 'blocked', 'days', 'share', 'cost', 'adopt'];
+      var el = {}; ids.forEach(function (i) { el[i] = document.getElementById(i); });
+      var result = document.getElementById('result'), err = document.getElementById('error');
+      var n0 = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+      var n1 = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 });
+      var usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+      var text = '';
+
+      function show(msg, bad) {
+        err.hidden = !msg; err.textContent = msg || '';
+        ids.forEach(function (i) { el[i].removeAttribute('aria-invalid'); });
+        if (bad) bad.setAttribute('aria-invalid', 'true');
+        result.hidden = true;
+      }
+
+      function update() {
+        var v = {};
+        for (var k = 0; k < ids.length; k++) {
+          if (el[ids[k]].value === '') { show('', null); return; }
+          v[ids[k]] = Number(el[ids[k]].value);
+          if (!isFinite(v[ids[k]]) || v[ids[k]] < 0) { show('Enter a number that is zero or more.', el[ids[k]]); return; }
+        }
+        if (v.decisions < 1) { show('Decisions logged must be at least 1.', el.decisions); return; }
+        if (v.days < 1) { show('Pilot length must be at least 1 day.', el.days); return; }
+        if (v.blocked > v.decisions) { show('Would-have-blocked cannot be more than decisions logged.', el.blocked); return; }
+        if (v.share > 100) { show('Share must be between 0 and 100.', el.share); return; }
+        show('', null);
+        var rate = v.blocked / v.decisions * 100;
+        var month = v.blocked / v.days * 30;
+        var inc = month * v.share / 100;
+        var avoided = inc * v.cost;
+        var net = avoided - v.adopt;
+        document.getElementById('o-rate').textContent = n1.format(rate) + '% of ' + n0.format(v.decisions) + ' decisions';
+        document.getElementById('o-month').textContent = n1.format(month);
+        document.getElementById('o-inc').textContent = n1.format(inc);
+        document.getElementById('o-usd').textContent = usd.format(avoided);
+        document.getElementById('o-net').textContent = (net >= 0 ? usd.format(net) + ' more than it costs' : usd.format(-net) + ' less than it costs') + ' per month, on your estimates';
+        text = ['Pilot worksheet (my own estimates, not measured results)',
+          'Decisions logged: ' + n0.format(v.decisions) + ', would have been blocked: ' + n0.format(v.blocked) + ' over ' + n0.format(v.days) + ' days',
+          'Would-have-blocked rate: ' + n1.format(rate) + '%',
+          'Per 30 days: ' + n1.format(month) + ' would-have-blocked, ' + n1.format(inc) + ' damaging incidents at ' + n1.format(v.share) + '%',
+          'Exposure avoided per 30 days at ' + usd.format(v.cost) + ' each: ' + usd.format(avoided),
+          'Monthly cost of adopting: ' + usd.format(v.adopt) + ', net ' + usd.format(net)].join('\n');
+        result.hidden = false;
+      }
+
+      ids.forEach(function (i) { el[i].addEventListener('input', update); });
+      document.getElementById('worksheet').addEventListener('submit', function (e) { e.preventDefault(); });
+      document.getElementById('copy').addEventListener('click', function () {
+        var done = function (m) { document.getElementById('copied').textContent = m; };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () { done('Copied.'); }, function () { done('Copy failed. Select the numbers above and copy them.'); });
+        } else { done('Copy is not available here. Select the numbers above and copy them.'); }
+      });
+    })();
+  </script>
+</body>
+</html>

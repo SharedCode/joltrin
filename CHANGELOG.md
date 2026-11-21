@@ -12,6 +12,7 @@
 - Go is bumped to 1.26.11 and 1.27.4, which clears GO-2026-6859, an HTTP/1 server crash in `net/http` that govulncheck now reports against 1.26.10 and 1.27.3.
 - Go is bumped to 1.26.10 and 1.27.3, which clears GO-2026-6809 in `crypto/x509` that the govulncheck and Trivy image scans now report against 1.26.9 and 1.27.2.
 - `adapters/nats` can store barrier decisions in JetStream. `VerifyBridge.WithJetStream` creates the stream or checks that an existing one captures the bridge's subject, and publishes each decision asynchronously, so the barrier's answer is never delayed or changed by a publish failure; failures go to `OnPublishError`, and `Flush` waits for pending acknowledgements. `CheckAndCommitIdempotent` publishes with a message ID built from the workflow, step, and idempotency key, so a retry is stored once inside the stream's duplicate window. `SubscribeJetStream` reads them back through a durable pull consumer with explicit acknowledgement, `AckWait` and `MaxDeliver`, so a consumer that was offline catches up. Without `WithJetStream` the bridge behaves exactly as before.
+- `/pilot/` on joltrinhq.com is a worksheet for the end of an observe-mode pilot. You enter the counts from the decision log, how much of it you judge would have done damage, and your own cost estimates, and it shows a monthly figure. It ships with no numbers filled in, runs in the browser and sends nothing. The output is your estimate multiplied out, not a measured result.
 
 ## v5.11.1
 
