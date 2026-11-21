@@ -142,6 +142,8 @@ Four settings, all off by default, for a server you leave running. The first thr
 
 `SOP_MODE=observe` is a dry run, for trying a runbook on real agent traffic before you enforce it. A step that would be blocked runs anyway. The result has `executed: true`, `would_have_blocked` with the same missing state a block would give, and a hint saying nothing is being blocked. The decision log and `joltrin_steps_total` record it as `observed`. The server prints a warning to stderr at startup. Nothing is stopped in this mode, so do not leave it on for a database you care about. Unset it, or set `SOP_MODE=enforce`, to block again. Any other value is refused at startup. The step is still recorded, so later steps in the same trace see the state it establishes.
 
+After a pilot, `sop-mcp-server report /path/to/decisions.log` totals the log: decisions, traces, allowed, blocked or would-have-blocked, and which rules and steps fired. Add `--json` for scripts.
+
 These cover `execute_step` on the MCP server. `validate_step` and the A2A server are not counted yet.
 
 ## Serving the barrier over HTTP, and in Kubernetes
