@@ -49,4 +49,16 @@ test.describe('About the founders', () => {
     const text = await page.locator('main').innerText();
     for (const word of ['Go', 'Rust', 'Python', 'multiprocessing', 'Kubernetes']) expect(text).toContain(word);
   });
+
+  test('shows experience, selected work with caveats, and a save as PDF button', async ({ page }) => {
+    await page.goto('/about/', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#experience')).toContainText('Senior Engineer, DevOps and Platform Engineering, Qualcomm');
+    const cards = page.locator('#work .folio-card a');
+    await expect(cards).toHaveCount(6);
+    for (const href of await cards.evaluateAll((els) => els.map((e) => (e as HTMLAnchorElement).href))) {
+      expect(href).toMatch(/^https:\/\/(github\.com|gerardrecinto\.github\.io)\//);
+    }
+    await expect(page.locator('#work')).toContainText('Not run on a real air-gapped network');
+    await expect(page.locator('#save-pdf')).toBeVisible();
+  });
 });
