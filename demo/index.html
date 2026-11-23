@@ -418,6 +418,14 @@
     @media (prefers-color-scheme: light) { .block-stamp { color: rgb(185 28 28); border-color: rgb(185 28 28); } .block-wrap::after { background: linear-gradient(90deg, transparent, rgb(185 28 28 / 0.6), transparent); } }
     .tilt-card { transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s; }
     @media (hover: hover) { .tilt-card:hover { transform: translate3d(0, -4px, 0); } }
+    /* Pricing: the three plans rise in one after another and the Pro card gets a single light sweep. Added only when motion is allowed. */
+    .js #pricing .tier { opacity: 0; transform: translate3d(0, 28px, 0); transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s; transition-delay: var(--tier-delay, 0ms); }
+    .js #pricing.in .tier { opacity: 1; transform: none; }
+    @media (hover: hover) { .js #pricing.in .tier:hover { transform: translate3d(0, -5px, 0); transition-delay: 0ms; } }
+    .tier-pro { overflow: hidden; }
+    .tier-pro::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 45%; background: linear-gradient(100deg, transparent, rgb(var(--c-fg) / 0.09), transparent); transform: translate3d(-130%, 0, 0); opacity: 0; pointer-events: none; }
+    .js #pricing.in .tier-pro::after { animation: tier-sweep 1.4s 1.1s ease-out 1 both; }
+    @keyframes tier-sweep { 0% { opacity: 1; transform: translate3d(-130%, 0, 0); } 100% { opacity: 1; transform: translate3d(330%, 0, 0); } }
     /* Calmer rhythm: larger section headings, more air between panels, softer corners, glassy header. */
     main h2.font-extrabold { font-size: clamp(1.75rem, 3.8vw, 2.75rem); letter-spacing: -0.03em; line-height: 1.08; }
     main > section.mb-12 { margin-bottom: clamp(3rem, 7vw, 5.5rem); }
@@ -3196,6 +3204,13 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
       document.querySelectorAll('#live-experiences > *').forEach(function (card, i) {
         card.classList.add('tilt-card');
         card.style.setProperty('--reveal-delay', (i * 90) + 'ms');
+      });
+
+      // Pricing plans cascade, and the Pro card gets one light sweep.
+      Array.prototype.forEach.call(document.querySelector('#pricing > .grid').children, function (card, i) {
+        card.classList.add('tier');
+        if (i === 1) card.classList.add('tier-pro');
+        card.style.setProperty('--tier-delay', (i * 120) + 'ms');
       });
 
       var bar = document.querySelector('.scroll-progress');
