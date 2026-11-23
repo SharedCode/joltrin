@@ -22,6 +22,10 @@ Usage:
                                        ask about one step and remember it between calls, for hooks and scripts
   sop-mcp-server report [--json] LOGFILE
                                        summarize a SOP_DECISION_LOG file: allowed, blocked, which rules fired
+  sop-mcp-server taint check [--json] [--observe] --policy FILE --values FILE CALL
+                                       check one agent tool call for labeled data going to a sink the policy does not allow
+  sop-mcp-server taint honeytoken [KIND]
+                                       print a fake credential to plant in an agent's context
   sop-mcp-server demo [--json]         watch the barrier block a database drop until a backup is validated
   sop-mcp-server version               print the version
   sop-mcp-server help                  print this text
@@ -33,6 +37,7 @@ Environment:
   SOP_DECISION_LOG "stderr" or a file path: one JSON line per execute_step decision
   SOP_MCP_TOKEN    bearer token for the http command, at least 16 characters if --addr is not loopback
   SOP_RETRY_LIMIT  after this many blocks of one step in a trace, tell the agent to stop and ask
+  SOP_TAINT_POLICY, SOP_TAINT_VALUES  turn on the check_tool_call tool (policy JSON and a 0600 values file); SOP_TAINT_AUDIT appends decisions to a hash-chained file
   SOP_MODE         "observe" runs and logs steps that would be blocked instead of blocking them (default: enforce)
 
 Exit codes: 0 success, 1 failure, 2 usage error.
@@ -86,6 +91,8 @@ func dispatch(args []string, out, errw io.Writer) (code int, serve bool) {
 		return runTry(args[1:], out, errw), false
 	case "gate":
 		return runGate(args[1:], out, errw), false
+	case "taint":
+		return runTaint(args[1:], os.Stdin, out, errw), false
 	case "report":
 		return runReport(args[1:], out, errw), false
 	case "demo":

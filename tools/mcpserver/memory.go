@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/sharedcode/joltrin/v5/taint"
 	"github.com/sharedcode/joltrin/v5/tools/blocklog"
 	"github.com/sharedcode/joltrin/v5/tools/runbookstore"
 	"github.com/sharedcode/joltrin/v5/verify"
@@ -45,6 +46,7 @@ type config struct {
 	decisions   *decisionLog
 	retryLimit  int
 	observeOnly bool
+	taint       *taint.Barrier
 	// writeMu keeps two requests from writing the lessons file at once. They
 	// share one temporary file name, so overlapping writes could leave the
 	// file truncated or mixed.
