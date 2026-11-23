@@ -20,6 +20,8 @@ Usage:
                                        replay steps against a runbook and see which the barrier blocks
   sop-mcp-server gate [--json] [--state-dir DIR] [--reset] FILE WORKFLOW SESSION [STEP]
                                        ask about one step and remember it between calls, for hooks and scripts
+  sop-mcp-server report [--json] LOGFILE
+                                       summarize a SOP_DECISION_LOG file: allowed, blocked, which rules fired
   sop-mcp-server demo [--json]         watch the barrier block a database drop until a backup is validated
   sop-mcp-server version               print the version
   sop-mcp-server help                  print this text
@@ -84,6 +86,8 @@ func dispatch(args []string, out, errw io.Writer) (code int, serve bool) {
 		return runTry(args[1:], out, errw), false
 	case "gate":
 		return runGate(args[1:], out, errw), false
+	case "report":
+		return runReport(args[1:], out, errw), false
 	case "demo":
 		return runDemoArgs(args[1:], out, errw), false
 	}
