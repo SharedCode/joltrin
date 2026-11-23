@@ -3342,16 +3342,12 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
       }
       var B32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
-      // The decoy is shaped like an AWS access key id and ends with the same checksum marker as the Go generator.
+      // The decoy is shaped like an AWS access key id and ends with the same checksum marker as the Go generator (FNV-1a, not a security hash).
       function makeDecoy() {
-        var body = 'AKIA' + rand(12, B32);
-        var data = new TextEncoder().encode('joltrin-honeytoken-v1:aws_access_key_id' + body);
-        if (!(window.crypto && crypto.subtle)) return Promise.resolve(body + rand(4, B32));
-        return crypto.subtle.digest('SHA-256', data).then(function (d) {
-          var u = new Uint8Array(d), c = '';
-          for (var i = 0; i < 4; i++) c += B32[u[i] % 32];
-          return body + c;
-        });
+        var body = 'AKIA' + rand(12, B32), h = 0xcbf29ce484222325n, data = new TextEncoder().encode('joltrin-honeytoken-v1:aws_access_key_id' + body), c = '', i;
+        for (i = 0; i < data.length; i++) h = ((h ^ BigInt(data[i])) * 0x100000001b3n) & 0xffffffffffffffffn;
+        for (i = 0; i < 4; i++) c += B32[Number((h >> BigInt(56 - 8 * i)) & 0xffn) % 32];
+        return Promise.resolve(body + c);
       }
 
       // Same canonical form as taint.Normalize: drop whitespace and invisible format characters, lower-case.

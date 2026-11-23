@@ -2,10 +2,10 @@ package taint
 
 import (
 	"crypto/rand"
-	"crypto/sha256"
 	"errors"
 	"fmt"
 	"hash/crc32"
+	"hash/fnv"
 	"math/big"
 )
 
@@ -137,7 +137,10 @@ func randString(alphabet string, n int) (string, error) {
 }
 
 func checkChars(alphabet, data string, n int) string {
-	sum := sha256.Sum256([]byte(hnyContext + data))
+	// A non-cryptographic checksum: it marks a token as ours, it protects nothing.
+	h := fnv.New64a()
+	h.Write([]byte(hnyContext + data))
+	sum := h.Sum(nil)
 	out := make([]byte, n)
 	for i := range out {
 		out[i] = alphabet[int(sum[i])%len(alphabet)]
