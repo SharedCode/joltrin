@@ -1,5 +1,9 @@
 # Changelog
 
+## v5.13.1
+
+- The v5.13.0 Python wheel and NuGet package were built as 5.11.1 because the version files were not bumped before the tag. This release bumps them, so every package in the release matches the tag. It has no other changes.
+
 ## v5.13.0
 
 - Taint Barrier, a new `taint` package: information-flow control plus tripwires for agent tool calls. You register labeled values (secret, pii, customer-data) as keyed HMAC-SHA256 fingerprints, never the raw value, including base64, hex, percent-encoded, reversed, spaced and chunked forms. Each tool call is checked, and a call that carries a labeled value to a host, tool or file path the per-label policy does not allow is blocked with a reason code and no value in the output. Planted honeytokens (fake AWS-, GitHub- and API-key-shaped credentials) block on any appearance and raise an alert. Every decision is written to the hash-chained audit log, masked and signed when the sink has an Ed25519 signer, and verifies offline. `sop-mcp-server taint check` and `taint honeytoken` are the CLI, `SOP_TAINT_POLICY` and `SOP_TAINT_VALUES` add a `check_tool_call` MCP tool, and observe mode logs without blocking. The homepage has a "Try to steal the key" demo that simulates the same rules in the browser with fake secrets. It does not catch paraphrase or encodings outside the list, does not protect data you did not label, refuses values under 8 characters, and is not a sandbox; nothing routes an agent's calls through it by default. See `docs/SECURITY_CONTROLS.md`.
