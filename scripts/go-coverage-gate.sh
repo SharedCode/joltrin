@@ -12,6 +12,7 @@ floors=(
   "./common:88"
   "./cache:64"
   "./logsafe:100"
+  "./taint:90"
 )
 
 fail=0

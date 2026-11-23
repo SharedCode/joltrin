@@ -90,6 +90,10 @@ func New(store *runbookstore.Store, opts ...Option) *server.MCPServer {
 		)
 	}
 
+	if cfg.taint != nil {
+		addTaintTool(s, cfg.taint)
+	}
+
 	return s
 }
 

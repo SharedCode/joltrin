@@ -49,7 +49,40 @@ Status words:
 | Verification barrier: a step is blocked until the recorded state it needs exists | Implemented, tested | `verify/`, `docs/AGENT_BARRIER_TESTS.md` | It judges the recorded trace. It does not inspect what a tool really did. |
 | Policy-as-code compilation and evaluation | Implemented, tested | `governance/policy.go`, `governance/policy_test.go` | |
 | Signed human approvals for sensitive steps (single owner) | Implemented | `docs/PRIVATE_INTENT.md` | Approval routing for teams is Planned. |
-| Prompt injection defense | Missing | | The barrier limits what a manipulated agent can do next. It does not detect injected text. |
+| Prompt injection defense | Missing | | The barrier limits what a manipulated agent can do next. It does not detect injected text. The [Taint Barrier](#taint-barrier) below limits one consequence of an injection: labeled data leaving in a tool call. |
+
+## Taint Barrier
+
+Information-flow control plus tripwires for agent tool calls, in the `taint` package. You label values (`secret`, `pii`, `customer-data`) and register them. Each tool call is checked before it runs. If its arguments contain a labeled value, in one of the encodings below, and the call's destination is not allowed for that label, the call is blocked. Planted fake credentials (honeytokens) block on any appearance. It is part of the open-source Go module (MIT). It is not a sandbox and it is not a prompt injection detector.
+
+| Control | Status | Evidence | Limit |
+| --- | --- | --- | --- |
+| Labeled values kept only as keyed HMAC-SHA256 fingerprints, with a per-session random key. The raw value is not stored, logged or returned | Implemented, tested | `taint/registry.go`, `TestNoRawValueInOutputs` | Fingerprints are per process. A restart makes a new key and the registry has to be filled again. A rolling prefilter, also keyed, is stored next to each fingerprint and every candidate is confirmed with HMAC. |
+| Matching in common encodings: plain, case and whitespace changes, zero-width and soft-hyphen characters, reversed, hex, percent-encoding (including double and partial), base64 and base64url at every byte alignment, base32, and pieces of 12 or more characters of values of 24 or more | Implemented, tested | `taint/normalize.go`, `TestVariantsAreBlocked`, `TestChunkedExfil`, `FuzzNormalize`, `FuzzScanFindsRegisteredValue` | Exact match on those forms only. Paraphrase, other encodings (double base64, gzip, encryption, character substitution, steganography) and pieces under 12 characters sent out of order are not caught. |
+| Values under 8 characters (after normalization) and over 4096 bytes are refused | Implemented, tested | `TestShortAndBadValuesAreRefused` | Short values collide with ordinary text. A low-entropy value of 8 or more characters can still be guessed by something that can query the check. |
+| Per-label allowlist of egress hosts, tools and file paths, default deny, JSON policy that rejects unknown fields | Implemented, tested | `taint/policy.go`, `TestSinkPolicy`, `TestPolicyParsing` | A call that names a destination is judged by the destination, so a host in the arguments that the tool later contacts is not seen. Hosts are matched by name. It does not resolve DNS or check the address (see `netguard`). |
+| Blocked calls return a machine-readable reason and the handles of the values found, never the value | Implemented, tested | `Verdict`, `TestNoRawValueInOutputs`, `tools/mcpserver/taint_test.go` | The handle is a name you chose and must not be sensitive. |
+| Honeytokens: format-shaped fake credentials (AWS access key id and secret, GitHub token, generic API key) with a checksum marker. Any appearance in a call is blocked, alerted and recorded as a violation, even to an allowed host | Implemented, tested | `taint/honeytoken.go`, `TestHoneytokens`, `TestHoneytokenFormatAndMarker` | They cannot authenticate because they are random and were never issued. For AWS and the generic form that is a probability argument, not a guarantee from the provider. The GitHub form has a deliberately wrong CRC32 suffix. A honeytoken only helps if it is planted where the agent reads it, and it fires only if it appears in a call you route through the check. |
+| Every decision (allow, block, honeytoken trip) recorded in the hash-chained audit log, masked with `PIIRedactor`, with an Ed25519 signature when the sink has a signer. Receipts verify offline | Implemented, tested | `taint/barrier.go`, `VerifyReceipt`, `VerifyExport`, `TestAuditChainAndReceiptsVerifyOffline`, `TestAuditPIIMasking` | Without a signer the chain is hash-linked but unsigned. A call that cannot be audited is blocked in enforce mode. The limits of the audit log in [Audit and integrity](#audit-and-integrity) apply. |
+| Observe mode: log what would be blocked and allow the call. Honeytoken trips still alert | Implemented, tested | `TestObserveMode`, `SOP_MODE=observe` | Nothing is stopped in this mode. |
+| CLI: `sop-mcp-server taint check` (exit 0 allowed, 1 blocked, 2 usage) and `taint honeytoken` | Implemented, tested | `cmd/sop-mcp-server/taint.go`, `cmd/sop-mcp-server/taint_test.go` | The values file holds raw secrets, so the CLI refuses one that other users can read. Each run builds a new registry. |
+| MCP tool `check_tool_call`, added when `SOP_TAINT_POLICY` and `SOP_TAINT_VALUES` are set | Implemented, tested | `tools/mcpserver/taint.go`, `tools/mcpserver/taint_test.go` | When the agent calls it, the agent is checking its own plan, so the answer is advice. A caller can also probe it for whether a guess is in the registry. Enforce from a hook or proxy the agent cannot skip. |
+| Routing every tool call of a given agent through the check | Library only | `taint.Barrier.Check` | Nothing intercepts an agent's tool calls by default. The caller wires the check into the place that executes calls. |
+| Matching data split across several calls, or by a model that rewrites it | Missing | | Each call is judged alone. |
+| Detecting injected instructions | Missing | | See the prompt injection row above. |
+| Protecting data that was never labeled | Missing | | Only registered values are tracked. |
+
+### Threat model note
+
+Mapped to the OWASP Top 10 for LLM Applications (2025 numbering). The mapping says which part of each risk the control addresses. It is not a claim of coverage.
+
+| Risk | Attack | What the Taint Barrier does | What it does not do |
+| --- | --- | --- | --- |
+| LLM01 Prompt Injection | Text the agent reads tells it to send a secret to an attacker | Blocks the resulting tool call when it carries a labeled value to a destination the label does not allow, whatever the injected text said | Does not detect or remove the injected text, and does not stop other harm the injection causes |
+| LLM02 Sensitive Information Disclosure | A value the agent can see leaves through a tool argument, a URL or a file, possibly encoded | Blocks labeled values in the listed encodings at a sink that is not allowed. Honeytokens give a high-confidence signal that something is reading and sending what it should not | Misses paraphrase, unlisted encodings and unlabeled data. Does not control what the model says to the user |
+| LLM06 Excessive Agency | An agent with a broad tool, such as HTTP or file write, uses it to move data | Adds a per-label destination allowlist in front of those tools, default deny | Does not limit what the tool can do with data that is not labeled. The verification barrier in `verify/` governs step order, not data flow |
+
+Nothing in this section is a compliance claim.
 
 ## Network and logging
 

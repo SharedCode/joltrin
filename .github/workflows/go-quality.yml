@@ -36,10 +36,10 @@ jobs:
           fi
 
       - name: Race detector on core packages
-        run: go test -race -count=1 -timeout 20m . ./btree ./inmemory ./common ./cache ./logsafe
+        run: go test -race -count=1 -timeout 20m . ./btree ./inmemory ./common ./cache ./logsafe ./taint
 
       - name: Coverage floors
         run: scripts/go-coverage-gate.sh
 
-      - name: staticcheck (root and logsafe)
-        run: go run honnef.co/go/tools/cmd/staticcheck@v0.7.0 -tests=false . ./logsafe
+      - name: staticcheck (root, logsafe and taint)
+        run: go run honnef.co/go/tools/cmd/staticcheck@v0.7.0 -tests=false . ./logsafe ./taint
