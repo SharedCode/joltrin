@@ -31,7 +31,7 @@ Neither part executes the operation for you or confirms it finished. Enforcement
 
 - Policy engines are mature, reviewed and widely deployed. Joltrin is not.
 - The verification barrier, including the Kubernetes gate, has no signed evidence, no action-bound approvals, no expiry, no replay protection and no revocation. A commit token is its whole trust boundary. Those controls exist in Private Intent, not yet in the gate.
-- Private Intent keeps used nonces and approvals in memory, has no transparency log, and a host that can edit its vault and engine can change policy.
+- Private Intent keeps used nonces and approvals in memory, can record receipts in a Merkle log (`translog`) but does not by default, and a host that can edit its vault and engine can change policy.
 - The Kubernetes gate is a single replica with in-memory state.
 - Enforcement is only as complete as the places you route through it.
 
