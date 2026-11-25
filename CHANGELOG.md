@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- `translog`, a new package: an append-only Merkle log for decision receipts, using the RFC 6962 hashing and the RFC 9162 proof construction that Certificate Transparency and Sigstore Rekor use. `Append` adds an entry, `SignHead` signs the log's size and root under a named origin with Ed25519, `InclusionProof` and `VerifyInclusion` show that one receipt is in the log of a given size, and `ConsistencyProof` and `VerifyConsistency` show that a later log extends an earlier one without rewriting it. Verification needs only the entry bytes, a short proof and a signed head, so an auditor can run it offline. The RFC 6962 reference roots, every proof for logs up to 70 entries and tampered or rewritten histories are tested, and `intent` has a test that logs real receipts. It does not stop an operator from showing two histories to two parties (that needs independent monitors comparing heads), the log is in memory with no storage, nothing writes receipts to it by default, and a log entry shows a receipt was recorded, not that the action ran. No existing API changes.
+
 ## v5.13.1
 
 - The v5.13.0 Python wheel and NuGet package were built as 5.11.1 because the version files were not bumped before the tag. This release bumps them, so every package in the release matches the tag. It has no other changes.
