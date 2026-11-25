@@ -606,13 +606,6 @@ func (s *DefaultBillingService) HandleWebhook(ctx context.Context, payload []byt
 	if _, exists := s.processedEvents[ev.ID]; exists {
 		return nil, fmt.Errorf("%w: %s", ErrDuplicateWebhookEvent, ev.ID)
 	}
-	processedAt := time.Now().UTC()
-	s.processedEvents[ev.ID] = processedAt
-	if s.store != nil {
-		if err := s.store.MarkProcessedEvent(ctx, ev.ID, processedAt); err != nil {
-			return nil, fmt.Errorf("governance/billing: persist processed event: %w", err)
-		}
-	}
 
 	// Clean up old events cache (> 24 hours)
 	if len(s.processedEvents) > 5000 {
@@ -626,14 +619,15 @@ func (s *DefaultBillingService) HandleWebhook(ctx context.Context, payload []byt
 
 	// 4. Inner Data Object
 	obj := ev.Data.Object
-	if obj == nil {
-		return &ev, nil
-	}
 
 	now := time.Now().UTC()
 	var affectedTenant, affectedCustomer string
 
-	switch ev.Type {
+	eventType := ev.Type
+	if obj == nil {
+		eventType = ""
+	}
+	switch eventType {
 	case "checkout.session.completed":
 		tenantID := "default"
 		if meta, ok := obj["metadata"].(map[string]any); ok {
@@ -792,6 +786,17 @@ func (s *DefaultBillingService) HandleWebhook(ctx context.Context, payload []byt
 			}
 		}
 	}
+
+	// Record completion only after all state writes succeed. A failed write
+	// must remain retryable, both in this process and after a restart. The
+	// store uses separate writes, so a retry can repeat an earlier upsert.
+	processedAt := time.Now().UTC()
+	if s.store != nil {
+		if err := s.store.MarkProcessedEvent(ctx, ev.ID, processedAt); err != nil {
+			return nil, fmt.Errorf("governance/billing: persist processed event: %w", err)
+		}
+	}
+	s.processedEvents[ev.ID] = processedAt
 
 	return &ev, nil
 }

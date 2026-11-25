@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -282,5 +283,93 @@ func TestSubmitEnterpriseInquiry_StopsAtTheCap(t *testing.T) {
 	}
 	if _, err := svc.SubmitEnterpriseInquiry(context.Background(), &EnterpriseInquiry{Email: "a@example.com"}); !errors.Is(err, ErrInquiryLimit) {
 		t.Errorf("past the cap: got %v, want ErrInquiryLimit", err)
+	}
+}
+
+// failWebhookStore injects one durable-write failure without changing the real store.
+type failWebhookStore struct {
+	BillingStore
+	fail string
+}
+
+func (s *failWebhookStore) PutSubscription(ctx context.Context, sub *Subscription) error {
+	if s.fail == "subscription" {
+		s.fail = ""
+		return errors.New("subscription storage unavailable")
+	}
+	return s.BillingStore.PutSubscription(ctx, sub)
+}
+
+func (s *failWebhookStore) PutCustomerTenant(ctx context.Context, customer, tenant string) error {
+	if s.fail == "customer" {
+		s.fail = ""
+		return errors.New("customer storage unavailable")
+	}
+	return s.BillingStore.PutCustomerTenant(ctx, customer, tenant)
+}
+
+func (s *failWebhookStore) MarkProcessedEvent(ctx context.Context, id string, at time.Time) error {
+	if s.fail == "event" {
+		s.fail = ""
+		return errors.New("event storage unavailable")
+	}
+	return s.BillingStore.MarkProcessedEvent(ctx, id, at)
+}
+
+func TestDefaultBillingService_Webhook_RetryAfterStorageFailure(t *testing.T) {
+	for _, stage := range []string{"subscription", "customer", "event"} {
+		for _, restart := range []bool{false, true} {
+			t.Run(fmt.Sprintf("%s/restart=%t", stage, restart), func(t *testing.T) {
+				ctx := context.Background()
+				path := t.TempDir()
+				store := &failWebhookStore{BillingStore: NewJoltrinBillingStore(path), fail: stage}
+				gate := NewFeatureGate(TierCore)
+				svc := NewDefaultBillingService(StripeConfig{Simulate: true}, gate, store)
+				payload := ConstructSimulatedWebhookPayload("checkout.session.completed", "evt_retry", "tenant-retry", TierPro)
+				if _, err := svc.HandleWebhook(ctx, payload, ""); err == nil {
+					t.Fatal("expected injected storage failure")
+				}
+				if done, err := store.HasProcessedEvent(ctx, "evt_retry"); err != nil || done {
+					t.Fatalf("failed event was marked complete: done=%t err=%v", done, err)
+				}
+				if restart {
+					svc = NewDefaultBillingService(StripeConfig{Simulate: true}, gate, NewJoltrinBillingStore(path))
+				}
+				if _, err := svc.HandleWebhook(ctx, payload, ""); err != nil {
+					t.Fatalf("retry failed: %v", err)
+				}
+				persisted := NewJoltrinBillingStore(path)
+				sub, found, err := persisted.GetSubscription(ctx, "tenant-retry")
+				if err != nil || !found || sub.PlanTier != TierPro {
+					t.Fatalf("subscription not saved: %+v found=%t err=%v", sub, found, err)
+				}
+				tenant, found, err := persisted.ResolveTenantByCustomer(ctx, sub.CustomerID)
+				if err != nil || !found || tenant != "tenant-retry" {
+					t.Fatalf("customer mapping not saved: %q found=%t err=%v", tenant, found, err)
+				}
+				if gate.Tier() != TierPro {
+					t.Fatalf("tier = %s", gate.Tier())
+				}
+				svc = NewDefaultBillingService(StripeConfig{Simulate: true}, gate, persisted)
+				if _, err := svc.HandleWebhook(ctx, payload, ""); !errors.Is(err, ErrDuplicateWebhookEvent) {
+					t.Fatalf("completed event was not deduplicated after restart: %v", err)
+				}
+			})
+		}
+	}
+}
+
+func TestDefaultBillingService_Webhook_NullObjectDoesNotChangeTier(t *testing.T) {
+	gate := NewFeatureGate(TierCore)
+	svc := NewDefaultBillingService(StripeConfig{Simulate: true}, gate)
+	payload := []byte(`{"id":"evt_null","type":"checkout.session.completed","data":{"object":null}}`)
+	if _, err := svc.HandleWebhook(context.Background(), payload, ""); err != nil {
+		t.Fatal(err)
+	}
+	if gate.Tier() != TierCore || len(svc.subscriptions) != 0 {
+		t.Fatal("null object changed subscription state")
+	}
+	if _, err := svc.HandleWebhook(context.Background(), payload, ""); !errors.Is(err, ErrDuplicateWebhookEvent) {
+		t.Fatalf("null event not deduplicated: %v", err)
 	}
 }
