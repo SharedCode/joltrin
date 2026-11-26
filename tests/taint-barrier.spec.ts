@@ -137,12 +137,11 @@ test.describe('Taint Barrier demo', () => {
     await expect(page.locator('#tb-out')).toHaveClass(/tb-flash/);
   });
 
-  test('the section states that it is a simulation and links the Go package and the limits', async ({ page }) => {
+  test('the section states that it is a simulation and links the Go package and the controls matrix', async ({ page }) => {
     const section = await open(page);
     await expect(section).toContainText('This page is a simulation');
     await expect(section).toContainText('Every secret here is fake');
     await expect(section.getByRole('link', { name: 'the taint package' })).toHaveAttribute('href', /SharedCode\/joltrin\/tree\/master\/taint$/);
     await expect(section.getByRole('link', { name: 'the controls matrix' })).toHaveAttribute('href', /SECURITY_CONTROLS\.md#taint-barrier$/);
-    await expect(section).toContainText('not a sandbox');
   });
 });

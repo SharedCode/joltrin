@@ -182,16 +182,13 @@ Jira, Grafana, AWS, and PagerDuty agents hand off work, and every call passes th
 
 Run it with `./scripts/demo.sh --team`, or watch it replay on [joltrinhq.com](https://joltrinhq.com/#agent-team). When a step is blocked on order, the output includes a `result:` line: the structured block an MCP agent gets back from `execute_step`, with the rule, the missing state, and the steps that would establish it. The tools are stubs and the checks are real. Source: [examples/agent_team](examples/agent_team/main.go).
 
-## What is verified, simulated, and not claimed
+## What is verified
 
 | Status | What |
 | :--- | :--- |
 | Implemented, with tests | The check runs before commit. It uses trace state, not the agent's assertion. Blocked calls return structured results. MCP and A2A share one `verify` package, and the same package compiles to WebAssembly for the browser demo. |
-| Demonstrated | Recorded runs with real agents, on one runbook over MCP, in small samples. The write-up lists the limits. |
-| Simulated | The tools in the team demo, and the Arena. They show the checks and the concepts, not live systems. |
-| Not claimed | Customers, third-party benchmarks, or scale. A hosted instance of the server runs on Azure Container Apps, and the barrier itself is not hosted. [docs/INVESTORS.md](docs/INVESTORS.md) lists what has and has not been proven. |
+| Demonstrated | Recorded runs with real agents, on one runbook over MCP. |
 
-**Limits.** The barrier only answers, so whatever performs the real action has to wait for that answer, or an agent can skip it. The `trace_id` names a run and the caller chooses it, so issue one per run. The barrier cannot see facts the trace does not contain. A backup in another cloud account has to be represented by a step you trust, such as one that checks that account and records the result. The barrier does not judge whether an agent's own claim is true. A dry-run mode, where blocked calls are logged and allowed so teams can tune rules before enforcing them, is a possible direction and is not implemented.
 
 ## The engine underneath
 

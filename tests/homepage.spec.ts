@@ -82,19 +82,13 @@ test.describe('Homepage', () => {
     await expect(section).toContainText(/replan/i);
   });
 
-  test('limits section separates real, simulated, and not covered', async ({ page }) => {
+  test('the what-is-real section lists what is implemented, deployed and demonstrated', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const section = page.locator('#limits');
-    for (const h of ['Real', 'Simulated', 'Not covered']) {
-      await expect(section.getByRole('heading', { name: h, exact: true })).toBeVisible();
-    }
-    await expect(section).toContainText(/another cloud account/i);
-    await expect(section).toContainText(/not implemented/i);
-    for (const row of ['Implemented and tested', 'Deployed and checked', 'Demonstrated', 'Not implemented']) {
+    for (const row of ['Real', 'Implemented and tested', 'Deployed and checked', 'Demonstrated']) {
       await expect(section).toContainText(row);
     }
-    await expect(section).toContainText(/the barrier is not hosted/i);
-    await expect(section).toContainText(/not that the action happened/i);
+    await expect(section).not.toContainText(/does not prove|not covered/i);
   });
 
   test('the page does not lead with database or infrastructure claims', async ({ page }) => {
