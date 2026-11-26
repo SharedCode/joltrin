@@ -186,7 +186,7 @@
     <section class="max-w-5xl mx-auto px-5 pt-20 sm:pt-28 pb-16 text-center">
       <p class="rise text-sm font-medium text-brand-300">Private Intent</p>
       <h1 class="rise display mt-4 text-[clamp(2.5rem,7.5vw,5.25rem)] text-[#f5f5f7] max-w-4xl mx-auto">AI agents that respect your rules before they act.</h1>
-      <p class="rise mt-6 text-[clamp(1.05rem,2.2vw,1.35rem)] leading-relaxed text-slate-400 max-w-2xl mx-auto">Give agents the context they need, keep private data under your control, and independently verify every high-risk action.</p>
+      <p class="rise mt-6 text-[clamp(1.05rem,2.2vw,1.35rem)] leading-relaxed text-slate-400 max-w-2xl mx-auto">Write the rules once, keep their wording private, and require signed approval before an agent runs a high-risk action. Private Intent gates actions. It does not hide secrets or cookies; for that, see the <a class="text-brand-300 hover:text-brand-200" href="../#verification-barrier">Taint Barrier</a>.</p>
       <div class="rise mt-9 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
         <a href="#try" onclick="track('intent_cta_try')" class="rounded-full bg-brand-500 hover:bg-brand-400 text-black font-semibold px-6 py-3 transition">Try a protected agent</a>
         <a href="#how" class="group text-brand-300 hover:text-brand-200 transition font-medium">How it works <span aria-hidden="true" class="inline-block transition-transform group-hover:translate-x-0.5">&#8250;</span></a>
@@ -198,6 +198,7 @@
         <div class="text-center">
           <h2 id="try-h" class="display text-2xl sm:text-4xl text-[#f5f5f7]">An agent wants to delete a production database.</h2>
           <p class="mt-3 text-xs tracking-[0.14em] text-slate-500">SIMULATED. No real system is touched.</p>
+          <p class="mt-2 text-xs text-slate-500 max-w-xl mx-auto">This only protects actions routed through the check. An agent that holds its own credentials to the database, or has a shell, is not stopped.</p>
         </div>
 
         <div id="banner" class="banner mt-8 rounded-[28px] bg-[#0b0b0f] px-6 py-9 text-center" role="status" aria-live="polite">
