@@ -35,7 +35,8 @@ To maintain clean separation between the open-source storage engine and commerci
   - Enforces a 300-second timestamp tolerance window to eliminate replay attacks.
   - Constant-time signature comparison protects against timing side-channel attacks.
 - **Idempotent Webhook Processing (`HandleWebhook`)**:
-  - Automatically deduplicates re-delivered Stripe events using a thread-safe event cache.
+  - Records a webhook as complete only after its subscription and customer mapping writes succeed. Failed writes remain retryable, including after restart with a durable store.
+  - Deduplicates completed events using a thread-safe event cache and durable completion markers when configured. Storage writes are separate upserts, so a retry may repeat a partial write; this is not a transaction across billing records.
   - Handles `checkout.session.completed`, `customer.subscription.created/updated`, `customer.subscription.deleted`, `invoice.payment_succeeded`, and `invoice.payment_failed`.
   - A live deployment (Stripe secret key set) refuses every webhook until `STRIPE_WEBHOOK_SECRET` is configured, so an unsigned event can never change the tier.
   - Automatically upgrades or downgrades the server's `FeatureGate` tier based on authoritative subscription state.
