@@ -7,6 +7,10 @@
 //	go run ./examples/private_intent attest ./pi prod/orders
 //	go run ./examples/private_intent approve ./pi orders
 //	go run ./examples/private_intent revoke ./pi <approval-id>
+//	go run ./examples/private_intent serve ./pi [addr]            (HTTP gateway for n8n)
+//	go run ./examples/private_intent pgp-init ./pi                (optional OpenPGP key)
+//	go run ./examples/private_intent encrypt ./pi <file>          (encrypt to that key)
+//	go run ./examples/private_intent approve-record ./pi <key> <payload-file>
 //
 // The agent gets one tool, delete_database. Behind it the server asks the
 // intent engine for a decision and then runs the (simulated) delete through a
@@ -51,7 +55,7 @@ func Main() {
 	switch args[0] {
 	case "demo":
 		err = runDemo()
-	case "init", "mcp", "attest", "approve", "revoke":
+	case "init", "mcp", "attest", "approve", "revoke", "serve", "pgp-init", "encrypt", "approve-record":
 		if len(args) < 2 {
 			err = errors.New("usage: private_intent " + args[0] + " <dir> ...")
 			break
@@ -82,6 +86,28 @@ func dispatch(cmd, dir string, rest []string) error {
 			return errors.New("usage: approve <dir> <database>")
 		}
 		return printID(approve(dir, rest[0]))
+	case "serve":
+		addr := "127.0.0.1:8787"
+		if len(rest) > 0 {
+			addr = rest[0]
+		}
+		return serveGateway(dir, addr)
+	case "pgp-init":
+		return pgpInit(dir)
+	case "encrypt":
+		if len(rest) < 1 {
+			return errors.New("usage: encrypt <dir> <file>")
+		}
+		return encryptFile(dir, rest[0])
+	case "approve-record":
+		if len(rest) < 2 {
+			return errors.New("usage: approve-record <dir> <key> <payload-file>")
+		}
+		payload, err := os.ReadFile(rest[1])
+		if err != nil {
+			return err
+		}
+		return printID(approveRecord(dir, rest[0], string(payload)))
 	default:
 		if len(rest) < 1 {
 			return errors.New("usage: revoke <dir> <artifact-id>")
@@ -176,6 +202,16 @@ func initDir(dir string) error {
 	if err := v.Add(prodRule()); err != nil {
 		return err
 	}
+	if err := v.Add(recordRule()); err != nil {
+		return err
+	}
+	tok, err := newToken()
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(filepath.Join(dir, "server", "gateway.token"), []byte(tok), 0o600); err != nil {
+		return err
+	}
 	if err := v.SaveFile(filepath.Join(dir, "server", "vault.sealed"), vkey); err != nil {
 		return err
 	}
@@ -262,7 +298,7 @@ func loadEngine(dir string, audit *governance.MemoryAuditRecorder) (*app, error)
 		Trust: intent.Trust{
 			Owner:     owner,
 			Issuers:   map[string]intent.TrustedKey{intent.KeyID(backup): {Key: backup, Scope: []string{"backup_validated"}}},
-			Approvers: map[string]intent.TrustedKey{intent.KeyID(approver): {Key: approver, Scope: []string{"production_owner"}}},
+			Approvers: map[string]intent.TrustedKey{intent.KeyID(approver): {Key: approver, Scope: []string{"production_owner", recordRole}}},
 		},
 	}
 	if audit != nil {
