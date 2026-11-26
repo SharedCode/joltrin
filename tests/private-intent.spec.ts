@@ -263,8 +263,10 @@ test.describe('Receipt checker', () => {
   test('a receipt from before a reset no longer checks out', async ({ page }) => {
     await allowed(page);
     await page.locator('#rc-load').click();
+    const oldKey = await page.locator('#rc-key').inputValue();
     await page.locator('#b-reset').click();
     await expect(page.locator('#rc-key')).toHaveValue(/^[0-9a-f]{64}$/);
+    await expect(page.locator('#rc-key')).not.toHaveValue(oldKey);
     await page.locator('#rc-check').click();
     await expect(page.locator('#rc-result')).toContainText('signature does not match');
   });
