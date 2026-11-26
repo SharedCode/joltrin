@@ -121,6 +121,85 @@ Limits:
 - Scope is glob matching. An agent can still do the wrong thing inside what it was allowed.
 - State is in memory. The contract is checked against one owner key, with no rotation or identity provider.
 
+## Use it from n8n
+
+An n8n workflow can write a record only after a human approves that exact record. n8n is treated as an untrusted courier: it asks for a decision and carries a receipt, but it holds no key and cannot sign anything. The check and the write both happen in a small gateway you run next to your data.
+
+```
+n8n  --POST /v1/authorize {key, payload}-->  gateway: Authorize (spends the approval)  --> ALLOW + receipt
+n8n  --POST /v1/execute {key, payload, receipt}-->  gateway: Guard.Run verifies, then writes records/<key>.txt
+owner: private_intent approve-record ./pi <key> <payload-file>     (signs; n8n never sees the key)
+```
+
+The gateway rebuilds the action from `key` and `payload`. Nothing in the request can name another tool or resource. The payload is bound into the action as its SHA-256, so an approval covers one payload and a receipt covers one payload.
+
+Try it (local only, nothing is hosted):
+
+```
+go run ./examples/private_intent init ./pi
+go run ./examples/private_intent serve ./pi                 # 127.0.0.1:8787
+```
+
+In n8n, import `examples/private_intent/n8n/private-intent-record.workflow.json`, then create a Header Auth credential named `Joltrin gateway` with name `Authorization` and value `Bearer <contents of ./pi/server/gateway.token>`. Run the workflow. It stops at "Wait for the owner" and asks again every 10 seconds. In another terminal:
+
+```
+echo -n "order 42 shipped" > /tmp/p.txt
+go run ./examples/private_intent approve-record ./pi order-42 /tmp/p.txt
+```
+
+The next poll returns ALLOW, the workflow executes, and `./pi/records/order-42.txt` appears. The wait loop has no cap. Stop the execution from n8n if no approval is coming.
+
+What the tests cover (`go test -race ./internal/examplecmd/private_intent`):
+
+| Case | Result |
+| --- | --- |
+| No approval | `REQUIRE_APPROVAL`, no receipt, nothing written |
+| Approval for a different payload or key | Not covered, stays `REQUIRE_APPROVAL` |
+| Receipt used with a changed payload, key, nonce or policy digest | 403 before any write, and the real receipt is not spent by the failed tries |
+| Expired approval, expired receipt | Refused |
+| Same receipt sent again | 403 `receipt already used` |
+| 25 concurrent `authorize` calls on one approval | Exactly one ALLOW |
+| 25 concurrent `execute` calls on one receipt | Exactly one write |
+| Wrong or missing bearer token, bad key, unknown field, oversize body | 401 or 400 |
+| Write fails after verification (record already exists) | 500 and the response says the receipt is spent |
+
+If execution fails or times out after the approval is consumed: the approval is spent at `authorize` and the receipt nonce is spent before the write runs, on purpose, so a crash cannot make a second write possible. A failed or timed-out `execute` therefore needs a new approval. The write itself is a temp file plus a hard link, so a reader never sees half a record and an existing record is never replaced. Between an `ALLOW` and an `execute` that never arrives, the approval is lost. That is the safe direction.
+
+### OpenPGP: where it helps and where it does not
+
+n8n stores the input and output of every node in its execution log. If a record is sensitive, that log is a second copy of it. For that case the sender encrypts the payload to the gateway's OpenPGP public key before n8n sees it (`pgp-init`, then `encrypt`). n8n forwards an armored message it cannot read. The approval binds the SHA-256 of the message n8n carries, so a different message, including the same text encrypted again, is refused before any decryption. The gateway decrypts only inside `Guard.Run`, after the receipt checks out. A message encrypted to a different key fails with a clear error and writes nothing. The private key stays in `server/pgp.key.asc` on the gateway and is never in the workflow, its logs or the test output.
+
+```
+go run ./examples/private_intent pgp-init ./pi
+go run ./examples/private_intent encrypt ./pi secret.txt > secret.asc
+go run ./examples/private_intent approve-record ./pi order-43 secret.asc
+```
+
+Limits you should know before relying on it:
+
+- It protects the payload from n8n and from n8n's logs. It does not protect it from the gateway, which decrypts it, or from whoever holds the gateway's private key.
+- The owner approves a hash of the ciphertext. To know what they are approving, they must decrypt it with the gateway's key (`gpg --decrypt`) or trust the sender. Joltrin does not show them the plaintext.
+- It uses the library's default OpenPGP integrity check (a modification detection code on the message). It does not sign the message, so it does not prove who sent it. The approval and the receipt provide the authorization.
+- If n8n itself must read or transform the plaintext, OpenPGP does nothing for you. Skip it.
+- The gateway key is a file. There is no rotation, no KMS and no HSM.
+
+### Taint Barrier on the way out
+
+If `server/taint.json` exists, the gateway also runs the [Taint Barrier](SECURITY_CONTROLS.md#taint-barrier) on the plaintext before it is written. A plain payload is screened at `authorize`, so a bad one never spends an approval. An encrypted payload cannot be read then, so it is screened after decryption, and a hit returns 403 and the receipt is spent. A human approval does not override it: an approved, encrypted message that contains a registered production key is still refused.
+
+```json
+{ "policy": { "version": 1, "labels": { "prod-secret": { "allow_hosts": ["vault.internal"] } } },
+  "values": [ { "label": "prod-secret", "name": "payments-key", "value": "<the value to watch for>" } ] }
+```
+
+The values stay on the gateway, and responses and findings carry only the label and name. The record file is not an allowed sink for `prod-secret` in this example, so any record containing it is blocked. It finds values you registered and their common encodings. It does not find a secret nobody registered.
+
+### What this does not do
+
+- The gateway, the rule and the keys are an example you run locally. There is no hosted gateway, no durable store for used receipts (a restart forgets them for the rest of their TTL), and no n8n community node.
+- It was tested with Go tests against the HTTP handlers. The workflow file is checked for valid wiring and for secrets, but it has not been run in a real n8n yet. Expect to adjust node settings on import.
+- The workflow only calls `http://127.0.0.1:8787`. A remote gateway needs TLS in front of it, which is not set up here.
+
 ## Run it
 
 ```
