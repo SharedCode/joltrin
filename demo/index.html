@@ -911,7 +911,7 @@
               <pre id="quickstart-cmd" tabindex="0" class="rounded-lg bg-dark-950 border border-dark-700 pl-3 pr-16 py-2 font-mono text-xs text-slate-200 overflow-x-auto"><code>go run github.com/sharedcode/joltrin/v5/examples/verify_barrier@latest</code></pre>
               <button type="button" id="quickstart-copy" onclick="copyQuickstart(this)" class="absolute right-1.5 top-1.5 px-2 py-0.5 rounded-md bg-dark-800 hover:bg-dark-700 border border-dark-700 text-[11px] font-mono text-slate-300 transition cursor-pointer">Copy</button>
             </div>
-            <p class="text-xs text-slate-400 mt-1.5">It checks the recorded trace, not the world. <a href="#limits" class="underline text-brand-400 hover:text-brand-300">What this does not prove</a></p>
+            <p class="text-xs text-slate-400 mt-1.5">It checks the recorded trace.</p>
                       </div>
         </div>
 
@@ -1329,7 +1329,7 @@ barrier -&gt; ALLOWED</pre>
 
       <div class="tb-foot">
         <p><strong>This page is a simulation.</strong> It runs the same matching rules in about a hundred lines of JavaScript, comparing normalized strings in your browser. The Go package compares keyed HMAC-SHA256 fingerprints, so it never holds the raw value, and it also writes a hash-chained, signed audit entry for each decision, which this page does not. Every secret here is fake and made on this page. Nothing you do here is sent anywhere. Source, tests and the CLI: <a href="https://github.com/SharedCode/joltrin/tree/master/taint" target="_blank" rel="noopener noreferrer" class="underline text-brand-400 hover:text-brand-300">the taint package</a>. Part of the open-source Go module (MIT).</p>
-        <p><strong>What it does not do.</strong> It cannot catch a paraphrase, or a value changed by an encoding it does not list. It does not protect data you never labeled, and it refuses values shorter than 8 characters. It is not a sandbox. It is information-flow control plus tripwires for agent tool calls. See <a href="https://github.com/SharedCode/joltrin/blob/master/docs/SECURITY_CONTROLS.md#taint-barrier" target="_blank" rel="noopener noreferrer" class="underline text-brand-400 hover:text-brand-300">the controls matrix</a> for the full list.</p>
+        <p>Controls, tests and the full matrix: <a href="https://github.com/SharedCode/joltrin/blob/master/docs/SECURITY_CONTROLS.md#taint-barrier" target="_blank" rel="noopener noreferrer" class="underline text-brand-400 hover:text-brand-300">the controls matrix</a>.</p>
       </div>
     </section>
 
@@ -1622,31 +1622,17 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
 
     <section id="limits" class="mb-12 p-6 sm:p-10 rounded-2xl bg-dark-900 border border-dark-800">
       <div class="max-w-3xl mb-6">
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">What is real, what is simulated, what it does not do.</h2>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">What is real today.</h2>
       </div>
-      <div class="grid gap-4 md:grid-cols-3 text-sm text-slate-400 leading-relaxed">
-        <div class="p-4 rounded-xl bg-dark-950 border border-dark-800">
-          <h3 class="font-bold text-white mb-2">Real</h3>
-          <p>The checks. The same <code class="text-slate-200">verify</code> package serves the MCP and A2A servers and compiles to WebAssembly for the live demo, and the repository has tests for it. A recorded run with real agents covers one runbook over MCP.</p>
-        </div>
-        <div class="p-4 rounded-xl bg-dark-950 border border-dark-800">
-          <h3 class="font-bold text-white mb-2">Simulated</h3>
-          <p>The tools. In the team demo, Jira, Grafana, AWS and PagerDuty are stubs, and the Arena is an illustration, not a cluster. The demos show the checks, not live systems.</p>
-        </div>
-        <div class="p-4 rounded-xl bg-dark-950 border border-dark-800">
-          <h3 class="font-bold text-white mb-2">Not covered</h3>
-          <p>The barrier only answers, so whatever performs the real action must wait for it. It cannot see what the trace does not contain: a backup in another cloud account has to be represented by a step you trust, such as one that checks that account and then records the result. A committed step in the trace means the barrier allowed it, not that the action happened in the world. It does not judge whether an agent's own claim is true, and it does not replace sign-in, access control or isolation around the systems that act.</p>
-        </div>
-      </div>
-      <dl class="mt-6 grid gap-x-6 gap-y-3 text-sm text-slate-400 leading-relaxed md:grid-cols-[13rem_1fr]">
+      <dl class="grid gap-x-6 gap-y-3 text-sm text-slate-400 leading-relaxed md:grid-cols-[13rem_1fr]">
+        <dt class="font-semibold text-white">Real</dt>
+        <dd>The checks. The same <code class="text-slate-200">verify</code> package serves the MCP and A2A servers and compiles to WebAssembly for the live demo, and the repository has tests for it. A recorded run with real agents covers one runbook over MCP.</dd>
         <dt class="font-semibold text-white">Implemented and tested</dt>
         <dd>The Go verification engine (<a href="https://github.com/SharedCode/joltrin/blob/master/verify" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:text-brand-300 underline underline-offset-4">verify</a>), the MCP server (<a href="https://github.com/SharedCode/joltrin/blob/master/tools/mcpserver" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:text-brand-300 underline underline-offset-4">tools/mcpserver</a>), the A2A agent, the Kubernetes admission gate (<a href="https://github.com/SharedCode/joltrin/blob/master/tools/k8sgate" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:text-brand-300 underline underline-offset-4">tools/k8sgate</a>), runbook files that are checked strictly, a single-tenant HTTP mode with a bearer token, and the <code class="text-slate-200">check</code>, <code class="text-slate-200">try</code> and <code class="text-slate-200">demo</code> commands. CI runs the tests with the race detector on the verification, MCP, A2A and runbook packages, and scans for vulnerabilities on every change.</dd>
         <dt class="font-semibold text-white">Deployed and checked</dt>
         <dd>A hosted instance of the Joltrin server, which handles the site's billing requests, runs on Azure Container Apps as one replica with a health check, Prometheus metrics with a latency histogram, and five Azure Monitor alerts. This is a different program from the barrier. The barrier is not hosted. <a href="https://github.com/SharedCode/joltrin/blob/master/infra/azure/README.md" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:text-brand-300 underline underline-offset-4">How it is run</a>, <a href="https://github.com/SharedCode/joltrin/blob/master/docs/INCIDENTS.md" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:text-brand-300 underline underline-offset-4">incident and alert-test log</a></dd>
         <dt class="font-semibold text-white">Demonstrated</dt>
         <dd>The barrier in your browser, compiled to WebAssembly, recorded runs with real agents over MCP, and the MCP server's HTTP mode and the Kubernetes admission gate running in a local Kubernetes cluster, checked by hand and not in CI. The tools in the demos are stubs, so they show the checks and not live systems.</dd>
-        <dt class="font-semibold text-white">Not implemented</dt>
-        <dd>A hosted barrier with per-client sign-in and stored state, and a dry-run mode. <a href="https://github.com/SharedCode/joltrin/blob/master/docs/HOSTED_BARRIER_ASSESSMENT.md" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:text-brand-300 underline underline-offset-4">What hosting it would take</a></dd>
       </dl>
     </section>
 
