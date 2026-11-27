@@ -12,6 +12,7 @@
 [![Go Tests](https://github.com/SharedCode/joltrin/actions/workflows/go.yml/badge.svg?event=push&branch=master)](https://github.com/SharedCode/joltrin/actions/workflows/go.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/sharedcode/joltrin/v5.svg)](https://pkg.go.dev/github.com/sharedcode/joltrin/v5)
 [![License](https://img.shields.io/github/license/SharedCode/joltrin)](LICENSE)
+[![joltrin MCP server on Glama](https://glama.ai/mcp/servers/SharedCode/joltrin/badges/score.svg)](https://glama.ai/mcp/servers/SharedCode/joltrin)
 
 </div>
 
