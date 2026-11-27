@@ -108,6 +108,7 @@
   </script>
 
   <style>
+    section[id] { scroll-margin-top: 4.5rem; }
     @media (prefers-reduced-motion: reduce) {
       *, ::before, ::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
     }
@@ -924,9 +925,62 @@ curl localhost:8087/.well-known/agent-card.json</pre>
       toggleMobileMenu();
     }
 
+    // Setting location.hash to the hash the URL already has does nothing, so jump with scrollIntoView and
+    // only add a history entry when the hash is new.
+    // Scroll-reveal sections start a little lower and slide into place, so the first scroll measures them
+    // too low and they end up under the sticky header. Scroll, wait for the scroll and reveal to settle,
+    // then line the section up once. If the visitor scrolls, or another jump starts, this backs off.
+    let alignToken = 0;
+    function alignWhenSettled(el) {
+      const mine = ++alignToken;
+      let interrupted = false;
+      const stop = () => { interrupted = true; };
+      ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach((t) => addEventListener(t, stop, { once: true, passive: true }));
+      const cancelled = () => interrupted || mine !== alignToken;
+      let last = -1, still = 0, polls = 0;
+      const poll = () => {
+        if (cancelled()) return;
+        const y = Math.round(scrollY);
+        still = y === last ? still + 1 : 0;
+        last = y;
+        if ((still >= 2 && polls > 2) || ++polls > 50) {
+          const settledY = y;
+          setTimeout(() => {
+            // The reveal moves things by tens of pixels. A much bigger change means someone else scrolled.
+            if (cancelled() || Math.abs(scrollY - settledY) > 200) return;
+            const gap = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
+            if (Math.abs(el.getBoundingClientRect().top - gap) > 6) el.scrollIntoView({ behavior: 'auto', block: 'start' });
+          }, 800);
+          return;
+        }
+        setTimeout(poll, 100);
+      };
+      poll();
+    }
+
+    // Covers opening a link such as /#pricing, and clicking an in-page link or using Back.
+    const alignToHash = () => {
+      const id = decodeURIComponent(location.hash.slice(1));
+      const el = id && document.getElementById(id);
+      if (el) alignWhenSettled(el);
+    };
+    addEventListener('load', alignToHash);
+    addEventListener('hashchange', alignToHash);
+
+    // Setting location.hash to the hash the URL already has does nothing, so jump with scrollIntoView and
+    // only add a history entry when the hash is new.
+    function goToSection(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      el.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' });
+      if (location.hash !== '#' + id) history.pushState(null, '', '#' + id);
+      alignWhenSettled(el);
+    }
+
     const CMDK_COMMANDS = [
-      { label: 'Agent Verification Barrier', hint: 'section', action: () => location.hash = '#demo-barrier' },
-      { label: 'Enterprise', hint: 'section', action: () => location.hash = '#enterprise-form' },
+      { label: 'Agent Verification Barrier', hint: 'section', action: () => goToSection('demo-barrier') },
+      { label: 'Enterprise', hint: 'section', action: () => goToSection('enterprise-form') },
       { label: 'Overview', hint: 'go to', action: () => location.href = '../' },
       { label: 'Joltrin Arena', hint: 'go to', action: () => location.href = '../arena/' },
       { label: 'Joltrin Arena: B-tree challenge', hint: 'go to', action: () => location.href = '../btree/' },
@@ -959,6 +1013,17 @@ curl localhost:8087/.well-known/agent-card.json</pre>
       cmdkRender();
     }
 
+    function cmdkItemClass(selected) {
+      return 'w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between gap-3 text-sm transition ' +
+        (selected ? 'bg-brand-500/20 text-brand-300' : 'text-slate-300 hover:bg-dark-800');
+    }
+
+    // Changes the highlight without rebuilding the list. Rebuilding on hover replaced the button under a
+    // finger before its click arrived, so tapping a result did nothing on a phone.
+    function cmdkHighlight() {
+      Array.from(document.getElementById('cmdk-list').children).forEach((el, i) => { el.className = cmdkItemClass(i === cmdkSelected); });
+    }
+
     function cmdkRender() {
       const list = document.getElementById('cmdk-list');
       list.innerHTML = '';
@@ -969,10 +1034,9 @@ curl localhost:8087/.well-known/agent-card.json</pre>
       cmdkFiltered.forEach((cmd, i) => {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between gap-3 text-sm transition ' +
-          (i === cmdkSelected ? 'bg-brand-500/20 text-brand-300' : 'text-slate-300 hover:bg-dark-800');
+        btn.className = cmdkItemClass(i === cmdkSelected);
         btn.innerHTML = '<span>' + cmd.label + '</span><span class="text-[10px] text-slate-500 font-mono uppercase">' + cmd.hint + '</span>';
-        btn.onmouseenter = () => { cmdkSelected = i; cmdkRender(); };
+        btn.onmouseenter = () => { cmdkSelected = i; cmdkHighlight(); };
         btn.onclick = () => { cmd.action(); closeCommandPalette(); };
         list.appendChild(btn);
       });
