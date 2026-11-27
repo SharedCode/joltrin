@@ -929,20 +929,25 @@ curl localhost:8087/.well-known/agent-card.json</pre>
     // only add a history entry when the hash is new.
     // Scroll-reveal sections start a little lower and slide into place, so the first scroll measures them
     // too low and they end up under the sticky header. Scroll, wait for the scroll and reveal to settle,
-    // then line the section up once. A visitor who starts scrolling themselves is left alone.
+    // then line the section up once. If the visitor scrolls, or another jump starts, this backs off.
+    let alignToken = 0;
     function alignWhenSettled(el) {
+      const mine = ++alignToken;
       let interrupted = false;
       const stop = () => { interrupted = true; };
       ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach((t) => addEventListener(t, stop, { once: true, passive: true }));
+      const cancelled = () => interrupted || mine !== alignToken;
       let last = -1, still = 0, polls = 0;
       const poll = () => {
-        if (interrupted) return;
+        if (cancelled()) return;
         const y = Math.round(scrollY);
         still = y === last ? still + 1 : 0;
         last = y;
-        if ((still >= 2 && polls > 2) || ++polls > 30) {
+        if ((still >= 2 && polls > 2) || ++polls > 50) {
+          const settledY = y;
           setTimeout(() => {
-            if (interrupted) return;
+            // The reveal moves things by tens of pixels. A much bigger change means someone else scrolled.
+            if (cancelled() || Math.abs(scrollY - settledY) > 200) return;
             const gap = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
             if (Math.abs(el.getBoundingClientRect().top - gap) > 6) el.scrollIntoView({ behavior: 'auto', block: 'start' });
           }, 800);

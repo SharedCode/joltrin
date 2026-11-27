@@ -21,8 +21,16 @@ async function pick(page: Page, isMobile: boolean, query: string) {
 }
 
 async function expectInView(page: Page, id: string) {
-  await expect.poll(() => sectionTop(page, id), { timeout: 8000 }).toBeGreaterThanOrEqual(56);
-  await expect.poll(() => sectionTop(page, id), { timeout: 8000 }).toBeLessThanOrEqual(140);
+  await expect.poll(() => sectionTop(page, id), { timeout: 15000 }).toBeGreaterThanOrEqual(56);
+  await expect.poll(() => sectionTop(page, id), { timeout: 15000 }).toBeLessThanOrEqual(140);
+  // Wait until it has stopped moving, so the page's own correction cannot run after the test scrolls away.
+  let last = NaN, stable = 0;
+  await expect.poll(async () => {
+    const now = await sectionTop(page, id);
+    stable = now === last ? stable + 1 : 0;
+    last = now;
+    return stable;
+  }, { timeout: 15000, intervals: [400] }).toBeGreaterThanOrEqual(4);
 }
 
 test.describe('Search on the homepage', () => {
