@@ -16,7 +16,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  workers: process.env.CI ? 4 : undefined,
 
   // Generates rich interactive HTML report with failure traces & terminal list outputs
   reporter: [
