@@ -150,3 +150,65 @@ func TestKeyErrorsAreClear(t *testing.T) {
 		t.Fatal("empty key accepted")
 	}
 }
+
+func TestPassphraseProtectedKeyNeedsThePassphrase(t *testing.T) {
+	protected, err := GenerateKey("p", "pgpkit test", "p@localhost", WithPassphrase("correct horse"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	sender := mustKey(t)
+
+	// Anyone can still encrypt to the public half.
+	ct, err := Encrypt(protected.Public, "hello", sender.Private)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Decrypt(protected.Private, ct, sender.Public); err == nil || !strings.Contains(err.Error(), "WithPassphrase") {
+		t.Fatalf("missing passphrase: got %v", err)
+	}
+	if _, err := Decrypt(protected.Private, ct, sender.Public, WithPassphrase("wrong")); err == nil || !strings.Contains(err.Error(), "wrong passphrase") {
+		t.Fatalf("wrong passphrase: got %v", err)
+	}
+	got, err := Decrypt(protected.Private, ct, sender.Public, WithPassphrase("correct horse"))
+	if err != nil || got.Plaintext != "hello" || !got.Signed {
+		t.Fatalf("got %+v, %v", got, err)
+	}
+}
+
+func TestPassphraseProtectedKeyCanSign(t *testing.T) {
+	protected, err := GenerateKey("p", "pgpkit test", "p@localhost", WithPassphrase("s3cret phrase"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	recipient := mustKey(t)
+
+	if _, err := ClearSign(protected.Private, "x"); err == nil {
+		t.Fatal("signed without the passphrase")
+	}
+	signed, err := ClearSign(protected.Private, "release approved", WithPassphrase("s3cret phrase"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if text, err := VerifyClearSigned(protected.Public, signed); err != nil || text != "release approved" {
+		t.Fatalf("got %q, %v", text, err)
+	}
+
+	ct, err := Encrypt(recipient.Public, "approve", protected.Private, WithPassphrase("s3cret phrase"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := Decrypt(recipient.Private, ct, protected.Public)
+	if err != nil || !got.Signed || got.SignerFingerprint != protected.Fingerprint {
+		t.Fatalf("got %+v, %v", got, err)
+	}
+}
+
+func TestProtectedKeyDoesNotChangeThePublicKey(t *testing.T) {
+	protected, err := GenerateKey("p", "pgpkit test", "p@localhost", WithPassphrase("abc def ghi"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if protected.Fingerprint == "" || !strings.HasPrefix(protected.Public, "-----BEGIN PGP PUBLIC KEY BLOCK-----") {
+		t.Fatalf("bad key: %+v", protected)
+	}
+}

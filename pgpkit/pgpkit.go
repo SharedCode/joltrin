@@ -7,8 +7,10 @@
 // library's integrity check, a message that fails the check returns an error
 // and never partial plaintext, and input is capped at MaxSize.
 //
-// Limits: private keys are not passphrase protected here, there is no key
-// rotation, expiry handling or revocation, and key storage is the caller's job.
+// Private keys can be passphrase protected: pass WithPassphrase to GenerateKey
+// to protect a new key, and to the other functions to unlock one. Limits: there
+// is no key rotation, expiry handling or revocation, and key storage and
+// passphrase handling are the caller's job.
 // Encryption hides the text from whoever carries it. It does not protect it
 // from the holder of the private key.
 package pgpkit
@@ -45,12 +47,30 @@ type Result struct {
 	SignerFingerprint string
 }
 
+// Option changes how a function treats keys.
+type Option func(*options)
+
+type options struct{ passphrase string }
+
+// WithPassphrase protects a key made by GenerateKey, or unlocks a protected
+// private key passed to Encrypt, Decrypt or ClearSign.
+func WithPassphrase(p string) Option { return func(o *options) { o.passphrase = p } }
+
+func opts(list []Option) options {
+	var o options
+	for _, f := range list {
+		f(&o)
+	}
+	return o
+}
+
 func config() *packet.Config {
 	return &packet.Config{DefaultCipher: packet.CipherAES256}
 }
 
 // GenerateKey makes a new ed25519 signing key with a cv25519 encryption subkey.
-func GenerateKey(name, comment, email string) (Key, error) {
+func GenerateKey(name, comment, email string, options ...Option) (Key, error) {
+	o := opts(options)
 	e, err := openpgp.NewEntity(name, comment, email, &packet.Config{
 		DefaultCipher: packet.CipherAES256,
 		Algorithm:     packet.PubKeyAlgoEdDSA,
@@ -59,22 +79,36 @@ func GenerateKey(name, comment, email string) (Key, error) {
 	if err != nil {
 		return Key{}, err
 	}
+	// Serialize the public half first: encrypting the private key below must not
+	// change what the public key says.
 	var priv, pub bytes.Buffer
-	w, err := armor.Encode(&priv, openpgp.PrivateKeyType, nil)
+	w, err := armor.Encode(&pub, openpgp.PublicKeyType, nil)
 	if err != nil {
 		return Key{}, err
 	}
-	if err := e.SerializePrivate(w, nil); err != nil {
+	if err := e.Serialize(w); err != nil {
 		return Key{}, err
 	}
 	if err := w.Close(); err != nil {
 		return Key{}, err
 	}
-	w, err = armor.Encode(&pub, openpgp.PublicKeyType, nil)
+	if o.passphrase != "" {
+		if err := e.EncryptPrivateKeys([]byte(o.passphrase), config()); err != nil {
+			return Key{}, err
+		}
+	}
+	w, err = armor.Encode(&priv, openpgp.PrivateKeyType, nil)
 	if err != nil {
 		return Key{}, err
 	}
-	if err := e.Serialize(w); err != nil {
+	// SerializePrivate signs again, which needs the unlocked key, so a protected
+	// key is written as it is.
+	if o.passphrase != "" {
+		err = e.SerializePrivateWithoutSigning(w, nil)
+	} else {
+		err = e.SerializePrivate(w, nil)
+	}
+	if err != nil {
 		return Key{}, err
 	}
 	if err := w.Close(); err != nil {
@@ -98,7 +132,7 @@ func readRing(armored, what string) (openpgp.EntityList, error) {
 	return ring, nil
 }
 
-func readPrivate(armored, what string) (openpgp.EntityList, error) {
+func readPrivate(armored, what, passphrase string) (openpgp.EntityList, error) {
 	ring, err := readRing(armored, what)
 	if err != nil {
 		return nil, err
@@ -108,7 +142,12 @@ func readPrivate(armored, what string) (openpgp.EntityList, error) {
 			return nil, fmt.Errorf("%s has no private key", what)
 		}
 		if e.PrivateKey.Encrypted {
-			return nil, fmt.Errorf("%s is passphrase protected, which pgpkit does not support", what)
+			if passphrase == "" {
+				return nil, fmt.Errorf("%s is passphrase protected: pass WithPassphrase", what)
+			}
+			if err := e.DecryptPrivateKeys([]byte(passphrase)); err != nil {
+				return nil, fmt.Errorf("%s: wrong passphrase", what)
+			}
 		}
 	}
 	return ring, nil
@@ -124,7 +163,8 @@ func tooLarge(s string) error {
 // Encrypt encrypts plaintext to recipientPublic and returns ASCII armor
 // ("-----BEGIN PGP MESSAGE-----"). If signerPrivate is not empty the message is
 // also signed, so the receiver can prove who sent it.
-func Encrypt(recipientPublic, plaintext, signerPrivate string) (string, error) {
+func Encrypt(recipientPublic, plaintext, signerPrivate string, options ...Option) (string, error) {
+	o := opts(options)
 	if err := tooLarge(plaintext); err != nil {
 		return "", err
 	}
@@ -134,7 +174,7 @@ func Encrypt(recipientPublic, plaintext, signerPrivate string) (string, error) {
 	}
 	var signer *openpgp.Entity
 	if signerPrivate != "" {
-		ring, err := readPrivate(signerPrivate, "signer key")
+		ring, err := readPrivate(signerPrivate, "signer key", o.passphrase)
 		if err != nil {
 			return "", err
 		}
@@ -165,11 +205,12 @@ func Encrypt(recipientPublic, plaintext, signerPrivate string) (string, error) {
 // empty the message must be signed by that key, and a missing or bad signature
 // is an error. The whole message is read and checked before anything is
 // returned.
-func Decrypt(privateKey, armored, signerPublic string) (Result, error) {
+func Decrypt(privateKey, armored, signerPublic string, options ...Option) (Result, error) {
+	o := opts(options)
 	if err := tooLarge(armored); err != nil {
 		return Result{}, err
 	}
-	ring, err := readPrivate(privateKey, "private key")
+	ring, err := readPrivate(privateKey, "private key", o.passphrase)
 	if err != nil {
 		return Result{}, err
 	}
@@ -232,11 +273,12 @@ func Decrypt(privateKey, armored, signerPublic string) (Result, error) {
 
 // ClearSign signs text and returns it with the signature in ASCII armor
 // ("-----BEGIN PGP SIGNED MESSAGE-----"). The text stays readable.
-func ClearSign(privateKey, text string) (string, error) {
+func ClearSign(privateKey, text string, options ...Option) (string, error) {
+	o := opts(options)
 	if err := tooLarge(text); err != nil {
 		return "", err
 	}
-	ring, err := readPrivate(privateKey, "private key")
+	ring, err := readPrivate(privateKey, "private key", o.passphrase)
 	if err != nil {
 		return "", err
 	}
