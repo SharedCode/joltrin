@@ -110,22 +110,22 @@ type UnknownStepResult struct {
 // StepDescription is one step's preconditions and postconditions, as
 // returned by read_sop.
 type StepDescription struct {
-	Requires    []verify.State `json:"requires"`
-	Establishes []verify.State `json:"establishes"`
+	Requires    []verify.State `json:"requires" jsonschema_description:"States that must already be recorded in the trace before this step is safe to execute."`
+	Establishes []verify.State `json:"establishes" jsonschema_description:"States this step records in the trace once it is executed."`
 }
 
 // SafetyRuleDescription is one safety rule, as returned by read_sop.
 type SafetyRuleDescription struct {
-	Name      string       `json:"name"`
-	Forbidden verify.State `json:"forbidden"`
-	Requires  verify.State `json:"requires"`
+	Name      string       `json:"name" jsonschema_description:"Name of the safety rule. A blocked call reports this name in blocked_by."`
+	Forbidden verify.State `json:"forbidden" jsonschema_description:"The state this rule guards: a step that would establish it is refused until the required state exists."`
+	Requires  verify.State `json:"requires" jsonschema_description:"The state that must already be recorded before the forbidden state may be established."`
 }
 
 // WorkflowDescription is read_sop's result for a well-formed request: the
 // full step graph and safety rules for one registered runbook.
 type WorkflowDescription struct {
-	Steps  map[string]StepDescription `json:"steps"`
-	Safety []SafetyRuleDescription    `json:"safety"`
+	Steps  map[string]StepDescription `json:"steps" jsonschema_description:"Every step in the runbook, keyed by step ID, with what each requires and establishes."`
+	Safety []SafetyRuleDescription    `json:"safety" jsonschema_description:"The safety rules that refuse a step until the state it depends on is recorded."`
 }
 
 // KeyReusedResult is returned instead of a replay when an idempotency_key that
