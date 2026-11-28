@@ -16,7 +16,7 @@ for (const scheme of ['dark', 'light'] as const) {
   test.describe(`Accessibility, ${scheme} theme`, () => {
     test.use({ colorScheme: scheme });
     for (const path of PAGES) {
-      test(`${path} has no WCAG A or AA violations`, async ({ page }) => {
+      test(`${path} has no WCAG 2.2 A or AA violations`, async ({ page }) => {
         await page.goto(path, { waitUntil: 'load' });
         await waitForWasmReady(page);
         if (path === '/private-intent/') {
@@ -38,7 +38,7 @@ for (const scheme of ['dark', 'light'] as const) {
         await page.addScriptTag({ path: axePath });
         const result = await page.evaluate(async () =>
           // @ts-expect-error axe is injected above
-          await axe.run(document, { runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'best-practice'] }),
+          await axe.run(document, { runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa', 'best-practice'] }),
         );
         const summary = result.violations.map((v: any) => `${v.id}: ${v.nodes.slice(0, 3).map((n: any) => n.target.join(' ')).join(' | ')}`);
         expect(summary, `${path}\n${summary.join('\n')}`).toEqual([]);
