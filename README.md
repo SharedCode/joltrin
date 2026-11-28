@@ -28,7 +28,7 @@ Joltrin blocks an AI agent's risky step, like dropping a database, until the ste
 
 **See it work in your browser, no install:** [joltrinhq.com/agents](https://joltrinhq.com/agents/).
 
-**Or add it to your AI agent, no Go needed** (macOS and Linux, about 9 MB; Windows and other options are [below](#connect-it-to-an-mcp-agent)):
+**Or add it to your AI agent, no Go needed** (macOS and Linux, a download of about 5 MB that unpacks to about 12 MB; Windows and other options are [below](#connect-it-to-an-mcp-agent)):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/SharedCode/joltrin/master/scripts/install.sh | sh
@@ -104,7 +104,7 @@ Joltrin is young. These tools are mature, and some are the right choice. See [th
 
 ## Connect it to an MCP agent
 
-Any agent that supports MCP can use the barrier. One command downloads a binary of about 9 MB (no Go needed), checks its checksum, and registers it with Claude Code, Codex, and the Gemini CLI, whichever are installed. It takes a few seconds and does not use `sudo`:
+Any agent that supports MCP can use the barrier. One command downloads a binary (about 5 MB compressed, about 12 MB installed, no Go needed), checks its checksum, and registers it with Claude Code, Codex, and the Gemini CLI, whichever are installed. It takes a few seconds and does not use `sudo`:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/SharedCode/joltrin/master/scripts/install.sh | sh
@@ -189,6 +189,7 @@ Run it with `./scripts/demo.sh --team`, or watch it replay on [joltrinhq.com](ht
 | :--- | :--- |
 | Implemented, with tests | The check runs before commit. It uses trace state, not the agent's assertion. Blocked calls return structured results. MCP and A2A share one `verify` package, and the same package compiles to WebAssembly for the browser demo. |
 | Demonstrated | Recorded runs with real agents, on one runbook over MCP. |
+| Measured | On an Apple M4, the precedence check takes about 50 ns when a step is allowed and about 350 ns when it is blocked, and a Taint Barrier check of a 4 KiB tool call takes about 0.8 ms. Run `go test -run xxx -bench 'Check4KiB|CheckSafety(Allowed|Blocked)$' -benchmem ./taint ./verify` for your machine. Numbers vary by hardware. |
 
 
 ## The engine underneath

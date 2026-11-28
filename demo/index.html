@@ -967,7 +967,7 @@
                 <a href="./docs/#mcp-command-powershell" class="underline text-brand-400 hover:text-brand-300">Windows PowerShell</a>
                 <a href="./docs/#mcp-command-cmd" class="underline text-brand-400 hover:text-brand-300">Windows Command Prompt (CMD)</a>
               </p>
-              <p class="mt-2 text-xs text-slate-400">It downloads one binary of about 9 MB, checks its checksum, and registers it with Claude Code, Codex or the Gemini CLI, whichever are installed. It does not use sudo.</p>
+              <p class="mt-2 text-xs text-slate-400">It downloads one binary (about 5 MB compressed, about 12 MB installed), checks its checksum, and registers it with Claude Code, Codex or the Gemini CLI, whichever are installed. It does not use sudo.</p>
               <p id="after-install" class="mt-2 text-xs text-slate-300">Then restart your agent and ask: "Use the joltrin tools to run <code>drop_prod_db</code> on workflow <code>db-maintenance</code> with trace id <code>t1</code>." The server refuses until <code>take_backup</code> and <code>validate_backup</code> have run. Some models decline a destructive task before calling anything. That is the model, not Joltrin, and <a href="./agents/" class="underline text-brand-400 hover:text-brand-300">the browser demo</a> shows the barrier with no agent at all.</p>
             </div>
             <p class="text-xs font-mono uppercase tracking-wider text-slate-400 mt-6 mb-1.5">Have Go? Run the demo from source (Go 1.26.11+)</p>
@@ -1293,7 +1293,7 @@
       <!-- Test with your own agent -->
       <div id="test-your-agent" class="mt-6 p-4 rounded-xl bg-dark-950 border border-dark-800 text-xs">
         <span class="text-white font-bold block text-sm mb-1">Test it with your own AI agent</span>
-        <p class="text-slate-400 mb-3">Any agent that supports MCP can use the barrier. This downloads a binary of about 9 MB, checks its checksum, and registers it with Claude Code, Codex, and the Gemini CLI, whichever are installed. No Go needed.</p>
+        <p class="text-slate-400 mb-3">Any agent that supports MCP can use the barrier. This downloads a binary (about 5 MB compressed, about 12 MB installed), checks its checksum, and registers it with Claude Code, Codex, and the Gemini CLI, whichever are installed. No Go needed.</p>
         <pre class="whitespace-pre-wrap break-all rounded-lg bg-dark-900 border border-dark-800 p-3 font-mono text-slate-200 leading-relaxed">curl -fsSL https://raw.githubusercontent.com/SharedCode/joltrin/master/scripts/install.sh | sh</pre>
         <p class="text-slate-400 mt-3 mb-1">On Windows, in PowerShell:</p>
         <pre class="whitespace-pre-wrap break-all rounded-lg bg-dark-900 border border-dark-800 p-3 font-mono text-slate-200 leading-relaxed">irm https://raw.githubusercontent.com/SharedCode/joltrin/master/scripts/install.ps1 | iex</pre>
