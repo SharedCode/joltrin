@@ -171,6 +171,10 @@ func (b *Barrier) Check(ctx context.Context, call Call) (Verdict, error) {
 		reason = ReasonNotInspectable
 	} else {
 		matches = b.reg.ScanViews(views...)
+		for _, v := range views {
+			matches = append(matches, ScanKeyMaterial(v)...)
+		}
+		matches = dedupMatches(matches)
 	}
 
 	v := Verdict{Sink: b.safe(s.label)}
@@ -447,4 +451,18 @@ func VerifyExport(r io.Reader, pub ed25519.PublicKey) error {
 		prev = ev.Hash
 	}
 	return nil
+}
+
+// dedupMatches drops repeated value IDs and keeps the order by value ID.
+func dedupMatches(in []Match) []Match {
+	seen := map[string]bool{}
+	var out []Match
+	for _, m := range in {
+		if !seen[m.ValueID] {
+			seen[m.ValueID] = true
+			out = append(out, m)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].ValueID < out[j].ValueID })
+	return out
 }

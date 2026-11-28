@@ -21,7 +21,14 @@ paths = [
   # Deleted legacy ASP.NET scaffold; its Application Insights
   # instrumentation key is a client-visible telemetry ID, not a secret.
   '''(^|/)Sop\.AzureWebApp/''',
+  # The Taint Barrier's key-block detector lists the BEGIN marker lines it
+  # looks for. They are public format headers, not key material.
+  '''^taint/keyblock\.go$''',
 ]
+
+# History only: the first commit of the key-block change carried literal
+# fake key blocks in its test file. The next commit builds them at run time.
+commits = ["44a9f0d902655108b66596b95e65d76696c86453"]
 
 regexes = [
   # Placeholder credentials used in test fixtures and README examples,
