@@ -49,6 +49,27 @@ func buildKeyHeaderB64() []string {
 	return out
 }
 
+// opensshMagic starts the binary body of every OpenSSH private key file, so the
+// base64 body can be found even when the BEGIN line was left off. Built from
+// parts like the headers above.
+var opensshMagic = "openssh-key-" + "v1\x00"
+
+// keyBodyB64 is opensshMagic in base64 (both alphabets, all three alignments),
+// edges trimmed the same way as keyHeaderB64.
+var keyBodyB64 = func() []string {
+	var out []string
+	for off := 0; off < 3; off++ {
+		b := []byte(strings.Repeat("x", off) + opensshMagic)
+		for _, enc := range []*base64.Encoding{base64.RawStdEncoding, base64.RawURLEncoding} {
+			s := enc.EncodeToString(b)
+			if len(s) > 8 {
+				out = append(out, s[4:len(s)-4])
+			}
+		}
+	}
+	return out
+}()
+
 // ScanKeyMaterial reports private key blocks in text. The match carries no
 // key data: ValueID names the kind of block that was found.
 func ScanKeyMaterial(text string) []Match {
@@ -73,6 +94,12 @@ func ScanKeyMaterial(text string) []Match {
 				break
 			}
 		}
+		for _, n := range keyBodyB64 {
+			if strings.Contains(noWS, n) {
+				found["openssh-body"] = true
+				break
+			}
+		}
 		next := percentDecode(cur)
 		if next == cur {
 			break
@@ -80,9 +107,13 @@ func ScanKeyMaterial(text string) []Match {
 		cur = next
 	}
 	var out []Match
-	for _, k := range []string{"pgp", "pem", "openssh", "encoded"} {
+	for _, k := range []string{"pgp", "pem", "openssh", "encoded", "openssh-body"} {
 		if found[k] {
-			out = append(out, Match{ValueID: "keyblock:" + k, Label: LabelPrivateKey, Variant: "header"})
+			variant := "header"
+			if k == "openssh-body" {
+				variant = "body"
+			}
+			out = append(out, Match{ValueID: "keyblock:" + k, Label: LabelPrivateKey, Variant: variant})
 		}
 	}
 	return out

@@ -119,3 +119,41 @@ func wrap(s string, n int) string {
 	}
 	return b.String() + s
 }
+
+// An OpenSSH private key whose BEGIN line was removed is still caught by the
+// magic bytes every such key body starts with. The body here is made up: the
+// magic plus filler, not a key.
+func TestOpenSSHKeyBodyWithoutHeaderIsCaught(t *testing.T) {
+	body := []byte(opensshMagic + "\x00\x00\x00\x04none\x00\x00\x00\x04none\x00\x00\x00\x00filler filler filler")
+	cases := map[string]string{
+		"std":            base64.StdEncoding.EncodeToString(body),
+		"wrapped":        wrap(base64.StdEncoding.EncodeToString(body), 70),
+		"url alphabet":   base64.URLEncoding.EncodeToString(body),
+		"inside a blob":  base64.StdEncoding.EncodeToString(append([]byte("ab"), body...)),
+		"inside a blob2": base64.StdEncoding.EncodeToString(append([]byte("a"), body...)),
+		"in prose":       "here is the file: " + base64.StdEncoding.EncodeToString(body) + " thanks",
+		"percent":        url.QueryEscape(base64.StdEncoding.EncodeToString(body)),
+	}
+	for name, text := range cases {
+		got := ScanKeyMaterial(text)
+		var ok bool
+		for _, m := range got {
+			ok = ok || (m.ValueID == "keyblock:openssh-body" && m.Variant == "body" && m.Label == LabelPrivateKey)
+		}
+		if !ok {
+			t.Errorf("%s: not detected, got %+v", name, got)
+		}
+	}
+}
+
+func TestOrdinaryBase64IsNotFlaggedAsAKeyBody(t *testing.T) {
+	for _, s := range []string{
+		base64.StdEncoding.EncodeToString([]byte("hello world, this is an ordinary message with no key in it")),
+		base64.StdEncoding.EncodeToString([]byte("openssh is a tool, and keys are files")),
+		"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIexample not a private key",
+	} {
+		if got := ScanKeyMaterial(s); len(got) != 0 {
+			t.Errorf("flagged %q: %+v", s, got)
+		}
+	}
+}
