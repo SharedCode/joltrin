@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Taint Barrier also catches an OpenSSH private key whose BEGIN line was removed, by the fixed bytes every OpenSSH key body starts with, in base64 (standard and URL alphabets, any alignment, wrapped or percent-encoded). The match is `keyblock:openssh-body`. PGP and PEM bodies have no such marker, so those are still caught by header only.
+
 ## v5.14.0
 
 - `read_sop` and `validate_step` now declare themselves read-only, idempotent and closed-world in their MCP tool annotations, and `read_sop` has an output schema. Directories that grade tool definitions treated them as destructive because the annotations were missing.
