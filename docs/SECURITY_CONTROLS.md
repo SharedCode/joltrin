@@ -2,6 +2,8 @@
 
 What Joltrin does today for security and privacy, what has a test, and what does not exist yet. Each row points at code or a workflow you can read. Nothing here is a certification. Joltrin has no SOC 2 report, no GDPR assessment and no penetration test, and it makes no zero-knowledge or guaranteed-confidentiality claim.
 
+Evidence check, 2026-11-28, at v5.14.0 plus later commits on master: every file path cited in this document exists, and `go test` passes for each Go package it cites (`.`, `cmd/sop-mcp-server`, `governance`, `netguard`, `pgpkit`, `taint`, `tools/mcpserver`). That shows the cited tests run and pass. It does not show the tests are complete.
+
 Status words:
 
 - **Implemented, tested**: the code exists and a test in the repository exercises it.
