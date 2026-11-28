@@ -1,6 +1,6 @@
 [package]
 name = "sop"
-version = "5.13.1"
+version = "5.14.0"
 edition = "2021"
 description = "Rust bindings for Joltrin (formerly SOP)"
 license = "MIT"

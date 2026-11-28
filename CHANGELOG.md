@@ -1,7 +1,8 @@
 # Changelog
 
-## Unreleased
+## v5.14.0
 
+- `read_sop` and `validate_step` now declare themselves read-only, idempotent and closed-world in their MCP tool annotations, and `read_sop` has an output schema. Directories that grade tool definitions treated them as destructive because the annotations were missing.
 - `pgpkit`, a new package: OpenPGP with ASCII armor in a few functions. `GenerateKey`, `Encrypt` (optionally signed), `Decrypt` (can require a signature from a given key), `ClearSign` and `VerifyClearSigned`. A message that fails its integrity check returns an error and no plaintext, input is capped at 1 MiB, and text around a clear-signed block is refused. Private keys are not passphrase protected, and there is no rotation, expiry, revocation or key storage. The Private Intent example still uses its own copy of the encrypt and decrypt code.
 - `examples/sealed_secret`: a scripted demo of an agent that uses a secret it cannot read. It combines `pgpkit` (sealed, signed secret), the Taint Barrier (blocks the key leaving to an unlisted host) and a signed audit log. No model is involved.
 - Taint Barrier now blocks private key blocks without registration. Armored PGP private key blocks and PEM or OpenSSH private key headers are found in any tool call, including spaced, zero-width, percent-encoded and base64 forms, and carry the label `private_key`. The default-deny policy blocks them at every sink until a policy lists that label, so an agent that quotes a key block will now be blocked; run observe mode first, or list `private_key` for tools that keep data local. It matches the header line only, so a key with its header removed is not caught. Public keys, certificates and armored PGP messages are not flagged.
