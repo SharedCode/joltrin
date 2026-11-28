@@ -21,7 +21,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/ncw/directio v1.0.5 // indirect
 	github.com/redis/go-redis/v9 v9.24.0 // indirect
-	github.com/sethvargo/go-retry v0.5.0 // indirect
+	github.com/sethvargo/go-retry v0.7.0 // indirect
 	github.com/sharedcode/joltrin/infs v0.1.0 // indirect
 	go.uber.org/atomic v1.12.0 // indirect
 	golang.org/x/sys v0.50.0 // indirect
