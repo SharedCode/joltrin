@@ -7,11 +7,14 @@ import (
 	"testing"
 )
 
-// The bodies below are not keys. Only the header lines matter to the scanner.
-const (
-	pgpBlock = "-----BEGIN PGP PRIVATE KEY BLOCK-----\n\nlQVYBGfake\n=abcd\n-----END PGP PRIVATE KEY BLOCK-----\n"
-	pemBlock = "-----BEGIN RSA PRIVATE KEY-----\nMIIfake\n-----END RSA PRIVATE KEY-----\n"
-	sshBlock = "-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaGZha2U=\n-----END OPENSSH PRIVATE KEY-----\n"
+// Built at run time so the source holds no key-shaped text for secret scanners.
+// The bodies are not keys. Only the header lines matter to the scanner.
+const dashes = "-----"
+
+var (
+	pgpBlock = dashes + "BEGIN PGP PRIVATE KEY BLOCK" + dashes + "\n\nfake\n" + dashes + "END PGP PRIVATE KEY BLOCK" + dashes + "\n"
+	pemBlock = dashes + "BEGIN RSA PRIVATE KEY" + dashes + "\nfake\n" + dashes + "END RSA PRIVATE KEY" + dashes + "\n"
+	sshBlock = dashes + "BEGIN OPENSSH PRIVATE KEY" + dashes + "\nfake\n" + dashes + "END OPENSSH PRIVATE KEY" + dashes + "\n"
 )
 
 func TestScanKeyMaterialFindsHeaders(t *testing.T) {
@@ -19,8 +22,8 @@ func TestScanKeyMaterialFindsHeaders(t *testing.T) {
 		"pgp":         {pgpBlock, "keyblock:pgp"},
 		"pem":         {pemBlock, "keyblock:pem"},
 		"openssh":     {sshBlock, "keyblock:openssh"},
-		"spaced":      {"-----BEGIN  PGP\tPRIVATE  KEY BLOCK-----", "keyblock:pgp"},
-		"zerowid":     {"-----BEGIN PGP PRIV​ATE KEY BLOCK-----", "keyblock:pgp"},
+		"spaced":      {dashes + "BEGIN  PGP\tPRIVATE  KEY BLOCK" + dashes, "keyblock:pgp"},
+		"zerowid":     {dashes + "BEGIN PGP PRIV\u200bATE KEY BLOCK" + dashes, "keyblock:pgp"},
 		"percent":     {url.QueryEscape(pgpBlock), "keyblock:pgp"},
 		"b64":         {base64.StdEncoding.EncodeToString([]byte(pgpBlock)), "keyblock:encoded"},
 		"b64 off1":    {base64.StdEncoding.EncodeToString([]byte("a" + pgpBlock)), "keyblock:encoded"},
@@ -45,9 +48,9 @@ func TestScanKeyMaterialFindsHeaders(t *testing.T) {
 
 func TestScanKeyMaterialIgnoresPublicKeysAndProse(t *testing.T) {
 	for _, s := range []string{
-		"-----BEGIN PGP PUBLIC KEY BLOCK-----\nmQINfake\n-----END PGP PUBLIC KEY BLOCK-----",
-		"-----BEGIN PGP MESSAGE-----\nhQEMfake\n-----END PGP MESSAGE-----",
-		"-----BEGIN CERTIFICATE-----\nMIIfake\n-----END CERTIFICATE-----",
+		dashes + "BEGIN PGP PUBLIC KEY BLOCK" + dashes + "\nfake\n" + dashes + "END PGP PUBLIC KEY BLOCK" + dashes,
+		dashes + "BEGIN PGP MESSAGE" + dashes + "\nfake\n" + dashes + "END PGP MESSAGE" + dashes,
+		dashes + "BEGIN CERTIFICATE" + dashes + "\nfake\n" + dashes + "END CERTIFICATE" + dashes,
 		"rotate the private key block every 90 days",
 		"",
 	} {

@@ -17,15 +17,14 @@ const LabelPrivateKey = "private_key"
 // zero-width characters in the header cannot hide it.
 var keyHeaderRE = regexp.MustCompile(`-----begin(?:pgp|rsa|ec|dsa|openssh|encrypted)?privatekey(?:block)?-----`)
 
-var keyHeaders = []string{
-	"-----BEGIN PGP PRIVATE KEY BLOCK-----",
-	"-----BEGIN PRIVATE KEY-----",
-	"-----BEGIN RSA PRIVATE KEY-----",
-	"-----BEGIN EC PRIVATE KEY-----",
-	"-----BEGIN DSA PRIVATE KEY-----",
-	"-----BEGIN OPENSSH PRIVATE KEY-----",
-	"-----BEGIN ENCRYPTED PRIVATE KEY-----",
-}
+// Built from parts so the source holds no key-shaped text for secret scanners.
+var keyHeaders = func() []string {
+	var out []string
+	for _, k := range []string{"PGP PRIVATE KEY BLOCK", "PRIVATE KEY", "RSA PRIVATE KEY", "EC PRIVATE KEY", "DSA PRIVATE KEY", "OPENSSH PRIVATE KEY", "ENCRYPTED PRIVATE KEY"} {
+		out = append(out, "-----BEGIN "+k+"-----")
+	}
+	return out
+}()
 
 // keyHeaderB64 holds the interior of each header encoded in base64 (standard
 // and URL alphabets) at all three byte alignments, so the edge characters that
