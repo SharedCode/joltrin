@@ -46,7 +46,7 @@ require (
 )
 
 require (
-	github.com/ProtonMail/go-crypto v1.4.1
+	github.com/ProtonMail/go-crypto v1.5.2
 	github.com/gocql/gocql v1.7.0
 	github.com/nats-io/nats.go v1.56.0
 	github.com/ncw/directio v1.0.5
