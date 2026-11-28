@@ -60,7 +60,7 @@ func (r fakeRelease) serve(t *testing.T) string {
 	return srv.URL
 }
 
-func runInstaller(t *testing.T, base, dest string) (string, error) {
+func runInstaller(t *testing.T, base, dest string, extraEnv ...string) (string, error) {
 	t.Helper()
 	if runtime.GOOS != "darwin" && runtime.GOOS != "linux" {
 		t.Skip("install.sh supports macOS and Linux")
@@ -75,6 +75,7 @@ func runInstaller(t *testing.T, base, dest string) (string, error) {
 		"JOLTRIN_NO_SETUP=1",
 		"HOME="+t.TempDir(),
 	)
+	cmd.Env = append(cmd.Env, extraEnv...)
 	out, err := cmd.CombinedOutput()
 	return string(out), err
 }
@@ -163,5 +164,46 @@ func TestInstallerExplainsAnUnwritableFolder(t *testing.T) {
 	}
 	if !strings.Contains(out, "install: cannot write to") || !strings.Contains(out, "JOLTRIN_BIN_DIR") {
 		t.Errorf("message does not say what to do:\n%s", out)
+	}
+}
+
+// shim puts a fake command first on PATH. It fails when the last argument
+// matches failOn and otherwise runs the real command.
+func shim(t *testing.T, name, failOn string) string {
+	t.Helper()
+	real, err := exec.LookPath(name)
+	if err != nil {
+		t.Skip(name + " not found")
+	}
+	dir := t.TempDir()
+	script := "#!/bin/sh\nfor last; do :; done\ncase \"$last\" in " + failOn + ") exit 1;; esac\nexec " + real + " \"$@\"\n"
+	if err := os.WriteFile(filepath.Join(dir, name), []byte(script), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	return "PATH=" + dir + string(os.PathListSeparator) + os.Getenv("PATH")
+}
+
+func TestInstallerStopsWhenTheFinalStepsFail(t *testing.T) {
+	base := newRelease(t, "#!/bin/sh\necho new\n").serve(t)
+	cases := map[string]struct{ cmd, failOn, want string }{
+		"chmod fails":        {"chmod", "*.sop-mcp-server.new", "could not make the download executable"},
+		"final rename fails": {"mv", "*/sop-mcp-server", "could not put the binary in place"},
+	}
+	for name, c := range cases {
+		t.Run(name, func(t *testing.T) {
+			dest := filepath.Join(t.TempDir(), "bin")
+			out, err := runInstaller(t, base, dest, shim(t, c.cmd, c.failOn))
+			if err == nil {
+				t.Fatalf("installer reported success:\n%s", out)
+			}
+			if !strings.Contains(out, "install: "+c.want) || strings.Contains(out, "Installed ") {
+				t.Errorf("want %q and no success line, got:\n%s", c.want, out)
+			}
+			for _, f := range []string{"sop-mcp-server", ".sop-mcp-server.new"} {
+				if _, statErr := os.Stat(filepath.Join(dest, f)); statErr == nil {
+					t.Errorf("%s was left behind", f)
+				}
+			}
+		})
 	}
 }

@@ -82,8 +82,8 @@ fi
 cannot="cannot write to $dest. Set JOLTRIN_BIN_DIR to a folder you can write to, for example JOLTRIN_BIN_DIR=\$HOME/bin"
 mkdir -p "$dest" 2>/dev/null || fail "$cannot"
 mv "$name" "$dest/.sop-mcp-server.new" 2>/dev/null || fail "$cannot"
-chmod +x "$dest/.sop-mcp-server.new"
-mv -f "$dest/.sop-mcp-server.new" "$dest/sop-mcp-server"
+chmod +x "$dest/.sop-mcp-server.new" || { rm -f "$dest/.sop-mcp-server.new"; fail "could not make the download executable, nothing was installed"; }
+mv -f "$dest/.sop-mcp-server.new" "$dest/sop-mcp-server" || { rm -f "$dest/.sop-mcp-server.new"; fail "could not put the binary in place at $dest/sop-mcp-server"; }
 echo "Installed $dest/sop-mcp-server"
 
 if [ "${JOLTRIN_NO_SETUP:-}" = 1 ]; then
