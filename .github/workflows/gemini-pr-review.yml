@@ -67,7 +67,23 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_MODEL: ${{ github.event.inputs.model || 'gemini-2.5-flash' }}
           GEMINI_TIMEOUT: 90s
-        run: go run ./cmd/pr-reviewer
+          MODEL_CHOSEN: ${{ github.event.inputs.model }}
+        # If the free-tier daily quota for the default model is used up (HTTP
+        # 429), review with the lighter model instead of leaving every PR
+        # blocked until the quota resets. Only a 429 triggers this: a FAIL
+        # verdict, a timeout or any other error still fails the gate.
+        run: |
+          set -o pipefail
+          log="$RUNNER_TEMP/review.log"
+          if go run ./cmd/pr-reviewer 2>&1 | tee "$log"; then
+            exit 0
+          fi
+          if [ -z "$MODEL_CHOSEN" ] && grep -q "gemini api error (status 429" "$log"; then
+            echo "::warning::Quota exhausted for $GEMINI_MODEL, reviewing with gemini-2.5-flash-lite"
+            GEMINI_MODEL=gemini-2.5-flash-lite go run ./cmd/pr-reviewer
+          else
+            exit 1
+          fi
 
   # A job that is cancelled, times out, or dies before the reviewer can write
   # a status leaves the commit with a stale pending or missing status. Mark
