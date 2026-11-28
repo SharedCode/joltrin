@@ -55,6 +55,9 @@ func ScanKeyMaterial(text string) []Match {
 	found := map[string]bool{}
 	cur := text
 	for pass := 0; pass < 3; pass++ {
+		// Form-encoded text writes a space as "+", which percentDecode leaves
+		// alone, so turn it into a space first. The "percent" case in the
+		// test fails without this line.
 		for _, h := range keyHeaderRE.FindAllString(Normalize(strings.ReplaceAll(cur, "+", " ")), -1) {
 			found[keyKind(h)] = true
 		}
