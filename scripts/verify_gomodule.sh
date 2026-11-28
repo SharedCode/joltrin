@@ -86,17 +86,30 @@ WANT="${BASE_PATH}$( [ -n "$PATH_SUFFIX" ] && echo "/v${PATH_SUFFIX}" )"
 SCRATCH_DIR="$(mktemp -d)"
 trap 'rm -rf "$SCRATCH_DIR"' EXIT
 
-(
-  cd "$SCRATCH_DIR"
-  go mod init gomodule-verify >/dev/null 2>&1
-  go get "${WANT}" 2>&1
-) || fail "go get ${WANT} (no version pinned) did not resolve"
+# The module proxy can lag a new tag by a few minutes. Ask it for the tag
+# directly (which makes it fetch the tag), then retry the live check for up to
+# about two minutes before calling a stale answer a failure.
+if command -v curl >/dev/null 2>&1; then
+  curl -fsS "https://proxy.golang.org/${WANT}/@v/${LATEST_TAG}.info" >/dev/null 2>&1 || true
+fi
 
-RESOLVED="$(cd "$SCRATCH_DIR" && go list -m "${WANT}" 2>/dev/null | awk '{print $2}')"
-echo "Resolved version: ${RESOLVED}"
+RESOLVED=""
+for attempt in 1 2 3 4 5 6; do
+  rm -rf "${SCRATCH_DIR:?}"/* "$SCRATCH_DIR"/.[!.]* 2>/dev/null || true
+  (
+    cd "$SCRATCH_DIR"
+    go mod init gomodule-verify >/dev/null 2>&1
+    go get "${WANT}" 2>&1
+  ) || fail "go get ${WANT} (no version pinned) did not resolve"
+
+  RESOLVED="$(cd "$SCRATCH_DIR" && go list -m "${WANT}" 2>/dev/null | awk '{print $2}')"
+  echo "Resolved version: ${RESOLVED} (attempt ${attempt})"
+  [ "$RESOLVED" = "$LATEST_TAG" ] && break
+  [ "$attempt" -lt 6 ] && sleep 20
+done
 
 if [ "$RESOLVED" != "$LATEST_TAG" ]; then
-  fail "go get with no version resolved to ${RESOLVED}, expected the latest tag ${LATEST_TAG}"
+  fail "go get with no version resolved to ${RESOLVED} after 6 tries, expected the latest tag ${LATEST_TAG}"
 fi
 pass "go get ${WANT} with no version pinned resolves to ${LATEST_TAG}, the actual latest release"
 
