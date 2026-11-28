@@ -619,3 +619,33 @@ func Test_MCP_OverlongIDsAreRefusedAndNothingIsStored(t *testing.T) {
 		t.Errorf("an id at the limit should work: %s", resultText(res))
 	}
 }
+
+// read_sop and validate_step change nothing, so they must say so. MCP treats a
+// tool with no annotations as destructive, and registries grade it that way.
+func TestReadOnlyToolsDeclareThemselvesReadOnly(t *testing.T) {
+	c := newTestClient(t)
+	list, err := c.ListTools(context.Background(), mcp.ListToolsRequest{})
+	if err != nil {
+		t.Fatalf("ListTools: %v", err)
+	}
+	seen := 0
+	for _, tool := range list.Tools {
+		if tool.Name != "read_sop" && tool.Name != "validate_step" {
+			continue
+		}
+		seen++
+		a := tool.Annotations
+		if a.ReadOnlyHint == nil || !*a.ReadOnlyHint {
+			t.Errorf("%s: readOnlyHint should be true", tool.Name)
+		}
+		if a.DestructiveHint == nil || *a.DestructiveHint {
+			t.Errorf("%s: destructiveHint should be false", tool.Name)
+		}
+		if a.IdempotentHint == nil || !*a.IdempotentHint {
+			t.Errorf("%s: idempotentHint should be true", tool.Name)
+		}
+	}
+	if seen != 2 {
+		t.Fatalf("found %d of read_sop and validate_step", seen)
+	}
+}

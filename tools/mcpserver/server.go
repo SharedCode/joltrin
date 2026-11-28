@@ -48,8 +48,13 @@ func New(store *runbookstore.Store, opts ...Option) *server.MCPServer {
 
 	s.AddTool(
 		mcp.NewTool("read_sop",
-			mcp.WithDescription("Read the steps, preconditions, and postconditions of a registered SOP runbook."),
+			mcp.WithDescription("Read the steps, preconditions, and postconditions of a registered SOP runbook. Read-only: it changes nothing and records nothing, and the same call always returns the same runbook. Call it first to learn which steps exist, which state each one requires and establishes, and which safety rules forbid a step until its required state is recorded. An unknown workflow name comes back with the runbooks the server actually has."),
 			mcp.WithString("workflow", mcp.Required(), mcp.Description("Name the runbook was registered under.")),
+			mcp.WithOutputSchema[WorkflowDescription](),
+			mcp.WithReadOnlyHintAnnotation(true),
+			mcp.WithDestructiveHintAnnotation(false),
+			mcp.WithIdempotentHintAnnotation(true),
+			mcp.WithOpenWorldHintAnnotation(false),
 		),
 		readSOPHandler(store),
 	)
@@ -61,6 +66,10 @@ func New(store *runbookstore.Store, opts ...Option) *server.MCPServer {
 			mcp.WithString("trace_id", mcp.Required(), mcp.Description("Identifies this execution's trace; steps already executed under this ID are what preconditions are checked against.")),
 			mcp.WithString("step", mcp.Required(), mcp.Description("ID of the step to validate.")),
 			mcp.WithOutputSchema[ValidateStepResult](),
+			mcp.WithReadOnlyHintAnnotation(true),
+			mcp.WithDestructiveHintAnnotation(false),
+			mcp.WithIdempotentHintAnnotation(true),
+			mcp.WithOpenWorldHintAnnotation(false),
 		),
 		validateStepHandler(store),
 	)
