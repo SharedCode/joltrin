@@ -103,6 +103,12 @@ An agent running a "pull the plug" failover tries to stop the primary site first
 - **Check**: `go test ./internal/examplecmd/failover_barrier -race -count=1`
 - **Note**: the same barrier as `verify_barrier` on an operations runbook that is not a database. It orders steps; it does not move traffic or talk to a load balancer.
 
+### 18. An agent that can use a secret it cannot read (`sealed_secret`)
+The owner seals a made-up API key to a vault with OpenPGP and signs it. The agent holds only the sealed message and asks the vault to use it, so it gets the result and not the key. If the key leaks into the agent's context anyway, the Taint Barrier blocks sending it to an unlisted host, in plain text, base64 or inside a longer message. A message signed by another key, or not signed, is refused. The decisions verify offline, and editing one breaks the check.
+- **Run**: `go run ./examples/sealed_secret`
+- **Check**: `go test ./internal/examplecmd/sealed_secret -race -count=1`
+- **Note**: the agent is scripted, there is no model, and the keys live in memory for the run. The barrier matches exact values in the supported encodings, not paraphrases.
+
 ---
 
 ## ▶️ Running the Examples
