@@ -189,7 +189,7 @@ Run it with `./scripts/demo.sh --team`, or watch it replay on [joltrinhq.com](ht
 | :--- | :--- |
 | Implemented, with tests | The check runs before commit. It uses trace state, not the agent's assertion. Blocked calls return structured results. MCP and A2A share one `verify` package, and the same package compiles to WebAssembly for the browser demo. |
 | Demonstrated | Recorded runs with real agents, on one runbook over MCP. |
-| Measured | On an Apple M4, the precedence check takes about 50 ns when a step is allowed and about 350 ns when it is blocked, and a Taint Barrier check of a 4 KiB tool call takes about 0.8 ms. Run `go test -run xxx -bench 'Check4KiB|CheckSafety(Allowed|Blocked)$' -benchmem ./taint ./verify` for your machine. Numbers vary by hardware. |
+| Measured | On an Apple M4 with a native arm64 build, the precedence check takes about 30 ns when a step is allowed and about 250 ns when it is blocked, a Taint Barrier check of a 4 KiB tool call takes about 0.5 ms, and `pgpkit` encrypts and signs 4 KiB in about 0.3 ms and decrypts and verifies it in about 0.3 ms. Run `go test -run xxx -bench 'Check4KiB|CheckSafety(Allowed|Blocked)$' -benchmem ./taint ./verify` and `go test -run xxx -bench . -benchmem ./pgpkit` for your machine. Numbers vary by hardware, and a build running under emulation is slower. |
 
 
 ## The engine underneath
