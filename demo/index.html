@@ -1698,7 +1698,7 @@ Error from server: admission webhook "gate.joltrin.dev" denied the request: step
         <dt class="font-semibold text-white">Demonstrated</dt>
         <dd>The barrier in your browser, compiled to WebAssembly, recorded runs with real agents over MCP, and the MCP server's HTTP mode and the Kubernetes admission gate running in a local Kubernetes cluster, checked by hand and not in CI. The tools in the demos are stubs, so they show the checks and not live systems. Run <code class="text-slate-200">go run ./examples/sealed_secret</code> to watch a scripted agent use a sealed, signed secret it cannot read, get blocked when it tries to send the key out, and have a forged message refused.</dd>
         <dt class="font-semibold text-white">Measured</dt>
-        <dd>On an Apple M4 the precedence check takes about 50 ns when a step is allowed and about 350 ns when it is blocked, and a Taint Barrier check of a 4 KiB tool call takes about 0.8 ms. The install is a download of about 5 MB that unpacks to about 12 MB. Numbers vary by hardware, and the benchmark command is in the README.</dd>
+        <dd>On an Apple M4 with a native arm64 build, the precedence check takes about 30 ns when a step is allowed and about 250 ns when it is blocked, a Taint Barrier check of a 4 KiB tool call takes about 0.5 ms, and pgpkit encrypts and signs 4 KiB in about 0.3 ms. The install is a download of about 5 MB that unpacks to about 12 MB. Numbers vary by hardware, and the benchmark commands are in the README.</dd>
       </dl>
     </section>
 

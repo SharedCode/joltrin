@@ -150,3 +150,72 @@ func TestKeyErrorsAreClear(t *testing.T) {
 		t.Fatal("empty key accepted")
 	}
 }
+
+func benchKeys(b *testing.B) (recipient, sender Key) {
+	b.Helper()
+	var err error
+	if recipient, err = GenerateKey("r", "bench", "r@localhost"); err != nil {
+		b.Fatal(err)
+	}
+	if sender, err = GenerateKey("s", "bench", "s@localhost"); err != nil {
+		b.Fatal(err)
+	}
+	return recipient, sender
+}
+
+func BenchmarkGenerateKey(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		if _, err := GenerateKey("k", "bench", "k@localhost"); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkEncryptSigned4KiB(b *testing.B) {
+	recipient, sender := benchKeys(b)
+	text := strings.Repeat("a", 4096)
+	b.SetBytes(int64(len(text)))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		if _, err := Encrypt(recipient.Public, text, sender.Private); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkDecryptVerify4KiB(b *testing.B) {
+	recipient, sender := benchKeys(b)
+	ct, err := Encrypt(recipient.Public, strings.Repeat("a", 4096), sender.Private)
+	if err != nil {
+		b.Fatal(err)
+	}
+	b.SetBytes(4096)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		if _, err := Decrypt(recipient.Private, ct, sender.Public); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkClearSignVerify(b *testing.B) {
+	k := mustKeyB(b)
+	for i := 0; i < b.N; i++ {
+		s, err := ClearSign(k.Private, "release 5.14 approved")
+		if err != nil {
+			b.Fatal(err)
+		}
+		if _, err := VerifyClearSigned(k.Public, s); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func mustKeyB(b *testing.B) Key {
+	b.Helper()
+	k, err := GenerateKey("k", "bench", "k@localhost")
+	if err != nil {
+		b.Fatal(err)
+	}
+	return k
+}
